@@ -1,4 +1,4 @@
-package main
+package potential
 
 // Synapses that fire together wire together.
 

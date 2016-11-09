@@ -1,4 +1,4 @@
-package main
+package potential
 
 import (
 	"math/rand"
@@ -23,7 +23,8 @@ type Network struct {
 }
 
 /*
-NewNetwork is a constructor that happens to reseet the random number generator.
+NewNetwork is a constructor that, which also happens to reset the random number generator
+when called. Seems like a good time.
 */
 func NewNetwork() Network {
 	rand.Seed(time.Now().Unix())
@@ -45,10 +46,19 @@ func (network *Network) Grow(neuronsToAdd, defaultNeuronSynapses, synapsesToAdd,
 
 			if synapse.ActivationHistory >= synapseMinFireThreshold {
 				// it was activated enough, so we bump it away from zero.
+				// needs cleanup refactoring.
 				if isPositive {
-					synapse.Millivolts -= synapseLearnRate
+					if int16(synapse.Millivolts)-int16(synapseLearnRate) > -127 {
+						synapse.Millivolts -= synapseLearnRate // do not overflow int8
+					} else {
+						synapse.Millivolts = -128
+					}
 				} else {
-					synapse.Millivolts += synapseLearnRate
+					if int16(synapse.Millivolts)+int16(synapseLearnRate) < 126 {
+						synapse.Millivolts += synapseLearnRate
+					} else {
+						synapse.Millivolts = 127
+					}
 				}
 			} else {
 				// It reached "no effect" of 0 millivolts last round. Then it didn't fire
