@@ -4,8 +4,8 @@ package potential
 
 // Represents how many millivolts a synapse can modify the cell's voltage which receives
 // its firings.
-const synapseMin int = -20
-const synapseMax int = 20
+const synapseMin int = -10
+const synapseMax int = 10
 
 /*
 Synapse is a construct for storing how much a one-way connection between two cells will
@@ -22,8 +22,9 @@ type Synapse struct {
 NewSynapse instantiates a synapse with a random millivolt weight
 */
 func NewSynapse() Synapse {
+	mv := int8(randomIntBetween(synapseMin, synapseMax))
 	return Synapse{
-		Millivolts: int8(randomIntBetween(synapseMin, synapseMax)),
+		Millivolts: mv,
 	}
 }
 

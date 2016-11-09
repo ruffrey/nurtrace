@@ -2,7 +2,6 @@ package potential
 
 import (
 	"encoding/json"
-	"fmt"
 	"math/rand"
 	"reflect"
 	"time"
@@ -113,42 +112,44 @@ func (network *Network) Grow(neuronsToAdd, defaultNeuronSynapses, synapsesToAdd 
 
 	// Now we add the default number of synapses to our new neurons, with random other neurons.
 	for _, cell := range addedNeurons {
-		synapse := NewSynapse()
-		otherCell := network.Cells[randomIntBetween(0, len(network.Cells))]
-		if cell.ID == otherCell.ID {
-			// TODO: decide what do to here, when attempting to add a synapse to a new neuron,
-			// but the randomIntBetween call picked the same neuron.
-			continue
-		}
-		if makeSender() {
-			synapse.FromNeuronAxon = cell
-			synapse.ToNeuronDendrite = &otherCell
-			otherCell.DendriteSynapses = append(otherCell.DendriteSynapses, &synapse)
-			cell.AxonSynapses = append(cell.AxonSynapses, &synapse)
-		} else {
-			synapse.FromNeuronAxon = &otherCell
-			synapse.ToNeuronDendrite = cell
-			otherCell.AxonSynapses = append(otherCell.AxonSynapses, &synapse)
-			cell.DendriteSynapses = append(cell.DendriteSynapses, &synapse)
+		for i := 0; i < defaultNeuronSynapses; {
+			synapse := NewSynapse()
+			ix := randomIntBetween(0, len(network.Cells)-1)
+			otherCell := &network.Cells[ix]
+			if cell.ID == otherCell.ID {
+				// try again
+				continue
+			}
+			if makeSender() {
+				synapse.FromNeuronAxon = cell
+				synapse.ToNeuronDendrite = otherCell
+				otherCell.DendriteSynapses = append(otherCell.DendriteSynapses, &synapse)
+				cell.AxonSynapses = append(cell.AxonSynapses, &synapse)
+			} else {
+				synapse.FromNeuronAxon = otherCell
+				synapse.ToNeuronDendrite = cell
+				otherCell.AxonSynapses = append(otherCell.AxonSynapses, &synapse)
+				cell.DendriteSynapses = append(cell.DendriteSynapses, &synapse)
+			}
+			i++
 		}
 	}
 
 	// Then we randomly add synapses between neurons to the whole network, including the
 	// newest neurons.
 	for i := 0; i < synapsesToAdd; {
-		sender := network.Cells[randomIntBetween(0, len(network.Cells))]
-		receiver := network.Cells[randomIntBetween(0, len(network.Cells))]
+		sender := &network.Cells[randomIntBetween(0, len(network.Cells)-1)]
+		receiver := &network.Cells[randomIntBetween(0, len(network.Cells)-1)]
 		// Thy cell shannot activate thyself
 		if sender.ID == receiver.ID {
 			continue
 		}
 
 		synapse := NewSynapse()
-		synapse.ToNeuronDendrite = &receiver
-		synapse.FromNeuronAxon = &sender
+		synapse.ToNeuronDendrite = receiver
+		synapse.FromNeuronAxon = sender
 		sender.AxonSynapses = append(sender.AxonSynapses, &synapse)
 		receiver.DendriteSynapses = append(receiver.DendriteSynapses, &synapse)
-		fmt.Println(synapse.FromNeuronAxon)
 		i++
 	}
 
@@ -231,7 +232,7 @@ func (network *Network) PruneNeuron(index int) {
 }
 
 func randomIntBetween(min, max int) int {
-	return rand.Intn(max-min) + min
+	return rand.Intn((max+1)-min) + min
 }
 
 func makeSender() bool {

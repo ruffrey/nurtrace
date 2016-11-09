@@ -90,6 +90,8 @@ func (cell *Cell) FireActionPotential() {
 	cell.Activating = true
 	time.AfterFunc(1*time.Millisecond, func() {
 		cell.Voltage = apPeak // probably not doing anything...hmm.
+
+		// activate all synapses on its axon
 		for _, synapse := range cell.AxonSynapses {
 			synapse.Activate()
 		}
