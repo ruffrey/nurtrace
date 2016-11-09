@@ -228,7 +228,6 @@ func (network *Network) PruneNeuron(index int) {
 		panic("Attempting to prune a neuron which still has synapses")
 	}
 	network.Cells = append(network.Cells[:index], network.Cells[index+1:]...) // this removes it
-	cell.Destroy()
 }
 
 func randomIntBetween(min, max int) int {
@@ -240,4 +239,17 @@ func makeSender() bool {
 		return true
 	}
 	return false
+}
+
+/*
+Equilibrium runs periodically to bring all cells closer to their apResting voltage.
+*/
+func (network *Network) Equilibrium() {
+	for _, cell := range network.Cells {
+		if cell.Voltage != apResting {
+			diff := cell.Voltage - apResting
+			// get halfway to resting
+			cell.Voltage -= (diff / 2)
+		}
+	}
 }

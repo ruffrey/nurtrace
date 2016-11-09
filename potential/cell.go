@@ -21,13 +21,12 @@ fires an action potential cycles and its axon synapses push voltage to the dendr
 to.
 */
 type Cell struct {
-	ID                    int
-	Voltage               int8
-	Activating            bool
-	DendriteSynapses      []*Synapse // This cell's inputs.
-	AxonSynapses          []*Synapse // this cell's outputs.
-	equilibriumTicker     *time.Ticker
-	equilibriumQuitSignal chan struct{}
+	ID                int
+	Voltage           int8
+	Activating        bool
+	DendriteSynapses  []*Synapse // This cell's inputs.
+	AxonSynapses      []*Synapse // this cell's outputs.
+	equilibriumTicker *time.Timer
 }
 
 /*
@@ -41,77 +40,37 @@ func NewCell() Cell {
 		DendriteSynapses: make([]*Synapse, 0),
 		AxonSynapses:     make([]*Synapse, 0),
 	}
-	cell.startEquilibrium()
 	return cell
-}
-
-/*
-Destroy removes things that might otherwise leak.
-*/
-func (cell *Cell) Destroy() {
-	cell.stopEquilibrium()
-}
-
-/*
-StartEquilibrium starts the equilibrium cycle, which moves the cell towards equilibrium at
-the normal resting potential `apResting`.
-*/
-func (cell *Cell) startEquilibrium() {
-	cell.equilibriumTicker = time.NewTicker(50)
-	cell.equilibriumQuitSignal = make(chan struct{})
-	go func() {
-		for {
-			select {
-			case <-cell.equilibriumTicker.C:
-				if cell.Activating {
-					return
-				}
-				// move it halfway towards its resting potential, every so often. this was
-				// arbitrarily chosen.
-				halfDiff := (cell.Voltage - apResting) % 2
-				cell.Voltage -= halfDiff
-				return
-			case <-cell.equilibriumQuitSignal:
-				cell.equilibriumTicker.Stop()
-				return
-			}
-		}
-	}()
-}
-
-func (cell *Cell) stopEquilibrium() {
-	close(cell.equilibriumQuitSignal)
 }
 
 /*
 FireActionPotential does an action potential cycle.
 */
 func (cell *Cell) FireActionPotential() {
+	// fmt.Println("Action Potential firing", cell.ID, "for synapses", cell.AxonSynapses)
 	cell.Activating = true
-	time.AfterFunc(1*time.Millisecond, func() {
-		cell.Voltage = apPeak // probably not doing anything...hmm.
+	cell.Voltage = apPeak // probably not doing anything...hmm.
 
-		// activate all synapses on its axon
-		for _, synapse := range cell.AxonSynapses {
-			synapse.Activate()
-		}
-		time.AfterFunc(1*time.Millisecond, func() {
-			cell.Voltage = apLow
-			time.AfterFunc(1*time.Millisecond, func() {
-				// other neuron firings may have already bumped this to, or above, the
-				// resting potential.
-				if cell.Voltage < apResting {
-					cell.Voltage = apResting
-				}
-			})
+	// activate all synapses on its axon
+	for _, synapse := range cell.AxonSynapses {
+		synapse.Activate()
+	}
+	time.AfterFunc(10*time.Millisecond, func() {
+		cell.Voltage = apLow
+		time.AfterFunc(10*time.Millisecond, func() {
+			// other neuron firings may have already bumped this to, or above, the
+			// resting potential.
+			if cell.Voltage < apResting {
+				cell.Voltage = apResting
+			}
 		})
 	})
 }
 
 /*
-applyVoltage changes it this much, but keeps it between the
+ApplyVoltage changes it this much, but keeps it between the
 */
-func (cell *Cell) applyVoltage(change int8, fromSynapse *Synapse) {
+func (cell *Cell) ApplyVoltage(change int8, fromSynapse *Synapse) {
 	if cell.Activating {
 		// Block during action potential cycle
 		return

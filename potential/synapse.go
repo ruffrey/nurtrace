@@ -33,5 +33,5 @@ Activate is when the dendrite receives voltage.
 */
 func (synapse *Synapse) Activate() {
 	synapse.ActivationHistory++
-	synapse.FromNeuronAxon.applyVoltage(synapse.Millivolts, synapse)
+	synapse.ToNeuronDendrite.ApplyVoltage(synapse.Millivolts, synapse)
 }
