@@ -1,6 +1,8 @@
 package potential
 
 import (
+	"encoding/json"
+	"fmt"
 	"math/rand"
 	"reflect"
 	"time"
@@ -29,6 +31,17 @@ when called. Seems like a good time.
 func NewNetwork() Network {
 	rand.Seed(time.Now().Unix())
 	return Network{}
+}
+
+/*
+ToJSON gives a json representation of the neural network.
+*/
+func (network *Network) ToJSON() (string, error) {
+	bytes, err := json.MarshalIndent(network, "", "  ")
+	if err != nil {
+		return "", err
+	}
+	return string(bytes), nil
 }
 
 /*
@@ -102,7 +115,7 @@ func (network *Network) Grow(neuronsToAdd, defaultNeuronSynapses, synapsesToAdd 
 	for _, cell := range addedNeurons {
 		synapse := NewSynapse()
 		otherCell := network.Cells[randomIntBetween(0, len(network.Cells))]
-		if reflect.DeepEqual(cell, otherCell) {
+		if cell.ID == otherCell.ID {
 			// TODO: decide what do to here, when attempting to add a synapse to a new neuron,
 			// but the randomIntBetween call picked the same neuron.
 			continue
@@ -126,7 +139,7 @@ func (network *Network) Grow(neuronsToAdd, defaultNeuronSynapses, synapsesToAdd 
 		sender := network.Cells[randomIntBetween(0, len(network.Cells))]
 		receiver := network.Cells[randomIntBetween(0, len(network.Cells))]
 		// Thy cell shannot activate thyself
-		if reflect.DeepEqual(sender, receiver) {
+		if sender.ID == receiver.ID {
 			continue
 		}
 
@@ -135,6 +148,7 @@ func (network *Network) Grow(neuronsToAdd, defaultNeuronSynapses, synapsesToAdd 
 		synapse.FromNeuronAxon = &sender
 		sender.AxonSynapses = append(sender.AxonSynapses, &synapse)
 		receiver.DendriteSynapses = append(receiver.DendriteSynapses, &synapse)
+		fmt.Println(synapse.FromNeuronAxon)
 		i++
 	}
 
@@ -180,7 +194,7 @@ func (network *Network) PruneSynapse(synapse *Synapse) {
 	if len(synapse.ToNeuronDendrite.AxonSynapses) == 0 && len(synapse.ToNeuronDendrite.DendriteSynapses) == 0 {
 		// find it's index and remove it right now
 		for index, cell := range network.Cells {
-			if reflect.DeepEqual(cell, synapse.ToNeuronDendrite) {
+			if cell.ID == synapse.ToNeuronDendrite.ID {
 				network.PruneNeuron(index)
 				break
 			}
@@ -189,7 +203,7 @@ func (network *Network) PruneSynapse(synapse *Synapse) {
 	if len(synapse.FromNeuronAxon.AxonSynapses) == 0 && len(synapse.FromNeuronAxon.DendriteSynapses) == 0 {
 		// find it's index and remove it right now
 		for index, cell := range network.Cells {
-			if reflect.DeepEqual(cell, synapse.FromNeuronAxon) {
+			if cell.ID == synapse.FromNeuronAxon.ID {
 				network.PruneNeuron(index)
 				break
 			}

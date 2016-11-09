@@ -11,5 +11,5 @@ func main() {
 	defaultNeuronSynapses := 4
 	synapsesToAdd := 10
 	network.Grow(neuronsToAdd, defaultNeuronSynapses, synapsesToAdd)
-	fmt.Println(network)
+	fmt.Println(network.ToJSON())
 }

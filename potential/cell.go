@@ -1,6 +1,9 @@
 package potential
 
-import "time"
+import (
+	"math/rand"
+	"time"
+)
 
 // From standard neuroscience Membrane Potential, which conveniently fits in a tiny 8 bit integer.
 const apResting int8 = -70
@@ -18,6 +21,7 @@ fires an action potential cycles and its axon synapses push voltage to the dendr
 to.
 */
 type Cell struct {
+	ID                    int
 	Voltage               int8
 	Activating            bool
 	DendriteSynapses      []*Synapse // This cell's inputs.
@@ -31,7 +35,11 @@ NewCell instantiates a Cell
 */
 func NewCell() Cell {
 	cell := Cell{
-		Voltage: apResting,
+		ID:               rand.Int(),
+		Voltage:          apResting,
+		Activating:       false,
+		DendriteSynapses: make([]*Synapse, 0),
+		AxonSynapses:     make([]*Synapse, 0),
 	}
 	cell.startEquilibrium()
 	return cell
