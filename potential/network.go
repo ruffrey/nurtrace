@@ -35,7 +35,7 @@ func NewNetwork() Network {
 Grow adds neurons, adds new synapses, prunes old neurons, and strengthens synapses that have
 fired a lot.
 */
-func (network *Network) Grow(neuronsToAdd, defaultNeuronSynapses, synapsesToAdd, minSynapseFiringKeepCount int) {
+func (network *Network) Grow(neuronsToAdd, defaultNeuronSynapses, synapsesToAdd int) {
 	// Next we move the less used synapses toward zero, because doing this later would prune the
 	// brand new synapses. This is a good time to apply the learning rate to synapses
 	// which were activated, too.
@@ -102,7 +102,7 @@ func (network *Network) Grow(neuronsToAdd, defaultNeuronSynapses, synapsesToAdd,
 	for _, cell := range addedNeurons {
 		synapse := NewSynapse()
 		otherCell := network.Cells[randomIntBetween(0, len(network.Cells))]
-		if is(cell, otherCell) {
+		if reflect.DeepEqual(cell, otherCell) {
 			// TODO: decide what do to here, when attempting to add a synapse to a new neuron,
 			// but the randomIntBetween call picked the same neuron.
 			continue
@@ -126,7 +126,7 @@ func (network *Network) Grow(neuronsToAdd, defaultNeuronSynapses, synapsesToAdd,
 		sender := network.Cells[randomIntBetween(0, len(network.Cells))]
 		receiver := network.Cells[randomIntBetween(0, len(network.Cells))]
 		// Thy cell shannot activate thyself
-		if is(sender, receiver) {
+		if reflect.DeepEqual(sender, receiver) {
 			continue
 		}
 
@@ -152,7 +152,7 @@ func (network *Network) PruneSynapse(synapse *Synapse) {
 	removedDendriteRef := false
 
 	for index, ref := range synapse.FromNeuronAxon.AxonSynapses {
-		if is(ref, synapse.FromNeuronAxon) {
+		if reflect.DeepEqual(ref, synapse.FromNeuronAxon) {
 			synapse.FromNeuronAxon.AxonSynapses = append(synapse.FromNeuronAxon.AxonSynapses[:index], synapse.FromNeuronAxon.AxonSynapses[index+1:]...)
 			removedAxonRef = true
 			break
@@ -163,7 +163,7 @@ func (network *Network) PruneSynapse(synapse *Synapse) {
 	}
 
 	for index, ref := range synapse.ToNeuronDendrite.DendriteSynapses {
-		if is(ref, synapse.ToNeuronDendrite) {
+		if reflect.DeepEqual(ref, synapse.ToNeuronDendrite) {
 			synapse.ToNeuronDendrite.DendriteSynapses = append(synapse.ToNeuronDendrite.DendriteSynapses[:index], synapse.ToNeuronDendrite.DendriteSynapses[index+1:]...)
 			removedDendriteRef = true
 			break
@@ -180,7 +180,7 @@ func (network *Network) PruneSynapse(synapse *Synapse) {
 	if len(synapse.ToNeuronDendrite.AxonSynapses) == 0 && len(synapse.ToNeuronDendrite.DendriteSynapses) == 0 {
 		// find it's index and remove it right now
 		for index, cell := range network.Cells {
-			if is(cell, synapse.ToNeuronDendrite) {
+			if reflect.DeepEqual(cell, synapse.ToNeuronDendrite) {
 				network.PruneNeuron(index)
 				break
 			}
@@ -189,7 +189,7 @@ func (network *Network) PruneSynapse(synapse *Synapse) {
 	if len(synapse.FromNeuronAxon.AxonSynapses) == 0 && len(synapse.FromNeuronAxon.DendriteSynapses) == 0 {
 		// find it's index and remove it right now
 		for index, cell := range network.Cells {
-			if is(cell, synapse.FromNeuronAxon) {
+			if reflect.DeepEqual(cell, synapse.FromNeuronAxon) {
 				network.PruneNeuron(index)
 				break
 			}
@@ -225,8 +225,4 @@ func makeSender() bool {
 		return true
 	}
 	return false
-}
-
-func is(a, b interface{}) bool {
-	return reflect.ValueOf(a).Pointer() == reflect.ValueOf(b).Pointer()
 }
