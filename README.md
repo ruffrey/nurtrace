@@ -17,5 +17,10 @@ on more than one stimuli simultaneously
 - same network can be trained on more than one kind of stimuli to solve different problems
 
 ## TODO:
-- needs a name
 - figure out how to serialize and store memory
+- figure out how to sample / receive output
+    - to receive a sample, specify an input point and output point
+- figure out how to train
+    - to train, specify an input point and output point. get the output value. if good,
+    backpropagate it by reinforcing the connections in that path. if bad, decrement the activated
+    pathways.
