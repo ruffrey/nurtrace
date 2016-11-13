@@ -8,20 +8,18 @@ import (
 	"time"
 )
 
-// There are two factors that result in battering down a synapse:
-
-// The minimum count of times a synapse fired in a given round between Grow cycles, with
-// a millivolts=0 value.
-const synapseMinFireThreshold uint = 2
-
-// How much a synapse should get bumped
-const synapseLearnRate int8 = 1
-
 /*
 Network is a neural network
 */
 type Network struct {
 	Cells []Cell
+	// There are two factors that result in battering down a synapse:
+
+	// The minimum count of times a synapse fired in a given round between Grow cycles, with
+	// a millivolts=0 value.
+	SynapseMinFireThreshold uint
+	// How much a synapse should get bumped
+	SynapseLearnRate int8
 }
 
 /*
@@ -30,7 +28,10 @@ when called. Seems like a good time.
 */
 func NewNetwork() Network {
 	rand.Seed(time.Now().Unix())
-	return Network{}
+	return Network{
+		SynapseMinFireThreshold: 2,
+		SynapseLearnRate:        1,
+	}
 }
 
 /*
@@ -57,18 +58,18 @@ func (network *Network) Grow(neuronsToAdd, defaultNeuronSynapses, synapsesToAdd 
 		for _, synapse := range cell.DendriteSynapses { // could also be axons, but, meh.
 			isPositive := synapse.Millivolts >= 0
 
-			if synapse.ActivationHistory >= synapseMinFireThreshold {
+			if synapse.ActivationHistory >= network.SynapseMinFireThreshold {
 				// it was activated enough, so we bump it away from zero.
 				// needs cleanup refactoring.
 				if isPositive {
-					if int16(synapse.Millivolts)-int16(synapseLearnRate) > -127 {
-						synapse.Millivolts -= synapseLearnRate // do not overflow int8
+					if int16(synapse.Millivolts)-int16(network.SynapseLearnRate) > -127 {
+						synapse.Millivolts -= network.SynapseLearnRate // do not overflow int8
 					} else {
 						synapse.Millivolts = -128
 					}
 				} else {
-					if int16(synapse.Millivolts)+int16(synapseLearnRate) < 126 {
-						synapse.Millivolts += synapseLearnRate
+					if int16(synapse.Millivolts)+int16(network.SynapseLearnRate) < 126 {
+						synapse.Millivolts += network.SynapseLearnRate
 					} else {
 						synapse.Millivolts = 127
 					}
@@ -82,9 +83,9 @@ func (network *Network) Grow(neuronsToAdd, defaultNeuronSynapses, synapsesToAdd 
 
 				// did not meet minimum fire threshold, so punish it by moving toward zero
 				if isPositive {
-					synapse.Millivolts -= synapseLearnRate
+					synapse.Millivolts -= network.SynapseLearnRate
 				} else {
-					synapse.Millivolts += synapseLearnRate
+					synapse.Millivolts += network.SynapseLearnRate
 				}
 
 				// Next time, if it did not fire, and it is zero, it will get pruned.
@@ -243,7 +244,7 @@ func makeSender() bool {
 }
 
 /*
-Equilibrium runs periodically to bring all cells closer to their apResting voltage.
+Equilibrium should run periodically to bring all cells closer to their apResting voltage.
 */
 func (network *Network) Equilibrium() {
 	for _, cell := range network.Cells {
