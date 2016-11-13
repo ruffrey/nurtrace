@@ -24,3 +24,5 @@ on more than one stimuli simultaneously
 - figure out how to train
     - to train, specify an input point and output point. get the output value. if good,
     reinforce the path and prune. If bad, grow pathways and cells.
+- use [SIMD](https://github.com/bjwbell/gensimd) instructions
+    - once it works, generate assembly for the low level math, to make it even faster and efficient.
