@@ -2,6 +2,7 @@ package potential
 
 import (
 	"encoding/json"
+	"fmt"
 	"math/rand"
 	"reflect"
 	"time"
@@ -251,5 +252,17 @@ func (network *Network) Equilibrium() {
 			// get halfway to resting
 			cell.Voltage -= (diff / 2)
 		}
+	}
+}
+
+/*
+PrintCells logs the network cells to console
+*/
+func (network *Network) PrintCells() {
+	for _, cell := range network.Cells {
+		fmt.Println("----------\ncell id=", cell.ID)
+		fmt.Println("  voltage=", cell.Voltage)
+		fmt.Println("  axons=", cell.AxonSynapses)
+		fmt.Println("  dendrites=", cell.DendriteSynapses)
 	}
 }

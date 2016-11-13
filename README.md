@@ -7,9 +7,10 @@ train a neural network.
 
 ## Goals
 - simple math resembling millivolts in neural network firings
-- extremely fast and works cross platform
+- fast and works cross platform
 - parallelized learning and inputs - instead of only training on one thing at a time, can train
 on more than one stimuli simultaneously
+- can also train in parallel on the same dataset
 - focus is on the pathway, rather than the neural network solving only one problem
 
 ## Stretch Goals
@@ -22,5 +23,4 @@ on more than one stimuli simultaneously
     - to receive a sample, specify an input point and output point
 - figure out how to train
     - to train, specify an input point and output point. get the output value. if good,
-    backpropagate it by reinforcing the connections in that path. if bad, decrement the activated
-    pathways.
+    reinforce the path and prune. If bad, grow pathways and cells.
