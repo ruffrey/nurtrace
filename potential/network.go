@@ -3,22 +3,49 @@ package potential
 import (
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"math/rand"
+	"os"
 	"reflect"
 	"time"
 )
 
 /*
-Network is a neural network
+Network is a full neural network
 */
 type Network struct {
-	Cells []Cell
-	// There are two factors that result in battering down a synapse:
+	/*
+	   Synapses are where the magic happens.
+	*/
+	Synapses map[int]*Synapse
 
-	// The minimum count of times a synapse fired in a given round between Grow cycles, with
-	// a millivolts=0 value.
+	/*
+		Cells are the neurons that hold the actual structure of the potential brain.
+		However, with perception layers and
+	*/
+	Cells []Cell
+
+	/*
+	   Receptors are sometimes known as the input of the brain.
+	*/
+	Receptors []Receptor
+
+	/*
+	   Perceptions are sometimes known as the output of the brain. After an input is fed into the
+	   receptor layer, it ripples through the Cells and a perception layer item fires.
+	*/
+	Perceptions []Perceptor
+
+	// There are two factors that result in degrading a synapse:
+
+	/*
+		The minimum count of times a synapse fired in a given round between Grow cycles, with
+		a millivolts=0 value.
+	*/
 	SynapseMinFireThreshold uint
-	// How much a synapse should get bumped
+	/*
+	   How much a synapse should get bumped when it is being reinforced
+	*/
 	SynapseLearnRate int8
 }
 
@@ -116,6 +143,7 @@ func (network *Network) Grow(neuronsToAdd, defaultNeuronSynapses, synapsesToAdd 
 	for _, cell := range addedNeurons {
 		for i := 0; i < defaultNeuronSynapses; {
 			synapse := NewSynapse()
+			network.Synapses[synapse.ID] = &synapse
 			ix := randomIntBetween(0, len(network.Cells)-1)
 			otherCell := &network.Cells[ix]
 			if cell.ID == otherCell.ID {
@@ -148,6 +176,7 @@ func (network *Network) Grow(neuronsToAdd, defaultNeuronSynapses, synapsesToAdd 
 		}
 
 		synapse := NewSynapse()
+		network.Synapses[synapse.ID] = &synapse
 		synapse.ToNeuronDendrite = receiver
 		synapse.FromNeuronAxon = sender
 		sender.AxonSynapses = append(sender.AxonSynapses, &synapse)
@@ -213,6 +242,7 @@ func (network *Network) PruneSynapse(synapse *Synapse) {
 		}
 	}
 
+	delete(network.Synapses, synapse.ID)
 	// this synapse is now dead
 }
 
@@ -266,4 +296,16 @@ func (network *Network) PrintCells() {
 		fmt.Println("  axons=", cell.AxonSynapses)
 		fmt.Println("  dendrites=", cell.DendriteSynapses)
 	}
+}
+
+/*
+SaveToFile outputs the network to a file
+*/
+func (network *Network) SaveToFile(filepath string) (err error) {
+	contents, err := network.ToJSON()
+	if err != nil {
+		return err
+	}
+	err = ioutil.WriteFile(filepath, []byte(contents), os.ModePerm)
+	return nil
 }

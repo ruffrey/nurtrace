@@ -1,13 +1,6 @@
 package potential
 
 /*
-ReceptorLayer is a flat network of Receptors.
-*/
-type ReceptorLayer struct {
-	Receptors []Receptor
-}
-
-/*
 Receptor receives external output and is connected to a cell. It has a corresponding output cell.
 When this receptor fires, it always fires its cell.
 
