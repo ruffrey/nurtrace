@@ -16,13 +16,3 @@ on more than one stimuli simultaneously
 ## Stretch Goals
 - generalized model can be used for any kind of data that can be put in memory
 - same network can be trained on more than one kind of stimuli to solve different problems
-
-## TODO:
-- figure out how to serialize and store memory
-- figure out how to sample / receive output
-    - to receive a sample, specify an input point and output point
-- figure out how to train
-    - to train, specify an input point and output point. get the output value. if good,
-    reinforce the path and prune. If bad, grow pathways and cells.
-- use [SIMD](https://github.com/bjwbell/gensimd) instructions
-    - once it works, generate assembly for the low level math, to make it even faster and efficient.
