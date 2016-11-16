@@ -16,7 +16,16 @@ type Receptor struct {
 	*/
 	Value interface{}
 	/*
-	   The normal network cell that this receptor fires.
+	   CellToFire is he normal network cell which this Receptor fires when the receptor is
+	   activated.
 	*/
-	CellFiree *Cell
+	CellToFire *Cell
+}
+
+/*
+Activate should be used to indicate the value this Receptor represents is present/happening,
+and the network should respond accordingly. It fires this cell's action potential.
+*/
+func (receptor *Receptor) Activate() {
+	receptor.CellToFire.FireActionPotential()
 }
