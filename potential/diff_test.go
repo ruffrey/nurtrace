@@ -6,10 +6,14 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+func Test_DiffNetworks(t *testing.T) {
+
+}
+
 func Test_CopyNetwork(t *testing.T) {
 	original := NewNetwork()
-	original.Cells = append(original.Cells, NewCell())
-	beforeCell := original.Cells[0]
+	beforeCell := NewCell()
+	original.Cells[beforeCell.ID] = &beforeCell
 	cloned := CloneNetwork(&original)
 	afterCell := original.Cells[0]
 	// change something

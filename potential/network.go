@@ -23,18 +23,18 @@ type Network struct {
 		Cells are the neurons that hold the actual structure of the potential brain.
 		However, with perception layers and
 	*/
-	Cells []Cell
+	Cells map[int]*Cell
 
 	/*
 	   Receptors are sometimes known as the input of the brain.
 	*/
-	Receptors []Receptor
+	Receptors map[int]Receptor
 
 	/*
-	   Perceptions are sometimes known as the output of the brain. After an input is fed into the
+	   Perceptors are sometimes known as the output of the brain. After an input is fed into the
 	   receptor layer, it ripples through the Cells and a perception layer item fires.
 	*/
-	Perceptions []Perceptor
+	Perceptors map[int]Perceptor
 
 	// There are two factors that result in degrading a synapse:
 
@@ -56,6 +56,10 @@ when called. Seems like a good time.
 func NewNetwork() Network {
 	rand.Seed(time.Now().Unix())
 	return Network{
+		Synapses:                make(map[int]*Synapse),
+		Cells:                   make(map[int]*Cell),
+		Receptors:               make(map[int]Receptor),
+		Perceptors:              make(map[int]Perceptor),
 		SynapseMinFireThreshold: 2,
 		SynapseLearnRate:        1,
 	}
@@ -135,7 +139,7 @@ func (network *Network) Grow(neuronsToAdd, defaultNeuronSynapses, synapsesToAdd 
 	var addedNeurons []*Cell
 	for i := 0; i < neuronsToAdd; i++ {
 		cell := NewCell()
-		network.Cells = append(network.Cells, cell)
+		network.Cells[cell.ID] = &cell
 		addedNeurons = append(addedNeurons, &cell)
 	}
 
@@ -144,8 +148,8 @@ func (network *Network) Grow(neuronsToAdd, defaultNeuronSynapses, synapsesToAdd 
 		for i := 0; i < defaultNeuronSynapses; {
 			synapse := NewSynapse()
 			network.Synapses[synapse.ID] = &synapse
-			ix := randomIntBetween(0, len(network.Cells)-1)
-			otherCell := &network.Cells[ix]
+			ix := network.RandomCellKey()
+			otherCell := network.Cells[ix]
 			if cell.ID == otherCell.ID {
 				// try again
 				continue
@@ -168,8 +172,10 @@ func (network *Network) Grow(neuronsToAdd, defaultNeuronSynapses, synapsesToAdd 
 	// Then we randomly add synapses between neurons to the whole network, including the
 	// newest neurons.
 	for i := 0; i < synapsesToAdd; {
-		sender := &network.Cells[randomIntBetween(0, len(network.Cells)-1)]
-		receiver := &network.Cells[randomIntBetween(0, len(network.Cells)-1)]
+		senderIx := network.RandomCellKey()
+		receiverIx := network.RandomCellKey()
+		sender := network.Cells[senderIx]
+		receiver := network.Cells[receiverIx]
 		// Thy cell shannot activate thyself
 		if sender.ID == receiver.ID {
 			continue
@@ -225,18 +231,18 @@ func (network *Network) PruneSynapse(synapse *Synapse) {
 	// build up more synapses via the grow process.
 	if len(synapse.ToNeuronDendrite.AxonSynapses) == 0 && len(synapse.ToNeuronDendrite.DendriteSynapses) == 0 {
 		// find it's index and remove it right now
-		for index, cell := range network.Cells {
+		for key, cell := range network.Cells {
 			if cell.ID == synapse.ToNeuronDendrite.ID {
-				network.PruneNeuron(index)
+				network.PruneNeuron(key)
 				break
 			}
 		}
 	}
 	if len(synapse.FromNeuronAxon.AxonSynapses) == 0 && len(synapse.FromNeuronAxon.DendriteSynapses) == 0 {
-		// find it's index and remove it right now
-		for index, cell := range network.Cells {
+		// find it's key and remove it right now
+		for key, cell := range network.Cells {
 			if cell.ID == synapse.FromNeuronAxon.ID {
-				network.PruneNeuron(index)
+				network.PruneNeuron(key)
 				break
 			}
 		}
@@ -254,16 +260,40 @@ It is assumed this neuron has no synapses!
 It also cannot be called in a range operation over network.Cells, because it will be removing
 the cell at the supplied index.
 */
-func (network *Network) PruneNeuron(index int) {
-	cell := network.Cells[index]
+func (network *Network) PruneNeuron(key int) {
+	cell := network.Cells[key]
 	if len(cell.DendriteSynapses) != 0 || len(cell.AxonSynapses) != 0 {
 		panic("Attempting to prune a neuron which still has synapses")
 	}
-	network.Cells = append(network.Cells[:index], network.Cells[index+1:]...) // this removes it
+	delete(network.Cells, key)
 }
 
 func randomIntBetween(min, max int) int {
 	return rand.Intn((max+1)-min) + min
+}
+
+/*
+Methods for random map keys below select a random integer between 0 and the map length,
+then interate into the map that many times to find the map key we want.
+Golang technically will not guarantee looping order over a map; but
+it is not truly random, so we have to do this expensive task of looping.
+It could likely be improved later by using a larger memory footprint
+that tracks all the keys in an array of integers.
+*/
+
+/*
+RandomCellKey gets the key of a random one in the map
+*/
+func (network *Network) RandomCellKey() int {
+	iterate := randomIntBetween(0, len(network.Cells)-1)
+	i := 0
+	for k := range network.Cells {
+		if i >= iterate {
+			return k
+		}
+		i++
+	}
+	return 0
 }
 
 func makeSender() bool {
