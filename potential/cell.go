@@ -16,15 +16,30 @@ const apLow int8 = -90
 const synapseAPBoost uint = 1
 
 /*
+CellID is a normal Go integer that should be unique for all cells in a network.
+*/
+type CellID int
+
+/*
+NewCellID makes a new random CellID.
+*/
+func NewCellID() (cid CellID) {
+	return CellID(rand.Int())
+}
+
+/*
 Cell holds voltage, receives input from Dendrites, and upon reaching the activation voltage,
 fires an action potential cycles and its axon synapses push voltage to the dendrites it connects
 to.
 */
 type Cell struct {
-	ID                int
-	Voltage           int8
-	Activating        bool
-	DendriteSynapses  []*Synapse // This cell's inputs.
+	ID         CellID
+	Voltage    int8
+	Activating bool
+	/*
+		DendriteSynapses are this cell's inputs. They are IDs of synapses.
+	*/
+	DendriteSynapses  []*Synapse
 	AxonSynapses      []*Synapse // this cell's outputs.
 	equilibriumTicker *time.Timer
 }
@@ -34,7 +49,7 @@ NewCell instantiates a Cell
 */
 func NewCell() Cell {
 	cell := Cell{
-		ID:               rand.Int(),
+		ID:               NewCellID(),
 		Voltage:          apResting,
 		Activating:       false,
 		DendriteSynapses: make([]*Synapse, 0),

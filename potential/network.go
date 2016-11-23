@@ -17,13 +17,13 @@ type Network struct {
 	/*
 	   Synapses are where the magic happens.
 	*/
-	Synapses map[int]*Synapse
+	Synapses map[SynapseID]*Synapse
 
 	/*
 		Cells are the neurons that hold the actual structure of the potential brain.
 		However, with perception layers and
 	*/
-	Cells map[int]*Cell
+	Cells map[CellID]*Cell
 
 	/*
 	   Receptors are sometimes known as the input of the brain.
@@ -56,8 +56,8 @@ when called. Seems like a good time.
 func NewNetwork() Network {
 	rand.Seed(time.Now().Unix())
 	return Network{
-		Synapses:                make(map[int]*Synapse),
-		Cells:                   make(map[int]*Cell),
+		Synapses:                make(map[SynapseID]*Synapse),
+		Cells:                   make(map[CellID]*Cell),
 		Receptors:               make(map[int]Receptor),
 		Perceptors:              make(map[int]Perceptor),
 		SynapseMinFireThreshold: 2,
@@ -260,7 +260,7 @@ It is assumed this neuron has no synapses!
 It also cannot be called in a range operation over network.Cells, because it will be removing
 the cell at the supplied index.
 */
-func (network *Network) PruneNeuron(key int) {
+func (network *Network) PruneNeuron(key CellID) {
 	cell := network.Cells[key]
 	if len(cell.DendriteSynapses) != 0 || len(cell.AxonSynapses) != 0 {
 		panic("Attempting to prune a neuron which still has synapses")
@@ -284,16 +284,16 @@ that tracks all the keys in an array of integers.
 /*
 RandomCellKey gets the key of a random one in the map
 */
-func (network *Network) RandomCellKey() int {
+func (network *Network) RandomCellKey() CellID {
 	iterate := randomIntBetween(0, len(network.Cells)-1)
 	i := 0
 	for k := range network.Cells {
 		if i >= iterate {
-			return k
+			return CellID(k)
 		}
 		i++
 	}
-	return 0
+	return CellID(0)
 }
 
 func makeSender() bool {

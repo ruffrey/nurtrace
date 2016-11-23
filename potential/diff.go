@@ -13,12 +13,12 @@ type Diff struct {
 	   synapses is a map where the keys are synapse IDs, and the value is the difference between
 	   the new and old network.
 	*/
-	synapseDiffs  map[int]int8
+	synapseDiffs  map[SynapseID]int8
 	addedSynapses []Synapse
 	/*
 	   removedSynapses is a list of the IDs of the synapses that no longer exist in the new network.
 	*/
-	removedSynapses []int
+	removedSynapses []SynapseID
 	/*
 	   For cells that were kept, this is the voltage change from old to new. They would be
 	   added to the old network (though can be positive or negative). The key is the cell ID.
@@ -43,6 +43,9 @@ func DiffNetworks(originalNetwork, newerNetwork *Network) (diff Diff) {
 	for id, newerNetworkSynapse := range newerNetwork.Synapses {
 		originalSynapse, alreadyExisted := originalNetwork.Synapses[id]
 		if !alreadyExisted {
+			// we want it derefenced so it is an instance, not a pointer. that will ensure
+			// later we can need to update the synapse to be pointing to the originalNetwork
+			// dendrite and axon cells. it will still be pointing to the old ones.
 			diff.addedSynapses = append(diff.addedSynapses, *newerNetworkSynapse)
 		} else {
 			// this synapse already existed, so we will calculate the diff
