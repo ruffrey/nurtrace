@@ -34,26 +34,28 @@ to.
 */
 type Cell struct {
 	ID         CellID
+	Network    *Network
 	Voltage    int8
 	Activating bool
 	/*
 		DendriteSynapses are this cell's inputs. They are IDs of synapses.
 	*/
-	DendriteSynapses  []*Synapse
-	AxonSynapses      []*Synapse // this cell's outputs.
+	DendriteSynapses  []SynapseID
+	AxonSynapses      []SynapseID // this cell's outputs.
 	equilibriumTicker *time.Timer
 }
 
 /*
 NewCell instantiates a Cell
 */
-func NewCell() Cell {
+func NewCell(network *Network) Cell {
 	cell := Cell{
 		ID:               NewCellID(),
+		Network:          network,
 		Voltage:          apResting,
 		Activating:       false,
-		DendriteSynapses: make([]*Synapse, 0),
-		AxonSynapses:     make([]*Synapse, 0),
+		DendriteSynapses: make([]SynapseID, 0),
+		AxonSynapses:     make([]SynapseID, 0),
 	}
 	return cell
 }
@@ -67,7 +69,8 @@ func (cell *Cell) FireActionPotential() {
 	cell.Voltage = apPeak // probably not doing anything...hmm.
 
 	// activate all synapses on its axon
-	for _, synapse := range cell.AxonSynapses {
+	for _, synapseID := range cell.AxonSynapses {
+		synapse := cell.Network.Synapses[synapseID]
 		synapse.Activate()
 	}
 	time.AfterFunc(10*time.Millisecond, func() {

@@ -6,7 +6,6 @@ import (
 	"io/ioutil"
 	"math/rand"
 	"os"
-	"reflect"
 	"time"
 )
 
@@ -17,13 +16,13 @@ type Network struct {
 	/*
 	   Synapses are where the magic happens.
 	*/
-	Synapses map[SynapseID]*Synapse
+	Synapses map[SynapseID]Synapse
 
 	/*
 		Cells are the neurons that hold the actual structure of the potential brain.
 		However, with perception layers and
 	*/
-	Cells map[CellID]*Cell
+	Cells map[CellID]Cell
 
 	/*
 	   Receptors are sometimes known as the input of the brain.
@@ -56,8 +55,8 @@ when called. Seems like a good time.
 func NewNetwork() Network {
 	rand.Seed(time.Now().Unix())
 	return Network{
-		Synapses:                make(map[SynapseID]*Synapse),
-		Cells:                   make(map[CellID]*Cell),
+		Synapses:                make(map[SynapseID]Synapse),
+		Cells:                   make(map[CellID]Cell),
 		Receptors:               make(map[int]Receptor),
 		Perceptors:              make(map[int]Perceptor),
 		SynapseMinFireThreshold: 2,
@@ -86,7 +85,8 @@ func (network *Network) Grow(neuronsToAdd, defaultNeuronSynapses, synapsesToAdd 
 	// which were activated, too.
 	var synapsesToRemove []*Synapse
 	for _, cell := range network.Cells {
-		for _, synapse := range cell.DendriteSynapses { // could also be axons, but, meh.
+		for _, synapseID := range cell.DendriteSynapses { // could also be axons, but, meh.
+			synapse := network.Synapses[synapseID]
 			isPositive := synapse.Millivolts >= 0
 
 			if synapse.ActivationHistory >= network.SynapseMinFireThreshold {
@@ -109,7 +109,7 @@ func (network *Network) Grow(neuronsToAdd, defaultNeuronSynapses, synapsesToAdd 
 				// It reached "no effect" of 0 millivolts last round. Then it didn't fire
 				// this round. Remove this synapse.
 				if synapse.Millivolts == 0 {
-					synapsesToRemove = append(synapsesToRemove, synapse)
+					synapsesToRemove = append(synapsesToRemove, &synapse)
 				}
 
 				// did not meet minimum fire threshold, so punish it by moving toward zero
@@ -138,16 +138,16 @@ func (network *Network) Grow(neuronsToAdd, defaultNeuronSynapses, synapsesToAdd 
 	// newer neurons.
 	var addedNeurons []*Cell
 	for i := 0; i < neuronsToAdd; i++ {
-		cell := NewCell()
-		network.Cells[cell.ID] = &cell
+		cell := NewCell(network)
+		network.Cells[cell.ID] = cell
 		addedNeurons = append(addedNeurons, &cell)
 	}
 
 	// Now we add the default number of synapses to our new neurons, with random other neurons.
 	for _, cell := range addedNeurons {
 		for i := 0; i < defaultNeuronSynapses; {
-			synapse := NewSynapse()
-			network.Synapses[synapse.ID] = &synapse
+			synapse := NewSynapse(network)
+			network.Synapses[synapse.ID] = synapse
 			ix := network.RandomCellKey()
 			otherCell := network.Cells[ix]
 			if cell.ID == otherCell.ID {
@@ -155,15 +155,15 @@ func (network *Network) Grow(neuronsToAdd, defaultNeuronSynapses, synapsesToAdd 
 				continue
 			}
 			if chooseIfSender() {
-				synapse.FromNeuronAxon = cell
-				synapse.ToNeuronDendrite = otherCell
-				otherCell.DendriteSynapses = append(otherCell.DendriteSynapses, &synapse)
-				cell.AxonSynapses = append(cell.AxonSynapses, &synapse)
+				synapse.FromNeuronAxon = cell.ID
+				synapse.ToNeuronDendrite = otherCell.ID
+				otherCell.DendriteSynapses = append(otherCell.DendriteSynapses, synapse.ID)
+				cell.AxonSynapses = append(cell.AxonSynapses, synapse.ID)
 			} else {
-				synapse.FromNeuronAxon = otherCell
-				synapse.ToNeuronDendrite = cell
-				otherCell.AxonSynapses = append(otherCell.AxonSynapses, &synapse)
-				cell.DendriteSynapses = append(cell.DendriteSynapses, &synapse)
+				synapse.FromNeuronAxon = otherCell.ID
+				synapse.ToNeuronDendrite = cell.ID
+				otherCell.AxonSynapses = append(otherCell.AxonSynapses, synapse.ID)
+				cell.DendriteSynapses = append(cell.DendriteSynapses, synapse.ID)
 			}
 			i++
 		}
@@ -181,71 +181,69 @@ func (network *Network) Grow(neuronsToAdd, defaultNeuronSynapses, synapsesToAdd 
 			continue
 		}
 
-		synapse := NewSynapse()
-		network.Synapses[synapse.ID] = &synapse
-		synapse.ToNeuronDendrite = receiver
-		synapse.FromNeuronAxon = sender
-		sender.AxonSynapses = append(sender.AxonSynapses, &synapse)
-		receiver.DendriteSynapses = append(receiver.DendriteSynapses, &synapse)
+		synapse := NewSynapse(network)
+		network.Synapses[synapse.ID] = synapse
+		synapse.ToNeuronDendrite = receiver.ID
+		synapse.FromNeuronAxon = sender.ID
+		sender.AxonSynapses = append(sender.AxonSynapses, synapse.ID)
+		receiver.DendriteSynapses = append(receiver.DendriteSynapses, synapse.ID)
 		i++
 	}
 
 }
 
 /*
-PruneSynapse removes a synapse and all references to it. A synapse only exists by being
-referenced by neurons. So we remove those references and hope the garbage collector
-cleans it up.
+PruneSynapse removes a synapse and all references to it.
+
+A synapse exists between two neurons. We get both neurons and remove the synapse
+from its list.
 
 If either of those neurons no longer has any synapses itself, kill off that neuron cell.
 */
 func (network *Network) PruneSynapse(synapse *Synapse) {
-	removedAxonRef := false
+	dendriteCell := network.Cells[synapse.FromNeuronAxon]
 	removedDendriteRef := false
+	axonCell := network.Cells[synapse.ToNeuronDendrite]
+	removedAxonRef := false
 
-	for index, ref := range synapse.FromNeuronAxon.AxonSynapses {
-		if reflect.DeepEqual(ref, synapse.FromNeuronAxon) {
-			synapse.FromNeuronAxon.AxonSynapses = append(synapse.FromNeuronAxon.AxonSynapses[:index], synapse.FromNeuronAxon.AxonSynapses[index+1:]...)
+	// Get the "from" neuron for this synapse, and remove this synapse from its list of
+	// axon synapses.
+	for index, synapseID := range dendriteCell.AxonSynapses {
+		if synapseID == synapse.ID {
+			// apparently this removes an item from a slice
+			dendriteCell.AxonSynapses = append(dendriteCell.AxonSynapses[:index], dendriteCell.AxonSynapses[index+1:]...)
 			removedAxonRef = true
 			break
 		}
 	}
 	if !removedAxonRef {
-		panic("Failed to remove a synapse refernece from the AXON side of a cell")
+		panic("Failed to remove a synapse reference from the AXON side of a synapse")
 	}
 
-	for index, ref := range synapse.ToNeuronDendrite.DendriteSynapses {
-		if reflect.DeepEqual(ref, synapse.ToNeuronDendrite) {
-			synapse.ToNeuronDendrite.DendriteSynapses = append(synapse.ToNeuronDendrite.DendriteSynapses[:index], synapse.ToNeuronDendrite.DendriteSynapses[index+1:]...)
+	// Get the "to" neuron for this synapse, and remove this synapse from its list of
+	// dendrite synapses
+	for index, synapseID := range axonCell.DendriteSynapses {
+		if synapseID == synapse.ID {
+			axonCell.DendriteSynapses = append(axonCell.DendriteSynapses[:index], axonCell.DendriteSynapses[index+1:]...)
 			removedDendriteRef = true
 			break
 		}
 	}
 	if !removedDendriteRef {
-		panic("Failed to remove a synapse refernece from the DENDTIRE side of a cell")
+		panic("Failed to remove a synapse reference from the DENDRITE side of a synapse")
 	}
 
 	// See if either cell (to/from) should be pruned, also.
 	// Technically this can result in a cell being the end of a dead pathway, or not receiving
 	// any input. But that is something to revisit. It is likely these cells would eventually
 	// build up more synapses via the grow process.
-	if len(synapse.ToNeuronDendrite.AxonSynapses) == 0 && len(synapse.ToNeuronDendrite.DendriteSynapses) == 0 {
-		// find it's index and remove it right now
-		for key, cell := range network.Cells {
-			if cell.ID == synapse.ToNeuronDendrite.ID {
-				network.PruneNeuron(key)
-				break
-			}
-		}
+	receiverCellHasNoSynapses := len(dendriteCell.AxonSynapses) == 0 && len(dendriteCell.DendriteSynapses) == 0
+	if receiverCellHasNoSynapses {
+		delete(network.Cells, dendriteCell.ID)
 	}
-	if len(synapse.FromNeuronAxon.AxonSynapses) == 0 && len(synapse.FromNeuronAxon.DendriteSynapses) == 0 {
-		// find it's key and remove it right now
-		for key, cell := range network.Cells {
-			if cell.ID == synapse.FromNeuronAxon.ID {
-				network.PruneNeuron(key)
-				break
-			}
-		}
+	senderCellHasNoSynapses := len(axonCell.AxonSynapses) == 0 && len(axonCell.DendriteSynapses) == 0
+	if senderCellHasNoSynapses {
+		delete(network.Cells, axonCell.ID)
 	}
 
 	delete(network.Synapses, synapse.ID)

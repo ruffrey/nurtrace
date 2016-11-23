@@ -46,7 +46,7 @@ func DiffNetworks(originalNetwork, newerNetwork *Network) (diff Diff) {
 			// we want it derefenced so it is an instance, not a pointer. that will ensure
 			// later we can need to update the synapse to be pointing to the originalNetwork
 			// dendrite and axon cells. it will still be pointing to the old ones.
-			diff.addedSynapses = append(diff.addedSynapses, *newerNetworkSynapse)
+			diff.addedSynapses = append(diff.addedSynapses, newerNetworkSynapse)
 		} else {
 			// this synapse already existed, so we will calculate the diff
 			diff.synapseDiffs[id] = originalSynapse.Millivolts - newerNetworkSynapse.Millivolts
@@ -73,7 +73,8 @@ but this isn't technically required. Though, it is undefined behavior.
 */
 func ApplyDiff(diff Diff, originalNetwork *Network) {
 	for synapseID, diffValue := range diff.synapseDiffs {
-		originalNetwork.Synapses[synapseID].Millivolts += diffValue
+		synapse := originalNetwork.Synapses[synapseID]
+		synapse.Millivolts += diffValue
 	}
 	// TODO: more
 }
