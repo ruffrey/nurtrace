@@ -154,7 +154,7 @@ func (network *Network) Grow(neuronsToAdd, defaultNeuronSynapses, synapsesToAdd 
 				// try again
 				continue
 			}
-			if makeSender() {
+			if chooseIfSender() {
 				synapse.FromNeuronAxon = cell
 				synapse.ToNeuronDendrite = otherCell
 				otherCell.DendriteSynapses = append(otherCell.DendriteSynapses, &synapse)
@@ -296,7 +296,7 @@ func (network *Network) RandomCellKey() CellID {
 	return CellID(0)
 }
 
-func makeSender() bool {
+func chooseIfSender() bool {
 	if randomIntBetween(0, 1) == 1 {
 		return true
 	}
