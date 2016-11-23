@@ -1,7 +1,9 @@
 # TODO
 
 ## Near term
-[ ] switch all lists to be maps
+[ ] finish diffing
+[ ] consider using IDs between synapses and cells, instead of pointers
+[x] switch all lists to be maps
 [ ] figure out how to serialize and store memory (it is an interface{})
 [ ] attach receptors/perceptors cleanly to the network
 [ ] add training methods
