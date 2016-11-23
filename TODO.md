@@ -2,12 +2,14 @@
 
 ## Near term
 [ ] finish diffing
-[ ] consider using IDs between synapses and cells, instead of pointers, for portability during diffs
+[x] use IDs between synapses and cells, instead of pointers, for portability during diffs
 [x] switch all lists to be maps
-[ ] figure out how to serialize and store memory (it is an interface{})
+[ ] implement: serialize the network and deserialize it
+    - assign the pointer to the network on each cell and synapse
 [ ] attach receptors/perceptors cleanly to the network
 [ ] add training methods
-[ ] NewCellID and NewSynapseID should be an instance method on a network
+[ ] NewCellID and NewSynapseID should be an instance method on a network to ensure
+no ID collisions occur
 
 ## Once working
 
