@@ -61,3 +61,11 @@ may take a while at first, but should get faster and faster over time.
 Instead, run a few rapid trials, inputting one letter and seeing if it results in the output firing. If it does, do not discard the learning. If it doesn't, discard this trial. Then grow the network to try to get a connection between the input and desired output. Growing can be done by adding neurons, adding synapses, and maybe pruning. Not sure about pruning. Pruning may be better to reduce noise later. Or, perhaps after a successful series of trials, we prune synapses.
 
 This avoids the expensive and complicated path tracing. It is better than brute forcing because we change the network in between trials.
+
+# Timing
+
+Timing is an interesting problem to solve during training and sampling. While a brain is always
+working with the same hardware, a neural network may be on vastly different hardware. Additionally
+there may be slightly different sets of processes running in the background which degrade training
+or sampling speed in small ways. While small, it is a challenge because a learning and thinking
+brain does not experience vast variations in hardware on det

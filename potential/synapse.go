@@ -61,6 +61,6 @@ func (synapse *Synapse) Activate() {
 		fmt.Println("bad synapse: ", synapse)
 		panic("Attempting to activate non-existent cell connected to synapse.")
 	}
-	fmt.Println("  synapse", synapse.ID, "firing dendrite on", synapse.ToNeuronDendrite)
+	// fmt.Println("  synapse", synapse.ID, "firing dendrite on", synapse.ToNeuronDendrite)
 	dendriteCell.ApplyVoltage(synapse.Millivolts, synapse)
 }

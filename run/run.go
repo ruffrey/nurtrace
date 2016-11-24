@@ -8,13 +8,13 @@ import (
 
 func main() {
 	network := potential.NewNetwork()
-	neuronsToAdd := 5
+	neuronsToAdd := 5000
 	defaultNeuronSynapses := 10
-	synapsesToAdd := 10
+	synapsesToAdd := 100
 	network.Grow(neuronsToAdd, defaultNeuronSynapses, synapsesToAdd)
 	fmt.Println("Created network")
 	printNetwork(&network)
-	for i := 0; i < 100; i++ {
+	for i := 0; i < 10000000; i++ {
 		cellID := network.RandomCellKey()
 		cell := network.Cells[cellID]
 		cell.FireActionPotential()
@@ -22,7 +22,7 @@ func main() {
 	fmt.Println("\nAfter activation\n ")
 	printNetwork(&network)
 	network.Equilibrium()
-	time.Sleep(500 * time.Millisecond)
+	time.Sleep(2 * time.Second)
 	network.Equilibrium()
 	fmt.Println("\nFinal\n ")
 	printNetwork(&network)

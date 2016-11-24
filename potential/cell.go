@@ -1,7 +1,6 @@
 package potential
 
 import (
-	"fmt"
 	"math/rand"
 	"time"
 )
@@ -84,19 +83,19 @@ func NewCell(network *Network) Cell {
 FireActionPotential does an action potential cycle.
 */
 func (cell *Cell) FireActionPotential() {
-	fmt.Println("Action Potential Firing\n  cell=", cell.ID, "\n  axon synapses=", cell.AxonSynapses)
+	// fmt.Println("Action Potential Firing\n  cell=", cell.ID, "\n  axon synapses=", cell.AxonSynapses)
 	cell.Activating = true
 	cell.Voltage = apPeak // probably not doing anything...hmm.
 
 	// activate all synapses on its axon
 	for synapseID := range cell.AxonSynapses {
 		synapse := cell.Network.Synapses[synapseID]
-		fmt.Println("  activating synapse", synapse, "from cell", cell.ID)
+		// fmt.Println("  activating synapse", synapse, "from cell", cell.ID)
 		synapse.Activate()
 	}
-	time.AfterFunc(10*time.Millisecond, func() {
+	time.AfterFunc(4*time.Millisecond, func() {
 		cell.Voltage = apLow
-		time.AfterFunc(10*time.Millisecond, func() {
+		time.AfterFunc(4*time.Millisecond, func() {
 			// other neuron firings may have already bumped this to, or above, the
 			// resting potential.
 			if cell.Voltage < apResting {
