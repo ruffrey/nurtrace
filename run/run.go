@@ -14,11 +14,11 @@ func main() {
 	network.Grow(neuronsToAdd, defaultNeuronSynapses, synapsesToAdd)
 	fmt.Println("Created network")
 	printNetwork(&network)
-	network.Cells[network.RandomCellKey()].FireActionPotential()
-	network.Cells[network.RandomCellKey()].FireActionPotential()
-	network.Cells[network.RandomCellKey()].FireActionPotential()
-	network.Cells[network.RandomCellKey()].FireActionPotential()
-	network.Cells[network.RandomCellKey()].FireActionPotential()
+	for i := 0; i < 100; i++ {
+		cellID := network.RandomCellKey()
+		cell := network.Cells[cellID]
+		cell.FireActionPotential()
+	}
 	fmt.Println("\nAfter activation\n ")
 	printNetwork(&network)
 	network.Equilibrium()

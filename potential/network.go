@@ -16,24 +16,24 @@ type Network struct {
 	/*
 	   Synapses are where the magic happens.
 	*/
-	Synapses map[SynapseID]Synapse
+	Synapses map[SynapseID]*Synapse
 
 	/*
 		Cells are the neurons that hold the actual structure of the potential brain.
 		However, with perception layers and
 	*/
-	Cells map[CellID]Cell
+	Cells map[CellID]*Cell
 
 	/*
 	   Receptors are sometimes known as the input of the brain.
 	*/
-	Receptors map[int]Receptor
+	Receptors map[int]*Receptor
 
 	/*
 	   Perceptors are sometimes known as the output of the brain. After an input is fed into the
 	   receptor layer, it ripples through the Cells and a perception layer item fires.
 	*/
-	Perceptors map[int]Perceptor
+	Perceptors map[int]*Perceptor
 
 	// There are two factors that result in degrading a synapse:
 
@@ -55,10 +55,10 @@ when called. Seems like a good time.
 func NewNetwork() Network {
 	rand.Seed(time.Now().Unix())
 	return Network{
-		Synapses:                make(map[SynapseID]Synapse),
-		Cells:                   make(map[CellID]Cell),
-		Receptors:               make(map[int]Receptor),
-		Perceptors:              make(map[int]Perceptor),
+		Synapses:                make(map[SynapseID]*Synapse),
+		Cells:                   make(map[CellID]*Cell),
+		Receptors:               make(map[int]*Receptor),
+		Perceptors:              make(map[int]*Perceptor),
 		SynapseMinFireThreshold: 2,
 		SynapseLearnRate:        1,
 	}
@@ -85,7 +85,7 @@ func (network *Network) Grow(neuronsToAdd, defaultNeuronSynapses, synapsesToAdd 
 	// which were activated, too.
 	var synapsesToRemove []*Synapse
 	for _, cell := range network.Cells {
-		for _, synapseID := range cell.DendriteSynapses { // could also be axons, but, meh.
+		for synapseID := range cell.DendriteSynapses { // could also be axons, but, meh.
 			synapse := network.Synapses[synapseID]
 			isPositive := synapse.Millivolts >= 0
 
@@ -109,7 +109,7 @@ func (network *Network) Grow(neuronsToAdd, defaultNeuronSynapses, synapsesToAdd 
 				// It reached "no effect" of 0 millivolts last round. Then it didn't fire
 				// this round. Remove this synapse.
 				if synapse.Millivolts == 0 {
-					synapsesToRemove = append(synapsesToRemove, &synapse)
+					synapsesToRemove = append(synapsesToRemove, synapse)
 				}
 
 				// did not meet minimum fire threshold, so punish it by moving toward zero
@@ -139,7 +139,7 @@ func (network *Network) Grow(neuronsToAdd, defaultNeuronSynapses, synapsesToAdd 
 	var addedNeurons []*Cell
 	for i := 0; i < neuronsToAdd; i++ {
 		cell := NewCell(network)
-		network.Cells[cell.ID] = cell
+		network.Cells[cell.ID] = &cell
 		addedNeurons = append(addedNeurons, &cell)
 	}
 
@@ -147,7 +147,6 @@ func (network *Network) Grow(neuronsToAdd, defaultNeuronSynapses, synapsesToAdd 
 	for _, cell := range addedNeurons {
 		for i := 0; i < defaultNeuronSynapses; {
 			synapse := NewSynapse(network)
-			network.Synapses[synapse.ID] = synapse
 			ix := network.RandomCellKey()
 			otherCell := network.Cells[ix]
 			if cell.ID == otherCell.ID {
@@ -157,14 +156,17 @@ func (network *Network) Grow(neuronsToAdd, defaultNeuronSynapses, synapsesToAdd 
 			if chooseIfSender() {
 				synapse.FromNeuronAxon = cell.ID
 				synapse.ToNeuronDendrite = otherCell.ID
-				otherCell.DendriteSynapses = append(otherCell.DendriteSynapses, synapse.ID)
-				cell.AxonSynapses = append(cell.AxonSynapses, synapse.ID)
+				otherCell.DendriteSynapses[synapse.ID] = true
+				cell.AxonSynapses[synapse.ID] = true
 			} else {
 				synapse.FromNeuronAxon = otherCell.ID
 				synapse.ToNeuronDendrite = cell.ID
-				otherCell.AxonSynapses = append(otherCell.AxonSynapses, synapse.ID)
-				cell.DendriteSynapses = append(cell.DendriteSynapses, synapse.ID)
+				otherCell.AxonSynapses[synapse.ID] = true
+				cell.DendriteSynapses[synapse.ID] = true
 			}
+			// fmt.Println("created synapse", synapse)
+			// must go last because it appears to copy on assignment
+			network.Synapses[synapse.ID] = &synapse
 			i++
 		}
 	}
@@ -182,11 +184,13 @@ func (network *Network) Grow(neuronsToAdd, defaultNeuronSynapses, synapsesToAdd 
 		}
 
 		synapse := NewSynapse(network)
-		network.Synapses[synapse.ID] = synapse
 		synapse.ToNeuronDendrite = receiver.ID
 		synapse.FromNeuronAxon = sender.ID
-		sender.AxonSynapses = append(sender.AxonSynapses, synapse.ID)
-		receiver.DendriteSynapses = append(receiver.DendriteSynapses, synapse.ID)
+		sender.AxonSynapses[synapse.ID] = true
+		receiver.DendriteSynapses[synapse.ID] = true
+		// fmt.Println("created synapse", synapse)
+		// must go last because it appears to copy on assignment
+		network.Synapses[synapse.ID] = &synapse
 		i++
 	}
 
@@ -202,36 +206,10 @@ If either of those neurons no longer has any synapses itself, kill off that neur
 */
 func (network *Network) PruneSynapse(synapse *Synapse) {
 	dendriteCell := network.Cells[synapse.FromNeuronAxon]
-	removedDendriteRef := false
 	axonCell := network.Cells[synapse.ToNeuronDendrite]
-	removedAxonRef := false
 
-	// Get the "from" neuron for this synapse, and remove this synapse from its list of
-	// axon synapses.
-	for index, synapseID := range dendriteCell.AxonSynapses {
-		if synapseID == synapse.ID {
-			// apparently this removes an item from a slice
-			dendriteCell.AxonSynapses = append(dendriteCell.AxonSynapses[:index], dendriteCell.AxonSynapses[index+1:]...)
-			removedAxonRef = true
-			break
-		}
-	}
-	if !removedAxonRef {
-		panic("Failed to remove a synapse reference from the AXON side of a synapse")
-	}
-
-	// Get the "to" neuron for this synapse, and remove this synapse from its list of
-	// dendrite synapses
-	for index, synapseID := range axonCell.DendriteSynapses {
-		if synapseID == synapse.ID {
-			axonCell.DendriteSynapses = append(axonCell.DendriteSynapses[:index], axonCell.DendriteSynapses[index+1:]...)
-			removedDendriteRef = true
-			break
-		}
-	}
-	if !removedDendriteRef {
-		panic("Failed to remove a synapse reference from the DENDRITE side of a synapse")
-	}
+	delete(dendriteCell.AxonSynapses, synapse.ID)
+	delete(axonCell.DendriteSynapses, synapse.ID)
 
 	// See if either cell (to/from) should be pruned, also.
 	// Technically this can result in a cell being the end of a dead pathway, or not receiving
@@ -282,16 +260,20 @@ that tracks all the keys in an array of integers.
 /*
 RandomCellKey gets the key of a random one in the map
 */
-func (network *Network) RandomCellKey() CellID {
+func (network *Network) RandomCellKey() (randCellID CellID) {
 	iterate := randomIntBetween(0, len(network.Cells)-1)
 	i := 0
 	for k := range network.Cells {
-		if i >= iterate {
-			return CellID(k)
+		if i == iterate {
+			randCellID = CellID(k)
+			break
 		}
 		i++
 	}
-	return CellID(0)
+	if randCellID == CellID(0) {
+		panic("Should never get cell ID 0")
+	}
+	return randCellID
 }
 
 func chooseIfSender() bool {

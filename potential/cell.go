@@ -1,6 +1,7 @@
 package potential
 
 import (
+	"fmt"
 	"math/rand"
 	"time"
 )
@@ -24,13 +25,28 @@ type CellID int
 NewCellID makes a new random CellID.
 */
 func NewCellID() (cid CellID) {
-	return CellID(rand.Int())
+	i := rand.Int()
+	if i == 0 {
+		panic("Should never get zero from rand.Int()")
+	}
+	return CellID(i)
 }
 
 /*
 Cell holds voltage, receives input from Dendrites, and upon reaching the activation voltage,
-fires an action potential cycles and its axon synapses push voltage to the dendrites it connects
+fires an action potential cycle and its axon synapses push voltage to the dendrites it connects
 to.
+
+Maps are used for DendriteSynapses because they are easier to use for the use cases in this
+library than slices. They are always the value true. Being false is not advised, but that is
+undefined behavior. We can't have empty values in a map, so a bool is one byte.
+
+Surprisingly, a map with integer keys and single byte values is the same size as an slice with
+integer values. So it makes no difference at scale whether it is a map or array. If anything,
+map lookups would be faster.
+
+Using maps where one might expect arrays or slices (because it really is just a list) might
+be a source of confusion.
 */
 type Cell struct {
 	ID         CellID
@@ -38,10 +54,14 @@ type Cell struct {
 	Voltage    int8
 	Activating bool
 	/*
-		DendriteSynapses are this cell's inputs. They are IDs of synapses.
+	  DendriteSynapses are this cell's inputs. They are IDs of synapses.
 	*/
-	DendriteSynapses  []SynapseID
-	AxonSynapses      []SynapseID // this cell's outputs.
+	DendriteSynapses map[SynapseID]bool
+	/*
+	  DendriteSynapses are this cell's outputs. They are IDs of synapses. When it fires,
+	  these synapses will be triggered.
+	*/
+	AxonSynapses      map[SynapseID]bool
 	equilibriumTicker *time.Timer
 }
 
@@ -54,8 +74,8 @@ func NewCell(network *Network) Cell {
 		Network:          network,
 		Voltage:          apResting,
 		Activating:       false,
-		DendriteSynapses: make([]SynapseID, 0),
-		AxonSynapses:     make([]SynapseID, 0),
+		DendriteSynapses: make(map[SynapseID]bool),
+		AxonSynapses:     make(map[SynapseID]bool),
 	}
 	return cell
 }
@@ -64,13 +84,14 @@ func NewCell(network *Network) Cell {
 FireActionPotential does an action potential cycle.
 */
 func (cell *Cell) FireActionPotential() {
-	// fmt.Println("Action Potential firing", cell.ID, "for synapses", cell.AxonSynapses)
+	fmt.Println("Action Potential Firing\n  cell=", cell.ID, "\n  axon synapses=", cell.AxonSynapses)
 	cell.Activating = true
 	cell.Voltage = apPeak // probably not doing anything...hmm.
 
 	// activate all synapses on its axon
-	for _, synapseID := range cell.AxonSynapses {
+	for synapseID := range cell.AxonSynapses {
 		synapse := cell.Network.Synapses[synapseID]
+		fmt.Println("  activating synapse", synapse, "from cell", cell.ID)
 		synapse.Activate()
 	}
 	time.AfterFunc(10*time.Millisecond, func() {

@@ -13,7 +13,7 @@ func Test_DiffNetworks(t *testing.T) {
 func Test_CopyNetwork(t *testing.T) {
 	original := NewNetwork()
 	beforeCell := NewCell(&original)
-	original.Cells[beforeCell.ID] = beforeCell
+	original.Cells[beforeCell.ID] = &beforeCell
 	cloned := CloneNetwork(&original)
 	afterCell := original.Cells[0]
 	// change something

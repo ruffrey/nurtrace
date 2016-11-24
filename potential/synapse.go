@@ -1,6 +1,9 @@
 package potential
 
-import "math/rand"
+import (
+	"fmt"
+	"math/rand"
+)
 
 // Synapses that fire together wire together.
 
@@ -53,6 +56,11 @@ Activate is when the dendrite receives voltage.
 */
 func (synapse *Synapse) Activate() {
 	synapse.ActivationHistory++
-	dendriteCell := synapse.Network.Cells[synapse.ToNeuronDendrite]
+	dendriteCell, exists := synapse.Network.Cells[synapse.ToNeuronDendrite]
+	if !exists {
+		fmt.Println("bad synapse: ", synapse)
+		panic("Attempting to activate non-existent cell connected to synapse.")
+	}
+	fmt.Println("  synapse", synapse.ID, "firing dendrite on", synapse.ToNeuronDendrite)
 	dendriteCell.ApplyVoltage(synapse.Millivolts, synapse)
 }
