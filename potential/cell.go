@@ -60,8 +60,7 @@ type Cell struct {
 	  DendriteSynapses are this cell's outputs. They are IDs of synapses. When it fires,
 	  these synapses will be triggered.
 	*/
-	AxonSynapses      map[SynapseID]bool
-	equilibriumTicker *time.Timer
+	AxonSynapses map[SynapseID]bool
 }
 
 /*
