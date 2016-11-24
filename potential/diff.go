@@ -28,7 +28,7 @@ type Diff struct {
 	/*
 	   removedCells is a list of the cell IDs that no longer exist in the new network.
 	*/
-	removedCells []int
+	removedCells []CellID
 }
 
 /*
@@ -60,19 +60,24 @@ func DiffNetworks(originalNetwork, newerNetwork *Network) (diff Diff) {
 		}
 	}
 	// Get new cells that were added to the network
-	// for id, newerNetworkCell := range newerNetwork.Cells {
-	// 	originalCell, alreadyExisted := originalNetwork.Cells[id]
-	// 	if !alreadyExisted {
-	// 		diff.addedCells = append(diff.addedCells, newerNetworkCell)
-	// 	} else {
-	// 		// While there is probably no need to get any diff info on cells which already existed,
-	// 		// since tracking new synapses should be enough information, and voltage would always
-	// 		// be set to zero upon beginning training - we do it anyways.
-	// 		// TODO
-	// 	}
-	//
-	// }
+	for id, newerNetworkCell := range newerNetwork.Cells {
+		_, alreadyExisted := originalNetwork.Cells[id]
+		if !alreadyExisted {
+			diff.addedCells = append(diff.addedCells, newerNetworkCell)
+		} else {
+			// Here, we could theoretically get diff information on existing cells.
+			// However, that *should* be captured by the synapses, and applying the diff
+			// would add the additional synapses, and remove the gone synapses, which
+			// are stored secondarily in each Cell.
+		}
+	}
 	// Check if any cells were removed
+	for id, originalNetworkCell := range originalNetwork.Cells {
+		_, stillExists := newerNetwork.Cells[id]
+		if !stillExists {
+			diff.removedCells = append(diff.removedCells, originalNetworkCell.ID)
+		}
+	}
 
 	return diff
 }
