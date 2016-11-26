@@ -51,14 +51,17 @@ func Test_ApplyDiff(t *testing.T) {
 	t.Run("synapse millivolts are properly applied", func(t *testing.T) {
 		original := NewNetwork()
 		syn1 := NewSynapse(&original)
-		fmt.Println(syn1)
+		syn1.Millivolts = 5
 
 		original.Synapses[syn1.ID] = &syn1
 		cloned := CloneNetwork(&original)
 
-		diff, err := DiffNetworks(&original, &cloned)
+		cloned.Synapses[syn1.ID].Millivolts = 10
 
-		assert.Equal(t, err, nil, "Expected no error during diff")
+		diff := DiffNetworks(&original, &cloned)
+		assert.Equal(t, len(diff.synapseDiffs), 1, "Should be 1 synapse diff")
+		assert.Equal(t, diff.synapseDiffs[syn1.ID], int8(5), "Synapse diff should be NEW - OLD")
+		// TODO: apply!
 		fmt.Println("diff=", diff)
 	})
 }

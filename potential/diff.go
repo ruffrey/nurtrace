@@ -9,6 +9,7 @@ Diff values are always *old minus new*. They can be positive or negative. The di
 added back later when needed.
 */
 type Diff struct {
+	NetworkVersion Shasum
 	/*
 	   synapses is a map where the keys are synapse IDs, and the value is the difference between
 	   the new and old network.
@@ -42,13 +43,10 @@ from the newerNetwork.
 You can take the diff and apply it to the original network using addition,
 by looping through the synapses and adding it.
 */
-func DiffNetworks(originalNetwork, newerNetwork *Network) (diff Diff, err error) {
-	if originalNetwork.Version != newerNetwork.Version {
-		err = fmt.Errorf("Diffing networks failed due to version mismatch: original=%s, newer=%s", originalNetwork.Version, newerNetwork.Version)
-		return diff, err
-	}
-
+func DiffNetworks(originalNetwork, newerNetwork *Network) (diff Diff) {
 	diff = NewDiff()
+	diff.NetworkVersion = originalNetwork.Version
+
 	// Get new synapses and the millivolt differences between existing synapses
 	for id, newerNetworkSynapse := range newerNetwork.Synapses {
 		originalSynapse, alreadyExisted := originalNetwork.Synapses[id]
@@ -59,7 +57,7 @@ func DiffNetworks(originalNetwork, newerNetwork *Network) (diff Diff, err error)
 			diff.addedSynapses = append(diff.addedSynapses, newerNetworkSynapse)
 		} else {
 			// this synapse already existed, so we will calculate the diff
-			diff.synapseDiffs[id] = originalSynapse.Millivolts - newerNetworkSynapse.Millivolts
+			diff.synapseDiffs[id] = newerNetworkSynapse.Millivolts - originalSynapse.Millivolts
 		}
 	}
 	// Check if any synapses were removed
@@ -89,7 +87,7 @@ func DiffNetworks(originalNetwork, newerNetwork *Network) (diff Diff, err error)
 		}
 	}
 
-	return diff, nil
+	return diff
 }
 
 /*
@@ -107,7 +105,12 @@ no need to copy any changes from existing cell voltages.
 
 This will update the network version, also.
 */
-func ApplyDiff(diff Diff, originalNetwork *Network) {
+func ApplyDiff(diff Diff, originalNetwork *Network) (err error) {
+	if originalNetwork.Version != diff.NetworkVersion {
+		err = fmt.Errorf("Diffing networks failed due to version mismatch: original=%s, newer=%s", originalNetwork.Version, diff.NetworkVersion)
+		return err
+	}
+
 	// Remove synapses
 	for _, synapseID := range diff.removedSynapses {
 		// TODO: remove synapses from both connected cells
@@ -142,6 +145,8 @@ func ApplyDiff(diff Diff, originalNetwork *Network) {
 	}
 
 	originalNetwork.RegenVersion()
+
+	return nil
 }
 
 /*
