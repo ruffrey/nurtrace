@@ -12,7 +12,8 @@ func main() {
 	defaultNeuronSynapses := 10
 	synapsesToAdd := 100
 	network.Grow(neuronsToAdd, defaultNeuronSynapses, synapsesToAdd)
-	fmt.Println("Created network")
+	network.RegenVersion()
+	fmt.Println("Created network Version=", network.Version)
 	printNetwork(&network)
 	for i := 0; i < 10000000; i++ {
 		cellID := network.RandomCellKey()

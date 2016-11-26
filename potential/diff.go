@@ -1,5 +1,7 @@
 package potential
 
+import "fmt"
+
 /*
 Diff holds the changed values in the second network since the original network was cloned.
 
@@ -17,12 +19,7 @@ type Diff struct {
 	   removedSynapses is a list of the IDs of the synapses that no longer exist in the new network.
 	*/
 	removedSynapses []SynapseID
-	/*
-	   For cells that were kept, this is the voltage change from old to new. They would be
-	   added to the old network (though can be positive or negative). The key is the cell ID.
-	*/
-	cellVoltageDiffs map[int]int8
-	addedCells       []*Cell
+	addedCells      []*Cell
 	/*
 	   removedCells is a list of the cell IDs that no longer exist in the new network.
 	*/
@@ -34,8 +31,7 @@ NewDiff is a Diff factory
 */
 func NewDiff() Diff {
 	return Diff{
-		synapseDiffs:     make(map[SynapseID]int8),
-		cellVoltageDiffs: make(map[int]int8),
+		synapseDiffs: make(map[SynapseID]int8),
 	}
 }
 
@@ -46,7 +42,12 @@ from the newerNetwork.
 You can take the diff and apply it to the original network using addition,
 by looping through the synapses and adding it.
 */
-func DiffNetworks(originalNetwork, newerNetwork *Network) (diff Diff) {
+func DiffNetworks(originalNetwork, newerNetwork *Network) (diff Diff, err error) {
+	if originalNetwork.Version != newerNetwork.Version {
+		err = fmt.Errorf("Diffing networks failed due to version mismatch: original=%s, newer=%s", originalNetwork.Version, newerNetwork.Version)
+		return diff, err
+	}
+
 	diff = NewDiff()
 	// Get new synapses and the millivolt differences between existing synapses
 	for id, newerNetworkSynapse := range newerNetwork.Synapses {
@@ -88,7 +89,7 @@ func DiffNetworks(originalNetwork, newerNetwork *Network) (diff Diff) {
 		}
 	}
 
-	return diff
+	return diff, nil
 }
 
 /*
@@ -98,13 +99,49 @@ It updates (CHANGES) the originalNetwork using the synapse weight changes from t
 
 The originalNetwork should probably be in a resting state when the diff is applied,
 but this isn't technically required. Though, it is undefined behavior if not.
+
+When training a network, we should be starting all cells at resting potential voltage. So
+no need to copy any changes from existing cell voltages.
+
+**The order of operations in ApplyDiff matters!**
+
+This will update the network version, also.
 */
 func ApplyDiff(diff Diff, originalNetwork *Network) {
+	// Remove synapses
+	for _, synapseID := range diff.removedSynapses {
+		// TODO: remove synapses from both connected cells
+		delete(originalNetwork.Synapses, synapseID)
+	}
+
+	// Remove cells by ID
+	for _, cellID := range diff.removedCells {
+		delete(originalNetwork.Cells, cellID)
+	}
+
+	// New cells
+	for _, cell := range diff.addedCells {
+		copy := copyCell(cell, originalNetwork)
+		originalNetwork.Cells[cell.ID] = &copy
+	}
+
+	// Cells are generic and voltage will be the default upon starting training,
+	// so no need to care about changing existing cells.
+
+	// Update voltages on existing synapses
 	for synapseID, diffValue := range diff.synapseDiffs {
 		synapse := originalNetwork.Synapses[synapseID]
 		synapse.Millivolts += diffValue
 	}
-	// TODO: more
+
+	// New synapses
+	for _, synapse := range diff.addedSynapses {
+		copy := copySynapse(synapse, originalNetwork)
+		originalNetwork.Synapses[synapse.ID] = &copy
+		// TODO add this new synapse to its cell connections
+	}
+
+	originalNetwork.RegenVersion()
 }
 
 /*
@@ -121,23 +158,38 @@ func CloneNetwork(originalNetwork *Network) Network {
 	newNetwork.SynapseMinFireThreshold = originalNetwork.SynapseMinFireThreshold
 
 	for id, cell := range originalNetwork.Cells {
-		copiedCell := NewCell(&newNetwork)
-		copiedCell.ID = id
-		copiedCell.Activating = cell.Activating
-		copiedCell.Voltage = cell.Voltage
-		copiedCell.AxonSynapses = cell.AxonSynapses
-		copiedCell.DendriteSynapses = cell.DendriteSynapses
+		copiedCell := copyCell(cell, &newNetwork)
 		newNetwork.Cells[id] = &copiedCell
 	}
 	for id, synapse := range originalNetwork.Synapses {
-		copiedSynapse := NewSynapse(&newNetwork)
-		copiedSynapse.Network = synapse.Network
-		copiedSynapse.Millivolts = synapse.Millivolts
-		copiedSynapse.FromNeuronAxon = synapse.FromNeuronAxon
-		copiedSynapse.ToNeuronDendrite = synapse.ToNeuronDendrite
-		copiedSynapse.ActivationHistory = synapse.ActivationHistory
+		copiedSynapse := copySynapse(synapse, &newNetwork)
 		newNetwork.Synapses[id] = &copiedSynapse
 	}
 
 	return newNetwork
+}
+
+/*
+copyCell copies the properies of once cell to a new one, and updates the network pointer
+on the new cell to a different given network.
+*/
+func copyCell(cell *Cell, newNetwork *Network) Cell {
+	copiedCell := NewCell(newNetwork)
+	copiedCell.ID = cell.ID
+	copiedCell.Activating = cell.Activating
+	copiedCell.Voltage = cell.Voltage
+	copiedCell.AxonSynapses = cell.AxonSynapses
+	copiedCell.DendriteSynapses = cell.DendriteSynapses
+	return copiedCell
+}
+
+func copySynapse(synapse *Synapse, newNetwork *Network) Synapse {
+	copiedSynapse := NewSynapse(newNetwork)
+	copiedSynapse.ID = synapse.ID
+	copiedSynapse.Network = synapse.Network
+	copiedSynapse.Millivolts = synapse.Millivolts
+	copiedSynapse.FromNeuronAxon = synapse.FromNeuronAxon
+	copiedSynapse.ToNeuronDendrite = synapse.ToNeuronDendrite
+	copiedSynapse.ActivationHistory = synapse.ActivationHistory
+	return copiedSynapse
 }

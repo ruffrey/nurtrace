@@ -17,7 +17,6 @@ func Test_NewDiff(t *testing.T) {
 		// tests are here
 		diff.addedCells = append(diff.addedCells, &cell)
 		diff.addedSynapses = append(diff.addedSynapses, &synapse)
-		diff.cellVoltageDiffs[22] = 8
 		diff.removedCells = append(diff.removedCells, cell.ID)
 		diff.removedSynapses = append(diff.removedSynapses, synapse.ID)
 	})
@@ -57,7 +56,9 @@ func Test_ApplyDiff(t *testing.T) {
 		original.Synapses[syn1.ID] = &syn1
 		cloned := CloneNetwork(&original)
 
-		diff := DiffNetworks(&original, &cloned)
+		diff, err := DiffNetworks(&original, &cloned)
+
+		assert.Equal(t, err, nil, "Expected no error during diff")
 		fmt.Println("diff=", diff)
 	})
 }
