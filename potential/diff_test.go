@@ -1,10 +1,27 @@
 package potential
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 )
+
+func Test_NewDiff(t *testing.T) {
+	t.Run("initializes maps so immediate assignment does not panic", func(t *testing.T) {
+		network := NewNetwork()
+		diff := NewDiff()
+		cell := NewCell(&network)
+		synapse := NewSynapse(&network)
+
+		// tests are here
+		diff.addedCells[22] = &cell
+		diff.addedSynapses[33] = &synapse
+		diff.cellVoltageDiffs[22] = 8
+		diff.removedCells = append(diff.removedCells, cell.ID)
+		diff.removedSynapses = append(diff.removedSynapses, synapse.ID)
+	})
+}
 
 func Test_CopyNetwork(t *testing.T) {
 	original := NewNetwork()
@@ -31,15 +48,16 @@ func Test_CopyNetwork(t *testing.T) {
 	}
 }
 
-func Test_DiffNetworks(t *testing.T) {
-	// t.Run("synapse millivolts are properly applied", func(t *testing.T) {
-	// 	original := NewNetwork()
-	// 	beforeCell := NewCell(&original)
-	// 	syn1 := NewSynapse(&original)
-	//
-	// 	original.Cells[beforeCell.ID] = &beforeCell
-	// 	cloned := CloneNetwork(&original)
-	// 	afterCell := original.Cells[0]
-	//
-	// })
+func Test_ApplyDiff(t *testing.T) {
+	t.Run("synapse millivolts are properly applied", func(t *testing.T) {
+		original := NewNetwork()
+		syn1 := NewSynapse(&original)
+		fmt.Println(syn1)
+
+		original.Synapses[syn1.ID] = &syn1
+		cloned := CloneNetwork(&original)
+
+		diff := DiffNetworks(&original, &cloned)
+		fmt.Println("diff=", diff)
+	})
 }

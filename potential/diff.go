@@ -30,6 +30,13 @@ type Diff struct {
 }
 
 /*
+NewDiff is a Diff factory
+*/
+func NewDiff() Diff {
+	return Diff{}
+}
+
+/*
 DiffNetworks produces a diff from the original network, showing the forward changes
 from the newerNetwork.
 
@@ -37,6 +44,7 @@ You can take the diff and apply it to the original network using addition,
 by looping through the synapses and adding it.
 */
 func DiffNetworks(originalNetwork, newerNetwork *Network) (diff Diff) {
+	diff = NewDiff()
 	// Get new synapses and the millivolt differences between existing synapses
 	for id, newerNetworkSynapse := range newerNetwork.Synapses {
 		originalSynapse, alreadyExisted := originalNetwork.Synapses[id]

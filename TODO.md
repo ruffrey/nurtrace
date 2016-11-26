@@ -15,6 +15,7 @@ no ID collisions occur
 [ ] timers are causing tens of thousands of idle wake ups. mem usage is low, but unsure if there
 is a better way, or if performance is bad.
 [ ] Need solution for timing - different hardware may result in different results (training.MD)
+    [ ] remember that Network.Equilibrium() still exists...need to remove or modify.
 
 ## Once working
 
