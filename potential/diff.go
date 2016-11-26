@@ -1,7 +1,5 @@
 package potential
 
-import "github.com/jinzhu/copier"
-
 /*
 Diff holds the changed values in the second network since the original network was cloned.
 
@@ -88,7 +86,7 @@ ApplyDiff uses a diff between the originalNetwork and another duplicate network.
 It updates (CHANGES) the originalNetwork using the synapse weight changes from the diff.
 
 The originalNetwork should probably be in a resting state when the diff is applied,
-but this isn't technically required. Though, it is undefined behavior.
+but this isn't technically required. Though, it is undefined behavior if not.
 */
 func ApplyDiff(diff Diff, originalNetwork *Network) {
 	for synapseID, diffValue := range diff.synapseDiffs {
@@ -100,10 +98,35 @@ func ApplyDiff(diff Diff, originalNetwork *Network) {
 
 /*
 CloneNetwork returns an exact copy of a network - not a pointer. This is useful when
-doing distributed testing.
+doing distributed training.
+
+It involves resetting pointers.
 */
-func CloneNetwork(network *Network) Network {
+func CloneNetwork(originalNetwork *Network) Network {
 	newNetwork := NewNetwork()
-	copier.Copy(&newNetwork, network)
+	newNetwork.Perceptors = originalNetwork.Perceptors
+	newNetwork.Receptors = originalNetwork.Receptors
+	newNetwork.SynapseLearnRate = originalNetwork.SynapseLearnRate
+	newNetwork.SynapseMinFireThreshold = originalNetwork.SynapseMinFireThreshold
+
+	for id, cell := range originalNetwork.Cells {
+		copiedCell := NewCell(&newNetwork)
+		copiedCell.ID = id
+		copiedCell.Activating = cell.Activating
+		copiedCell.Voltage = cell.Voltage
+		copiedCell.AxonSynapses = cell.AxonSynapses
+		copiedCell.DendriteSynapses = cell.DendriteSynapses
+		newNetwork.Cells[id] = &copiedCell
+	}
+	for id, synapse := range originalNetwork.Synapses {
+		copiedSynapse := NewSynapse(&newNetwork)
+		copiedSynapse.Network = synapse.Network
+		copiedSynapse.Millivolts = synapse.Millivolts
+		copiedSynapse.FromNeuronAxon = synapse.FromNeuronAxon
+		copiedSynapse.ToNeuronDendrite = synapse.ToNeuronDendrite
+		copiedSynapse.ActivationHistory = synapse.ActivationHistory
+		newNetwork.Synapses[id] = &copiedSynapse
+	}
+
 	return newNetwork
 }
