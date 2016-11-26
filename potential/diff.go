@@ -33,7 +33,10 @@ type Diff struct {
 NewDiff is a Diff factory
 */
 func NewDiff() Diff {
-	return Diff{}
+	return Diff{
+		synapseDiffs:     make(map[SynapseID]int8),
+		cellVoltageDiffs: make(map[int]int8),
+	}
 }
 
 /*

@@ -8,15 +8,15 @@ import (
 )
 
 func Test_NewDiff(t *testing.T) {
-	t.Run("initializes maps so immediate assignment does not panic", func(t *testing.T) {
+	t.Run("initializes maps and arrays so immediate assignment does not panic", func(t *testing.T) {
 		network := NewNetwork()
 		diff := NewDiff()
 		cell := NewCell(&network)
 		synapse := NewSynapse(&network)
 
 		// tests are here
-		diff.addedCells[22] = &cell
-		diff.addedSynapses[33] = &synapse
+		diff.addedCells = append(diff.addedCells, &cell)
+		diff.addedSynapses = append(diff.addedSynapses, &synapse)
 		diff.cellVoltageDiffs[22] = 8
 		diff.removedCells = append(diff.removedCells, cell.ID)
 		diff.removedSynapses = append(diff.removedSynapses, synapse.ID)
