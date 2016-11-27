@@ -258,22 +258,6 @@ func (network *Network) PruneSynapse(synapse *Synapse) {
 	// this synapse is now dead
 }
 
-/*
-PruneNeuron deactivates and removes a neuron cell.
-
-It is assumed this neuron has no synapses!
-
-It also cannot be called in a range operation over network.Cells, because it will be removing
-the cell at the supplied index.
-*/
-func (network *Network) PruneNeuron(key CellID) {
-	cell := network.Cells[key]
-	if len(cell.DendriteSynapses) != 0 || len(cell.AxonSynapses) != 0 {
-		panic("Attempting to prune a neuron which still has synapses")
-	}
-	delete(network.Cells, key)
-}
-
 func randomIntBetween(min, max int) int {
 	return rand.Intn((max+1)-min) + min
 }
