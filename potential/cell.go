@@ -64,7 +64,7 @@ type Cell struct {
 }
 
 /*
-NewCell instantiates a Cell
+NewCell instantiates a Cell *and* adds it to the network's list of cells.
 */
 func NewCell(network *Network) Cell {
 	cell := Cell{
@@ -75,6 +75,7 @@ func NewCell(network *Network) Cell {
 		DendriteSynapses: make(map[SynapseID]bool),
 		AxonSynapses:     make(map[SynapseID]bool),
 	}
+	network.Cells[cell.ID] = &cell
 	return cell
 }
 

@@ -98,12 +98,12 @@ Grow adds neurons, adds new synapses, prunes old neurons, and strengthens synaps
 fired a lot.
 */
 func (network *Network) Grow(neuronsToAdd, defaultNeuronSynapses, synapsesToAdd int) {
-	fmt.Println("Grow session start")
+	// fmt.Println("Grow session start")
 	// Next we move the less used synapses toward zero, because doing this later would prune the
 	// brand new synapses. This is a good time to apply the learning rate to synapses
 	// which were activated, too.
 	var synapsesToRemove []*Synapse
-	fmt.Println("  processing learning on cells, total=", len(network.Cells))
+	// fmt.Println("  processing learning on cells, total=", len(network.Cells))
 	for _, cell := range network.Cells {
 		for synapseID := range cell.DendriteSynapses { // could also be axons, but, meh.
 			synapse := network.Synapses[synapseID]
@@ -146,30 +146,29 @@ func (network *Network) Grow(neuronsToAdd, defaultNeuronSynapses, synapsesToAdd 
 			synapse.ActivationHistory = 0
 		}
 	}
-	fmt.Println("  done")
+	// fmt.Println("  done")
 
-	fmt.Println("  synapses to remove=", len(synapsesToRemove))
+	// fmt.Println("  synapses to remove=", len(synapsesToRemove))
 	// Actually pruning synapses is done after the previous loop because it can
 	// trigger removal of Cells, which can subsequently mess up the range operation
 	// happening over the same array of cells.
 	for _, synapse := range synapsesToRemove {
 		network.PruneSynapse(synapse)
 	}
-	fmt.Println("  done")
+	// fmt.Println("  done")
 
-	fmt.Println("  adding neurons =", neuronsToAdd)
+	// fmt.Println("  adding neurons =", neuronsToAdd)
 	// Now - all the new neurons are added first with no synapses. If synapses were added at
 	// create time, the newer neurons would end up with far fewer connections to the following
 	// newer neurons.
 	var addedNeurons []*Cell
 	for i := 0; i < neuronsToAdd; i++ {
 		cell := NewCell(network)
-		network.Cells[cell.ID] = &cell
 		addedNeurons = append(addedNeurons, &cell)
 	}
-	fmt.Println("  done")
+	// fmt.Println("  done")
 
-	fmt.Println("  adding default synapses to new neurons", defaultNeuronSynapses)
+	// fmt.Println("  adding default synapses to new neurons", defaultNeuronSynapses)
 	// Now we add the default number of synapses to our new neurons, with random other neurons.
 	for _, cell := range addedNeurons {
 		for i := 0; i < defaultNeuronSynapses; {
@@ -197,9 +196,9 @@ func (network *Network) Grow(neuronsToAdd, defaultNeuronSynapses, synapsesToAdd 
 			i++
 		}
 	}
-	fmt.Println("  done")
+	// fmt.Println("  done")
 
-	fmt.Println("  adding synapses to whole network", synapsesToAdd)
+	// fmt.Println("  adding synapses to whole network", synapsesToAdd)
 	// Then we randomly add synapses between neurons to the whole network, including the
 	// newest neurons.
 	for i := 0; i < synapsesToAdd; {
@@ -222,9 +221,9 @@ func (network *Network) Grow(neuronsToAdd, defaultNeuronSynapses, synapsesToAdd 
 		network.Synapses[synapse.ID] = &synapse
 		i++
 	}
-	fmt.Println("  done")
+	// fmt.Println("  done")
 
-	fmt.Println("  Grow session end")
+	// fmt.Println("  Grow session end")
 }
 
 /*

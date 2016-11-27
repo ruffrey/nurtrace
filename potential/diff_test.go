@@ -25,7 +25,6 @@ func Test_NewDiff(t *testing.T) {
 func Test_CopyNetwork(t *testing.T) {
 	original := NewNetwork()
 	beforeCell := NewCell(&original)
-	original.Cells[beforeCell.ID] = &beforeCell
 	cloned := CloneNetwork(&original)
 	// change something
 	cloned.SynapseLearnRate = 100

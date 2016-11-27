@@ -188,6 +188,10 @@ func copyCell(cell *Cell, newNetwork *Network) Cell {
 	return copiedCell
 }
 
+/*
+copySynapse copies the properies of once synapse to a new one, and updates the network pointer
+on the new synapse to a different given network.
+*/
 func copySynapse(synapse *Synapse, newNetwork *Network) Synapse {
 	copiedSynapse := NewSynapse(newNetwork)
 	copiedSynapse.ID = synapse.ID
