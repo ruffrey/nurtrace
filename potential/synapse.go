@@ -32,11 +32,11 @@ Cell Axon -> Cell Dendrite
 */
 type Synapse struct {
 	ID                SynapseID
-	Network           *Network
+	Network           *Network `json:"-"` // skip circular reference in JSON
 	Millivolts        int8
 	FromNeuronAxon    CellID
 	ToNeuronDendrite  CellID
-	ActivationHistory uint
+	ActivationHistory uint `json:"-"` // unnecessary to recreate synapse
 }
 
 /*

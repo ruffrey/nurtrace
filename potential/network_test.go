@@ -1,6 +1,11 @@
 package potential
 
-import "testing"
+import (
+	"fmt"
+	"testing"
+
+	"github.com/stretchr/testify/assert"
+)
 
 func Test_NewNetwork(t *testing.T) {
 	original := NewNetwork()
@@ -70,4 +75,47 @@ func Test_PruneSynapse(t *testing.T) {
 			panic("cell2 not removed from network when synapses were zero during synapse prune")
 		}
 	})
+}
+
+func Test_NetworkSerialization(t *testing.T) {
+	var network Network
+	var synapse Synapse
+	var cell1, cell2 Cell
+	before := func() {
+		// setup
+		network = NewNetwork()
+		synapse = NewSynapse(&network)
+		// cell 1 fires into cell 2
+		cell1 = NewCell(&network)
+		cell2 = NewCell(&network)
+		cell1.AxonSynapses[synapse.ID] = true
+		cell2.DendriteSynapses[synapse.ID] = true
+		synapse.FromNeuronAxon = cell1.ID
+		synapse.ToNeuronDendrite = cell2.ID
+	}
+
+	t.Run("serializes network to JSON despite having circular references", func(t *testing.T) {
+		before()
+		json, err := network.ToJSON()
+		assert.Equal(t, err, nil, "error occurred generating json from network")
+		assert.NotEqual(t, json, "", "json failed to be generated from network")
+	})
+	t.Run("writes serialized network to disk, reads back and hydrates all pointers", func(t *testing.T) {
+		before()
+		err := network.SaveToFile("_network.test.json")
+		if err != nil {
+			fmt.Println(err)
+			panic("Error testing network serialization to file")
+		}
+		net2, err := LoadNetworkFromFile("_network.test.json")
+		if err != nil {
+			fmt.Println(err)
+			panic("Failed reading network from save file")
+		}
+		assert.EqualValues(t, network, net2, "loaded network does not match original")
+	})
+	t.Skip("reads serialized network from disk and hydrades all pointers", func(t *testing.T) {
+		before()
+	})
+
 }

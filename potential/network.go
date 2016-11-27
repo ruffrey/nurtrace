@@ -83,17 +83,6 @@ func (network *Network) RegenVersion() {
 }
 
 /*
-ToJSON gives a json representation of the neural network.
-*/
-func (network *Network) ToJSON() (string, error) {
-	bytes, err := json.MarshalIndent(network, "", "  ")
-	if err != nil {
-		return "", err
-	}
-	return string(bytes), nil
-}
-
-/*
 Grow adds neurons, adds new synapses, prunes old neurons, and strengthens synapses that have
 fired a lot.
 */
@@ -325,6 +314,17 @@ func (network *Network) PrintCells() {
 }
 
 /*
+ToJSON gives a json representation of the neural network.
+*/
+func (network *Network) ToJSON() (string, error) {
+	bytes, err := json.Marshal(network)
+	if err != nil {
+		return "", err
+	}
+	return string(bytes), nil
+}
+
+/*
 SaveToFile outputs the network to a file
 */
 func (network *Network) SaveToFile(filepath string) (err error) {
@@ -333,5 +333,20 @@ func (network *Network) SaveToFile(filepath string) (err error) {
 		return err
 	}
 	err = ioutil.WriteFile(filepath, []byte(contents), os.ModePerm)
-	return nil
+	return err
+}
+
+/*
+LoadNetworkFromFile reads a saved network from disk and creates a new network
+*/
+func LoadNetworkFromFile(filepath string) (network Network, err error) {
+	bytes, err := ioutil.ReadFile(filepath)
+	if err != nil {
+		return network, err
+	}
+	err = json.Unmarshal(bytes, &network)
+	if err != nil {
+		return network, err
+	}
+	return network, nil
 }

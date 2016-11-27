@@ -49,9 +49,9 @@ be a source of confusion.
 */
 type Cell struct {
 	ID         CellID
-	Network    *Network
-	Voltage    int8
-	Activating bool
+	Network    *Network `json:"-"` // skip circular reference in JSON
+	Voltage    int8     // unnecessary to recreate cell
+	Activating bool     // unnecessary to recreate cell
 	/*
 	  DendriteSynapses are this cell's inputs. They are IDs of synapses.
 	*/
