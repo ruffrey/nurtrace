@@ -200,7 +200,6 @@ on the new synapse to a different given network.
 func copySynapse(synapse *Synapse, newNetwork *Network) Synapse {
 	copiedSynapse := NewSynapse(newNetwork)
 	copiedSynapse.ID = synapse.ID
-	copiedSynapse.Network = synapse.Network
 	copiedSynapse.Millivolts = synapse.Millivolts
 	copiedSynapse.FromNeuronAxon = synapse.FromNeuronAxon
 	copiedSynapse.ToNeuronDendrite = synapse.ToNeuronDendrite
