@@ -1,7 +1,6 @@
 package potential
 
 import (
-	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -46,8 +45,8 @@ func Test_CopyNetwork(t *testing.T) {
 	}
 }
 
-func Test_ApplyDiff(t *testing.T) {
-	t.Run("synapse millivolts are properly applied", func(t *testing.T) {
+func Test_DiffNetworks(t *testing.T) {
+	t.Run("synapse millivolt diff is NEW minus OLD", func(t *testing.T) {
 		original := NewNetwork()
 		syn1 := NewSynapse(&original)
 		syn1.Millivolts = 5
@@ -60,7 +59,24 @@ func Test_ApplyDiff(t *testing.T) {
 		diff := DiffNetworks(&original, &cloned)
 		assert.Equal(t, len(diff.synapseDiffs), 1, "Should be 1 synapse diff")
 		assert.Equal(t, diff.synapseDiffs[syn1.ID], int8(5), "Synapse diff should be NEW - OLD")
-		// TODO: apply!
-		fmt.Println("diff=", diff)
+	})
+}
+
+func Test_ApplyDiff(t *testing.T) {
+	t.Run("synapse millivolts are properly applied", func(t *testing.T) {
+		original := NewNetwork()
+		syn1 := NewSynapse(&original)
+		syn1.Millivolts = 7
+
+		original.Synapses[syn1.ID] = &syn1
+		cloned := CloneNetwork(&original)
+
+		cloned.Synapses[syn1.ID].Millivolts = 14
+
+		diff := DiffNetworks(&original, &cloned)
+		ApplyDiff(diff, &original)
+
+		assert.Equal(t, int8(14), original.Synapses[syn1.ID].Millivolts,
+			"synapse millivolts failed to apply")
 	})
 }

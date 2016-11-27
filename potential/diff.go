@@ -106,20 +106,16 @@ no need to copy any changes from existing cell voltages.
 This will update the network version, also.
 */
 func ApplyDiff(diff Diff, originalNetwork *Network) (err error) {
+	// Sanity check
 	if originalNetwork.Version != diff.NetworkVersion {
 		err = fmt.Errorf("Diffing networks failed due to version mismatch: original=%s, newer=%s", originalNetwork.Version, diff.NetworkVersion)
 		return err
 	}
 
-	// Remove synapses
-	for _, synapseID := range diff.removedSynapses {
-		// TODO: remove synapses from both connected cells
-		delete(originalNetwork.Synapses, synapseID)
-	}
-
-	// Remove cells by ID
-	for _, cellID := range diff.removedCells {
-		delete(originalNetwork.Cells, cellID)
+	// Update voltages on existing synapses
+	for synapseID, diffValue := range diff.synapseDiffs {
+		synapse := originalNetwork.Synapses[synapseID]
+		synapse.Millivolts += diffValue
 	}
 
 	// New cells
@@ -128,20 +124,29 @@ func ApplyDiff(diff Diff, originalNetwork *Network) (err error) {
 		originalNetwork.Cells[cell.ID] = &copy
 	}
 
-	// Cells are generic and voltage will be the default upon starting training,
-	// so no need to care about changing existing cells.
-
-	// Update voltages on existing synapses
-	for synapseID, diffValue := range diff.synapseDiffs {
-		synapse := originalNetwork.Synapses[synapseID]
-		synapse.Millivolts += diffValue
-	}
-
 	// New synapses
 	for _, synapse := range diff.addedSynapses {
-		copy := copySynapse(synapse, originalNetwork)
-		originalNetwork.Synapses[synapse.ID] = &copy
-		// TODO add this new synapse to its cell connections
+		synapseCopy := copySynapse(synapse, originalNetwork)
+		originalNetwork.Synapses[synapse.ID] = &synapseCopy
+		// add connections to cells
+		originalNetwork.Cells[synapse.FromNeuronAxon].AxonSynapses[synapse.ID] = true
+		originalNetwork.Cells[synapse.ToNeuronDendrite].DendriteSynapses[synapse.ID] = true
+	}
+
+	// Remove synapses
+	for _, synapseID := range diff.removedSynapses {
+		synapse, ok := originalNetwork.Synapses[synapseID]
+		if !ok {
+			panic("Attempt to remove synapse during diff but synapse does not exist (" + string(synapseID) + ")")
+		}
+		// Removes synapses from both connected cells.
+		// Will also prune cells with no synapses.
+		originalNetwork.PruneSynapse(synapse)
+	}
+
+	// Remove cells by ID
+	for _, cellID := range diff.removedCells {
+		delete(originalNetwork.Cells, cellID)
 	}
 
 	originalNetwork.RegenVersion()
