@@ -114,8 +114,5 @@ func Test_NetworkSerialization(t *testing.T) {
 		}
 		assert.EqualValues(t, network, net2, "loaded network does not match original")
 	})
-	t.Skip("reads serialized network from disk and hydrades all pointers", func(t *testing.T) {
-		before()
-	})
 
 }
