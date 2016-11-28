@@ -28,7 +28,7 @@ of responses. In the case of speech generation based on a primer:
     - one character per receptor (layer)
     - feed X characters in a row into the network via the input cells, which creates a firing pattern
     - the firing pattern makes synapses stronger automatically (fire together, wire together)
-    - the firing path which reaches the expected output will get a reverse flow boost
+    - the firing paths which reach the expected output will be allowed to get stronger
 
 Explained a slightly different way:
 - the input layer has one receptor representing each character
