@@ -49,23 +49,32 @@ func main() {
 
 	totalLines := len(lines)
 	for i := 0; i < totalLines; {
+		threadsFinished := 0
 
+		ch := make(chan processResult)
+		networkCopies := make(map[int]*potential.Network)
+		// train in parallel over this number of threads
 		for thread := 0; thread < threads; thread++ {
 			if i >= totalLines { // ran out of lines
+				threadsFinished = threads
 				break
 			}
 			line := lines[i]
-			i++
-
-			ch := make(chan bool)
 			copiedNetwork := potential.CloneNetwork(&network)
+			networkCopies[i] = &copiedNetwork
+			i++
 			fmt.Println("starting thread", thread)
 			go func() {
-				processLine(line, &copiedNetwork, vocab, ch)
+				processLine(thread, line, &copiedNetwork, vocab, ch)
 			}()
-			success := <-ch
-			if success { // keep the training
-				diff := potential.DiffNetworks(&network, &copiedNetwork)
+
+		}
+
+		for result := range ch {
+			threadsFinished++
+			if result.succeeded { // keep the training
+				copiedNetwork := networkCopies[result.threadIndex]
+				diff := potential.DiffNetworks(&network, copiedNetwork)
 				potential.ApplyDiff(diff, &network)
 				// network.Grow(0, 0, 0) // prune
 			} else {
@@ -84,14 +93,20 @@ func main() {
 	fmt.Println("Failed saving network")
 }
 
+type processResult struct {
+	succeeded   bool
+	threadIndex int
+}
+
 /*
 processLine fires this entire line in the neural network at once, hoping to get the desired output.
 
 It will not add any synapses.
 */
-func processLine(line string, network *potential.Network, vocab charrnn.Vocab, ch chan bool) {
+func processLine(thread int, line string, network *potential.Network, vocab charrnn.Vocab, ch chan processResult) {
 	lineChars := strings.Split(line, "")
 
+	result := processResult{threadIndex: thread}
 	succeeded := 0
 
 	// First time through, fire the receptors a bunch to stimulate the network,
@@ -130,5 +145,6 @@ func processLine(line string, network *potential.Network, vocab charrnn.Vocab, c
 	}
 	wasSuccessful := succeeded == (len(lineChars) - 1)
 	fmt.Println(wasSuccessful, succeeded, "/", (len(lineChars) - 1), "\n  ", line)
-	ch <- wasSuccessful
+	result.succeeded = wasSuccessful
+	ch <- result
 }
