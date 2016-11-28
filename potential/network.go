@@ -32,17 +32,6 @@ type Network struct {
 	*/
 	Cells map[CellID]*Cell
 
-	/*
-	   Receptors are sometimes known as the input of the brain.
-	*/
-	Receptors map[int]*Receptor
-
-	/*
-	   Perceptors are sometimes known as the output of the brain. After an input is fed into the
-	   receptor layer, it ripples through the Cells and a perception layer item fires.
-	*/
-	Perceptors map[int]*Perceptor
-
 	// There are two factors that result in degrading a synapse:
 
 	/*
@@ -63,11 +52,9 @@ when called. Seems like a good time.
 func NewNetwork() Network {
 	rand.Seed(time.Now().Unix())
 	return Network{
-		Version:                 "0",
-		Synapses:                make(map[SynapseID]*Synapse),
-		Cells:                   make(map[CellID]*Cell),
-		Receptors:               make(map[int]*Receptor),
-		Perceptors:              make(map[int]*Perceptor),
+		Version:  "0",
+		Synapses: make(map[SynapseID]*Synapse),
+		Cells:    make(map[CellID]*Cell),
 		SynapseMinFireThreshold: 2,
 		SynapseLearnRate:        1,
 	}
@@ -298,6 +285,20 @@ func (network *Network) Equilibrium() {
 			// get halfway to resting
 			cell.Voltage -= (diff / 2)
 		}
+	}
+}
+
+/*
+ResetForTraining resets transient properties on the network to their base resting state.
+*/
+func (network *Network) ResetForTraining() {
+	for _, cell := range network.Cells {
+		cell.activating = false
+		cell.WasFired = false
+		cell.Voltage = apResting
+	}
+	for _, synapse := range network.Synapses {
+		synapse.ActivationHistory = 0
 	}
 }
 

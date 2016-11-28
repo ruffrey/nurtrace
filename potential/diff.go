@@ -162,8 +162,6 @@ It involves resetting pointers.
 */
 func CloneNetwork(originalNetwork *Network) Network {
 	newNetwork := NewNetwork()
-	newNetwork.Perceptors = originalNetwork.Perceptors
-	newNetwork.Receptors = originalNetwork.Receptors
 	newNetwork.SynapseLearnRate = originalNetwork.SynapseLearnRate
 	newNetwork.SynapseMinFireThreshold = originalNetwork.SynapseMinFireThreshold
 
@@ -186,7 +184,7 @@ on the new cell to a different given network.
 func copyCell(cell *Cell, newNetwork *Network) Cell {
 	copiedCell := NewCell(newNetwork)
 	copiedCell.ID = cell.ID
-	copiedCell.Activating = cell.Activating
+	copiedCell.activating = cell.activating
 	copiedCell.Voltage = cell.Voltage
 	copiedCell.AxonSynapses = cell.AxonSynapses
 	copiedCell.DendriteSynapses = cell.DendriteSynapses
@@ -203,6 +201,7 @@ func copySynapse(synapse *Synapse, newNetwork *Network) Synapse {
 	copiedSynapse.Millivolts = synapse.Millivolts
 	copiedSynapse.FromNeuronAxon = synapse.FromNeuronAxon
 	copiedSynapse.ToNeuronDendrite = synapse.ToNeuronDendrite
+	// we do need to keep this because we might want to grow the synapse later
 	copiedSynapse.ActivationHistory = synapse.ActivationHistory
 	return copiedSynapse
 }

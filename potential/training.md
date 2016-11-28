@@ -69,3 +69,5 @@ working with the same hardware, a neural network may be on vastly different hard
 there may be slightly different sets of processes running in the background which degrade training
 or sampling speed in small ways. While small, it is a challenge because a learning and thinking
 brain does not experience vast variations in hardware on det
+
+- the timing solution is to always add a millisecond sleep before applying the voltage

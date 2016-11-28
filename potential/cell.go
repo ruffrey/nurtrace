@@ -24,19 +24,19 @@ its firing results in activation (strengthening the synapse)
 const synapseAPBoost uint = 1
 
 /*
-synapseEffectDelayMillis is the time between another cell's axon firing and the
+SynapseEffectDelayMillis is the time between another cell's axon firing and the
 cell at the end of the synapse getting a voltage boost. The primary reason for
 this delay is to normalize timing across all machines. Without it, faster
 machines will process voltage changes faster, and a network trained on one
 set of hardware will not be usable on another set.
 */
-const synapseEffectDelayMillis = 1
+const SynapseEffectDelayMillis = 1
 
 /*
-refractoryPeriodMillis represents after a neuron fires, the amount of time (ms) is will
+RefractoryPeriodMillis represents after a neuron fires, the amount of time (ms) is will
 be blocked from firing again.
 */
-const refractoryPeriodMillis = 4
+const RefractoryPeriodMillis = 4
 
 /*
 CellID is a normal Go integer that should be unique for all cells in a network.
@@ -74,7 +74,7 @@ type Cell struct {
 	ID         CellID
 	Network    *Network `json:"-"` // skip circular reference in JSON
 	Voltage    int8     // unnecessary to recreate cell
-	Activating bool     // unnecessary to recreate cell
+	activating bool     // unnecessary to recreate cell
 	/*
 	  DendriteSynapses are this cell's inputs. They are IDs of synapses.
 	*/
@@ -84,6 +84,10 @@ type Cell struct {
 	  these synapses will be triggered.
 	*/
 	AxonSynapses map[SynapseID]bool
+	/*
+	   WasFired is used during training to know if this cell fired during the session
+	*/
+	WasFired bool
 }
 
 /*
@@ -94,9 +98,10 @@ func NewCell(network *Network) Cell {
 		ID:               NewCellID(),
 		Network:          network,
 		Voltage:          apResting,
-		Activating:       false,
+		activating:       false,
 		DendriteSynapses: make(map[SynapseID]bool),
 		AxonSynapses:     make(map[SynapseID]bool),
+		WasFired:         false,
 	}
 	network.Cells[cell.ID] = &cell
 	return cell
@@ -107,7 +112,8 @@ FireActionPotential does an action potential cycle.
 */
 func (cell *Cell) FireActionPotential() {
 	// fmt.Println("Action Potential Firing\n  cell=", cell.ID, "\n  axon synapses=", cell.AxonSynapses)
-	cell.Activating = true
+	cell.WasFired = true
+	cell.activating = true
 
 	// activate all synapses on its axon
 	for synapseID := range cell.AxonSynapses {
@@ -116,20 +122,20 @@ func (cell *Cell) FireActionPotential() {
 		synapse.Activate()
 	}
 
-	time.AfterFunc(refractoryPeriodMillis*time.Millisecond, func() {
+	time.AfterFunc(RefractoryPeriodMillis*time.Millisecond, func() {
 		cell.Voltage = apResting
-		cell.Activating = false
+		cell.activating = false
 	})
 }
 
 /*
 ApplyVoltage changes the cell's voltage by a specified amount much.
 Care is taken to prevent the tiny int8 variables from overflowing.
-Voltage may not change for a few milliseconds depending on `synapseEffectDelayMillis`.
+Voltage may not change for a few milliseconds depending on `SynapseEffectDelayMillis`.
 */
 func (cell *Cell) ApplyVoltage(change int8, fromSynapse *Synapse) {
-	time.AfterFunc(synapseEffectDelayMillis*time.Millisecond, func() {
-		if cell.Activating {
+	time.AfterFunc(SynapseEffectDelayMillis*time.Millisecond, func() {
+		if cell.activating {
 			// Block during action potential cycle
 			return
 		}
