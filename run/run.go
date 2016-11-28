@@ -8,14 +8,20 @@ import (
 
 func main() {
 	network := potential.NewNetwork()
-	neuronsToAdd := 5000
+	neuronsToAdd := 50
 	defaultNeuronSynapses := 10
 	synapsesToAdd := 100
 	network.Grow(neuronsToAdd, defaultNeuronSynapses, synapsesToAdd)
 	network.RegenVersion()
 	fmt.Println("Created network Version=", network.Version)
 	printNetwork(&network)
-	for i := 0; i < 10000000; i++ {
+	iterations := 1000000
+	for i := 1; i < iterations; i++ {
+		if i%10000 == 0 {
+			var p float64
+			p = float64(i) / float64(iterations)
+			fmt.Println(" progress", p)
+		}
 		cellID := network.RandomCellKey()
 		cell := network.Cells[cellID]
 		cell.FireActionPotential()

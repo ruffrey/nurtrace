@@ -5,15 +5,38 @@ import (
 	"time"
 )
 
-// From standard neuroscience Membrane Potential, which conveniently fits in a tiny 8 bit integer.
+/*
+apResting comes from standard neuroscience Membrane Potential. This, and all voltages
+in the lib, conveniently fit in tiny 8 bit integers.
+*/
 const apResting int8 = -70
-const apThreshold int16 = -55 // needed for comparisons
-const apPeak int8 = 40
-const apLow int8 = -90
 
-// How much a synapse's ActivationHistory should be incremented extra when
-// its firing results in activation (strengthening the synapse)
+/*
+apThreshold represents the millivolts where an action potential will result.
+int16 is needed for comparisons.
+*/
+const apThreshold int16 = -55
+
+/*
+synapseAPBoost is how much a synapse's ActivationHistory should be incremented extra when
+its firing results in activation (strengthening the synapse)
+*/
 const synapseAPBoost uint = 1
+
+/*
+synapseEffectDelayMillis is the time between another cell's axon firing and the
+cell at the end of the synapse getting a voltage boost. The primary reason for
+this delay is to normalize timing across all machines. Without it, faster
+machines will process voltage changes faster, and a network trained on one
+set of hardware will not be usable on another set.
+*/
+const synapseEffectDelayMillis = 1
+
+/*
+refractoryPeriodMillis represents after a neuron fires, the amount of time (ms) is will
+be blocked from firing again.
+*/
+const refractoryPeriodMillis = 4
 
 /*
 CellID is a normal Go integer that should be unique for all cells in a network.
@@ -85,7 +108,6 @@ FireActionPotential does an action potential cycle.
 func (cell *Cell) FireActionPotential() {
 	// fmt.Println("Action Potential Firing\n  cell=", cell.ID, "\n  axon synapses=", cell.AxonSynapses)
 	cell.Activating = true
-	cell.Voltage = apPeak // probably not doing anything...hmm.
 
 	// activate all synapses on its axon
 	for synapseID := range cell.AxonSynapses {
@@ -93,35 +115,34 @@ func (cell *Cell) FireActionPotential() {
 		// fmt.Println("  activating synapse", synapse, "from cell", cell.ID)
 		synapse.Activate()
 	}
-	time.AfterFunc(4*time.Millisecond, func() {
-		cell.Voltage = apLow
-		time.AfterFunc(4*time.Millisecond, func() {
-			// other neuron firings may have already bumped this to, or above, the
-			// resting potential.
-			if cell.Voltage < apResting {
-				cell.Voltage = apResting
-			}
-		})
+
+	time.AfterFunc(refractoryPeriodMillis*time.Millisecond, func() {
+		cell.Voltage = apResting
+		cell.Activating = false
 	})
 }
 
 /*
-ApplyVoltage changes it this much, but keeps it between the
+ApplyVoltage changes the cell's voltage by a specified amount much.
+Care is taken to prevent the tiny int8 variables from overflowing.
+Voltage may not change for a few milliseconds depending on `synapseEffectDelayMillis`.
 */
 func (cell *Cell) ApplyVoltage(change int8, fromSynapse *Synapse) {
-	if cell.Activating {
-		// Block during action potential cycle
-		return
-	}
-
-	// Neither alone will be outside int8 bounds, but we need to prevent
-	// possible int8 buffer overflow in the result.
-	newPossibleVoltage := int16(change) + int16(cell.Voltage)
-	if newPossibleVoltage > apThreshold {
-		// when a synapse firing results in firing an Action Potential, it counts toward making
-		// the synapse stronger, so we increment the ActivationHistory a second time
-		fromSynapse.ActivationHistory += synapseAPBoost
-		cell.FireActionPotential()
-	}
-	cell.Voltage = int8(newPossibleVoltage)
+	time.AfterFunc(synapseEffectDelayMillis*time.Millisecond, func() {
+		if cell.Activating {
+			// Block during action potential cycle
+			return
+		}
+		// Neither alone will be outside int8 bounds, but we need to prevent
+		// possible int8 buffer overflow in the result.
+		var newPossibleVoltage int16
+		newPossibleVoltage = int16(change) + int16(cell.Voltage)
+		if newPossibleVoltage > apThreshold {
+			// when a synapse firing results in firing an Action Potential, it counts toward making
+			// the synapse stronger, so we increment the ActivationHistory a second time
+			fromSynapse.ActivationHistory += synapseAPBoost
+			cell.FireActionPotential()
+		}
+		cell.Voltage = int8(newPossibleVoltage)
+	})
 }
