@@ -51,9 +51,10 @@ func main() {
 	for i := 0; i < totalLines; {
 		threadsFinished := 0
 
+		// train in parallel over this number of threads
 		ch := make(chan processResult)
 		networkCopies := make(map[int]*potential.Network)
-		// train in parallel over this number of threads
+		results := make(map[int]processResult)
 		for thread := 0; thread < threads; thread++ {
 			if i >= totalLines { // ran out of lines
 				threadsFinished = threads
@@ -70,19 +71,35 @@ func main() {
 
 		}
 
+		// read results from the threads as they come in
 		for result := range ch {
 			threadsFinished++
-			if result.succeeded { // keep the training
-				copiedNetwork := networkCopies[result.threadIndex]
-				diff := potential.DiffNetworks(&network, copiedNetwork)
-				potential.ApplyDiff(diff, &network)
-				// network.Grow(0, 0, 0) // prune
-			} else {
-				// We failed to generate the desired effect, so do a significant growth
-				// of cells.
-				// network.Grow(100, 20, 200)
+			results[result.threadIndex] = result
+			if threadsFinished >= threads {
+				close(ch)
 			}
 		}
+
+		// now that all threads are finished, read their results and modify the network in
+		// series
+
+		// let the network finish firing
+		time.AfterFunc(100*time.Millisecond, func() {
+			for thread := 0; thread < threads; thread++ {
+				r := results[thread]
+				if r.succeeded { // keep the training
+					copiedNetwork := networkCopies[r.threadIndex]
+					diff := potential.DiffNetworks(&network, copiedNetwork)
+					potential.ApplyDiff(diff, &network)
+					network.Grow(0, 0, 0) // prune
+				} else {
+					// We failed to generate the desired effect, so do a significant growth
+					// of cells.
+					network.Grow(100, 20, 200)
+				}
+			}
+		})
+
 	}
 
 	err = network.SaveToFile("network.json")
@@ -128,11 +145,10 @@ func processLine(thread int, line string, network *potential.Network, vocab char
 		}
 
 		network.ResetForTraining()
-		// just make the network fires several times in order
 		for i := 0; i < 10; i++ {
 			doneChan := make(chan bool)
 			go func() {
-				time.Sleep(potential.RefractoryPeriodMillis * time.Millisecond)
+				time.Sleep(potential.RefractoryPeriodMillis * 2 * time.Millisecond)
 				network.Cells[inChar.OutputCell].FireActionPotential()
 				doneChan <- true
 			}()
@@ -144,7 +160,7 @@ func processLine(thread int, line string, network *potential.Network, vocab char
 		}
 	}
 	wasSuccessful := succeeded == (len(lineChars) - 1)
-	fmt.Println(wasSuccessful, succeeded, "/", (len(lineChars) - 1), "\n  ", line)
+	fmt.Println(wasSuccessful, succeeded, "/", len(lineChars), "\n  ", line)
 	result.succeeded = wasSuccessful
 	ch <- result
 }
