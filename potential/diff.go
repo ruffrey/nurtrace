@@ -125,8 +125,7 @@ func ApplyDiff(diff Diff, originalNetwork *Network) (err error) {
 
 	// New synapses
 	for _, synapse := range diff.addedSynapses {
-		synapseCopy := copySynapse(synapse, originalNetwork)
-		originalNetwork.Synapses[synapse.ID] = &synapseCopy
+		copySynapseToNetwork(synapse, originalNetwork)
 		// add connections to cells
 		originalNetwork.Cells[synapse.FromNeuronAxon].AxonSynapses[synapse.ID] = true
 		originalNetwork.Cells[synapse.ToNeuronDendrite].DendriteSynapses[synapse.ID] = true
@@ -169,9 +168,8 @@ func CloneNetwork(originalNetwork *Network) *Network {
 	for _, cell := range originalNetwork.Cells {
 		copyCellToNetwork(cell, newNetwork)
 	}
-	for id, synapse := range originalNetwork.Synapses {
-		copiedSynapse := copySynapse(synapse, newNetwork)
-		newNetwork.Synapses[id] = &copiedSynapse
+	for _, synapse := range originalNetwork.Synapses {
+		copySynapseToNetwork(synapse, newNetwork)
 	}
 
 	return newNetwork
@@ -194,16 +192,18 @@ func copyCellToNetwork(cell *Cell, newNetwork *Network) {
 }
 
 /*
-copySynapse copies the properies of once synapse to a new one, and updates the network pointer
+copySynapseToNetwork copies the properies of once synapse to a new one, and updates the network pointer
 on the new synapse to a different given network.
 */
-func copySynapse(synapse *Synapse, newNetwork *Network) Synapse {
-	copiedSynapse := NewSynapse(newNetwork)
+func copySynapseToNetwork(synapse *Synapse, newNetwork *Network) {
+	copiedSynapse := NewSynapse()
+	newNetwork.Synapses[synapse.ID] = copiedSynapse
+	copiedSynapse.Network = newNetwork
+
 	copiedSynapse.ID = synapse.ID
 	copiedSynapse.Millivolts = synapse.Millivolts
 	copiedSynapse.FromNeuronAxon = synapse.FromNeuronAxon
 	copiedSynapse.ToNeuronDendrite = synapse.ToNeuronDendrite
 	// we do need to keep this because we might want to grow the synapse later
 	copiedSynapse.ActivationHistory = synapse.ActivationHistory
-	return copiedSynapse
 }

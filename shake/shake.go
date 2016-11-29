@@ -18,8 +18,8 @@ func main() {
 	if err != nil {
 		fmt.Println("No existing network in file; creating new one.", err)
 		network = potential.NewNetwork()
-		neuronsToAdd := 1000
-		defaultNeuronSynapses := 20
+		neuronsToAdd := 10
+		defaultNeuronSynapses := 5
 		synapsesToAdd := 0
 		network.Grow(neuronsToAdd, defaultNeuronSynapses, synapsesToAdd)
 		fmt.Println("Created network")

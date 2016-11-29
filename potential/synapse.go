@@ -40,15 +40,18 @@ type Synapse struct {
 }
 
 /*
-NewSynapse instantiates a synapse with a random millivolt weight
+NewSynapse instantiates a synapse with a random millivolt weight.
+
+It is up to the implementer to set add it to the network and set the pointer.
 */
-func NewSynapse(network *Network) Synapse {
+func NewSynapse() *Synapse {
 	mv := int8(randomIntBetween(synapseMin, synapseMax))
-	return Synapse{
+	s := Synapse{
 		ID:         NewSynapseID(),
-		Network:    network,
 		Millivolts: mv,
 	}
+	synapse := &s
+	return synapse
 }
 
 /*

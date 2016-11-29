@@ -16,8 +16,8 @@ func Test_NewNetwork(t *testing.T) {
 	})
 
 	t.Run("Synapse map is initialized and can add synapse immediately", func(t *testing.T) {
-		synapse := NewSynapse(&original)
-		original.Synapses[synapse.ID] = &synapse
+		synapse := NewSynapse()
+		original.Synapses[synapse.ID] = synapse
 	})
 
 	t.Run("Calling Grow() with all empty values does not crash", func(t *testing.T) {
@@ -28,12 +28,14 @@ func Test_NewNetwork(t *testing.T) {
 
 func Test_PruneSynapse(t *testing.T) {
 	var network Network
-	var synapse Synapse
+	var synapse *Synapse
 	var cell1, cell2 *Cell
 	before := func() {
 		// setup
 		network = NewNetwork()
-		synapse = NewSynapse(&network)
+		synapse = NewSynapse()
+		network.Synapses[synapse.ID] = synapse
+		synapse.Network = &network
 		// cell 1 fires into cell 2
 		cell1 = NewCell()
 		network.Cells[cell1.ID] = cell1
@@ -49,7 +51,7 @@ func Test_PruneSynapse(t *testing.T) {
 
 	t.Run("removes synapse from the network", func(t *testing.T) {
 		before()
-		network.PruneSynapse(&synapse)
+		network.PruneSynapse(synapse)
 		_, ok := network.Synapses[synapse.ID]
 		if ok {
 			panic("synapse not removed from network during PruneNetwork")
@@ -57,7 +59,7 @@ func Test_PruneSynapse(t *testing.T) {
 	})
 	t.Run("removes synapses from the actual network cells (not copying)", func(t *testing.T) {
 		before()
-		network.PruneSynapse(&synapse)
+		network.PruneSynapse(synapse)
 		_, ok := cell1.AxonSynapses[synapse.ID]
 		if ok {
 			panic("synapse not removed from axon side when pruned")
@@ -69,7 +71,7 @@ func Test_PruneSynapse(t *testing.T) {
 	})
 	t.Run("when cells have no synapses, it removes them too", func(t *testing.T) {
 		before()
-		network.PruneSynapse(&synapse)
+		network.PruneSynapse(synapse)
 		_, ok := network.Cells[cell1.ID]
 		if ok {
 			panic("cell1 not removed from network when synapses were zero during synapse prune")
@@ -83,12 +85,14 @@ func Test_PruneSynapse(t *testing.T) {
 
 func Test_NetworkSerialization(t *testing.T) {
 	var network Network
-	var synapse Synapse
+	var synapse *Synapse
 	var cell1, cell2 *Cell
 	before := func() {
 		// setup
 		network = NewNetwork()
-		synapse = NewSynapse(&network)
+		synapse = NewSynapse()
+		network.Synapses[synapse.ID] = synapse
+		synapse.Network = &network
 		// cell 1 fires into cell 2
 		cell1 = NewCell()
 		network.Cells[cell1.ID] = cell1

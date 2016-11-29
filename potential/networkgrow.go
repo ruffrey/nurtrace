@@ -136,7 +136,10 @@ func (network *Network) GrowRandomNeurons(neuronsToAdd, defaultNeuronSynapses in
 	// Now we add the default number of synapses to our new neurons, with random other neurons.
 	for _, cell := range addedNeurons {
 		for i := 0; i < defaultNeuronSynapses; {
-			synapse := NewSynapse(network)
+			synapse := NewSynapse()
+			network.Synapses[synapse.ID] = synapse
+			synapse.Network = network
+
 			ix := network.RandomCellKey()
 			otherCell := network.Cells[ix]
 			if cell.ID == otherCell.ID {
@@ -155,8 +158,6 @@ func (network *Network) GrowRandomNeurons(neuronsToAdd, defaultNeuronSynapses in
 				cell.DendriteSynapses[synapse.ID] = true
 			}
 			// fmt.Println("created synapse", synapse)
-			// must go last because it appears to copy on assignment
-			network.Synapses[synapse.ID] = &synapse
 			i++
 		}
 	}
@@ -180,14 +181,14 @@ func (network *Network) GrowRandomSynapses(synapsesToAdd int) {
 			continue
 		}
 
-		synapse := NewSynapse(network)
+		synapse := NewSynapse()
+		network.Synapses[synapse.ID] = synapse
+		synapse.Network = network
 		synapse.ToNeuronDendrite = receiver.ID
 		synapse.FromNeuronAxon = sender.ID
 		sender.AxonSynapses[synapse.ID] = true
 		receiver.DendriteSynapses[synapse.ID] = true
 		// fmt.Println("created synapse", synapse)
-		// must go last because it appears to copy on assignment
-		network.Synapses[synapse.ID] = &synapse
 		i++
 	}
 	// fmt.Println("  done")

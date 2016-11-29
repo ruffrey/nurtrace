@@ -15,11 +15,11 @@ func Test_NewDiff(t *testing.T) {
 		network.Cells[cell.ID] = cell
 		cell.Network = &network
 
-		synapse := NewSynapse(&network)
+		synapse := NewSynapse()
 
 		// tests are here
 		diff.addedCells = append(diff.addedCells, cell)
-		diff.addedSynapses = append(diff.addedSynapses, &synapse)
+		diff.addedSynapses = append(diff.addedSynapses, synapse)
 		diff.removedCells = append(diff.removedCells, cell.ID)
 		diff.removedSynapses = append(diff.removedSynapses, synapse.ID)
 	})
@@ -56,10 +56,11 @@ func Test_CloneNetwork(t *testing.T) {
 func Test_DiffNetworks(t *testing.T) {
 	t.Run("synapse millivolt diff is NEW minus OLD", func(t *testing.T) {
 		original := NewNetwork()
-		syn1 := NewSynapse(&original)
+		syn1 := NewSynapse()
 		syn1.Millivolts = 5
+		syn1.Network = &original
+		original.Synapses[syn1.ID] = syn1
 
-		original.Synapses[syn1.ID] = &syn1
 		cloned := CloneNetwork(&original)
 
 		cloned.Synapses[syn1.ID].Millivolts = 10
@@ -73,10 +74,11 @@ func Test_DiffNetworks(t *testing.T) {
 func Test_ApplyDiff(t *testing.T) {
 	t.Run("synapse millivolts are properly applied", func(t *testing.T) {
 		original := NewNetwork()
-		syn1 := NewSynapse(&original)
+		syn1 := NewSynapse()
 		syn1.Millivolts = 7
+		syn1.Network = &original
+		original.Synapses[syn1.ID] = syn1
 
-		original.Synapses[syn1.ID] = &syn1
 		cloned := CloneNetwork(&original)
 
 		cloned.Synapses[syn1.ID].Millivolts = 14
