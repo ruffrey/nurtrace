@@ -10,20 +10,28 @@ func Test_NewDiff(t *testing.T) {
 	t.Run("initializes maps and arrays so immediate assignment does not panic", func(t *testing.T) {
 		network := NewNetwork()
 		diff := NewDiff()
-		cell := NewCell(&network)
+
+		cell := NewCell()
+		network.Cells[cell.ID] = cell
+		cell.Network = &network
+
 		synapse := NewSynapse(&network)
 
 		// tests are here
-		diff.addedCells = append(diff.addedCells, &cell)
+		diff.addedCells = append(diff.addedCells, cell)
 		diff.addedSynapses = append(diff.addedSynapses, &synapse)
 		diff.removedCells = append(diff.removedCells, cell.ID)
 		diff.removedSynapses = append(diff.removedSynapses, synapse.ID)
 	})
 }
 
-func Test_CopyNetwork(t *testing.T) {
+func Test_CloneNetwork(t *testing.T) {
 	original := NewNetwork()
-	beforeCell := NewCell(&original)
+
+	beforeCell := NewCell()
+	original.Cells[beforeCell.ID] = beforeCell
+	beforeCell.Network = &original
+
 	cloned := CloneNetwork(&original)
 	// change something
 	cloned.SynapseLearnRate = 100
@@ -56,7 +64,7 @@ func Test_DiffNetworks(t *testing.T) {
 
 		cloned.Synapses[syn1.ID].Millivolts = 10
 
-		diff := DiffNetworks(&original, &cloned)
+		diff := DiffNetworks(&original, cloned)
 		assert.Equal(t, len(diff.synapseDiffs), 1, "Should be 1 synapse diff")
 		assert.Equal(t, diff.synapseDiffs[syn1.ID], int8(5), "Synapse diff should be NEW - OLD")
 	})
@@ -73,7 +81,7 @@ func Test_ApplyDiff(t *testing.T) {
 
 		cloned.Synapses[syn1.ID].Millivolts = 14
 
-		diff := DiffNetworks(&original, &cloned)
+		diff := DiffNetworks(&original, cloned)
 		ApplyDiff(diff, &original)
 
 		assert.Equal(t, int8(14), original.Synapses[syn1.ID].Millivolts,

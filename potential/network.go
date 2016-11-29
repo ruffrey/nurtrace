@@ -22,6 +22,11 @@ Network is a full neural network
 type Network struct {
 	Version Shasum
 	/*
+		Indicates whether neurons are allowed to fire. Setting it disabled will stop firing
+		in a few milliseconds.
+	*/
+	Disabled bool
+	/*
 	   Synapses are where the magic happens.
 	*/
 	Synapses map[SynapseID]*Synapse
@@ -53,6 +58,7 @@ func NewNetwork() Network {
 	rand.Seed(time.Now().Unix())
 	return Network{
 		Version:  "0",
+		Disabled: false,
 		Synapses: make(map[SynapseID]*Synapse),
 		Cells:    make(map[CellID]*Cell),
 		SynapseMinFireThreshold: 2,
@@ -137,6 +143,7 @@ func (network *Network) ResetForTraining() {
 	for _, synapse := range network.Synapses {
 		synapse.ActivationHistory = 0
 	}
+	network.Disabled = false
 }
 
 /*

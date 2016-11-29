@@ -9,7 +9,9 @@ import (
 func Test_NewCell(t *testing.T) {
 	t.Run("calling NewCell() also adds it to the network", func(t *testing.T) {
 		network := NewNetwork()
-		cell := NewCell(&network)
+		cell := NewCell()
+		network.Cells[cell.ID] = cell
+		cell.Network = &network
 		netCell, ok := network.Cells[cell.ID]
 		if !ok {
 			panic("NewCell() did not add cell to the network")

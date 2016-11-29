@@ -11,8 +11,8 @@ func Test_NewNetwork(t *testing.T) {
 	original := NewNetwork()
 
 	t.Run("Cell map is initialized and can add cell immediately", func(t *testing.T) {
-		cell := NewCell(&original)
-		original.Cells[cell.ID] = &cell
+		cell := NewCell()
+		original.Cells[cell.ID] = cell
 	})
 
 	t.Run("Synapse map is initialized and can add synapse immediately", func(t *testing.T) {
@@ -29,14 +29,18 @@ func Test_NewNetwork(t *testing.T) {
 func Test_PruneSynapse(t *testing.T) {
 	var network Network
 	var synapse Synapse
-	var cell1, cell2 Cell
+	var cell1, cell2 *Cell
 	before := func() {
 		// setup
 		network = NewNetwork()
 		synapse = NewSynapse(&network)
 		// cell 1 fires into cell 2
-		cell1 = NewCell(&network)
-		cell2 = NewCell(&network)
+		cell1 = NewCell()
+		network.Cells[cell1.ID] = cell1
+		cell1.Network = &network
+		cell2 = NewCell()
+		network.Cells[cell2.ID] = cell2
+		cell2.Network = &network
 		cell1.AxonSynapses[synapse.ID] = true
 		cell2.DendriteSynapses[synapse.ID] = true
 		synapse.FromNeuronAxon = cell1.ID
@@ -80,14 +84,18 @@ func Test_PruneSynapse(t *testing.T) {
 func Test_NetworkSerialization(t *testing.T) {
 	var network Network
 	var synapse Synapse
-	var cell1, cell2 Cell
+	var cell1, cell2 *Cell
 	before := func() {
 		// setup
 		network = NewNetwork()
 		synapse = NewSynapse(&network)
 		// cell 1 fires into cell 2
-		cell1 = NewCell(&network)
-		cell2 = NewCell(&network)
+		cell1 = NewCell()
+		network.Cells[cell1.ID] = cell1
+		cell1.Network = &network
+		cell2 = NewCell()
+		network.Cells[cell2.ID] = cell2
+		cell2.Network = &network
 		cell1.AxonSynapses[synapse.ID] = true
 		cell2.DendriteSynapses[synapse.ID] = true
 		synapse.FromNeuronAxon = cell1.ID

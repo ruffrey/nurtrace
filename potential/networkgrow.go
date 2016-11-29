@@ -1,5 +1,7 @@
 package potential
 
+import "fmt"
+
 // All methods on a network that relate to growing are here.
 
 /*
@@ -57,7 +59,11 @@ func (network *Network) Prune() {
 	// fmt.Println("  processing learning on cells, total=", len(network.Cells))
 	for _, cell := range network.Cells {
 		for synapseID := range cell.DendriteSynapses { // could also be axons, but, meh.
-			synapse := network.Synapses[synapseID]
+			synapse, exists := network.Synapses[synapseID]
+			if !exists {
+				fmt.Println("warn: synapse attempted to be accesed but it was already removed", synapseID)
+				continue
+			}
 			isPositive := synapse.Millivolts >= 0
 
 			if synapse.ActivationHistory >= network.SynapseMinFireThreshold {
@@ -99,7 +105,7 @@ func (network *Network) Prune() {
 	}
 	// fmt.Println("  done")
 
-	// fmt.Println("  synapses to remove=", len(synapsesToRemove))
+	fmt.Println("  synapses to remove=", len(synapsesToRemove))
 	// Actually pruning synapses is done after the previous loop because it can
 	// trigger removal of Cells, which can subsequently mess up the range operation
 	// happening over the same array of cells.
@@ -119,8 +125,10 @@ func (network *Network) GrowRandomNeurons(neuronsToAdd, defaultNeuronSynapses in
 	// newer neurons.
 	var addedNeurons []*Cell
 	for i := 0; i < neuronsToAdd; i++ {
-		cell := NewCell(network)
-		addedNeurons = append(addedNeurons, &cell)
+		cell := NewCell()
+		network.Cells[cell.ID] = cell
+		cell.Network = network
+		addedNeurons = append(addedNeurons, cell)
 	}
 	// fmt.Println("  done")
 

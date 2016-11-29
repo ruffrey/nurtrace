@@ -120,8 +120,7 @@ func ApplyDiff(diff Diff, originalNetwork *Network) (err error) {
 
 	// New cells
 	for _, cell := range diff.addedCells {
-		copy := copyCell(cell, originalNetwork)
-		originalNetwork.Cells[cell.ID] = &copy
+		copyCellToNetwork(cell, originalNetwork)
 	}
 
 	// New synapses
@@ -160,17 +159,18 @@ doing distributed training.
 
 It involves resetting pointers.
 */
-func CloneNetwork(originalNetwork *Network) Network {
-	newNetwork := NewNetwork()
+func CloneNetwork(originalNetwork *Network) *Network {
+	n := NewNetwork()
+	newNetwork := &n
+	fmt.Println("CloneNetwork: new network=", &newNetwork)
 	newNetwork.SynapseLearnRate = originalNetwork.SynapseLearnRate
 	newNetwork.SynapseMinFireThreshold = originalNetwork.SynapseMinFireThreshold
 
-	for id, cell := range originalNetwork.Cells {
-		copiedCell := copyCell(cell, &newNetwork)
-		newNetwork.Cells[id] = &copiedCell
+	for _, cell := range originalNetwork.Cells {
+		copyCellToNetwork(cell, newNetwork)
 	}
 	for id, synapse := range originalNetwork.Synapses {
-		copiedSynapse := copySynapse(synapse, &newNetwork)
+		copiedSynapse := copySynapse(synapse, newNetwork)
 		newNetwork.Synapses[id] = &copiedSynapse
 	}
 
@@ -178,17 +178,19 @@ func CloneNetwork(originalNetwork *Network) Network {
 }
 
 /*
-copyCell copies the properies of once cell to a new one, and updates the network pointer
-on the new cell to a different given network.
+copyCellToNetwork copies the properies of once cell to a new one, and updates the network pointer
+on the new cell to a different given network. It also adds the cell to the new network.
 */
-func copyCell(cell *Cell, newNetwork *Network) Cell {
-	copiedCell := NewCell(newNetwork)
+func copyCellToNetwork(cell *Cell, newNetwork *Network) {
+	copiedCell := NewCell()
+	newNetwork.Cells[cell.ID] = copiedCell
+	copiedCell.Network = newNetwork
+
 	copiedCell.ID = cell.ID
 	copiedCell.activating = cell.activating
 	copiedCell.Voltage = cell.Voltage
 	copiedCell.AxonSynapses = cell.AxonSynapses
 	copiedCell.DendriteSynapses = cell.DendriteSynapses
-	return copiedCell
 }
 
 /*

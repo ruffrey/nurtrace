@@ -1,6 +1,7 @@
 package potential
 
 import (
+	"fmt"
 	"math/rand"
 	"time"
 )
@@ -91,20 +92,20 @@ type Cell struct {
 }
 
 /*
-NewCell instantiates a Cell *and* adds it to the network's list of cells.
+NewCell instantiates a Cell and returns a pointer to it.
+
+It is up to the implementer to set the Network pointer and add it to the network.
 */
-func NewCell(network *Network) Cell {
+func NewCell() *Cell {
 	cell := Cell{
 		ID:               NewCellID(),
-		Network:          network,
 		Voltage:          apResting,
 		activating:       false,
 		DendriteSynapses: make(map[SynapseID]bool),
 		AxonSynapses:     make(map[SynapseID]bool),
 		WasFired:         false,
 	}
-	network.Cells[cell.ID] = &cell
-	return cell
+	return &cell
 }
 
 /*
@@ -118,7 +119,7 @@ func (cell *Cell) FireActionPotential() {
 	// activate all synapses on its axon
 	for synapseID := range cell.AxonSynapses {
 		synapse := cell.Network.Synapses[synapseID]
-		// fmt.Println("  activating synapse", synapse, "from cell", cell.ID)
+		fmt.Println("  activating synapse", synapse, "from cell", cell.ID, "network.Disabled=", cell.Network.Disabled)
 		synapse.Activate()
 	}
 
@@ -134,6 +135,12 @@ Care is taken to prevent the tiny int8 variables from overflowing.
 Voltage may not change for a few milliseconds depending on `SynapseEffectDelayMillis`.
 */
 func (cell *Cell) ApplyVoltage(change int8, fromSynapse *Synapse) {
+	if cell.Network.Disabled {
+		// disable more voltage applications from cells once the network has been disabled,
+		// which will let the network firings sizzle out after a refractory period or so.
+		fmt.Println("warn: attempt to fire action potential when network disabled")
+		return
+	}
 	time.AfterFunc(SynapseEffectDelayMillis*time.Millisecond, func() {
 		if cell.activating {
 			// Block during action potential cycle
