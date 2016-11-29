@@ -72,7 +72,12 @@ Using maps where one might expect arrays or slices (because it really is just a 
 be a source of confusion.
 */
 type Cell struct {
-	ID         CellID
+	ID CellID
+	/*
+	   Immortal means this cell cannot be pruned. It should only be by perceptors and
+	   receptors.
+	*/
+	Immortal   bool
 	Network    *Network `json:"-"` // skip circular reference in JSON
 	Voltage    int8     // unnecessary to recreate cell
 	activating bool     // unnecessary to recreate cell
@@ -99,6 +104,7 @@ It is up to the implementer to set the Network pointer and add it to the network
 func NewCell() *Cell {
 	cell := Cell{
 		ID:               NewCellID(),
+		Immortal:         false,
 		Voltage:          apResting,
 		activating:       false,
 		DendriteSynapses: make(map[SynapseID]bool),
@@ -119,7 +125,7 @@ func (cell *Cell) FireActionPotential() {
 	// activate all synapses on its axon
 	for synapseID := range cell.AxonSynapses {
 		synapse := cell.Network.Synapses[synapseID]
-		fmt.Println("  activating synapse", synapse, "from cell", cell.ID, "network.Disabled=", cell.Network.Disabled)
+		fmt.Println("  activating synapse", synapse, "\n  from cell", cell.ID, "disabled=", cell.Network.Disabled)
 		synapse.Activate()
 	}
 
@@ -135,13 +141,15 @@ Care is taken to prevent the tiny int8 variables from overflowing.
 Voltage may not change for a few milliseconds depending on `SynapseEffectDelayMillis`.
 */
 func (cell *Cell) ApplyVoltage(change int8, fromSynapse *Synapse) {
+	fmt.Println("ApplyVoltage", cell.ID, cell.Network.Disabled, &cell.Network)
 	if cell.Network.Disabled {
 		// disable more voltage applications from cells once the network has been disabled,
 		// which will let the network firings sizzle out after a refractory period or so.
 		fmt.Println("warn: attempt to fire action potential when network disabled")
 		return
 	}
-	time.AfterFunc(SynapseEffectDelayMillis*time.Millisecond, func() {
+	go func(cell *Cell) {
+		time.Sleep(SynapseEffectDelayMillis * time.Millisecond)
 		if cell.activating {
 			// Block during action potential cycle
 			return
@@ -157,5 +165,6 @@ func (cell *Cell) ApplyVoltage(change int8, fromSynapse *Synapse) {
 			cell.FireActionPotential()
 		}
 		cell.Voltage = int8(newPossibleVoltage)
-	})
+	}(cell)
+
 }

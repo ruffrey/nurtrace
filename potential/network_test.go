@@ -51,7 +51,7 @@ func Test_PruneSynapse(t *testing.T) {
 
 	t.Run("removes synapse from the network", func(t *testing.T) {
 		before()
-		network.PruneSynapse(synapse)
+		network.PruneSynapse(synapse.ID)
 		_, ok := network.Synapses[synapse.ID]
 		if ok {
 			panic("synapse not removed from network during PruneNetwork")
@@ -59,7 +59,7 @@ func Test_PruneSynapse(t *testing.T) {
 	})
 	t.Run("removes synapses from the actual network cells (not copying)", func(t *testing.T) {
 		before()
-		network.PruneSynapse(synapse)
+		network.PruneSynapse(synapse.ID)
 		_, ok := cell1.AxonSynapses[synapse.ID]
 		if ok {
 			panic("synapse not removed from axon side when pruned")
@@ -71,7 +71,7 @@ func Test_PruneSynapse(t *testing.T) {
 	})
 	t.Run("when cells have no synapses, it removes them too", func(t *testing.T) {
 		before()
-		network.PruneSynapse(synapse)
+		network.PruneSynapse(synapse.ID)
 		_, ok := network.Cells[cell1.ID]
 		if ok {
 			panic("cell1 not removed from network when synapses were zero during synapse prune")

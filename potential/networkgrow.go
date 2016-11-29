@@ -11,12 +11,13 @@ It adds neurons, adds new synapses, prunes old neurons, and strengthens synapses
 fired a lot.
 */
 func (network *Network) Grow(neuronsToAdd, defaultNeuronSynapses, synapsesToAdd int) {
+	fmt.Println("Grow session start")
 	network.Prune()
 
 	network.GrowRandomNeurons(neuronsToAdd, defaultNeuronSynapses)
 
 	network.GrowRandomSynapses(synapsesToAdd)
-	// fmt.Println("  Grow session end")
+	fmt.Println("  Grow session end")
 }
 
 /*
@@ -51,7 +52,6 @@ Additionally, it checks when the cells that connect to a synapse have no more sy
 and removes those cells if they have none.
 */
 func (network *Network) Prune() {
-	// fmt.Println("Grow session start")
 	// Next we move the less used synapses toward zero, because doing this later would prune the
 	// brand new synapses. This is a good time to apply the learning rate to synapses
 	// which were activated, too.
@@ -110,9 +110,9 @@ func (network *Network) Prune() {
 	// trigger removal of Cells, which can subsequently mess up the range operation
 	// happening over the same array of cells.
 	for _, synapse := range synapsesToRemove {
-		network.PruneSynapse(synapse)
+		network.PruneSynapse(synapse.ID)
 	}
-	// fmt.Println("  done")
+	fmt.Println("  done pruning")
 }
 
 /*
@@ -132,7 +132,7 @@ func (network *Network) GrowRandomNeurons(neuronsToAdd, defaultNeuronSynapses in
 	}
 	// fmt.Println("  done")
 
-	// fmt.Println("  adding default synapses to new neurons", defaultNeuronSynapses)
+	fmt.Println("  adding default synapses to new neurons", defaultNeuronSynapses)
 	// Now we add the default number of synapses to our new neurons, with random other neurons.
 	for _, cell := range addedNeurons {
 		for i := 0; i < defaultNeuronSynapses; {
@@ -161,7 +161,7 @@ func (network *Network) GrowRandomNeurons(neuronsToAdd, defaultNeuronSynapses in
 			i++
 		}
 	}
-	// fmt.Println("  done")
+	fmt.Println("  GrowRandomNeurons done")
 }
 
 /*
@@ -191,7 +191,7 @@ func (network *Network) GrowRandomSynapses(synapsesToAdd int) {
 		// fmt.Println("created synapse", synapse)
 		i++
 	}
-	// fmt.Println("  done")
+	fmt.Println("  GrowRandomSynapses done")
 
 }
 
@@ -203,24 +203,33 @@ from its list.
 
 If either of those neurons no longer has any synapses itself, kill off that neuron cell.
 */
-func (network *Network) PruneSynapse(synapse *Synapse) {
-	dendriteCell := network.Cells[synapse.FromNeuronAxon]
-	axonCell := network.Cells[synapse.ToNeuronDendrite]
-
-	delete(dendriteCell.AxonSynapses, synapse.ID)
-	delete(axonCell.DendriteSynapses, synapse.ID)
+func (network *Network) PruneSynapse(synapseID SynapseID) {
+	synapse, ok := network.Synapses[synapseID]
+	if !ok {
+		fmt.Println("warn: attempt to remove synapse that is not in network", synapseID)
+		return
+	}
 
 	// See if either cell (to/from) should be pruned, also.
 	// Technically this can result in a cell being the end of a dead pathway, or not receiving
 	// any input. But that is something to revisit. It is likely these cells would eventually
 	// build up more synapses via the grow process.
-	receiverCellHasNoSynapses := len(dendriteCell.AxonSynapses) == 0 && len(dendriteCell.DendriteSynapses) == 0
-	if receiverCellHasNoSynapses {
-		delete(network.Cells, dendriteCell.ID)
+
+	if dendriteCell, exists := network.Cells[synapse.FromNeuronAxon]; exists {
+		delete(dendriteCell.AxonSynapses, synapse.ID)
+		receiverCellHasNoSynapses := len(dendriteCell.AxonSynapses) == 0 && len(dendriteCell.DendriteSynapses) == 0
+		if !dendriteCell.Immortal && receiverCellHasNoSynapses {
+			delete(network.Cells, dendriteCell.ID)
+		}
 	}
-	senderCellHasNoSynapses := len(axonCell.AxonSynapses) == 0 && len(axonCell.DendriteSynapses) == 0
-	if senderCellHasNoSynapses {
-		delete(network.Cells, axonCell.ID)
+
+	if axonCell, exists := network.Cells[synapse.ToNeuronDendrite]; exists {
+		delete(axonCell.DendriteSynapses, synapse.ID)
+
+		senderCellHasNoSynapses := len(axonCell.AxonSynapses) == 0 && len(axonCell.DendriteSynapses) == 0
+		if !axonCell.Immortal && senderCellHasNoSynapses {
+			delete(network.Cells, axonCell.ID)
+		}
 	}
 
 	delete(network.Synapses, synapse.ID)

@@ -39,6 +39,10 @@ func NewVocab(text string, network *potential.Network) Vocab {
 					break
 				}
 			}
+			// inputs and outputs must never be pruned
+			network.Cells[InputCell].Immortal = true
+			network.Cells[OutputCell].Immortal = true
+
 			vocab[Character] = VocabItem{
 				Character,
 				InputCell,
@@ -67,6 +71,12 @@ func NewVocab(text string, network *potential.Network) Vocab {
 			break
 		}
 	}
+
+	network.Cells[start.InputCell].Immortal = true
+	network.Cells[start.OutputCell].Immortal = true
+	network.Cells[end.InputCell].Immortal = true
+	network.Cells[end.OutputCell].Immortal = true
+
 	vocab["START"] = start
 	vocab["END"] = end
 

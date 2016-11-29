@@ -10,16 +10,18 @@ import (
 )
 
 func main() {
-	threads := 1
+	threads := 5
 
-	var network potential.Network
+	// start by initializing the network from disk or whatever
+	var network *potential.Network
 	var err error
-	network, err = potential.LoadNetworkFromFile("network.json")
+	n, err := potential.LoadNetworkFromFile("network.json")
 	if err != nil {
 		fmt.Println("No existing network in file; creating new one.", err)
-		network = potential.NewNetwork()
-		neuronsToAdd := 10
-		defaultNeuronSynapses := 5
+		newN := potential.NewNetwork()
+		network = &newN
+		neuronsToAdd := 500
+		defaultNeuronSynapses := 10
 		synapsesToAdd := 0
 		network.Grow(neuronsToAdd, defaultNeuronSynapses, synapsesToAdd)
 		fmt.Println("Created network")
@@ -30,12 +32,13 @@ func main() {
 			return
 		}
 	} else {
+		network = &n
 		fmt.Println("Loaded network from disk,", len(network.Cells), "cells")
 	}
 
 	network.Disabled = true // we just will never need it to fire
 
-	bytes, err := ioutil.ReadFile("shake.txt")
+	bytes, err := ioutil.ReadFile("short.txt")
 	if err != nil {
 		panic(err)
 	}
@@ -43,7 +46,7 @@ func main() {
 	text := string(bytes)
 	lines := strings.Split(text, "\n")
 
-	vocab := charrnn.NewVocab(text, &network)
+	vocab := charrnn.NewVocab(text, network)
 
 	fmt.Println("Loaded vocab, lenth=", len(vocab))
 
@@ -63,11 +66,11 @@ func main() {
 				break
 			}
 			line := lines[i]
-			networkCopies[thread] = potential.CloneNetwork(&network)
+			networkCopies[thread] = potential.CloneNetwork(network)
 			fmt.Println("starting thread", thread)
-			go func(net *potential.Network) {
+			go func(net *potential.Network, thread int) {
 				processLine(thread, line, net, vocab, ch)
-			}(networkCopies[thread])
+			}(networkCopies[thread], thread)
 			i++
 
 		}
@@ -97,29 +100,30 @@ func main() {
 				r := results[thread]
 				if r.succeeded { // keep the training
 					net := networkCopies[r.threadIndex]
-					diff := potential.DiffNetworks(&network, net)
+					diff := potential.DiffNetworks(network, net)
 					fmt.Println("applying diff for thread=", thread)
-					potential.ApplyDiff(diff, &network)
+					potential.ApplyDiff(diff, network)
 					network.Grow(0, 0, 0) // prune
 				} else {
 					// We failed to generate the desired effect, so do a significant growth
 					// of cells.
-					fmt.Println("running grow for thread=", thread)
-					network.Grow(100, 20, 200)
+					fmt.Println("applying grow for thread=", thread)
+					network.Grow(20, 10, 50)
 				}
 			}
 			done <- true
 		})
-
+		<-done
 		fmt.Println("Round of lines done")
 	}
 
 	err = network.SaveToFile("network.json")
 	if err != nil {
+		fmt.Println("Failed saving network")
 		fmt.Println(err)
 		return
 	}
-	fmt.Println("Failed saving network")
+	fmt.Println("Reached end")
 }
 
 type processResult struct {
@@ -157,13 +161,15 @@ func processLine(thread int, line string, network *potential.Network, vocab char
 		}
 
 		network.ResetForTraining()
+		sleepTime := potential.RefractoryPeriodMillis * 2 * time.Millisecond
+
 		for i := 0; i < 10; i++ {
 			doneChan := make(chan bool)
-			go func() {
-				time.Sleep(potential.RefractoryPeriodMillis * 2 * time.Millisecond)
+			go func(i int) {
+				time.Sleep(sleepTime)
 				network.Cells[inChar.OutputCell].FireActionPotential()
 				doneChan <- true
-			}()
+			}(i)
 			<-doneChan
 		}
 

@@ -112,12 +112,6 @@ func ApplyDiff(diff Diff, originalNetwork *Network) (err error) {
 		return err
 	}
 
-	// Update voltages on existing synapses
-	for synapseID, diffValue := range diff.synapseDiffs {
-		synapse := originalNetwork.Synapses[synapseID]
-		synapse.Millivolts += diffValue
-	}
-
 	// New cells
 	for _, cell := range diff.addedCells {
 		copyCellToNetwork(cell, originalNetwork)
@@ -131,15 +125,17 @@ func ApplyDiff(diff Diff, originalNetwork *Network) (err error) {
 		originalNetwork.Cells[synapse.ToNeuronDendrite].DendriteSynapses[synapse.ID] = true
 	}
 
+	// Update voltages on existing synapses
+	for synapseID, diffValue := range diff.synapseDiffs {
+		synapse := originalNetwork.Synapses[synapseID]
+		synapse.Millivolts += diffValue
+	}
+
 	// Remove synapses
 	for _, synapseID := range diff.removedSynapses {
-		synapse, ok := originalNetwork.Synapses[synapseID]
-		if !ok {
-			panic("Attempt to remove synapse during diff but synapse does not exist (" + string(synapseID) + ")")
-		}
 		// Removes synapses from both connected cells.
 		// Will also prune cells with no synapses.
-		originalNetwork.PruneSynapse(synapse)
+		originalNetwork.PruneSynapse(synapseID)
 	}
 
 	// Remove cells by ID
@@ -161,7 +157,6 @@ It involves resetting pointers.
 func CloneNetwork(originalNetwork *Network) *Network {
 	n := NewNetwork()
 	newNetwork := &n
-	fmt.Println("CloneNetwork: new network=", &newNetwork)
 	newNetwork.SynapseLearnRate = originalNetwork.SynapseLearnRate
 	newNetwork.SynapseMinFireThreshold = originalNetwork.SynapseMinFireThreshold
 
@@ -181,10 +176,11 @@ on the new cell to a different given network. It also adds the cell to the new n
 */
 func copyCellToNetwork(cell *Cell, newNetwork *Network) {
 	copiedCell := NewCell()
+	copiedCell.ID = cell.ID
 	newNetwork.Cells[cell.ID] = copiedCell
 	copiedCell.Network = newNetwork
 
-	copiedCell.ID = cell.ID
+	copiedCell.Immortal = cell.Immortal
 	copiedCell.activating = cell.activating
 	copiedCell.Voltage = cell.Voltage
 	copiedCell.AxonSynapses = cell.AxonSynapses
@@ -197,10 +193,10 @@ on the new synapse to a different given network.
 */
 func copySynapseToNetwork(synapse *Synapse, newNetwork *Network) {
 	copiedSynapse := NewSynapse()
+	copiedSynapse.ID = synapse.ID
 	newNetwork.Synapses[synapse.ID] = copiedSynapse
 	copiedSynapse.Network = newNetwork
 
-	copiedSynapse.ID = synapse.ID
 	copiedSynapse.Millivolts = synapse.Millivolts
 	copiedSynapse.FromNeuronAxon = synapse.FromNeuronAxon
 	copiedSynapse.ToNeuronDendrite = synapse.ToNeuronDendrite

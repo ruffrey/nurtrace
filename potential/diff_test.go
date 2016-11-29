@@ -90,3 +90,23 @@ func Test_ApplyDiff(t *testing.T) {
 			"synapse millivolts failed to apply")
 	})
 }
+
+func Test_copyCellToNetwork(t *testing.T) {
+	t.Run("copying a cell sets the pointer to a new network", func(t *testing.T) {
+		on := NewNetwork()
+		originalNetwork := &on
+		nn := NewNetwork()
+		newNetwork := &nn
+		originalCell := NewCell()
+		originalCell.Network = originalNetwork
+		originalNetwork.Cells[originalCell.ID] = originalCell
+		copyCellToNetwork(originalCell, newNetwork)
+		copiedCell, exists := newNetwork.Cells[originalCell.ID]
+		if !exists {
+			t.Error("cell not copied to new network")
+		}
+		if copiedCell.Network != newNetwork {
+			t.Error("cell copied but new network prop not set to new network pointer")
+		}
+	})
+}
