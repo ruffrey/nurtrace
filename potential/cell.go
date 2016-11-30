@@ -126,7 +126,10 @@ func (cell *Cell) FireActionPotential() {
 	for synapseID := range cell.AxonSynapses {
 		synapse := cell.Network.Synapses[synapseID]
 		// fmt.Println("  activating synapse", synapse, "\n  from cell", cell.ID, "disabled=", cell.Network.Disabled)
-		synapse.Activate()
+		err := synapse.Activate()
+		if err != nil {
+			fmt.Println("cell fire err:", err)
+		}
 	}
 
 	time.AfterFunc(RefractoryPeriodMillis*time.Millisecond, func() {

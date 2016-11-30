@@ -57,13 +57,15 @@ func NewSynapse() *Synapse {
 /*
 Activate is when the dendrite receives voltage.
 */
-func (synapse *Synapse) Activate() {
+func (synapse *Synapse) Activate() (err error) {
 	synapse.ActivationHistory++
 	dendriteCell, exists := synapse.Network.Cells[synapse.ToNeuronDendrite]
 	if !exists {
-		fmt.Println("bad synapse: ", synapse)
-		panic("Attempting to activate non-existent cell connected to synapse.")
+		err := fmt.Errorf("bad synapse dendrite: not on network; dendrite=%d", synapse.ToNeuronDendrite)
+		return err
 	}
 	// fmt.Println("  synapse", synapse.ID, "firing dendrite on", synapse.ToNeuronDendrite)
 	dendriteCell.ApplyVoltage(synapse.Millivolts, synapse)
+
+	return nil
 }
