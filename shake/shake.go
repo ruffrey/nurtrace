@@ -10,7 +10,7 @@ import (
 )
 
 func main() {
-	threads := 5
+	threads := 50
 
 	// start by initializing the network from disk or whatever
 	var network *potential.Network
@@ -20,7 +20,7 @@ func main() {
 		fmt.Println("No existing network in file; creating new one.", err)
 		newN := potential.NewNetwork()
 		network = &newN
-		neuronsToAdd := 500
+		neuronsToAdd := 10000
 		defaultNeuronSynapses := 10
 		synapsesToAdd := 0
 		network.Grow(neuronsToAdd, defaultNeuronSynapses, synapsesToAdd)
@@ -38,7 +38,7 @@ func main() {
 
 	network.Disabled = true // we just will never need it to fire
 
-	bytes, err := ioutil.ReadFile("short.txt")
+	bytes, err := ioutil.ReadFile("shake.txt")
 	if err != nil {
 		panic(err)
 	}
@@ -67,7 +67,7 @@ func main() {
 			}
 			line := lines[i]
 			networkCopies[thread] = potential.CloneNetwork(network)
-			fmt.Println("starting thread", thread)
+			// fmt.Println("starting thread", thread)
 			go func(net *potential.Network, thread int) {
 				processLine(thread, line, net, vocab, ch)
 			}(networkCopies[thread], thread)
@@ -77,7 +77,7 @@ func main() {
 
 		// read results from the threads as they come in
 		for result := range ch {
-			fmt.Println("finished thread", threadsFinished)
+			// fmt.Println("finished thread", threadsFinished)
 			threadsFinished++
 			results[result.threadIndex] = result
 			if threadsFinished >= threads {
@@ -103,18 +103,17 @@ func main() {
 					diff := potential.DiffNetworks(network, net)
 					fmt.Println("applying diff for thread=", thread)
 					potential.ApplyDiff(diff, network)
-					network.Grow(0, 0, 0) // prune
 				} else {
 					// We failed to generate the desired effect, so do a significant growth
 					// of cells.
-					fmt.Println("applying grow for thread=", thread)
-					network.Grow(20, 10, 50)
+					// fmt.Println("disgarding growth for thread=", thread)
 				}
 			}
+			network.Grow(50, 20, 200)
 			done <- true
 		})
 		<-done
-		fmt.Println("Round of lines done")
+		fmt.Println("Round of lines done, line=", i)
 	}
 
 	err = network.SaveToFile("network.json")
@@ -178,7 +177,7 @@ func processLine(thread int, line string, network *potential.Network, vocab char
 		}
 	}
 	wasSuccessful := succeeded == len(lineChars)
-	fmt.Println(wasSuccessful, succeeded, "/", len(lineChars), "\n  ", line)
+	// fmt.Println(wasSuccessful, succeeded, "/", len(lineChars), "\n  ", line)
 	result.succeeded = wasSuccessful
 	ch <- result
 }

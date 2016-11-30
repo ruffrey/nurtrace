@@ -1,6 +1,10 @@
 package potential
 
-import "fmt"
+import (
+	"fmt"
+	"math"
+	"sync"
+)
 
 // All methods on a network that relate to growing are here.
 
@@ -17,28 +21,108 @@ func (network *Network) Grow(neuronsToAdd, defaultNeuronSynapses, synapsesToAdd 
 	network.GrowRandomNeurons(neuronsToAdd, defaultNeuronSynapses)
 
 	network.GrowRandomSynapses(synapsesToAdd)
-	fmt.Println("  Grow session end")
+	fmt.Println("  Grow session end, synapses=", len(network.Synapses), "cells=", len(network.Cells))
 }
 
 /*
 GrowPathBetween will make a path between two neurons.
 
-This is a little complicated and probably should only be used sparingly.
+The desired goal is for there to be a path, or series of paths, from startCell to endCell.
 
-The desired goal is for there to be a path from startCell to endCell.
-
-We start at both cells, working forward through the axons of startCell and its
-connections, and backward through the dendrites of endCell and its connections.
-
-At each layer, we check to see if any of the start axons are connected to the
-end dendrites. If there is no connection, we follow all those axons and dendrites.
+1. We start in at the startCell and traverse its axons.
+2. At each layer, we check to see if any of the start axons are connected to the
+end dendrites.
+3. We count the connected synapses as we go.
+4. Upon reaching minSynapses, or maxHops, or nowhere, we stop.
+	- if reached minSynapses, just really stop and return 0 synapses added
+	- if reached maxHops, continue.
+5. We need to add enough synapses to reach minSynapses, such that these are the minimum
+number of synapses that connect from startCell's tree to endCell.
 
 After `maxHops`, if there are not minSynapses, we create synapses at that layer.
 
 TODO: finish GrowPathBetween
 */
-func (network *Network) GrowPathBetween(startCell, endCell CellID, maxHops, minSynapses int) {
+func (network *Network) GrowPathBetween(startCell, endCell CellID, minSynapses int) (synapsesAdded int) {
+	synapsesAdded = 0
 
+	avgSynPerCell := float64(len(network.Synapses) / len(network.Cells))
+	// hardcoded number of max hops. this was arbitrary.
+	maxHops := int(math.Min(avgSynPerCell, 20.0))
+
+	synapsesToEnd := make(map[SynapseID]bool)
+
+	var lastCellID CellID
+	mux := sync.Mutex{}
+
+	// walk traverses the axons and see if any synapse leads to the end cell.
+	// hops is the layer we are on, *copied* on pass.
+	// this is a fan-out kind of traversal through a tree of cells and synapses.
+	// Note: need to fully declare it before assigning it, apparently because the
+	// runtime needs this to compile a recursive function.
+	var walk func(cellID CellID, hops int) chan SynapseID
+	walk = func(cellID CellID, hops int) chan SynapseID {
+		ch := make(chan SynapseID)
+
+		mux.Lock()
+		lastCellID = cellID
+		mux.Unlock()
+		hops++
+		if hops >= maxHops {
+			go func() {
+				close(ch)
+			}()
+			return ch
+		}
+		// look at the next cells in the axon chain from this one, to see
+		// if any are the endCell then send it down the channel.
+		getReceiverCellFromSynapse := func(synapseId SynapseID) CellID {
+			return network.Synapses[synapseId].ToNeuronDendrite
+		}
+		go func() {
+			for axonSynapseID := range network.Cells[cellID].AxonSynapses {
+				receiverCellID := getReceiverCellFromSynapse(axonSynapseID)
+				if receiverCellID == endCell {
+					ch <- axonSynapseID
+				}
+				// also walk the axons of this cell, and pipe any values downstream.
+				childChan := walk(receiverCellID, hops)
+				go func() {
+					for childAxonSynapse := range childChan {
+						ch <- childAxonSynapse
+					}
+					close(childChan)
+				}()
+			}
+			close(ch)
+		}()
+
+		return ch
+	}
+
+	ch := walk(startCell, 0)
+
+	// receive the connectd synapses.
+	// channel is closed upstream when we reach the end (? how ?)
+	for synapseToOutputCell := range ch {
+		synapsesToEnd[synapseToOutputCell] = true
+	}
+
+	needSynapses := minSynapses - len(synapsesToEnd)
+	if needSynapses > 0 {
+		// add cells and synapases around the last cell we saw
+		for i := 0; i < needSynapses; i++ {
+			synapse := NewSynapse()
+			network.Synapses[synapse.ID] = synapse
+			synapse.Network = network
+			synapse.Millivolts = int8(synapseMax)
+
+			synapse.FromNeuronAxon = lastCellID
+			synapse.ToNeuronDendrite = endCell
+		}
+	}
+
+	return synapsesAdded
 }
 
 /*

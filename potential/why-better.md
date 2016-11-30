@@ -4,7 +4,7 @@
 
 #### The vast majority of the math operations will be simple addition and subtraction
 
-Normally there's all this matrix multiplication, sigmoids, logrithms, math loops within loops,
+Normally there's all this matrix multiplication, sigmoids, logarithms, math loops within loops,
 and other expensive things which must be computed on a GPU with hard-to-conceptualize GPU
 programming. This leads to abstraction libraries that can be easy-ish, yet contain inflexible
 concepts. The high barrier of entry to those who are not hardcore programmers remains below the
@@ -12,8 +12,9 @@ surface. There are fewer hardcore programmers than regular programmers want you 
 
 #### Parallelizable design by nature
 
-Copy the network, train it on some data on each copy, capture the diff, then merge it back to
-master at a given point.
+We can copy the network, train it on some data on each copy, capture the diff, then merge it back
+to the master network at a given point. The network structure is supposed to change over time.
+Unlike things like LSTMs, this is explicitly designed to expand and contract in size over time.
 
 #### Able to be distributed
 
@@ -23,7 +24,8 @@ the key part here. You fast forward each set of weights later when you reconvene
 
 What it means if you can take a new or partially trained network, copy it, split up your
 computation onto multiple machines, split it again to take advantage of all cores, then
-merge back to master.
+merge back to master. There can be more noise than perfectly constructed mathematical models,
+but the additional noise is a small price to pay for distributed process.
 
 #### Designed to get around overfitting/overtraining
 
@@ -34,12 +36,16 @@ to avoid overfitting in the future.
 
 #### Keep growing the network
 
-##### More neurons
+##### Add more neurons
 If the network is not performing well on a new dataset, then you can add more neurons and synapses
-and keep trying. No training is really lost.
+and keep trying. The training which already took place is just lost if you want to make the network
+larger.
 
 Traditional neural networks seem to suffer from the ability to not be able to change their
 size - number of layers and number of cells per layer.
+
+Because the size is not fixed, one could, in theory, grow the same network for years, pushing the
+boundaries of computer hardware.
 
 ##### New input types
 

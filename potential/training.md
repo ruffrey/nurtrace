@@ -49,7 +49,7 @@ This enables multithreaded training:
 - copy it 8x
 - grab 8 difference sentences
 - retain a master original snaptshot of the network
-- run your training trial on a sentence, backpropagating the whole time
+- run your training trial on a sentence
 - diff the master original and each freshly trained copy network
 - apply the diff to the master original
 - now the network has been trained on 8 sentences at once

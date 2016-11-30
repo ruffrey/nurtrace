@@ -125,7 +125,7 @@ func (cell *Cell) FireActionPotential() {
 	// activate all synapses on its axon
 	for synapseID := range cell.AxonSynapses {
 		synapse := cell.Network.Synapses[synapseID]
-		fmt.Println("  activating synapse", synapse, "\n  from cell", cell.ID, "disabled=", cell.Network.Disabled)
+		// fmt.Println("  activating synapse", synapse, "\n  from cell", cell.ID, "disabled=", cell.Network.Disabled)
 		synapse.Activate()
 	}
 
@@ -141,7 +141,7 @@ Care is taken to prevent the tiny int8 variables from overflowing.
 Voltage may not change for a few milliseconds depending on `SynapseEffectDelayMillis`.
 */
 func (cell *Cell) ApplyVoltage(change int8, fromSynapse *Synapse) {
-	fmt.Println("ApplyVoltage", cell.ID, cell.Network.Disabled, &cell.Network)
+	// fmt.Println("ApplyVoltage", cell.ID, cell.Network.Disabled, &cell.Network)
 	if cell.Network.Disabled {
 		// disable more voltage applications from cells once the network has been disabled,
 		// which will let the network firings sizzle out after a refractory period or so.
