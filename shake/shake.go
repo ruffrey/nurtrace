@@ -117,7 +117,12 @@ func main() {
 					// of cells.
 					fmt.Println("disgarding growth for thread=", thread, "and adding more connections")
 					for _, vocabItem := range vocab {
+						// finish := make(chan bool)
+						// go func() {
 						net.GrowPathBetween(vocabItem.InputCell, vocabItem.OutputCell, 20)
+						// finish <- true
+						// }()
+						// <-finish
 					}
 					diff := potential.DiffNetworks(network, net)
 					fmt.Println("applying growth diff for thread=", thread)
