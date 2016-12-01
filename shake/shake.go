@@ -11,7 +11,7 @@ import (
 )
 
 func main() {
-	threads := 10
+	threads := 20
 
 	// start by initializing the network from disk or whatever
 	var network *potential.Network
@@ -39,7 +39,7 @@ func main() {
 
 	network.Disabled = true // we just will never need it to fire
 
-	bytes, err := ioutil.ReadFile("short.txt")
+	bytes, err := ioutil.ReadFile("shake.txt")
 	if err != nil {
 		panic(err)
 	}
