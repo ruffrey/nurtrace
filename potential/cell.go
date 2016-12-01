@@ -152,7 +152,7 @@ func (cell *Cell) ApplyVoltage(change int8, fromSynapse *Synapse) {
 	if cell.Network.Disabled {
 		// disable more voltage applications from cells once the network has been disabled,
 		// which will let the network firings sizzle out after a refractory period or so.
-		fmt.Println("warn: attempt to fire action potential when network disabled")
+		fmt.Println("warn: attempt to apply voltage when network disabled")
 		return
 	}
 	go func(cell *Cell) {

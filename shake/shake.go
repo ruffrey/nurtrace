@@ -20,7 +20,7 @@ func main() {
 		fmt.Println("No existing network in file; creating new one.", err)
 		newN := potential.NewNetwork()
 		network = &newN
-		neuronsToAdd := 10000
+		neuronsToAdd := 1000
 		defaultNeuronSynapses := 10
 		synapsesToAdd := 0
 		network.Grow(neuronsToAdd, defaultNeuronSynapses, synapsesToAdd)
@@ -98,18 +98,22 @@ func main() {
 		time.AfterFunc(50*time.Millisecond, func() {
 			for thread := 0; thread < threads; thread++ {
 				r := results[thread]
+				net := networkCopies[r.threadIndex]
 				if r.succeeded { // keep the training
-					net := networkCopies[r.threadIndex]
 					diff := potential.DiffNetworks(network, net)
 					fmt.Println("applying diff for thread=", thread)
 					potential.ApplyDiff(diff, network)
 				} else {
 					// We failed to generate the desired effect, so do a significant growth
 					// of cells.
-					// fmt.Println("disgarding growth for thread=", thread)
+					fmt.Println("disgarding growth for thread=", thread, "and adding more connections")
+					for _, vocabItem := range vocab {
+						net.GrowPathBetween(vocabItem.InputCell, vocabItem.OutputCell, 20)
+					}
 				}
 			}
-			network.Grow(50, 20, 200)
+			network.GrowRandomNeurons(20, 10)
+			network.GrowRandomSynapses(100)
 			done <- true
 		})
 		<-done
