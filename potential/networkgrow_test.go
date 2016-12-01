@@ -1,6 +1,7 @@
 package potential
 
 import (
+	"strconv"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -102,7 +103,54 @@ func Test_GrowPathBetween(t *testing.T) {
 	})
 	t.Run("does not find synapses past the maxHops", func(t *testing.T) {
 		before()
+		n := NewNetwork()
+		network = &n
 
+		var lastCell *Cell
+		var lastHoppedCell *Cell
+
+		input := NewCell()
+		network.Cells[input.ID] = input
+		input.Tag = "input"
+		output := NewCell()
+		output.Tag = "output"
+		network.Cells[output.ID] = output
+
+		lastCell = input
+
+		// make a single path from input to output that is longer than the max hops
+		// minimum value of 20
+		for i := 0; i < 25; i++ {
+			s := NewSynapse()
+			network.Synapses[s.ID] = s
+			c := NewCell()
+			network.Cells[c.ID] = c
+
+			s.FromNeuronAxon = lastCell.ID
+			lastCell.AxonSynapses[s.ID] = true
+			s.ToNeuronDendrite = c.ID
+			c.DendriteSynapses[s.ID] = true
+			c.Tag = strconv.Itoa(i)
+			lastCell = c
+			if i == 18 {
+				lastHoppedCell = c
+			}
+		}
+
+		// pre test checks
+		// these next two cells will be linked together
+		assert.Equal(t, 0, len(output.DendriteSynapses))
+		assert.Equal(t, 1, len(lastHoppedCell.AxonSynapses))
+		lastHoppedCell.Tag += " last hopped cell"
+
+		endSynapses, addedSynapses := network.GrowPathBetween(input.ID, output.ID, 10)
+
+		// test assertions
+		assert.Equal(t, 0, len(endSynapses))
+		assert.Equal(t, 10, len(addedSynapses))
+		assert.Equal(t, 35, len(network.Synapses))
+		assert.Equal(t, 10, len(output.DendriteSynapses))
+		assert.Equal(t, 11, len(lastHoppedCell.AxonSynapses))
 	})
 	t.Run("does not panic on a large network with many synapses", func(t *testing.T) {
 		n := NewNetwork()

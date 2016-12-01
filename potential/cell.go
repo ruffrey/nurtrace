@@ -94,6 +94,10 @@ type Cell struct {
 	   WasFired is used during training to know if this cell fired during the session
 	*/
 	WasFired bool
+	/*
+		Purely informational, for use when testing or debugging.
+	*/
+	Tag string
 }
 
 /*

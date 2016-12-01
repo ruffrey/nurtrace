@@ -112,17 +112,22 @@ func (network *Network) GrowPathBetween(startCell, endCell CellID, minSynapses i
 
 	needSynapses := minSynapses - len(synapsesToEnd)
 	if needSynapses > 0 {
-		// add cells and synapases around the last cell we saw
+		// Add cells and synapases from the last cell we saw to the output.
+		// Whatever the last cell at `maxHops` from the input was, will get
+		// `needSynapses` more synapses directly to the `endCell`.
 		for i := 0; i < needSynapses; i++ {
 			synapse := NewSynapse()
 			network.Synapses[synapse.ID] = synapse
 			synapsesAdded[synapse.ID] = true
 			synapse.Network = network
-			// arbitrarily decided to set the synapses to the highest value allowed
+			// somewhat arbitrarily decided to set the synapses to the highest value allowed
 			synapse.Millivolts = int8(synapseMax)
 
 			synapse.FromNeuronAxon = lastCellID
+			network.Cells[lastCellID].AxonSynapses[synapse.ID] = true
+
 			synapse.ToNeuronDendrite = endCell
+			network.Cells[endCell].DendriteSynapses[synapse.ID] = true
 		}
 	}
 	return synapsesToEnd, synapsesAdded
