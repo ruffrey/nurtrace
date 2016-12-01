@@ -5,6 +5,7 @@
 [ ] NewCellID and NewSynapseID should be an instance method on a network to ensure
 no ID collisions occur
 [ ] build charrnn sampling code
+[ ] add tests for synapse/cell integrity testing before and after growth, pruning, and diffing
 
 ## Optimizations
 [ ] use int32 for IDs
