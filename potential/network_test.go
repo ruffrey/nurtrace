@@ -3,6 +3,7 @@ package potential
 import (
 	"fmt"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -24,6 +25,24 @@ func Test_NewNetwork(t *testing.T) {
 		original.Grow(0, 0, 0)
 	})
 
+}
+
+func Test_BasicNetworkFiring(t *testing.T) {
+	t.Run("does not panic during forced FireActionPotential", func(t *testing.T) {
+		network := NewNetwork()
+		neuronsToAdd := 50
+		defaultNeuronSynapses := 10
+		synapsesToAdd := 100
+		network.Grow(neuronsToAdd, defaultNeuronSynapses, synapsesToAdd)
+		iterations := 1000
+		for i := 1; i < iterations; i++ {
+			cellID := network.RandomCellKey()
+			cell := network.Cells[cellID]
+			cell.FireActionPotential()
+			time.Sleep(1 * time.Millisecond)
+		}
+		time.Sleep(100 * time.Millisecond)
+	})
 }
 
 func Test_PruneSynapse(t *testing.T) {
