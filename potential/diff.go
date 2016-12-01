@@ -183,8 +183,13 @@ func copyCellToNetwork(cell *Cell, newNetwork *Network) {
 	copiedCell.Immortal = cell.Immortal
 	copiedCell.activating = cell.activating
 	copiedCell.Voltage = cell.Voltage
-	copiedCell.AxonSynapses = cell.AxonSynapses
-	copiedCell.DendriteSynapses = cell.DendriteSynapses
+	// golang does not copy a map on assignment; must loop over it.
+	for id := range cell.AxonSynapses {
+		copiedCell.AxonSynapses[id] = true
+	}
+	for id := range cell.DendriteSynapses {
+		copiedCell.DendriteSynapses[id] = true
+	}
 }
 
 /*
