@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"strings"
+	"sync"
 	"time"
 )
 
@@ -20,7 +21,7 @@ func main() {
 		fmt.Println("No existing network in file; creating new one.", err)
 		newN := potential.NewNetwork()
 		network = &newN
-		neuronsToAdd := 1000
+		neuronsToAdd := 2000
 		defaultNeuronSynapses := 10
 		synapsesToAdd := 0
 		network.Grow(neuronsToAdd, defaultNeuronSynapses, synapsesToAdd)
@@ -38,7 +39,7 @@ func main() {
 
 	network.Disabled = true // we just will never need it to fire
 
-	bytes, err := ioutil.ReadFile("shake.txt")
+	bytes, err := ioutil.ReadFile("short.txt")
 	if err != nil {
 		panic(err)
 	}
@@ -48,30 +49,32 @@ func main() {
 
 	vocab := charrnn.NewVocab(text, network)
 
-	fmt.Println("Loaded vocab, lenth=", len(vocab))
+	fmt.Println("Loaded vocab, length=", len(vocab))
 
 	fmt.Println("Beginning training", threads, "simultaneous sessions")
 
 	totalLines := len(lines)
 	for i := 0; i < totalLines; {
-		threadsFinished := 0
+		var wg sync.WaitGroup
 
 		// train in parallel over this number of threads
 		ch := make(chan processResult)
+
 		networkCopies := make(map[int]*potential.Network)
 		results := make(map[int]processResult)
 		for thread := 0; thread < threads; thread++ {
 			if i >= totalLines { // ran out of lines
-				threadsFinished = threads
 				break
 			}
+
 			line := lines[i]
 			net := potential.CloneNetwork(network)
 			net.GrowRandomNeurons(20, 10)
 			net.GrowRandomSynapses(100)
 			// fmt.Println("starting thread", thread)
 			go func(net *potential.Network, thread int) {
-				processLine(thread, line, net, vocab, ch)
+				wg.Add(1)
+				processLine(thread, line, net, vocab, ch, &wg)
 			}(net, thread)
 
 			networkCopies[thread] = net
@@ -80,14 +83,14 @@ func main() {
 
 		}
 
+		go func() {
+			wg.Wait()
+			close(ch)
+		}()
+
 		// read results from the threads as they come in
 		for result := range ch {
-			// fmt.Println("finished thread", threadsFinished)
-			threadsFinished++
 			results[result.threadIndex] = result
-			if threadsFinished >= threads {
-				close(ch)
-			}
 		}
 
 		// now that all threads are finished, read their results and modify the network in
@@ -110,19 +113,19 @@ func main() {
 				} else {
 					// We failed to generate the desired effect, so do a significant growth
 					// of cells.
-					// fmt.Println("disgarding growth for thread=", thread, "and adding more connections")
-					// for _, vocabItem := range vocab {
-					// 	net.GrowPathBetween(vocabItem.InputCell, vocabItem.OutputCell, 20)
-					// }
-					// diff := potential.DiffNetworks(network, net)
-					// fmt.Println("applying growth diff for thread=", thread)
-					// potential.ApplyDiff(diff, network)
+					fmt.Println("disgarding growth for thread=", thread, "and adding more connections")
+					for _, vocabItem := range vocab {
+						net.GrowPathBetween(vocabItem.InputCell, vocabItem.OutputCell, 20)
+					}
+					diff := potential.DiffNetworks(network, net)
+					fmt.Println("applying growth diff for thread=", thread)
+					potential.ApplyDiff(diff, network)
 				}
 			}
 			done <- true
 		})
 		<-done
-		fmt.Println("Round of lines done, line=", i)
+		fmt.Println("Round of lines done, line=", i, "/", totalLines)
 	}
 
 	err = network.SaveToFile("network.json")
@@ -144,7 +147,7 @@ processLine fires this entire line in the neural network at once, hoping to get 
 
 It will not add any synapses.
 */
-func processLine(thread int, line string, network *potential.Network, vocab charrnn.Vocab, ch chan processResult) {
+func processLine(thread int, line string, network *potential.Network, vocab charrnn.Vocab, ch chan processResult, wg *sync.WaitGroup) {
 	lineChars := strings.Split(line, "")
 
 	result := processResult{threadIndex: thread}
@@ -189,4 +192,5 @@ func processLine(thread int, line string, network *potential.Network, vocab char
 	// fmt.Println(wasSuccessful, succeeded, "/", len(lineChars), "\n  ", line)
 	result.succeeded = wasSuccessful
 	ch <- result
+	wg.Done()
 }

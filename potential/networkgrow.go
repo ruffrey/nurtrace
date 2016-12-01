@@ -215,7 +215,7 @@ func (network *Network) Prune() {
 GrowRandomNeurons will randomly add neurons with the default number of synapses to the network.
 */
 func (network *Network) GrowRandomNeurons(neuronsToAdd, defaultNeuronSynapses int) {
-	fmt.Println("  adding neurons =", neuronsToAdd)
+	// fmt.Println("  adding neurons =", neuronsToAdd)
 	// Now - all the new neurons are added first with no synapses. If synapses were added at
 	// create time, the newer neurons would end up with far fewer connections to the following
 	// newer neurons.
@@ -228,7 +228,7 @@ func (network *Network) GrowRandomNeurons(neuronsToAdd, defaultNeuronSynapses in
 	}
 	// fmt.Println("  done")
 
-	fmt.Println("  adding default synapses to new neurons", defaultNeuronSynapses)
+	// fmt.Println("  adding default synapses to new neurons", defaultNeuronSynapses)
 
 	// Now we add the default number of synapses to our new neurons, with random other neurons.
 	// Create the synapse, then choose a random cell from the network, then choose whether
@@ -261,7 +261,7 @@ func (network *Network) GrowRandomNeurons(neuronsToAdd, defaultNeuronSynapses in
 			i++
 		}
 	}
-	fmt.Println("  GrowRandomNeurons done")
+	// fmt.Println("  GrowRandomNeurons done")
 }
 
 /*
@@ -291,7 +291,7 @@ func (network *Network) GrowRandomSynapses(synapsesToAdd int) {
 		// fmt.Println("created synapse", synapse)
 		i++
 	}
-	fmt.Println("  GrowRandomSynapses done")
+	// fmt.Println("  GrowRandomSynapses done")
 
 }
 
