@@ -233,6 +233,7 @@ func (network *Network) GrowRandomNeurons(neuronsToAdd, defaultNeuronSynapses in
 	// Now we add the default number of synapses to our new neurons, with random other neurons.
 	// Create the synapse, then choose a random cell from the network, then choose whether
 	// this new cell will be a sender or receiver.
+
 	for _, cell := range addedNeurons {
 		for i := 0; i < defaultNeuronSynapses; {
 			ix := network.RandomCellKey()

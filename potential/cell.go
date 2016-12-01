@@ -126,20 +126,36 @@ func (cell *Cell) FireActionPotential() {
 	cell.WasFired = true
 	cell.activating = true
 
+	done := make(chan bool)
 	// activate all synapses on its axon
-	for synapseID := range cell.AxonSynapses {
-		synapse := cell.Network.Synapses[synapseID]
-		// fmt.Println("  activating synapse", synapse, "\n  from cell", cell.ID)
-		err := synapse.Activate()
-		if err != nil {
-			fmt.Println("cell fire err:", err)
+	// using a goroutine seems to help avoid crashes where there are concurrent
+	// reads and writes of the same map. That would happen if
+	go func() {
+		for synapseID := range cell.AxonSynapses {
+			if cell.Network.Disabled {
+				// This will likely happen when setting the network to disabled, because
+				// timeouts will still need to wait to finish then try to fire the network.
+				// While technically it should be ok to let the network fizzle out on its
+				// own in the ApplyVoltage check for network being disabled, stopping here
+				// will save some precious CPU.
+				// fmt.Println("warn: network stopped during FireActionPotential")
+				break
+			}
+			synapse := cell.Network.Synapses[synapseID]
+			// fmt.Println("  activating synapse", synapse, "\n  from cell", cell.ID)
+			err := synapse.Activate()
+			if err != nil {
+				fmt.Println("cell fire err:", err)
+			}
 		}
-	}
+		done <- true
+	}()
 
 	time.AfterFunc(RefractoryPeriodMillis*time.Millisecond, func() {
 		cell.Voltage = apResting
 		cell.activating = false
 	})
+	<-done
 }
 
 /*
@@ -152,9 +168,10 @@ func (cell *Cell) ApplyVoltage(change int8, fromSynapse *Synapse) {
 	if cell.Network.Disabled {
 		// disable more voltage applications from cells once the network has been disabled,
 		// which will let the network firings sizzle out after a refractory period or so.
-		fmt.Println("warn: attempt to apply voltage when network disabled")
+		// fmt.Println("warn: attempt to apply voltage when network disabled")
 		return
 	}
+
 	go func(cell *Cell) {
 		time.Sleep(SynapseEffectDelayMillis * time.Millisecond)
 		if cell.activating {
@@ -173,5 +190,4 @@ func (cell *Cell) ApplyVoltage(change int8, fromSynapse *Synapse) {
 		}
 		cell.Voltage = int8(newPossibleVoltage)
 	}(cell)
-
 }
