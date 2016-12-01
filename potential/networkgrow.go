@@ -81,12 +81,16 @@ func (network *Network) GrowPathBetween(startCell, endCell CellID, minSynapses i
 		wg.Add(1)
 		// look at the next cells in the axon chain from this one, to see
 		// if any are the endCell then send it down the channel.
-		getReceiverCellFromSynapse := func(synapseId SynapseID) CellID {
-			return network.Synapses[synapseId].ToNeuronDendrite
-		}
 		go func() {
 			for axonSynapseID := range network.Cells[cellID].AxonSynapses {
-				receiverCellID := getReceiverCellFromSynapse(axonSynapseID)
+				s, exists := network.Synapses[axonSynapseID]
+				if !exists {
+					fmt.Println("warn: synapse does not exist", axonSynapseID,
+						"from cell=", cellID)
+					continue
+				}
+				receiverCellID := s.ToNeuronDendrite
+
 				if receiverCellID == endCell {
 					ch <- axonSynapseID
 				}
@@ -211,7 +215,7 @@ func (network *Network) Prune() {
 GrowRandomNeurons will randomly add neurons with the default number of synapses to the network.
 */
 func (network *Network) GrowRandomNeurons(neuronsToAdd, defaultNeuronSynapses int) {
-	// fmt.Println("  adding neurons =", neuronsToAdd)
+	fmt.Println("  adding neurons =", neuronsToAdd)
 	// Now - all the new neurons are added first with no synapses. If synapses were added at
 	// create time, the newer neurons would end up with far fewer connections to the following
 	// newer neurons.
@@ -225,19 +229,23 @@ func (network *Network) GrowRandomNeurons(neuronsToAdd, defaultNeuronSynapses in
 	// fmt.Println("  done")
 
 	fmt.Println("  adding default synapses to new neurons", defaultNeuronSynapses)
+
 	// Now we add the default number of synapses to our new neurons, with random other neurons.
+	// Create the synapse, then choose a random cell from the network, then choose whether
+	// this new cell will be a sender or receiver.
 	for _, cell := range addedNeurons {
 		for i := 0; i < defaultNeuronSynapses; {
-			synapse := NewSynapse()
-			network.Synapses[synapse.ID] = synapse
-			synapse.Network = network
-
 			ix := network.RandomCellKey()
 			otherCell := network.Cells[ix]
 			if cell.ID == otherCell.ID {
 				// try again
 				continue
 			}
+
+			synapse := NewSynapse()
+			network.Synapses[synapse.ID] = synapse
+			synapse.Network = network
+
 			if chooseIfSender() {
 				synapse.FromNeuronAxon = cell.ID
 				synapse.ToNeuronDendrite = otherCell.ID

@@ -10,7 +10,7 @@ import (
 )
 
 func main() {
-	threads := 50
+	threads := 10
 
 	// start by initializing the network from disk or whatever
 	var network *potential.Network
@@ -66,11 +66,16 @@ func main() {
 				break
 			}
 			line := lines[i]
-			networkCopies[thread] = potential.CloneNetwork(network)
+			net := potential.CloneNetwork(network)
+			net.GrowRandomNeurons(20, 10)
+			net.GrowRandomSynapses(100)
 			// fmt.Println("starting thread", thread)
 			go func(net *potential.Network, thread int) {
 				processLine(thread, line, net, vocab, ch)
-			}(networkCopies[thread], thread)
+			}(net, thread)
+
+			networkCopies[thread] = net
+
 			i++
 
 		}
@@ -89,8 +94,7 @@ func main() {
 		// series
 
 		// End all network firings, let them finish, then do diffing or growing.
-		for ix, net := range networkCopies {
-			fmt.Println("disabling network", ix, &net)
+		for _, net := range networkCopies {
 			net.Disabled = true
 		}
 
@@ -101,19 +105,20 @@ func main() {
 				net := networkCopies[r.threadIndex]
 				if r.succeeded { // keep the training
 					diff := potential.DiffNetworks(network, net)
-					fmt.Println("applying diff for thread=", thread)
+					fmt.Println("applying natural diff for thread=", thread)
 					potential.ApplyDiff(diff, network)
 				} else {
 					// We failed to generate the desired effect, so do a significant growth
 					// of cells.
-					fmt.Println("disgarding growth for thread=", thread, "and adding more connections")
-					for _, vocabItem := range vocab {
-						net.GrowPathBetween(vocabItem.InputCell, vocabItem.OutputCell, 20)
-					}
+					// fmt.Println("disgarding growth for thread=", thread, "and adding more connections")
+					// for _, vocabItem := range vocab {
+					// 	net.GrowPathBetween(vocabItem.InputCell, vocabItem.OutputCell, 20)
+					// }
+					// diff := potential.DiffNetworks(network, net)
+					// fmt.Println("applying growth diff for thread=", thread)
+					// potential.ApplyDiff(diff, network)
 				}
 			}
-			network.GrowRandomNeurons(20, 10)
-			network.GrowRandomSynapses(100)
 			done <- true
 		})
 		<-done

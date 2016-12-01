@@ -129,7 +129,7 @@ func (cell *Cell) FireActionPotential() {
 	// activate all synapses on its axon
 	for synapseID := range cell.AxonSynapses {
 		synapse := cell.Network.Synapses[synapseID]
-		// fmt.Println("  activating synapse", synapse, "\n  from cell", cell.ID, "disabled=", cell.Network.Disabled)
+		// fmt.Println("  activating synapse", synapse, "\n  from cell", cell.ID)
 		err := synapse.Activate()
 		if err != nil {
 			fmt.Println("cell fire err:", err)

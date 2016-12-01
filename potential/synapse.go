@@ -58,6 +58,9 @@ func NewSynapse() *Synapse {
 Activate is when the dendrite receives voltage.
 */
 func (synapse *Synapse) Activate() (err error) {
+	if synapse == nil {
+		fmt.Println("critical error: synapse is nil", synapse)
+	}
 	synapse.ActivationHistory++
 	dendriteCell, exists := synapse.Network.Cells[synapse.ToNeuronDendrite]
 	if !exists {
