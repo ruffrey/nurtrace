@@ -28,9 +28,7 @@ func main() {
 	}
 	fmt.Println("\nAfter activation\n ")
 	printNetwork(&network)
-	network.Equilibrium()
 	time.Sleep(2 * time.Second)
-	network.Equilibrium()
 	fmt.Println("\nFinal\n ")
 	printNetwork(&network)
 }

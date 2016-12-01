@@ -117,21 +117,6 @@ func chooseIfSender() bool {
 }
 
 /*
-Equilibrium should run periodically to bring all cells closer to their apResting voltage.
-
-TODO: not in use currently, but should be during long running training.
-*/
-func (network *Network) Equilibrium() {
-	for _, cell := range network.Cells {
-		if cell.Voltage != apResting {
-			voltageDiff := cell.Voltage - apResting
-			// get halfway to resting
-			cell.Voltage -= (voltageDiff / 2)
-		}
-	}
-}
-
-/*
 ResetForTraining resets transient properties on the network to their base resting state.
 */
 func (network *Network) ResetForTraining() {
