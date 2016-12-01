@@ -11,7 +11,7 @@ import (
 )
 
 func main() {
-	threads := 20
+	threads := 1
 
 	// start by initializing the network from disk or whatever
 	var network *potential.Network
@@ -27,11 +27,11 @@ func main() {
 		network.Grow(neuronsToAdd, defaultNeuronSynapses, synapsesToAdd)
 		fmt.Println("Created network")
 		fmt.Println("Saving to disk")
-		err = network.SaveToFile("network.json")
-		if err != nil {
-			fmt.Println(err)
-			return
-		}
+		// err = network.SaveToFile("network.json")
+		// if err != nil {
+		// 	fmt.Println(err)
+		// 	return
+		// }
 	} else {
 		network = &n
 		fmt.Println("Loaded network from disk,", len(network.Cells), "cells")
@@ -39,7 +39,7 @@ func main() {
 
 	network.Disabled = true // we just will never need it to fire
 
-	bytes, err := ioutil.ReadFile("shake.txt")
+	bytes, err := ioutil.ReadFile("short.txt")
 	if err != nil {
 		panic(err)
 	}
@@ -72,9 +72,10 @@ func main() {
 			net.GrowRandomNeurons(20, 10)
 			net.GrowRandomSynapses(100)
 			// fmt.Println("starting thread", thread)
+			wg.Add(1)
 			go func(net *potential.Network, thread int) {
-				wg.Add(1)
-				processLine(thread, line, net, vocab, ch, &wg)
+				processLine(thread, line, net, vocab, ch)
+				wg.Done()
 			}(net, thread)
 
 			networkCopies[thread] = net
@@ -97,12 +98,13 @@ func main() {
 		// series
 
 		// End all network firings, let them finish, then do diffing or growing.
-		for _, net := range networkCopies {
+		for ix, net := range networkCopies {
+			fmt.Println("disabling network=", ix)
 			net.Disabled = true
 		}
 
 		done := make(chan bool)
-		time.AfterFunc(50*time.Millisecond, func() {
+		time.AfterFunc(100*time.Millisecond, func() {
 			for thread := 0; thread < threads; thread++ {
 				r := results[thread]
 				net := networkCopies[r.threadIndex]
@@ -147,7 +149,7 @@ processLine fires this entire line in the neural network at once, hoping to get 
 
 It will not add any synapses.
 */
-func processLine(thread int, line string, network *potential.Network, vocab charrnn.Vocab, ch chan processResult, wg *sync.WaitGroup) {
+func processLine(thread int, line string, network *potential.Network, vocab charrnn.Vocab, ch chan processResult) {
 	lineChars := strings.Split(line, "")
 
 	result := processResult{threadIndex: thread}
@@ -172,7 +174,7 @@ func processLine(thread int, line string, network *potential.Network, vocab char
 		}
 
 		network.ResetForTraining()
-		sleepTime := potential.RefractoryPeriodMillis * 2 * time.Millisecond
+		sleepTime := (potential.RefractoryPeriodMillis + 1) * time.Millisecond
 
 		for i := 0; i < 10; i++ {
 			doneChan := make(chan bool)
@@ -192,5 +194,4 @@ func processLine(thread int, line string, network *potential.Network, vocab char
 	// fmt.Println(wasSuccessful, succeeded, "/", len(lineChars), "\n  ", line)
 	result.succeeded = wasSuccessful
 	ch <- result
-	wg.Done()
 }
