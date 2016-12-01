@@ -43,37 +43,42 @@ After `maxHops`, if there are not minSynapses, we create synapses at that layer.
 
 TODO: finish GrowPathBetween
 */
-func (network *Network) GrowPathBetween(startCell, endCell CellID, minSynapses int) (synapsesAdded int) {
-	synapsesAdded = 0
+func (network *Network) GrowPathBetween(startCell, endCell CellID, minSynapses int) (synapsesToEnd map[SynapseID]bool, synapsesAdded map[SynapseID]bool) {
+	// these are the synapses we found that are on the path from the startCell,
+	// and attach directly to an endCell at the dendrite
+	synapsesToEnd = make(map[SynapseID]bool)
+	// any new synapses we create if there are not enough in the network that attach
+	// to the end cell
+	synapsesAdded = make(map[SynapseID]bool)
 
 	avgSynPerCell := float64(len(network.Synapses) / len(network.Cells))
-	// hardcoded number of max hops. this was arbitrary.
-	maxHops := int(math.Min(avgSynPerCell, 20.0))
+	// semi-hardcoded number of max hops. this was arbitrary.
+	maxHops := int(math.Max(math.Min(avgSynPerCell, 50.0), 20))
 
-	synapsesToEnd := make(map[SynapseID]bool)
-
-	var lastCellID CellID
 	mux := sync.Mutex{}
+	var lastCellID CellID
+	hops := 0
+	var wg sync.WaitGroup
+	ch := make(chan SynapseID)
 
 	// walk traverses the axons and see if any synapse leads to the end cell.
 	// hops is the layer we are on, *copied* on pass.
 	// this is a fan-out kind of traversal through a tree of cells and synapses.
 	// Note: need to fully declare it before assigning it, apparently because the
 	// runtime needs this to compile a recursive function.
-	var walk func(cellID CellID, hops int) chan SynapseID
-	walk = func(cellID CellID, hops int) chan SynapseID {
-		ch := make(chan SynapseID)
-
+	// TODO: refactor to be more elegant and use no mutexes or wait groups
+	// once i better understand goroutines and channels
+	var walk func(cellID CellID)
+	walk = func(cellID CellID) {
 		mux.Lock()
 		lastCellID = cellID
-		mux.Unlock()
 		hops++
-		if hops >= maxHops {
-			go func() {
-				close(ch)
-			}()
-			return ch
+		totalSynapsesFound := len(synapsesToEnd)
+		mux.Unlock()
+		if hops >= maxHops || totalSynapsesFound >= minSynapses {
+			return
 		}
+		wg.Add(1)
 		// look at the next cells in the axon chain from this one, to see
 		// if any are the endCell then send it down the channel.
 		getReceiverCellFromSynapse := func(synapseId SynapseID) CellID {
@@ -86,25 +91,22 @@ func (network *Network) GrowPathBetween(startCell, endCell CellID, minSynapses i
 					ch <- axonSynapseID
 				}
 				// also walk the axons of this cell, and pipe any values downstream.
-				childChan := walk(receiverCellID, hops)
-				go func() {
-					for childAxonSynapse := range childChan {
-						ch <- childAxonSynapse
-					}
-					close(childChan)
-				}()
+				walk(receiverCellID)
 			}
-			close(ch)
+			wg.Done()
 		}()
-
-		return ch
 	}
-
-	ch := walk(startCell, 0)
 
 	// receive the connectd synapses.
 	// channel is closed upstream when we reach the end (? how ?)
+	go func() {
+		walk(startCell)
+		wg.Wait()
+		close(ch)
+	}()
+
 	for synapseToOutputCell := range ch {
+		fmt.Println("synapseToOutputCell", synapseToOutputCell)
 		synapsesToEnd[synapseToOutputCell] = true
 	}
 
@@ -114,15 +116,16 @@ func (network *Network) GrowPathBetween(startCell, endCell CellID, minSynapses i
 		for i := 0; i < needSynapses; i++ {
 			synapse := NewSynapse()
 			network.Synapses[synapse.ID] = synapse
+			synapsesAdded[synapse.ID] = true
 			synapse.Network = network
+			// arbitrarily decided to set the synapses to the highest value allowed
 			synapse.Millivolts = int8(synapseMax)
 
 			synapse.FromNeuronAxon = lastCellID
 			synapse.ToNeuronDendrite = endCell
 		}
 	}
-
-	return synapsesAdded
+	return synapsesToEnd, synapsesAdded
 }
 
 /*
