@@ -106,7 +106,7 @@ func (network *Network) GrowPathBetween(startCell, endCell CellID, minSynapses i
 	}()
 
 	for synapseToOutputCell := range ch {
-		fmt.Println("synapseToOutputCell", synapseToOutputCell)
+		// fmt.Println("synapseToOutputCell", synapseToOutputCell)
 		synapsesToEnd[synapseToOutputCell] = true
 	}
 

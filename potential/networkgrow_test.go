@@ -1,17 +1,103 @@
 package potential
 
-import "testing"
+import (
+	"testing"
+
+	"github.com/stretchr/testify/assert"
+)
 
 func Test_GrowPathBetween(t *testing.T) {
 	var network *Network
+	var input *Cell
+	var output *Cell
+	var middle1 *Cell
+	var middle2 *Cell
+	var layer1A *Synapse
+	var layer1B *Synapse
+	var layer2C *Synapse
+	var layer2D *Synapse
 
 	before := func() {
 		n := NewNetwork()
 		network = &n
+
+		// synapses are in (parens)
+		//
+		//
+		//          (layer1A) - middle1 - (layer2C)
+		//         /                               \
+		// input -                                   - output
+		//         \                               /
+		//          (layer1B) - middle2 - (layer2D)
+
+		input = NewCell()
+		network.Cells[input.ID] = input
+		output = NewCell()
+		network.Cells[output.ID] = output
+
+		middle1 = NewCell()
+		network.Cells[middle1.ID] = middle1
+		middle2 = NewCell()
+		network.Cells[middle2.ID] = middle2
+
+		// setup synapses
+		layer1A = NewSynapse()
+		network.Synapses[layer1A.ID] = layer1A
+		layer1B = NewSynapse()
+		network.Synapses[layer1B.ID] = layer1B
+		layer2C = NewSynapse()
+		network.Synapses[layer2C.ID] = layer2C
+		layer2D = NewSynapse()
+		network.Synapses[layer2D.ID] = layer2D
+
+		// linking synapses
+
+		// top layer in diagram
+		input.AxonSynapses[layer1A.ID] = true
+		layer1A.FromNeuronAxon = input.ID
+		middle1.DendriteSynapses[layer1A.ID] = true
+		layer1A.ToNeuronDendrite = middle1.ID
+
+		middle1.AxonSynapses[layer2C.ID] = true
+		layer2C.FromNeuronAxon = middle1.ID
+		output.DendriteSynapses[layer2C.ID] = true
+		layer2C.ToNeuronDendrite = output.ID
+
+		// bottom layer in diagram
+		input.AxonSynapses[layer1B.ID] = true
+		layer1B.FromNeuronAxon = input.ID
+		middle2.DendriteSynapses[layer1B.ID] = true
+		layer1B.ToNeuronDendrite = middle2.ID
+
+		middle2.AxonSynapses[layer2D.ID] = true
+		layer2D.FromNeuronAxon = middle2.ID
+		output.DendriteSynapses[layer2D.ID] = true
+		layer2D.ToNeuronDendrite = output.ID
 	}
 
-	t.Run("finds all synapses connected to the end cell", func(t *testing.T) {
+	t.Run("finds all synapses connected to the end cell and does not add extra synapses", func(t *testing.T) {
 		before()
+
+		endSynapses, addedSynapses := network.GrowPathBetween(input.ID, output.ID, 2)
+
+		assert.Equal(t, 2, len(endSynapses))
+		assert.Equal(t, true, endSynapses[layer2C.ID])
+		assert.Equal(t, true, endSynapses[layer2D.ID])
+		assert.Equal(t, 0, len(addedSynapses))
+		assert.Equal(t, 4, len(network.Cells))
+		assert.Equal(t, 4, len(network.Synapses))
+	})
+	t.Run("adds synapses when the number of connections is below the minimum", func(t *testing.T) {
+		before()
+
+		endSynapses, addedSynapses := network.GrowPathBetween(input.ID, output.ID, 4)
+
+		assert.Equal(t, 2, len(endSynapses))
+		assert.Equal(t, true, endSynapses[layer2C.ID])
+		assert.Equal(t, true, endSynapses[layer2D.ID])
+		assert.Equal(t, 2, len(addedSynapses))
+		assert.Equal(t, 4, len(network.Cells))
+		assert.Equal(t, 6, len(network.Synapses))
 
 	})
 	t.Run("does not find synapses past the maxHops", func(t *testing.T) {
@@ -19,8 +105,9 @@ func Test_GrowPathBetween(t *testing.T) {
 
 	})
 	t.Run("does not panic on a large network with many synapses", func(t *testing.T) {
-		before()
-		network.Grow(5000, 10, 0)
+		n := NewNetwork()
+		network = &n
+		network.Grow(500, 10, 0)
 		input := network.RandomCellKey()
 		var output CellID
 		for {
@@ -30,13 +117,5 @@ func Test_GrowPathBetween(t *testing.T) {
 			}
 		}
 		network.GrowPathBetween(input, output, 10)
-	})
-	t.Run("adds synapses when the number of connections is below the minimum", func(t *testing.T) {
-		before()
-
-	})
-	t.Run("does not add synapses when the number of connections is at the minimum", func(t *testing.T) {
-		before()
-
 	})
 }
