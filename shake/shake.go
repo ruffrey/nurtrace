@@ -10,6 +10,15 @@ import (
 	"time"
 )
 
+const fireCharacterIterations = 4
+const initialNetworkNeurons = 2000
+const defaultNeuronSynapses = 10
+const pretrainNeuronsToGrow = 20
+const pretrainSynapsesToGrow = 100
+const growPathExpectedSynapses = 20
+const threads = 1
+const networkDisabledFizzleOutPeriod = 100 * time.Millisecond
+
 func main() {
 	threads := 1
 
@@ -21,8 +30,7 @@ func main() {
 		fmt.Println("No existing network in file; creating new one.", err)
 		newN := potential.NewNetwork()
 		network = &newN
-		neuronsToAdd := 2000
-		defaultNeuronSynapses := 10
+		neuronsToAdd := initialNetworkNeurons
 		synapsesToAdd := 0
 		network.Grow(neuronsToAdd, defaultNeuronSynapses, synapsesToAdd)
 		fmt.Println("Created network")
@@ -34,7 +42,8 @@ func main() {
 		// }
 	} else {
 		network = &n
-		fmt.Println("Loaded network from disk,", len(network.Cells), "cells")
+		fmt.Println("Loaded network from disk,", len(network.Cells), "cells",
+			len(network.Synapses), "synapses")
 	}
 
 	network.Disabled = true // we just will never need it to fire
@@ -69,8 +78,8 @@ func main() {
 
 			line := lines[i]
 			net := potential.CloneNetwork(network)
-			net.GrowRandomNeurons(20, 10)
-			net.GrowRandomSynapses(100)
+			net.GrowRandomNeurons(pretrainNeuronsToGrow, defaultNeuronSynapses)
+			net.GrowRandomSynapses(pretrainSynapsesToGrow)
 			// fmt.Println("starting thread", thread)
 			wg.Add(1)
 			go func(net *potential.Network, thread int) {
@@ -104,7 +113,9 @@ func main() {
 		}
 
 		done := make(chan bool)
-		time.AfterFunc(100*time.Millisecond, func() {
+		time.AfterFunc(networkDisabledFizzleOutPeriod, func() {
+			// TODO: move this back down into processLine and have it return a diff instead
+			// of results
 			for thread := 0; thread < threads; thread++ {
 				r := results[thread]
 				net := networkCopies[r.threadIndex]
@@ -119,7 +130,7 @@ func main() {
 					for _, vocabItem := range vocab {
 						// finish := make(chan bool)
 						// go func() {
-						net.GrowPathBetween(vocabItem.InputCell, vocabItem.OutputCell, 20)
+						net.GrowPathBetween(vocabItem.InputCell, vocabItem.OutputCell, growPathExpectedSynapses)
 						// finish <- true
 						// }()
 						// <-finish
@@ -141,7 +152,7 @@ func main() {
 		fmt.Println(err)
 		return
 	}
-	fmt.Println("Reached end")
+	fmt.Println("Done.", len(network.Cells), "cells", len(network.Synapses), "synapses")
 }
 
 type processResult struct {
@@ -179,14 +190,15 @@ func processLine(thread int, line string, network *potential.Network, vocab char
 		}
 
 		network.ResetForTraining()
-		sleepTime := (potential.RefractoryPeriodMillis + 1) * time.Millisecond
+		sleepTime := potential.RefractoryPeriodMillis * time.Millisecond
 
-		for i := 0; i < 10; i++ {
+		for i := 0; i < fireCharacterIterations; i++ {
 			doneChan := make(chan bool)
 			go func(i int) {
-				time.Sleep(sleepTime)
-				network.Cells[inChar.OutputCell].FireActionPotential()
-				doneChan <- true
+				time.AfterFunc(sleepTime, func() {
+					network.Cells[inChar.OutputCell].FireActionPotential()
+					doneChan <- true
+				})
 			}(i)
 			<-doneChan
 		}
