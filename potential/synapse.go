@@ -15,13 +15,13 @@ const synapseMax int = 10
 /*
 SynapseID is just a normal Go integer (probably int64).
 */
-type SynapseID int
+type SynapseID uint32
 
 /*
 NewSynapseID generates a new random SynapseID
 */
 func NewSynapseID() (sid SynapseID) {
-	return SynapseID(rand.Int())
+	return SynapseID(rand.Uint32())
 }
 
 /*

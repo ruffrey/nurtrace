@@ -42,17 +42,13 @@ const RefractoryPeriodMillis = 4
 /*
 CellID is a normal Go integer that should be unique for all cells in a network.
 */
-type CellID int
+type CellID uint32
 
 /*
 NewCellID makes a new random CellID.
 */
 func NewCellID() (cid CellID) {
-	i := rand.Int()
-	if i == 0 {
-		panic("Should never get zero from rand.Int()")
-	}
-	return CellID(i)
+	return CellID(rand.Uint32())
 }
 
 /*
