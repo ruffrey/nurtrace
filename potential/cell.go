@@ -172,8 +172,7 @@ func (cell *Cell) ApplyVoltage(change int8, fromSynapse *Synapse) {
 		return
 	}
 
-	go func(cell *Cell) {
-		time.Sleep(SynapseEffectDelayMillis * time.Millisecond)
+	time.AfterFunc(SynapseEffectDelayMillis*time.Millisecond, func() {
 		if cell.activating {
 			// Block during action potential cycle
 			return
@@ -189,5 +188,5 @@ func (cell *Cell) ApplyVoltage(change int8, fromSynapse *Synapse) {
 			cell.FireActionPotential()
 		}
 		cell.Voltage = int8(newPossibleVoltage)
-	}(cell)
+	})
 }
