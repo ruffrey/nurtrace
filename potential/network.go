@@ -61,7 +61,7 @@ func NewNetwork() Network {
 		Disabled: false,
 		Synapses: make(map[SynapseID]*Synapse),
 		Cells:    make(map[CellID]*Cell),
-		SynapseMinFireThreshold: 2,
+		SynapseMinFireThreshold: 4,
 		SynapseLearnRate:        1,
 	}
 }
@@ -124,9 +124,6 @@ func (network *Network) ResetForTraining() {
 		cell.activating = false
 		cell.WasFired = false
 		cell.Voltage = apResting
-	}
-	for _, synapse := range network.Synapses {
-		synapse.ActivationHistory = 0
 	}
 	network.Disabled = false
 }

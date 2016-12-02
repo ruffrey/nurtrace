@@ -12,9 +12,10 @@ type Diff struct {
 	NetworkVersion Shasum
 	/*
 	   synapses is a map where the keys are synapse IDs, and the value is the difference between
-	   the new and old network.
+	   the new and old network on the `syanpse.Millivolts` property.
 	*/
 	synapseDiffs  map[SynapseID]int8
+	synapseFires  map[SynapseID]uint
 	addedSynapses []*Synapse
 	/*
 	   removedSynapses is a list of the IDs of the synapses that no longer exist in the new network.
@@ -25,6 +26,10 @@ type Diff struct {
 	   removedCells is a list of the cell IDs that no longer exist in the new network.
 	*/
 	removedCells []CellID
+	/*
+	   Worker optionally indicates which worker this was on.
+	*/
+	Worker int
 }
 
 /*
@@ -33,15 +38,13 @@ NewDiff is a Diff factory
 func NewDiff() Diff {
 	return Diff{
 		synapseDiffs: make(map[SynapseID]int8),
+		synapseFires: make(map[SynapseID]uint),
 	}
 }
 
 /*
 DiffNetworks produces a diff from the original network, showing the forward changes
 from the newerNetwork.
-
-You can take the diff and apply it to the original network using addition,
-by looping through the synapses and adding it.
 */
 func DiffNetworks(originalNetwork, newerNetwork *Network) (diff Diff) {
 	diff = NewDiff()
@@ -58,6 +61,13 @@ func DiffNetworks(originalNetwork, newerNetwork *Network) (diff Diff) {
 		} else {
 			// this synapse already existed, so we will calculate the diff
 			diff.synapseDiffs[id] = newerNetworkSynapse.Millivolts - originalSynapse.Millivolts
+
+			// Track how many times it fired, so when many training sessions are in play
+			// we know if a cell should be considered for pruning. It is not a diff but will be
+			// added later.
+			if newerNetworkSynapse.ActivationHistory > 0 {
+				diff.synapseFires[id] = newerNetworkSynapse.ActivationHistory
+			}
 		}
 	}
 	// Check if any synapses were removed
@@ -125,10 +135,13 @@ func ApplyDiff(diff Diff, originalNetwork *Network) (err error) {
 		originalNetwork.Cells[synapse.ToNeuronDendrite].DendriteSynapses[synapse.ID] = true
 	}
 
-	// Update voltages on existing synapses
+	// Update voltages and activations on existing synapses
 	for synapseID, diffValue := range diff.synapseDiffs {
-		synapse := originalNetwork.Synapses[synapseID]
-		synapse.Millivolts += diffValue
+		originalNetwork.Synapses[synapseID].Millivolts += diffValue
+	}
+	// add the activation history
+	for synapseID, activations := range diff.synapseFires {
+		originalNetwork.Synapses[synapseID].ActivationHistory += activations
 	}
 
 	// Remove synapses

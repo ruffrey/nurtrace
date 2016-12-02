@@ -9,11 +9,11 @@ import (
 
 // Represents how many millivolts a synapse can modify the cell's voltage which receives
 // its firings.
-const synapseMin int = -10
-const synapseMax int = 10
+const synapseMin int = -15
+const synapseMax int = 15
 
 /*
-SynapseID is just a normal Go integer (probably int64).
+SynapseID should be unique for all the synapses in the network.
 */
 type SynapseID uint32
 

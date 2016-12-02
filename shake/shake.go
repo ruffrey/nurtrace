@@ -8,6 +8,8 @@ import (
 	"strings"
 	"sync"
 	"time"
+
+	"github.com/pkg/profile"
 )
 
 const fireCharacterIterations = 4
@@ -20,7 +22,8 @@ const threads = 1
 const networkDisabledFizzleOutPeriod = 100 * time.Millisecond
 
 func main() {
-	threads := 1
+	// defer profile.Start(profile.MemProfile).Stop()
+	defer profile.Start(profile.CPUProfile).Stop()
 
 	// start by initializing the network from disk or whatever
 	var network *potential.Network
@@ -67,10 +70,10 @@ func main() {
 		var wg sync.WaitGroup
 
 		// train in parallel over this number of threads
-		ch := make(chan processResult)
+		ch := make(chan potential.Diff)
 
 		networkCopies := make(map[int]*potential.Network)
-		results := make(map[int]processResult)
+		results := make(map[int]potential.Diff)
 		for thread := 0; thread < threads; thread++ {
 			if i >= totalLines { // ran out of lines
 				break
@@ -83,7 +86,7 @@ func main() {
 			// fmt.Println("starting thread", thread)
 			wg.Add(1)
 			go func(net *potential.Network, thread int) {
-				processLine(thread, line, net, vocab, ch)
+				processLine(thread, line, net, network, vocab, ch)
 				wg.Done()
 			}(net, thread)
 
@@ -99,46 +102,22 @@ func main() {
 		}()
 
 		// read results from the threads as they come in
-		for result := range ch {
-			results[result.threadIndex] = result
+		for diff := range ch {
+			results[diff.Worker] = diff
 		}
 
 		// now that all threads are finished, read their results and modify the network in
 		// series
 
 		// End all network firings, let them finish, then do diffing or growing.
-		for ix, net := range networkCopies {
-			fmt.Println("disabling network=", ix)
-			net.Disabled = true
-		}
 
 		done := make(chan bool)
 		time.AfterFunc(networkDisabledFizzleOutPeriod, func() {
 			// TODO: move this back down into processLine and have it return a diff instead
 			// of results
 			for thread := 0; thread < threads; thread++ {
-				r := results[thread]
-				net := networkCopies[r.threadIndex]
-				if r.succeeded { // keep the training
-					diff := potential.DiffNetworks(network, net)
-					fmt.Println("applying natural diff for thread=", thread)
-					potential.ApplyDiff(diff, network)
-				} else {
-					// We failed to generate the desired effect, so do a significant growth
-					// of cells.
-					fmt.Println("disgarding growth for thread=", thread, "and adding more connections")
-					for _, vocabItem := range vocab {
-						// finish := make(chan bool)
-						// go func() {
-						net.GrowPathBetween(vocabItem.InputCell, vocabItem.OutputCell, growPathExpectedSynapses)
-						// finish <- true
-						// }()
-						// <-finish
-					}
-					diff := potential.DiffNetworks(network, net)
-					fmt.Println("applying growth diff for thread=", thread)
-					potential.ApplyDiff(diff, network)
-				}
+				diff := results[thread]
+				potential.ApplyDiff(diff, network)
 			}
 			done <- true
 		})
@@ -146,18 +125,18 @@ func main() {
 		fmt.Println("Round of lines done, line=", i, "/", totalLines)
 	}
 
+	fmt.Println(len(network.Cells), "cells", len(network.Synapses), "synapses")
+	fmt.Println("Pruning...")
+	network.Prune()
+	fmt.Println(len(network.Cells), "cells", len(network.Synapses), "synapses")
+
 	err = network.SaveToFile("network.json")
 	if err != nil {
 		fmt.Println("Failed saving network")
 		fmt.Println(err)
 		return
 	}
-	fmt.Println("Done.", len(network.Cells), "cells", len(network.Synapses), "synapses")
-}
-
-type processResult struct {
-	succeeded   bool
-	threadIndex int
+	fmt.Println("Done.")
 }
 
 /*
@@ -165,10 +144,9 @@ processLine fires this entire line in the neural network at once, hoping to get 
 
 It will not add any synapses.
 */
-func processLine(thread int, line string, network *potential.Network, vocab charrnn.Vocab, ch chan processResult) {
+func processLine(thread int, line string, network *potential.Network, originalNetwork *potential.Network, vocab charrnn.Vocab, ch chan potential.Diff) {
 	lineChars := strings.Split(line, "")
 
-	result := processResult{threadIndex: thread}
 	succeeded := 0
 
 	// First time through, fire the receptors a bunch to stimulate the network,
@@ -209,6 +187,31 @@ func processLine(thread int, line string, network *potential.Network, vocab char
 	}
 	wasSuccessful := succeeded == len(lineChars)
 	// fmt.Println(wasSuccessful, succeeded, "/", len(lineChars), "\n  ", line)
-	result.succeeded = wasSuccessful
-	ch <- result
+	fmt.Println("disabling network=", thread)
+	network.Disabled = true
+
+	var diff potential.Diff
+
+	done := make(chan bool)
+	time.AfterFunc(10*potential.RefractoryPeriodMillis, func() {
+
+		if wasSuccessful { // keep the training
+			fmt.Println("Keep diff for thread=", thread)
+			diff = potential.DiffNetworks(originalNetwork, network)
+		} else {
+			// We failed to generate the desired effect, so do a significant growth
+			// of cells.
+			fmt.Println("Discard diff for thread=", thread, "and regrow")
+			for _, vocabItem := range vocab {
+				network.GrowPathBetween(vocabItem.InputCell, vocabItem.OutputCell, growPathExpectedSynapses)
+			}
+			diff = potential.DiffNetworks(originalNetwork, network)
+
+		}
+		diff.Worker = thread
+
+		done <- true
+	})
+	<-done
+	ch <- diff
 }

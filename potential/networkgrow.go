@@ -316,7 +316,7 @@ func (network *Network) PruneSynapse(synapseID SynapseID) {
 	// any input. But that is something to revisit. It is likely these cells would eventually
 	// build up more synapses via the grow process.
 
-	if dendriteCell, exists := network.Cells[synapse.FromNeuronAxon]; exists {
+	if dendriteCell, dendriteExists := network.Cells[synapse.FromNeuronAxon]; dendriteExists {
 		delete(dendriteCell.AxonSynapses, synapse.ID)
 		receiverCellHasNoSynapses := len(dendriteCell.AxonSynapses) == 0 && len(dendriteCell.DendriteSynapses) == 0
 		if !dendriteCell.Immortal && receiverCellHasNoSynapses {
@@ -324,7 +324,7 @@ func (network *Network) PruneSynapse(synapseID SynapseID) {
 		}
 	}
 
-	if axonCell, exists := network.Cells[synapse.ToNeuronDendrite]; exists {
+	if axonCell, axonExists := network.Cells[synapse.ToNeuronDendrite]; axonExists {
 		delete(axonCell.DendriteSynapses, synapse.ID)
 
 		senderCellHasNoSynapses := len(axonCell.AxonSynapses) == 0 && len(axonCell.DendriteSynapses) == 0
@@ -333,6 +333,8 @@ func (network *Network) PruneSynapse(synapseID SynapseID) {
 		}
 	}
 
-	delete(network.Synapses, synapse.ID)
+	if !dendriteExists && !axonExists {
+		delete(network.Synapses, synapse.ID)
+	}
 	// this synapse is now dead
 }

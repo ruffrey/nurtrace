@@ -147,3 +147,47 @@ func Test_NetworkSerialization(t *testing.T) {
 	})
 
 }
+
+func Test_ResetForTraining(t *testing.T) {
+	t.Run("resets cell props activating, voltage, wasFired", func(t *testing.T) {
+		n := NewNetwork()
+		network := &n
+
+		// pretest
+		cell1 := NewCell()
+		assert.Equal(t, false, cell1.activating)
+		assert.Equal(t, int8(-70), cell1.Voltage)
+		assert.Equal(t, false, cell1.WasFired)
+
+		// setup
+		cell1.activating = true
+		cell1.Voltage = int8(100)
+		cell1.WasFired = true
+
+		network.Cells[cell1.ID] = cell1
+
+		network.ResetForTraining()
+
+		// assertions
+		assert.Equal(t, false, cell1.activating)
+		assert.Equal(t, int8(-70), cell1.Voltage)
+		assert.Equal(t, false, cell1.WasFired)
+	})
+
+	// To make sure we don't do this accidentally because it seems like the right thing,
+	// and break synapse pruning.
+	t.Run("does not reset synapse ActivationHistory", func(t *testing.T) {
+		n := NewNetwork()
+		network := &n
+
+		s := NewSynapse()
+		s.ActivationHistory = 12
+
+		network.Synapses[s.ID] = s
+		s.Network = network
+
+		network.ResetForTraining()
+
+		assert.Equal(t, uint(12), network.Synapses[s.ID].ActivationHistory)
+	})
+}

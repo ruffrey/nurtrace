@@ -32,15 +32,17 @@ machines will process voltage changes faster, and a network trained on one
 set of hardware will not be usable on another set.
 */
 const SynapseEffectDelayMillis = 1
+const synapseDelay = SynapseEffectDelayMillis * time.Millisecond
 
 /*
 RefractoryPeriodMillis represents after a neuron fires, the amount of time (ms) is will
 be blocked from firing again.
 */
 const RefractoryPeriodMillis = 4
+const refractory = RefractoryPeriodMillis * time.Millisecond
 
 /*
-CellID is a normal Go integer that should be unique for all cells in a network.
+CellID should be unique for all cells in a network.
 */
 type CellID uint32
 
@@ -137,7 +139,11 @@ func (cell *Cell) FireActionPotential() {
 				// fmt.Println("warn: network stopped during FireActionPotential")
 				break
 			}
-			synapse := cell.Network.Synapses[synapseID]
+			synapse, exists := cell.Network.Synapses[synapseID]
+			if !exists {
+				fmt.Println("error: synapse", synapseID, "does not exist on cell", cell.ID)
+				continue
+			}
 			// fmt.Println("  activating synapse", synapse, "\n  from cell", cell.ID)
 			err := synapse.Activate()
 			if err != nil {
@@ -147,7 +153,7 @@ func (cell *Cell) FireActionPotential() {
 		done <- true
 	}()
 
-	time.AfterFunc(RefractoryPeriodMillis*time.Millisecond, func() {
+	time.AfterFunc(refractory, func() {
 		cell.Voltage = apResting
 		cell.activating = false
 	})
@@ -168,7 +174,7 @@ func (cell *Cell) ApplyVoltage(change int8, fromSynapse *Synapse) {
 		return
 	}
 
-	time.AfterFunc(SynapseEffectDelayMillis*time.Millisecond, func() {
+	time.AfterFunc(synapseDelay, func() {
 		if cell.activating {
 			// Block during action potential cycle
 			return
