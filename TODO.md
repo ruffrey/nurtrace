@@ -1,12 +1,13 @@
 # TODO
 
 ## Near term
-[ ] only grow characters that were trained by a given round
+[x] only grow characters that were trained by a given round
 [ ] move charrnn training from shake.go into its repo
 [ ] NewCellID and NewSynapseID should be an instance method on a network to ensure
 no ID collisions occur
 [ ] build charrnn sampling code
 [ ] add tests for synapse/cell integrity testing before and after growth, pruning, and diffing
+[ ] more aggressive pruning
 
 ## Optimizations
 [ ] use int32 for IDs

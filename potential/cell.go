@@ -25,14 +25,14 @@ its firing results in activation (strengthening the synapse)
 const synapseAPBoost uint = 1
 
 /*
-SynapseEffectDelayMillis is the time between another cell's axon firing and the
+SynapseEffectDelayMicrosecs is the time between another cell's axon firing and the
 cell at the end of the synapse getting a voltage boost. The primary reason for
 this delay is to normalize timing across all machines. Without it, faster
 machines will process voltage changes faster, and a network trained on one
 set of hardware will not be usable on another set.
 */
-const SynapseEffectDelayMillis = 1
-const synapseDelay = SynapseEffectDelayMillis * time.Millisecond
+const SynapseEffectDelayMicrosecs = 100
+const synapseDelay = SynapseEffectDelayMicrosecs * time.Microsecond
 
 /*
 RefractoryPeriodMillis represents after a neuron fires, the amount of time (ms) is will
@@ -163,7 +163,7 @@ func (cell *Cell) FireActionPotential() {
 /*
 ApplyVoltage changes the cell's voltage by a specified amount much.
 Care is taken to prevent the tiny int8 variables from overflowing.
-Voltage may not change for a few milliseconds depending on `SynapseEffectDelayMillis`.
+Voltage may not change for a few milliseconds depending on `SynapseEffectDelayMicrosecs`.
 */
 func (cell *Cell) ApplyVoltage(change int8, fromSynapse *Synapse) {
 	// fmt.Println("ApplyVoltage", cell.ID, cell.Network.Disabled, &cell.Network)

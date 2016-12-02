@@ -39,7 +39,7 @@ func Test_SynapseActivateNotExist(t *testing.T) {
 		go func() {
 			err := synapse.Activate()
 			assert.Nil(t, err, "no error when activating dendrite")
-			time.Sleep(SynapseEffectDelayMillis * 2 * time.Millisecond)
+			time.Sleep(SynapseEffectDelayMicrosecs * 2 * time.Millisecond)
 			ch <- true
 		}()
 
@@ -71,7 +71,7 @@ func Test_SynapseActivateNotExist(t *testing.T) {
 		go func() {
 			err := synapse.Activate()
 			assert.Nil(t, err, "no error when activating dendrite")
-			time.Sleep(SynapseEffectDelayMillis * 2 * time.Millisecond)
+			time.Sleep(SynapseEffectDelayMicrosecs * 2 * time.Millisecond)
 			ch <- true
 		}()
 
