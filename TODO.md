@@ -1,7 +1,7 @@
 # TODO
 
 ## Near term
-[ ] appears to be a memory leak during shake.go training
+[ ] only grow characters that were trained by a given round
 [ ] move charrnn training from shake.go into its repo
 [ ] NewCellID and NewSynapseID should be an instance method on a network to ensure
 no ID collisions occur
