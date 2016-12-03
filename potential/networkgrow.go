@@ -15,13 +15,13 @@ It adds neurons, adds new synapses, prunes old neurons, and strengthens synapses
 fired a lot.
 */
 func (network *Network) Grow(neuronsToAdd, defaultNeuronSynapses, synapsesToAdd int) {
-	fmt.Println("Grow session start")
+	// fmt.Println("Grow session start")
 	network.Prune()
 
 	network.GrowRandomNeurons(neuronsToAdd, defaultNeuronSynapses)
 
 	network.GrowRandomSynapses(synapsesToAdd)
-	fmt.Println("  Grow session end, synapses=", len(network.Synapses), "cells=", len(network.Cells))
+	// fmt.Println("  Grow session end, synapses=", len(network.Synapses), "cells=", len(network.Cells))
 }
 
 /*

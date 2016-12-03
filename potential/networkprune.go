@@ -75,14 +75,14 @@ func (network *Network) Prune() {
 	}
 	// fmt.Println("  done")
 
-	fmt.Println("  synapses to remove=", len(synapsesToRemove))
+	// fmt.Println("  synapses to remove=", len(synapsesToRemove))
 	// Actually pruning synapses is done after the previous loop because it can
 	// trigger removal of Cells, which can subsequently mess up the range operation
 	// happening over the same array of cells.
 	for _, synapse := range synapsesToRemove {
 		network.PruneSynapse(synapse.ID)
 	}
-	fmt.Println("  done pruning")
+	// fmt.Println("  done pruning")
 }
 
 /*
