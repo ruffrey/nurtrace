@@ -135,11 +135,13 @@ func (network *Network) ResetForTraining() {
 PrintCells logs the network cells to console
 */
 func (network *Network) PrintCells() {
+	fmt.Println("----------")
+	fmt.Println("Network version=", network.Version)
 	for _, cell := range network.Cells {
-		fmt.Println("----------\ncell id=", cell.ID)
+		fmt.Println("  --------\ncell id=", cell.ID)
 		fmt.Println("  voltage=", cell.Voltage)
-		fmt.Println("  axons=", cell.AxonSynapses)
-		fmt.Println("  dendrites=", cell.DendriteSynapses)
+		fmt.Println("  synapses to axon=", cell.AxonSynapses)
+		fmt.Println("  synapses to dendrite=", cell.DendriteSynapses)
 	}
 }
 
