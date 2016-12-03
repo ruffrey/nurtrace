@@ -10,6 +10,7 @@
 - [x] build charrnn sampling code
 - [ ] more aggressive pruning
 - [ ] Important to save vocab with the network
+- [ ] need additional integrity check to see if all synapse and cell relationships exist on each other
 
 ## Optimizations
 [x] use int32 for IDs

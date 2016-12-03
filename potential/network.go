@@ -119,13 +119,6 @@ func (network *Network) RandomCellKey() (randCellID CellID) {
 	return randCellID
 }
 
-func chooseIfSender() bool {
-	if randomIntBetween(0, 1) == 1 {
-		return true
-	}
-	return false
-}
-
 /*
 ResetForTraining resets transient properties on the network to their base resting state.
 */

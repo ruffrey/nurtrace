@@ -191,6 +191,13 @@ func (network *Network) GrowRandomNeurons(neuronsToAdd, defaultNeuronSynapses in
 	// fmt.Println("  GrowRandomNeurons done")
 }
 
+func chooseIfSender() bool {
+	if randomIntBetween(0, 1) == 1 {
+		return true
+	}
+	return false
+}
+
 /*
 GrowRandomSynapses adds the specified number of synapses haphazardly to the network.
 */

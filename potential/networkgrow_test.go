@@ -7,6 +7,17 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+func Test_NetworkGrow(t *testing.T) {
+	t.Run("Grow() adds the right number of cells and synapses", func(t *testing.T) {
+		n := NewNetwork()
+		network := &n
+		network.Grow(50, 5, 200)
+
+		assert.Equal(t, 50, len(network.Cells))
+		assert.Equal(t, (50*5)+200, len(network.Synapses))
+	})
+}
+
 func Test_GrowPathBetween(t *testing.T) {
 	var network *Network
 	var input *Cell
