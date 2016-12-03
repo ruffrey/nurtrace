@@ -1,7 +1,6 @@
 package potential
 
 import (
-	"fmt"
 	"testing"
 	"time"
 
@@ -85,15 +84,17 @@ func Test_NetworkSerialization(t *testing.T) {
 		before()
 		err := network.SaveToFile("_network.test.json")
 		if err != nil {
-			fmt.Println(err)
-			panic("Error testing network serialization to file")
+			assert.NoError(t, err, "Error testing network serialization to file")
 		}
 		net2, err := LoadNetworkFromFile("_network.test.json")
 		if err != nil {
-			fmt.Println(err)
-			panic("Failed reading network from save file")
+			assert.NoError(t, err, "Failed reading network from save file")
 		}
-		assert.EqualValues(t, network, net2, "loaded network does not match original")
+		n1, err := network.ToJSON()
+		assert.NoError(t, err)
+		n2, err := net2.ToJSON()
+		assert.NoError(t, err)
+		assert.EqualValues(t, n1, n2, "loaded network does not match original")
 	})
 
 }
