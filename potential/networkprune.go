@@ -3,7 +3,7 @@ package potential
 import "fmt"
 
 /*
-Prune traverses the network looking for neurons to degrade.
+Prune traverses the network looking for neurons to degrade or reinforce.
 
 This degrades synapses that didn't fire during a certain round of testing.
 
@@ -27,40 +27,49 @@ func (network *Network) Prune() {
 			}
 			isPositive := synapse.Millivolts >= 0
 
+			// when applying voltages, we must be careful to not overflow the int8 size
 			if synapse.ActivationHistory >= network.SynapseMinFireThreshold {
 				// it was activated enough, so we bump it away from zero.
 				// needs cleanup refactoring.
 				if isPositive {
-					if int16(synapse.Millivolts)-int16(network.SynapseLearnRate) > -127 {
-						synapse.Millivolts -= network.SynapseLearnRate // do not overflow int8
+					newMV := synapse.Millivolts + network.SynapseLearnRate
+					if newMV > network.actualSynapseMax {
+						synapse.Millivolts = network.actualSynapseMax
 					} else {
-						synapse.Millivolts = -128
+						synapse.Millivolts = newMV
 					}
 				} else {
-					if int16(synapse.Millivolts)+int16(network.SynapseLearnRate) < 126 {
-						synapse.Millivolts += network.SynapseLearnRate
+					newMV := synapse.Millivolts - network.SynapseLearnRate
+					if newMV < network.actualSynapseMin {
+						synapse.Millivolts = network.actualSynapseMin
 					} else {
-						synapse.Millivolts = 127
+						synapse.Millivolts = newMV
+					}
+				}
+			} else if synapse.ActivationHistory > 0 {
+				// did not meet minimum fire threshold, so punish it by moving toward zero
+				if isPositive {
+					newMV := synapse.Millivolts + network.SynapseLearnRate
+					if newMV > network.actualSynapseMax {
+						synapse.Millivolts = network.actualSynapseMax
+					} else {
+						synapse.Millivolts = newMV
+					}
+				} else {
+					newMV := synapse.Millivolts - network.SynapseLearnRate
+					if newMV < network.actualSynapseMin {
+						synapse.Millivolts = network.actualSynapseMax
+					} else {
+						synapse.Millivolts = newMV
 					}
 				}
 			} else {
-				// It reached "no effect" of 0 millivolts last round. Then it didn't fire
-				// this round. Remove this synapse.
-				if synapse.Millivolts == 0 {
-					synapsesToRemove = append(synapsesToRemove, synapse)
-				}
-
-				// did not meet minimum fire threshold, so punish it by moving toward zero
-				if isPositive {
-					synapse.Millivolts -= network.SynapseLearnRate
-				} else {
-					synapse.Millivolts += network.SynapseLearnRate
-				}
-
-				// Next time, if it did not fire, and it is zero, it will get pruned.
+				// it never fired during the training session, so it should be removed.
+				synapsesToRemove = append(synapsesToRemove, synapse)
 			}
 
-			// reset the activation history until the next Grow cycle.
+			// Reset the activation history until the next Prune cycle.
+			// This is not done in ResetForTraining because it is used across trainings.
 			synapse.ActivationHistory = 0
 		}
 	}

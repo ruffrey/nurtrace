@@ -48,6 +48,13 @@ type Network struct {
 	   How much a synapse should get bumped when it is being reinforced
 	*/
 	SynapseLearnRate int8
+
+	// private
+
+	// actualSynapseMin and Max helps make math less intensive if there is never a chance synapse
+	// addition will create an int8 overflow.
+	actualSynapseMin int8
+	actualSynapseMax int8
 }
 
 /*
@@ -56,13 +63,16 @@ when called. Seems like a good time.
 */
 func NewNetwork() Network {
 	rand.Seed(time.Now().Unix())
+	lr := int8(1)
 	return Network{
 		Version:  "0",
 		Disabled: false,
 		Synapses: make(map[SynapseID]*Synapse),
 		Cells:    make(map[CellID]*Cell),
 		SynapseMinFireThreshold: 4,
-		SynapseLearnRate:        1,
+		SynapseLearnRate:        lr,
+		actualSynapseMin:        int8(-128) + lr,
+		actualSynapseMax:        int8(127) - lr,
 	}
 }
 

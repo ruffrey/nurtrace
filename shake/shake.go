@@ -176,9 +176,9 @@ func main() {
 		fmt.Println("Round of lines done, line=", i, "/", totalLines)
 	}
 
-	// fmt.Println(len(network.Cells), "cells", len(network.Synapses), "synapses")
-	// fmt.Println("Pruning...")
-	// network.Prune()
+	fmt.Println(len(network.Cells), "cells", len(network.Synapses), "synapses")
+	fmt.Println("Pruning...")
+	network.Prune()
 	fmt.Println(len(network.Cells), "cells", len(network.Synapses), "synapses")
 
 	err = network.SaveToFile("network.json")
