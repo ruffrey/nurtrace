@@ -105,25 +105,45 @@ func (network *Network) PruneSynapse(synapseID SynapseID) {
 	// See if either cell (to/from) should be pruned, also.
 	// Technically this can result in a cell being the end of a dead pathway, or not receiving
 	// any input. But that is something to revisit. It is likely these cells would eventually
-	// build up more synapses via the grow process.
+	// build up more synapses via the grow process, or never fire and be pruned later.
 
-	if dendriteCell, dendriteExists := network.Cells[synapse.FromNeuronAxon]; dendriteExists {
-		delete(dendriteCell.AxonSynapses, synapse.ID)
-		receiverCellHasNoSynapses := len(dendriteCell.AxonSynapses) == 0 && len(dendriteCell.DendriteSynapses) == 0
-		if !dendriteCell.Immortal && receiverCellHasNoSynapses {
-			delete(network.Cells, dendriteCell.ID)
+	if c, exists := network.Cells[synapse.FromNeuronAxon]; exists {
+		delete(c.AxonSynapses, synapse.ID)
+		cellHasNoSynapses := len(c.AxonSynapses) == 0 && len(c.DendriteSynapses) == 0
+		if cellHasNoSynapses {
+			network.PruneCell(c.ID)
 		}
 	}
 
-	if axonCell, axonExists := network.Cells[synapse.ToNeuronDendrite]; axonExists {
-		delete(axonCell.DendriteSynapses, synapse.ID)
+	if c, exists := network.Cells[synapse.ToNeuronDendrite]; exists {
+		delete(c.DendriteSynapses, synapse.ID)
 
-		senderCellHasNoSynapses := len(axonCell.AxonSynapses) == 0 && len(axonCell.DendriteSynapses) == 0
-		if !axonCell.Immortal && senderCellHasNoSynapses {
-			delete(network.Cells, axonCell.ID)
+		cellHasNoSynapses := len(c.AxonSynapses) == 0 && len(c.DendriteSynapses) == 0
+		if cellHasNoSynapses {
+			network.PruneCell(c.ID)
 		}
 	}
 
 	delete(network.Synapses, synapse.ID)
 	// this synapse is now dead
+}
+
+/*
+PruneCell removes a cell and its synapses. It is independent of PruneSynapse.
+*/
+func (network *Network) PruneCell(cellID CellID) {
+	cell, ok := network.Cells[cellID]
+	if !ok {
+		fmt.Println("warn: attempt to prune cell which does not exist", cellID)
+		return
+	}
+	if cell.Immortal {
+		return
+	}
+	for synapseID := range cell.DendriteSynapses {
+		network.PruneSynapse(synapseID)
+	}
+	for synapseID := range cell.AxonSynapses {
+		network.PruneSynapse(synapseID)
+	}
 }

@@ -153,7 +153,7 @@ func ApplyDiff(diff Diff, originalNetwork *Network) (err error) {
 
 	// Remove cells by ID
 	for _, cellID := range diff.removedCells {
-		delete(originalNetwork.Cells, cellID)
+		originalNetwork.PruneCell(cellID)
 	}
 
 	originalNetwork.RegenVersion()

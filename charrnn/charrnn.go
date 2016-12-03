@@ -46,9 +46,7 @@ func NewVocab(text string, network *potential.Network) Vocab {
 				}
 			}
 			// inputs and outputs must never be pruned
-			network.Cells[InputCell].Immortal = true
 			network.Cells[InputCell].Tag = "in-" + Character
-			network.Cells[OutputCell].Immortal = true
 			network.Cells[OutputCell].Tag = "out-" + Character
 
 			network.GrowPathBetween(InputCell, OutputCell, 10)
@@ -85,13 +83,9 @@ func NewVocab(text string, network *potential.Network) Vocab {
 	network.GrowPathBetween(start.InputCell, start.OutputCell, 10)
 	network.GrowPathBetween(end.InputCell, end.OutputCell, 10)
 
-	network.Cells[start.InputCell].Immortal = true
 	network.Cells[start.InputCell].Tag = "in-START"
-	network.Cells[start.OutputCell].Immortal = true
 	network.Cells[start.OutputCell].Tag = "out-START"
-	network.Cells[end.InputCell].Immortal = true
 	network.Cells[end.InputCell].Tag = "in-END"
-	network.Cells[end.OutputCell].Immortal = true
 	network.Cells[end.OutputCell].Tag = "out-END"
 
 	vocab.CharToItem["START"] = start
@@ -100,6 +94,8 @@ func NewVocab(text string, network *potential.Network) Vocab {
 	for char, vi := range vocab.CharToItem {
 		vocab.CellToChar[vi.InputCell] = char
 		vocab.CellToChar[vi.OutputCell] = char
+		network.Cells[vi.InputCell].Immortal = true
+		network.Cells[vi.OutputCell].Immortal = true
 	}
 
 	return vocab

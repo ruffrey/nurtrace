@@ -86,7 +86,7 @@ func (network *Network) GrowPathBetween(startCell, endCell CellID, minSynapses i
 				s, exists := network.Synapses[axonSynapseID]
 				if !exists {
 					fmt.Println("warn: synapse does not exist", axonSynapseID,
-						"from cell=", cellID)
+						"from cell=", cellID, network.Cells[cellID].Tag)
 					continue
 				}
 				receiverCellID := s.ToNeuronDendrite
