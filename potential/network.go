@@ -166,7 +166,9 @@ func (network *Network) SaveToFile(filepath string) (err error) {
 /*
 LoadNetworkFromFile reads a saved network from disk and creates a new network from it.
 */
-func LoadNetworkFromFile(filepath string) (network *Network, err error) {
+func LoadNetworkFromFile(filepath string) (*Network, error) {
+	n := NewNetwork()
+	network := &n
 	bytes, err := ioutil.ReadFile(filepath)
 	if err != nil {
 		return network, err

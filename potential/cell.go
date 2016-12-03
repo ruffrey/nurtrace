@@ -89,9 +89,14 @@ type Cell struct {
 	*/
 	AxonSynapses map[SynapseID]bool
 	/*
-	   WasFired is used during training to know if this cell fired during the session
+	  WasFired is used during training to know if this cell fired during the session
 	*/
 	WasFired bool
+	/*
+	   OnFired is useful when this cell is an output cell, or during training. In simple
+	   tests, callback are hugely more performant than channels.
+	*/
+	OnFired []func(CellID) `json:"-"`
 	/*
 		Purely informational, for use when testing or debugging.
 	*/
@@ -112,6 +117,7 @@ func NewCell() *Cell {
 		DendriteSynapses: make(map[SynapseID]bool),
 		AxonSynapses:     make(map[SynapseID]bool),
 		WasFired:         false,
+		OnFired:          make([]func(CellID), 0),
 	}
 	return &cell
 }
@@ -120,9 +126,17 @@ func NewCell() *Cell {
 FireActionPotential does an action potential cycle.
 */
 func (cell *Cell) FireActionPotential() {
-	// fmt.Println("Action Potential Firing\n  cell=", cell.ID, "\n  axon synapses=", cell.AxonSynapses)
 	cell.WasFired = true
 	cell.activating = true
+
+	if cell.Network.Disabled {
+		return
+	}
+	// fmt.Println("Action Potential Firing\n  cell=", cell.ID, "syanpses=", len(cell.AxonSynapses))
+
+	for _, cb := range cell.OnFired {
+		go cb(cell.ID)
+	}
 
 	done := make(chan bool)
 	// activate all synapses on its axon

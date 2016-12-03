@@ -17,19 +17,25 @@ type VocabItem struct {
 }
 
 /*
-Vocab represnts the vocab
+Vocab represents the vocab
 */
-type Vocab map[string]VocabItem
+type Vocab struct {
+	CharToItem map[string]VocabItem
+	CellToChar map[potential.CellID]string
+}
 
 /*
 NewVocab generates the vocab from a bunch of text
 */
 func NewVocab(text string, network *potential.Network) Vocab {
 	chars := strings.Split(text, "")
-	vocab := make(Vocab)
+	vocab := Vocab{
+		CharToItem: make(map[string]VocabItem),
+		CellToChar: make(map[potential.CellID]string),
+	}
 
 	for _, Character := range chars {
-		if _, exists := vocab[Character]; !exists {
+		if _, exists := vocab.CharToItem[Character]; !exists {
 			InputCell := network.RandomCellKey()
 			// ensure the input and output cells are not the same!
 			var OutputCell potential.CellID
@@ -47,7 +53,7 @@ func NewVocab(text string, network *potential.Network) Vocab {
 
 			network.GrowPathBetween(InputCell, OutputCell, 10)
 
-			vocab[Character] = VocabItem{
+			vocab.CharToItem[Character] = VocabItem{
 				Character,
 				InputCell,
 				OutputCell,
@@ -88,8 +94,13 @@ func NewVocab(text string, network *potential.Network) Vocab {
 	network.Cells[end.OutputCell].Immortal = true
 	network.Cells[end.OutputCell].Tag = "out-END"
 
-	vocab["START"] = start
-	vocab["END"] = end
+	vocab.CharToItem["START"] = start
+	vocab.CharToItem["END"] = end
+
+	for char, vi := range vocab.CharToItem {
+		vocab.CellToChar[vi.InputCell] = char
+		vocab.CellToChar[vi.OutputCell] = char
+	}
 
 	return vocab
 }

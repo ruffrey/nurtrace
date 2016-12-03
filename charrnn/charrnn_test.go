@@ -13,28 +13,28 @@ func Test_NewVocab(t *testing.T) {
 
 		vocab := NewVocab(text, &network)
 
-		if _, ok := vocab["k"]; !ok {
+		if _, ok := vocab.CharToItem["k"]; !ok {
 			panic("vocab did not add k")
 		}
-		if _, ok := vocab["f"]; !ok {
+		if _, ok := vocab.CharToItem["f"]; !ok {
 			panic("vocab did not add f")
 		}
-		if _, ok := vocab["9"]; !ok {
+		if _, ok := vocab.CharToItem["9"]; !ok {
 			panic("vocab did not add 9")
 		}
-		if _, ok := vocab["\n"]; !ok {
+		if _, ok := vocab.CharToItem["\n"]; !ok {
 			panic("vocab did not add \n")
 		}
-		if _, ok := vocab["I"]; !ok {
+		if _, ok := vocab.CharToItem["I"]; !ok {
 			panic("vocab did not add I")
 		}
-		if _, ok := vocab["."]; !ok {
+		if _, ok := vocab.CharToItem["."]; !ok {
 			panic("vocab did not add .")
 		}
-		if _, ok := vocab["2"]; !ok {
+		if _, ok := vocab.CharToItem["2"]; !ok {
 			panic("vocab did not add 2")
 		}
-		if len(vocab) != 7 {
+		if len(vocab.CharToItem) != 7 {
 			panic("vocab has too many things")
 		}
 	})

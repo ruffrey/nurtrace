@@ -1,5 +1,9 @@
+*.pdf
+*.out
+cprof
 coverage.out
 *.test.json
 cprof
 potential.test
 *.pdf
+*.test

@@ -25,8 +25,9 @@ func NewSynapseID() (sid SynapseID) {
 }
 
 /*
-Synapse is a construct for storing how much a one-way connection between two cells will
-excite or inhibit the receiver.
+Synapse is a construct representing the connection between two cells.
+
+It is a one-way connection. It can either excite or inhibit the receiver.
 
 Cell Axon -> Cell Dendrite
 */

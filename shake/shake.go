@@ -3,13 +3,13 @@ package main
 import (
 	"bleh/charrnn"
 	"bleh/potential"
+	"flag"
 	"fmt"
 	"io/ioutil"
+	"os"
 	"strings"
 	"sync"
 	"time"
-
-	"github.com/pkg/profile"
 )
 
 const fireCharacterIterations = 4
@@ -18,19 +18,63 @@ const defaultNeuronSynapses = 10
 const pretrainNeuronsToGrow = 20
 const pretrainSynapsesToGrow = 100
 const growPathExpectedSynapses = 20
+const sleepBetweenInputTriggers = potential.RefractoryPeriodMillis * time.Millisecond
 const threads = 1
 const networkDisabledFizzleOutPeriod = 100 * time.Millisecond
 
+var samples = flag.Int("sample", 0, "Pass this flag with seed to do a sample instead of training")
+var seed = flag.String("seed", "", "Seeds the neural network when sampling")
+
+func sample(vocab charrnn.Vocab, network *potential.Network) {
+	network.Disabled = false
+	network.ResetForTraining()
+	fmt.Print("\n")
+	seedChars := strings.Split(*seed, "")
+
+	go func() {
+		for _, v := range vocab.CharToItem {
+			network.Cells[v.OutputCell].OnFired = append(
+				network.Cells[v.OutputCell].OnFired,
+				func(cell potential.CellID) {
+					s := vocab.CellToChar[cell]
+					if s == "END" {
+						fmt.Print("\n")
+						os.Exit(0)
+					}
+					if s == "START" {
+						return
+					}
+					fmt.Print(s)
+				},
+			)
+		}
+	}()
+
+	for {
+		for _, char := range seedChars {
+			for i := 0; i < 4; i++ {
+				ch := make(chan bool)
+				time.AfterFunc(sleepBetweenInputTriggers, func() {
+					network.Cells[vocab.CharToItem[char].InputCell].FireActionPotential()
+					ch <- true
+				})
+				<-ch
+			}
+		}
+	}
+}
+
 func main() {
 	// defer profile.Start(profile.MemProfile).Stop()
-	defer profile.Start(profile.CPUProfile).Stop()
+	// defer profile.Start(profile.CPUProfile).Stop()
+	// doTrace()
 
 	// start by initializing the network from disk or whatever
 	var network *potential.Network
 	var err error
-	n, err := potential.LoadNetworkFromFile("network.json")
+	network, err = potential.LoadNetworkFromFile("network.json")
 	if err != nil {
-		fmt.Println("No existing network in file; creating new one.", err)
+		fmt.Println("Unable to load network from file; creating new one.", err)
 		newN := potential.NewNetwork()
 		network = &newN
 		neuronsToAdd := initialNetworkNeurons
@@ -44,12 +88,9 @@ func main() {
 		// 	return
 		// }
 	} else {
-		network = &n
 		fmt.Println("Loaded network from disk,", len(network.Cells), "cells",
 			len(network.Synapses), "synapses")
 	}
-
-	network.Disabled = true // we just will never need it to fire
 
 	bytes, err := ioutil.ReadFile("short.txt")
 	if err != nil {
@@ -61,7 +102,17 @@ func main() {
 
 	vocab := charrnn.NewVocab(text, network)
 
-	fmt.Println("Loaded vocab, length=", len(vocab))
+	fmt.Println("Loaded vocab, length=", len(vocab.CharToItem))
+
+	flag.Parse()
+
+	if *samples > 0 && len(*seed) > 0 {
+		fmt.Println("Sampling", *samples, "characters with text: ", *seed)
+		sample(vocab, network)
+		return
+	}
+
+	network.Disabled = true // we just will never need it to fire
 
 	fmt.Println("Beginning training", threads, "simultaneous sessions")
 
@@ -125,9 +176,9 @@ func main() {
 		fmt.Println("Round of lines done, line=", i, "/", totalLines)
 	}
 
-	fmt.Println(len(network.Cells), "cells", len(network.Synapses), "synapses")
-	fmt.Println("Pruning...")
-	network.Prune()
+	// fmt.Println(len(network.Cells), "cells", len(network.Synapses), "synapses")
+	// fmt.Println("Pruning...")
+	// network.Prune()
 	fmt.Println(len(network.Cells), "cells", len(network.Synapses), "synapses")
 
 	err = network.SaveToFile("network.json")
@@ -157,23 +208,22 @@ func processLine(thread int, line string, network *potential.Network, originalNe
 		var inChar charrnn.VocabItem
 		var outChar charrnn.VocabItem
 		if isFirst {
-			inChar = vocab["START"]
-			outChar = vocab[char]
+			inChar = vocab.CharToItem["START"]
+			outChar = vocab.CharToItem[char]
 		} else if isLast {
-			inChar = vocab[char]
-			outChar = vocab["END"]
+			inChar = vocab.CharToItem[char]
+			outChar = vocab.CharToItem["END"]
 		} else {
-			inChar = vocab[lineChars[ix-1]]
-			outChar = vocab[char]
+			inChar = vocab.CharToItem[lineChars[ix-1]]
+			outChar = vocab.CharToItem[char]
 		}
 
 		network.ResetForTraining()
-		sleepTime := potential.RefractoryPeriodMillis * time.Millisecond
 
 		for i := 0; i < fireCharacterIterations; i++ {
 			doneChan := make(chan bool)
 			go func(i int) {
-				time.AfterFunc(sleepTime, func() {
+				time.AfterFunc(sleepBetweenInputTriggers, func() {
 					network.Cells[inChar.OutputCell].FireActionPotential()
 					doneChan <- true
 				})
@@ -202,7 +252,7 @@ func processLine(thread int, line string, network *potential.Network, originalNe
 			// We failed to generate the desired effect, so do a significant growth
 			// of cells.
 			fmt.Println("Discard diff for thread=", thread, "and regrow")
-			for _, vocabItem := range vocab {
+			for _, vocabItem := range vocab.CharToItem {
 				network.GrowPathBetween(vocabItem.InputCell, vocabItem.OutputCell, growPathExpectedSynapses)
 			}
 			diff = potential.DiffNetworks(originalNetwork, network)
