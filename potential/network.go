@@ -166,20 +166,20 @@ func (network *Network) SaveToFile(filepath string) (err error) {
 /*
 LoadNetworkFromFile reads a saved network from disk and creates a new network from it.
 */
-func LoadNetworkFromFile(filepath string) (network Network, err error) {
+func LoadNetworkFromFile(filepath string) (network *Network, err error) {
 	bytes, err := ioutil.ReadFile(filepath)
 	if err != nil {
 		return network, err
 	}
-	err = json.Unmarshal(bytes, &network)
+	err = json.Unmarshal(bytes, network)
 	if err != nil {
 		return network, err
 	}
 	for _, synapse := range network.Synapses {
-		synapse.Network = &network
+		synapse.Network = network
 	}
 	for _, cell := range network.Cells {
-		cell.Network = &network
+		cell.Network = network
 	}
 	return network, nil
 }
