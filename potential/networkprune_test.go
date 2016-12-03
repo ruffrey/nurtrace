@@ -34,9 +34,7 @@ func Test_PruneSynapse(t *testing.T) {
 		before()
 		network.PruneSynapse(synapse.ID)
 		_, ok := network.Synapses[synapse.ID]
-		if ok {
-			panic("synapse not removed from network during PruneNetwork")
-		}
+		assert.Equal(t, false, ok, "synapse not removed from network during PruneNetwork")
 	})
 	t.Run("maintains integrity after removal", func(t *testing.T) {
 		before()
@@ -60,12 +58,11 @@ func Test_PruneSynapse(t *testing.T) {
 		before()
 		network.PruneSynapse(synapse.ID)
 		_, ok := network.Cells[cell1.ID]
-		if ok {
-			panic("cell1 not removed from network when synapses were zero during synapse prune")
-		}
+		assert.Equal(t, 0, len(network.Cells), "network has too many cells after pruning synapse")
+
+		assert.Equal(t, false, ok, "cell1 not removed from network when synapses were zero during synapse prune")
+
 		_, ok = network.Cells[cell2.ID]
-		if ok {
-			panic("cell2 not removed from network when synapses were zero during synapse prune")
-		}
+		assert.Equal(t, false, ok, "cell2 not removed from network when synapses were zero during synapse prune")
 	})
 }
