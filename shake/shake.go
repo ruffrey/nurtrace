@@ -13,6 +13,8 @@ import (
 	"sync"
 	"syscall"
 	"time"
+
+	"github.com/pkg/profile"
 )
 
 const fireCharacterIterations = 4
@@ -23,11 +25,13 @@ const pretrainSynapsesToGrow = 50
 const growPathExpectedSynapses = 10
 const linesBetweenPruningSessions = 20
 const sleepBetweenInputTriggers = potential.RefractoryPeriodMillis * time.Millisecond
-const threads = 4
 const networkDisabledFizzleOutPeriod = 100 * time.Millisecond
 
-var samples = flag.Int("sample", 0, "Pass this flag with seed to do a sample instead of training")
-var seed = flag.String("seed", "", "Seeds the neural network when sampling")
+var networkSaveFile = flag.String("save", "network.json", "Load/save location of the network")
+var testDataFile = flag.String("data", "shake.txt", "File location of the training data.")
+var train = flag.Int("train", 0, "Train the network with this number of workers")
+var seed = flag.String("seed", "", "Seed the neural network with this text then sample it.")
+var doProfile = flag.String("profile", "", "Pass `cpu` or `mem` to do profiling")
 
 func sample(vocab charrnn.Vocab, network *potential.Network) {
 	network.Disabled = false
@@ -69,14 +73,12 @@ func sample(vocab charrnn.Vocab, network *potential.Network) {
 }
 
 func main() {
-	// defer profile.Start(profile.MemProfile).Stop()
-	// defer profile.Start(profile.CPUProfile).Stop()
 	// doTrace()
 
 	// start by initializing the network from disk or whatever
 	var network *potential.Network
 	var err error
-	network, err = potential.LoadNetworkFromFile("network.json")
+	network, err = potential.LoadNetworkFromFile(*networkSaveFile)
 	if err != nil {
 		fmt.Println("Unable to load network from file; creating new one.", err)
 		newN := potential.NewNetwork()
@@ -86,17 +88,12 @@ func main() {
 		network.Grow(neuronsToAdd, defaultNeuronSynapses, synapsesToAdd)
 		fmt.Println("Created network")
 		fmt.Println("Saving to disk")
-		// err = network.SaveToFile("network.json")
-		// if err != nil {
-		// 	fmt.Println(err)
-		// 	return
-		// }
 	} else {
 		fmt.Println("Loaded network from disk,", len(network.Cells), "cells",
 			len(network.Synapses), "synapses")
 	}
 
-	bytes, err := ioutil.ReadFile("shake.txt")
+	bytes, err := ioutil.ReadFile(*testDataFile)
 	if err != nil {
 		panic(err)
 	}
@@ -106,14 +103,27 @@ func main() {
 
 	vocab := charrnn.NewVocab(text, network)
 
-	fmt.Println("Loaded vocab, length=", len(vocab.CharToItem))
+	fmt.Println("Loaded vocab for", *testDataFile, "length=", len(vocab.CharToItem))
 
+	// Figure out how to run this program.
 	flag.Parse()
-
-	if *samples > 0 && len(*seed) > 0 {
-		fmt.Println("Sampling", *samples, "characters with text: ", *seed)
+	if len(*seed) > 0 {
+		fmt.Println("Sampling characters with seed text: ", *seed)
 		sample(vocab, network)
 		return
+	}
+	threads := *train
+	if threads == 0 {
+		fmt.Println("Not enough params. Help:")
+		flag.PrintDefaults()
+		fmt.Println("")
+		return
+	}
+	// only profile during training
+	if *doProfile == "mem" {
+		defer profile.Start(profile.MemProfile).Stop()
+	} else if *doProfile == "cpu" {
+		defer profile.Start(profile.CPUProfile).Stop()
 	}
 
 	network.Disabled = true // we just will never need it to fire
@@ -201,7 +211,7 @@ func main() {
 
 	}
 
-	err = network.SaveToFile("network.json")
+	err = network.SaveToFile(*networkSaveFile)
 	if err != nil {
 		fmt.Println("Failed saving network")
 		fmt.Println(err)
