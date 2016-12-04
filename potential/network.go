@@ -1,10 +1,10 @@
 package potential
 
 import (
-	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
+	"hash/crc32"
 	"io/ioutil"
 	"math/rand"
 	"os"
@@ -12,15 +12,10 @@ import (
 )
 
 /*
-Shasum is the sha 256 checksum of the network, used to represent its version
-*/
-type Shasum string
-
-/*
 Network is a full neural network
 */
 type Network struct {
-	Version Shasum
+	Version string
 	/*
 		Indicates whether neurons are allowed to fire. Setting it disabled will stop firing
 		in a few milliseconds.
@@ -80,9 +75,11 @@ func NewNetwork() Network {
 RegenVersion generates a new network version and sets the Version property.
 */
 func (network *Network) RegenVersion() {
-	hasher := sha256.New()
-	hasher.Write([]byte(fmt.Sprintf("%v", network)))
-	network.Version = Shasum(hex.EncodeToString(hasher.Sum(nil)))
+	n := []byte(fmt.Sprintf("%v", network))
+
+	hasher := crc32.NewIEEE()
+	hasher.Write(n)
+	network.Version = hex.EncodeToString(hasher.Sum(nil))
 }
 
 func randomIntBetween(min, max int) int {

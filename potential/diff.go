@@ -9,7 +9,7 @@ Diff values are always *old minus new*. They can be positive or negative. The di
 added back later when needed.
 */
 type Diff struct {
-	NetworkVersion Shasum
+	NetworkVersion string
 	/*
 	   synapses is a map where the keys are synapse IDs, and the value is the difference between
 	   the new and old network on the `syanpse.Millivolts` property.
