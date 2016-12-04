@@ -22,7 +22,8 @@ func (network *Network) Prune() {
 		for synapseID := range cell.DendriteSynapses { // could also be axons, but, meh.
 			synapse, exists := network.Synapses[synapseID]
 			if !exists {
-				fmt.Println("warn: synapse attempted to be accesed but it was already removed", synapseID)
+				fmt.Println("warn: cannot evaluate synapse", synapseID,
+					"- missing from cell dendrites", cell.ID)
 				continue
 			}
 			isPositive := synapse.Millivolts >= 0
@@ -118,13 +119,15 @@ func (network *Network) PruneSynapse(synapseID SynapseID) {
 	if exists {
 		delete(axon.AxonSynapses, synapse.ID)
 	} else {
-		fmt.Println("warn: synapse", synapse.ID, "FromNeuronAxon", synapse.FromNeuronAxon, "not exist")
+		fmt.Println("warn: cannot prune synapse", synapse.ID, "FromNeuronAxon",
+			synapse.FromNeuronAxon, "does not exist")
 	}
 	dendrite, exists = network.Cells[synapse.ToNeuronDendrite]
 	if exists {
 		delete(dendrite.DendriteSynapses, synapse.ID)
 	} else {
-		fmt.Println("warn: synapse", synapse.ID, "ToNeuronDendrite", synapse.ToNeuronDendrite, "not exist")
+		fmt.Println("warn: cannot prune synapse", synapse.ID, "ToNeuronDendrite",
+			synapse.ToNeuronDendrite, "does not exist")
 	}
 
 	// after removing the synapses, see if these cells can be removed.

@@ -155,13 +155,14 @@ func (cell *Cell) FireActionPotential() {
 			}
 			synapse, exists := cell.Network.Synapses[synapseID]
 			if !exists {
-				fmt.Println("error: synapse", synapseID, "does not exist on cell", cell.ID)
+				fmt.Println("error: cannot activate synapse", synapseID, "from cell", cell.ID,
+					"because it does not exist")
 				continue
 			}
 			// fmt.Println("  activating synapse", synapse, "\n  from cell", cell.ID)
 			err := synapse.Activate()
 			if err != nil {
-				fmt.Println("cell fire err:", err)
+				fmt.Println("error: synapse activate fail:", err)
 			}
 		}
 		done <- true

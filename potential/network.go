@@ -149,7 +149,7 @@ func (network *Network) PrintCells() {
 ToJSON gives a json representation of the neural network.
 */
 func (network *Network) ToJSON() (string, error) {
-	bytes, err := json.Marshal(network)
+	bytes, err := json.MarshalIndent(network, "", "  ")
 	if err != nil {
 		return "", err
 	}

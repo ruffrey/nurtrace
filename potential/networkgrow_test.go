@@ -177,4 +177,41 @@ func Test_GrowPathBetween(t *testing.T) {
 		}
 		network.GrowPathBetween(input, output, 10)
 	})
+	t.Run("changes the number of synapses during runs", func(t *testing.T) {
+		n := NewNetwork()
+		network := &n
+		network.Grow(500, 0, 0)
+		for i := 0; i < 10; i++ {
+			input := network.RandomCellKey()
+			var output CellID
+			for {
+				output = network.RandomCellKey()
+				if input != output {
+					break
+				}
+			}
+			beforeCount := len(network.Synapses)
+			network.GrowPathBetween(input, output, 10)
+			assert.NotEqual(t, beforeCount, len(network.Synapses))
+		}
+	})
+}
+
+func Test_GrowPathBetween_Integrity(t *testing.T) {
+	t.Run("passes the integrity after growing many deep paths on a large network", func(t *testing.T) {
+		n := NewNetwork()
+		network := &n
+		network.Grow(500, 5, 100)
+		for i := 0; i < 10; i++ {
+			input := network.RandomCellKey()
+			var output CellID
+			for {
+				output = network.RandomCellKey()
+				if input != output {
+					break
+				}
+			}
+			network.GrowPathBetween(input, output, 20)
+		}
+	})
 }
