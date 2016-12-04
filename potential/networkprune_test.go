@@ -14,7 +14,7 @@ func Test_PruneSynapse(t *testing.T) {
 		// setup
 		n := NewNetwork()
 		network = &n
-		synapse = NewSynapse()
+		synapse = NewSynapse(network)
 		network.Synapses[synapse.ID] = synapse
 		synapse.Network = network
 		// cell 1 fires into cell 2

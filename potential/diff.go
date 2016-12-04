@@ -213,7 +213,10 @@ copySynapseToNetwork copies the properies of once synapse to a new one, and upda
 on the new synapse to a different given network.
 */
 func copySynapseToNetwork(synapse *Synapse, newNetwork *Network) {
-	copiedSynapse := NewSynapse()
+	copiedSynapse := NewSynapse(newNetwork)
+	// the NewSynapse method automatically adds it to the network; do not allow this.
+	delete(newNetwork.Synapses, copiedSynapse.ID)
+
 	copiedSynapse.ID = synapse.ID
 	newNetwork.Synapses[synapse.ID] = copiedSynapse
 	copiedSynapse.Network = newNetwork

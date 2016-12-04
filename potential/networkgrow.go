@@ -120,10 +120,8 @@ func (network *Network) GrowPathBetween(startCell, endCell CellID, minSynapses i
 		// Whatever the last cell at `maxHops` from the input was, will get
 		// `needSynapses` more synapses directly to the `endCell`.
 		for i := 0; i < needSynapses; i++ {
-			synapse := NewSynapse()
-			network.Synapses[synapse.ID] = synapse
+			synapse := NewSynapse(network)
 			synapsesAdded[synapse.ID] = true
-			synapse.Network = network
 			// somewhat arbitrarily decided to set the synapses to the highest value allowed
 			synapse.Millivolts = int8(synapseMax)
 
@@ -167,9 +165,7 @@ func (network *Network) GrowRandomNeurons(neuronsToAdd, defaultNeuronSynapses in
 				continue
 			}
 
-			synapse := NewSynapse()
-			network.Synapses[synapse.ID] = synapse
-			synapse.Network = network
+			synapse := NewSynapse(network)
 
 			if chooseIfSender() {
 				synapse.FromNeuronAxon = cell.ID
@@ -200,9 +196,6 @@ func chooseIfSender() bool {
 GrowRandomSynapses adds the specified number of synapses haphazardly to the network.
 */
 func (network *Network) GrowRandomSynapses(synapsesToAdd int) {
-	// fmt.Println("  adding synapses to whole network", synapsesToAdd)
-	// Then we randomly add synapses between neurons to the whole network, including the
-	// newest neurons.
 	for i := 0; i < synapsesToAdd; {
 		senderIx := network.RandomCellKey()
 		receiverIx := network.RandomCellKey()
@@ -213,9 +206,7 @@ func (network *Network) GrowRandomSynapses(synapsesToAdd int) {
 			continue
 		}
 
-		synapse := NewSynapse()
-		network.Synapses[synapse.ID] = synapse
-		synapse.Network = network
+		synapse := NewSynapse(network)
 		synapse.ToNeuronDendrite = receiver.ID
 		synapse.FromNeuronAxon = sender.ID
 		sender.AxonSynapses[synapse.ID] = true
@@ -223,6 +214,4 @@ func (network *Network) GrowRandomSynapses(synapsesToAdd int) {
 		// fmt.Println("created synapse", synapse)
 		i++
 	}
-	// fmt.Println("  GrowRandomSynapses done")
-
 }

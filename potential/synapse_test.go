@@ -8,12 +8,16 @@ import (
 )
 
 func Test_SynapseActivateNotExist(t *testing.T) {
-	n := NewNetwork()
-	network := &n
+	var network *Network
+	before := func() {
+		n := NewNetwork()
+		network = &n
+	}
 
 	t.Run("when synapse references the network but its dendrite not in cells it returns error", func(t *testing.T) {
-		synapse := NewSynapse()
-		synapse.Network = network
+		before()
+
+		synapse := NewSynapse(network)
 		synapse.ToNeuronDendrite = NewCellID()
 
 		err := synapse.Activate()
@@ -21,9 +25,9 @@ func Test_SynapseActivateNotExist(t *testing.T) {
 	})
 
 	t.Run("when syanpse and cell exist, activating a synapse with low millivolts does not fire the cell", func(t *testing.T) {
-		synapse := NewSynapse()
-		synapse.Network = network
+		before()
 
+		synapse := NewSynapse(network)
 		cell := NewCell(network)
 
 		synapse.ToNeuronDendrite = cell.ID
@@ -52,8 +56,9 @@ func Test_SynapseActivateNotExist(t *testing.T) {
 	})
 
 	t.Run("when syanpse and cell exist, activating a synapse with high millivolts fires the cell", func(t *testing.T) {
-		synapse := NewSynapse()
-		synapse.Network = network
+		before()
+
+		synapse := NewSynapse(network)
 
 		cell := NewCell(network)
 

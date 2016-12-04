@@ -13,12 +13,12 @@ func Test_NewNetwork(t *testing.T) {
 
 	t.Run("Cell map is initialized and can add cell immediately", func(t *testing.T) {
 		cell := NewCell(original)
-		original.Cells[cell.ID] = cell
+		original.Cells[cell.ID] = cell // already done in factory
 	})
 
 	t.Run("Synapse map is initialized and can add synapse immediately", func(t *testing.T) {
-		synapse := NewSynapse()
-		original.Synapses[synapse.ID] = synapse
+		synapse := NewSynapse(original)
+		original.Synapses[synapse.ID] = synapse // already done in factory
 	})
 
 	t.Run("Calling Grow() with all empty values does not crash", func(t *testing.T) {
@@ -60,9 +60,7 @@ func Test_NetworkSerialization(t *testing.T) {
 		// setup
 		n := NewNetwork()
 		network = &n
-		synapse = NewSynapse()
-		network.Synapses[synapse.ID] = synapse
-		synapse.Network = network
+		synapse = NewSynapse(network)
 		// cell 1 fires into cell 2
 		cell1 = NewCell(network)
 		cell2 = NewCell(network)
@@ -129,11 +127,8 @@ func Test_ResetForTraining(t *testing.T) {
 		n := NewNetwork()
 		network := &n
 
-		s := NewSynapse()
+		s := NewSynapse(network)
 		s.ActivationHistory = 12
-
-		network.Synapses[s.ID] = s
-		s.Network = network
 
 		network.ResetForTraining()
 

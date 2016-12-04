@@ -45,18 +45,29 @@ NewSynapse instantiates a synapse with a random millivolt weight.
 
 It is up to the implementer to set add it to the network and set the pointer.
 */
-func NewSynapse() *Synapse {
+func NewSynapse(network *Network) *Synapse {
+	var id SynapseID
+	for {
+		id = NewSynapseID()
+		if _, alreadyExists := network.Synapses[id]; !alreadyExists {
+			break
+		}
+		fmt.Println("warn: would have gotten dupe synapse ID")
+	}
 	mv := int8(randomIntBetween(synapseMin, synapseMax))
 	s := Synapse{
-		ID:         NewSynapseID(),
+		ID:         id,
+		Network:    network,
 		Millivolts: mv,
 	}
 	synapse := &s
+	network.Synapses[id] = synapse
 	return synapse
 }
 
 /*
-Activate is when the dendrite receives voltage.
+Activate indicates an axon has fired and this synapse should pass the message along to
+its dendrite cell.
 */
 func (synapse *Synapse) Activate() (err error) {
 	if synapse == nil {

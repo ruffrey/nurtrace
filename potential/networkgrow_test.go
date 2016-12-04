@@ -49,14 +49,10 @@ func Test_GrowPathBetween(t *testing.T) {
 		middle2 = NewCell(network)
 
 		// setup synapses
-		layer1A = NewSynapse()
-		network.Synapses[layer1A.ID] = layer1A
-		layer1B = NewSynapse()
-		network.Synapses[layer1B.ID] = layer1B
-		layer2C = NewSynapse()
-		network.Synapses[layer2C.ID] = layer2C
-		layer2D = NewSynapse()
-		network.Synapses[layer2D.ID] = layer2D
+		layer1A = NewSynapse(network)
+		layer1B = NewSynapse(network)
+		layer2C = NewSynapse(network)
+		layer2D = NewSynapse(network)
 
 		// linking synapses
 
@@ -126,8 +122,7 @@ func Test_GrowPathBetween(t *testing.T) {
 		// make a single path from input to output that is longer than the max hops
 		// minimum value of 20
 		for i := 0; i < 25; i++ {
-			s := NewSynapse()
-			network.Synapses[s.ID] = s
+			s := NewSynapse(network)
 			c := NewCell(network)
 
 			s.FromNeuronAxon = lastCell.ID
