@@ -18,12 +18,8 @@ func Test_PruneSynapse(t *testing.T) {
 		network.Synapses[synapse.ID] = synapse
 		synapse.Network = network
 		// cell 1 fires into cell 2
-		cell1 = NewCell()
-		network.Cells[cell1.ID] = cell1
-		cell1.Network = network
-		cell2 = NewCell()
-		network.Cells[cell2.ID] = cell2
-		cell2.Network = network
+		cell1 = NewCell(network)
+		cell2 = NewCell(network)
 		cell1.AxonSynapses[synapse.ID] = true
 		cell2.DendriteSynapses[synapse.ID] = true
 		synapse.FromNeuronAxon = cell1.ID

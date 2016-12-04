@@ -8,10 +8,11 @@ import (
 )
 
 func Test_NewNetwork(t *testing.T) {
-	original := NewNetwork()
+	o := NewNetwork()
+	original := &o
 
 	t.Run("Cell map is initialized and can add cell immediately", func(t *testing.T) {
-		cell := NewCell()
+		cell := NewCell(original)
 		original.Cells[cell.ID] = cell
 	})
 
@@ -52,22 +53,19 @@ func Test_BasicNetworkFiring(t *testing.T) {
 }
 
 func Test_NetworkSerialization(t *testing.T) {
-	var network Network
+	var network *Network
 	var synapse *Synapse
 	var cell1, cell2 *Cell
 	before := func() {
 		// setup
-		network = NewNetwork()
+		n := NewNetwork()
+		network = &n
 		synapse = NewSynapse()
 		network.Synapses[synapse.ID] = synapse
-		synapse.Network = &network
+		synapse.Network = network
 		// cell 1 fires into cell 2
-		cell1 = NewCell()
-		network.Cells[cell1.ID] = cell1
-		cell1.Network = &network
-		cell2 = NewCell()
-		network.Cells[cell2.ID] = cell2
-		cell2.Network = &network
+		cell1 = NewCell(network)
+		cell2 = NewCell(network)
 		cell1.AxonSynapses[synapse.ID] = true
 		cell2.DendriteSynapses[synapse.ID] = true
 		synapse.FromNeuronAxon = cell1.ID
@@ -105,7 +103,7 @@ func Test_ResetForTraining(t *testing.T) {
 		network := &n
 
 		// pretest
-		cell1 := NewCell()
+		cell1 := NewCell(network)
 		assert.Equal(t, false, cell1.activating)
 		assert.Equal(t, int8(-70), cell1.Voltage)
 		assert.Equal(t, false, cell1.WasFired)

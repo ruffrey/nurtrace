@@ -24,9 +24,7 @@ func Test_SynapseActivateNotExist(t *testing.T) {
 		synapse := NewSynapse()
 		synapse.Network = network
 
-		cell := NewCell()
-		network.Cells[cell.ID] = cell
-		cell.Network = network
+		cell := NewCell(network)
 
 		synapse.ToNeuronDendrite = cell.ID
 		synapse.Millivolts = 1
@@ -57,9 +55,7 @@ func Test_SynapseActivateNotExist(t *testing.T) {
 		synapse := NewSynapse()
 		synapse.Network = network
 
-		cell := NewCell()
-		network.Cells[cell.ID] = cell
-		cell.Network = network
+		cell := NewCell(network)
 
 		synapse.ToNeuronDendrite = cell.ID
 		synapse.Millivolts = 50

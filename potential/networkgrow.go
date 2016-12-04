@@ -147,9 +147,7 @@ func (network *Network) GrowRandomNeurons(neuronsToAdd, defaultNeuronSynapses in
 	// newer neurons.
 	var addedNeurons []*Cell
 	for i := 0; i < neuronsToAdd; i++ {
-		cell := NewCell()
-		network.Cells[cell.ID] = cell
-		cell.Network = network
+		cell := NewCell(network)
 		addedNeurons = append(addedNeurons, cell)
 	}
 	// fmt.Println("  done")

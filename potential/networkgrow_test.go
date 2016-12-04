@@ -42,15 +42,11 @@ func Test_GrowPathBetween(t *testing.T) {
 		//         \                               /
 		//          (layer1B) - middle2 - (layer2D)
 
-		input = NewCell()
-		network.Cells[input.ID] = input
-		output = NewCell()
-		network.Cells[output.ID] = output
+		input = NewCell(network)
+		output = NewCell(network)
 
-		middle1 = NewCell()
-		network.Cells[middle1.ID] = middle1
-		middle2 = NewCell()
-		network.Cells[middle2.ID] = middle2
+		middle1 = NewCell(network)
+		middle2 = NewCell(network)
 
 		// setup synapses
 		layer1A = NewSynapse()
@@ -120,12 +116,10 @@ func Test_GrowPathBetween(t *testing.T) {
 		var lastCell *Cell
 		var lastHoppedCell *Cell
 
-		input := NewCell()
-		network.Cells[input.ID] = input
+		input := NewCell(network)
 		input.Tag = "input"
-		output := NewCell()
+		output := NewCell(network)
 		output.Tag = "output"
-		network.Cells[output.ID] = output
 
 		lastCell = input
 
@@ -134,8 +128,7 @@ func Test_GrowPathBetween(t *testing.T) {
 		for i := 0; i < 25; i++ {
 			s := NewSynapse()
 			network.Synapses[s.ID] = s
-			c := NewCell()
-			network.Cells[c.ID] = c
+			c := NewCell(network)
 
 			s.FromNeuronAxon = lastCell.ID
 			lastCell.AxonSynapses[s.ID] = true

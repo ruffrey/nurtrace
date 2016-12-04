@@ -106,11 +106,20 @@ type Cell struct {
 /*
 NewCell instantiates a Cell and returns a pointer to it.
 
-It is up to the implementer to set the Network pointer and add it to the network.
+Sets the network pointer to the supplied network.
 */
-func NewCell() *Cell {
-	cell := Cell{
-		ID:               NewCellID(),
+func NewCell(network *Network) *Cell {
+	var id CellID
+	for {
+		id = NewCellID()
+		if _, alreadyExists := network.Cells[id]; !alreadyExists {
+			break
+		}
+		fmt.Println("warn: would have gotten dupe cell ID")
+	}
+	c := Cell{
+		ID:               id,
+		Network:          network,
 		Immortal:         false,
 		Voltage:          apResting,
 		activating:       false,
@@ -119,7 +128,9 @@ func NewCell() *Cell {
 		WasFired:         false,
 		OnFired:          make([]func(CellID), 0),
 	}
-	return &cell
+	cell := &c
+	network.Cells[cell.ID] = cell
+	return cell
 }
 
 /*

@@ -8,13 +8,11 @@ import (
 
 func Test_NewDiff(t *testing.T) {
 	t.Run("initializes maps and arrays so immediate assignment does not panic", func(t *testing.T) {
-		network := NewNetwork()
+		n := NewNetwork()
+		network := &n
 		diff := NewDiff()
 
-		cell := NewCell()
-		network.Cells[cell.ID] = cell
-		cell.Network = &network
-
+		cell := NewCell(network)
 		synapse := NewSynapse()
 
 		// tests are here
@@ -26,13 +24,14 @@ func Test_NewDiff(t *testing.T) {
 }
 
 func Test_CloneNetwork(t *testing.T) {
-	original := NewNetwork()
+	o := NewNetwork()
+	original := &o
 
-	beforeCell := NewCell()
+	beforeCell := NewCell(original)
 	original.Cells[beforeCell.ID] = beforeCell
-	beforeCell.Network = &original
+	beforeCell.Network = original
 
-	cloned := CloneNetwork(&original)
+	cloned := CloneNetwork(original)
 	// change something
 	cloned.SynapseLearnRate = 100
 
@@ -97,9 +96,7 @@ func Test_copyCellToNetwork(t *testing.T) {
 		originalNetwork := &on
 		nn := NewNetwork()
 		newNetwork := &nn
-		originalCell := NewCell()
-		originalCell.Network = originalNetwork
-		originalNetwork.Cells[originalCell.ID] = originalCell
+		originalCell := NewCell(originalNetwork)
 		copyCellToNetwork(originalCell, newNetwork)
 		copiedCell, exists := newNetwork.Cells[originalCell.ID]
 		if !exists {

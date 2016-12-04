@@ -188,7 +188,10 @@ copyCellToNetwork copies the properies of once cell to a new one, and updates th
 on the new cell to a different given network. It also adds the cell to the new network.
 */
 func copyCellToNetwork(cell *Cell, newNetwork *Network) {
-	copiedCell := NewCell()
+	copiedCell := NewCell(newNetwork)
+	// the NewCell method automatically adds it to the network; do not allow this.
+	delete(newNetwork.Cells, copiedCell.ID)
+
 	copiedCell.ID = cell.ID
 	newNetwork.Cells[cell.ID] = copiedCell
 	copiedCell.Network = newNetwork
