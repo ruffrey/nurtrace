@@ -7,19 +7,23 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"os/signal"
+	"strconv"
 	"strings"
 	"sync"
+	"syscall"
 	"time"
 )
 
 const fireCharacterIterations = 4
-const initialNetworkNeurons = 2000
-const defaultNeuronSynapses = 10
+const initialNetworkNeurons = 200
+const defaultNeuronSynapses = 5
 const pretrainNeuronsToGrow = 20
-const pretrainSynapsesToGrow = 100
-const growPathExpectedSynapses = 20
+const pretrainSynapsesToGrow = 50
+const growPathExpectedSynapses = 10
+const linesBetweenPruningSessions = 20
 const sleepBetweenInputTriggers = potential.RefractoryPeriodMillis * time.Millisecond
-const threads = 1
+const threads = 4
 const networkDisabledFizzleOutPeriod = 100 * time.Millisecond
 
 var samples = flag.Int("sample", 0, "Pass this flag with seed to do a sample instead of training")
@@ -92,7 +96,7 @@ func main() {
 			len(network.Synapses), "synapses")
 	}
 
-	bytes, err := ioutil.ReadFile("short.txt")
+	bytes, err := ioutil.ReadFile("shake.txt")
 	if err != nil {
 		panic(err)
 	}
@@ -115,6 +119,19 @@ func main() {
 	network.Disabled = true // we just will never need it to fire
 
 	fmt.Println("Beginning training", threads, "simultaneous sessions")
+
+	// make sure we save any progress from a long running training
+	c := make(chan os.Signal, 2)
+	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
+	go func() {
+		<-c
+		now := strconv.FormatInt(time.Now().UTC().UnixNano(), 10)
+		err = network.SaveToFile("network_" + now + ".json")
+		if err != nil {
+			fmt.Println(err)
+		}
+		os.Exit(1)
+	}()
 
 	totalLines := len(lines)
 	for i := 0; i < totalLines; {
@@ -173,13 +190,16 @@ func main() {
 			done <- true
 		})
 		<-done
-		fmt.Println("Round of lines done, line=", i, "/", totalLines)
-	}
 
-	fmt.Println(len(network.Cells), "cells", len(network.Synapses), "synapses")
-	fmt.Println("Pruning...")
-	network.Prune()
-	fmt.Println(len(network.Cells), "cells", len(network.Synapses), "synapses")
+		fmt.Println("Round of lines done, line=", i, "/", totalLines)
+		if i%linesBetweenPruningSessions == 0 {
+			fmt.Println("Pruning...")
+			fmt.Println("  before:", len(network.Cells), "cells,", len(network.Synapses), "synapses")
+			network.Prune()
+			fmt.Println("  after:", len(network.Cells), "cells,", len(network.Synapses), "synapses")
+		}
+
+	}
 
 	err = network.SaveToFile("network.json")
 	if err != nil {
