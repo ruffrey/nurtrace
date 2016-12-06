@@ -5,15 +5,16 @@ import (
 	"strings"
 )
 
+// TODO: this file and train.go will be merged
+
 /*
 VocabItem has a cell for the input and the output, both of which represent the same word.
 
 It would have been just as easy to have separate inputs and outputs.
 */
 type VocabItem struct {
-	Character  string
-	InputCell  potential.CellID
-	OutputCell potential.CellID
+	potential.DataItem
+	Value string
 }
 
 /*
@@ -91,6 +92,7 @@ func NewVocab(text string, network *potential.Network) Vocab {
 	vocab.CharToItem["START"] = start
 	vocab.CharToItem["END"] = end
 
+	// add the reverse map, also make immortal right now
 	for char, vi := range vocab.CharToItem {
 		vocab.CellToChar[vi.InputCell] = char
 		vocab.CellToChar[vi.OutputCell] = char
