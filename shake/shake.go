@@ -22,7 +22,7 @@ const initialNetworkNeurons = 200
 const defaultNeuronSynapses = 5
 const pretrainNeuronsToGrow = 20
 const pretrainSynapsesToGrow = 50
-const growPathExpectedSynapses = 10
+const growPathExpectedMinimumSynapses = 10
 const linesBetweenPruningSessions = 20
 const sleepBetweenInputTriggers = potential.RefractoryPeriodMillis * time.Millisecond
 const networkDisabledFizzleOutPeriod = 100 * time.Millisecond
@@ -33,11 +33,12 @@ var train = flag.Int("train", 0, "Train the network with this number of workers"
 var seed = flag.String("seed", "", "Seed the neural network with this text then sample it.")
 var doProfile = flag.String("profile", "", "Pass `cpu` or `mem` to do profiling")
 
-func sample(vocab charrnn.Vocab, network *potential.Network) {
+func sample(vocab charrnn.Vocab, network *potential.Network) string {
 	network.Disabled = false
 	network.ResetForTraining()
-	fmt.Print("\n")
 	seedChars := strings.Split(*seed, "")
+	out := ""
+	outConduit := make(chan string)
 
 	go func() {
 		for _, v := range vocab.CharToItem {
@@ -45,22 +46,19 @@ func sample(vocab charrnn.Vocab, network *potential.Network) {
 				network.Cells[v.OutputCell].OnFired,
 				func(cell potential.CellID) {
 					s := vocab.CellToChar[cell]
-					if s == "END" {
-						fmt.Print("\n")
-						os.Exit(0)
-					}
 					if s == "START" {
 						return
 					}
-					fmt.Print(s)
+					outConduit <- s
 				},
 			)
 		}
 	}()
 
-	for {
-		for _, char := range seedChars {
-			for i := 0; i < 4; i++ {
+	go func() {
+		network.Cells[vocab.CharToItem["START"].InputCell].FireActionPotential()
+		time.AfterFunc(sleepBetweenInputTriggers, func() {
+			for _, char := range seedChars {
 				ch := make(chan bool)
 				time.AfterFunc(sleepBetweenInputTriggers, func() {
 					network.Cells[vocab.CharToItem[char].InputCell].FireActionPotential()
@@ -68,8 +66,29 @@ func sample(vocab charrnn.Vocab, network *potential.Network) {
 				})
 				<-ch
 			}
+		})
+	}()
+
+	done := make(chan bool)
+	go func() {
+		for {
+			select {
+			case s := <-outConduit:
+				if s == "END" {
+					done <- true
+					break
+				}
+				// fmt.Print(s)
+				out += s
+			case <-time.After(time.Second * 3):
+				done <- true
+			}
 		}
-	}
+
+	}()
+	<-done
+	fmt.Println(out)
+	return out
 }
 
 func main() {
@@ -164,7 +183,7 @@ func main() {
 			// fmt.Println("starting thread", thread)
 			wg.Add(1)
 			go func(net *potential.Network, thread int) {
-				processLine(thread, line, net, network, vocab, ch)
+				processBatch(thread, line, net, network, vocab, ch)
 				wg.Done()
 			}(net, thread)
 
@@ -191,7 +210,7 @@ func main() {
 
 		done := make(chan bool)
 		time.AfterFunc(networkDisabledFizzleOutPeriod, func() {
-			// TODO: move this back down into processLine and have it return a diff instead
+			// TODO: move this back down into processBatch and have it return a diff instead
 			// of results
 			for thread := 0; thread < threads; thread++ {
 				diff := results[thread]
@@ -221,11 +240,11 @@ func main() {
 }
 
 /*
-processLine fires this entire line in the neural network at once, hoping to get the desired output.
+processBatch fires this entire line in the neural network at once, hoping to get the desired output.
 
 It will not add any synapses.
 */
-func processLine(thread int, line string, network *potential.Network, originalNetwork *potential.Network, vocab charrnn.Vocab, ch chan potential.Diff) {
+func processBatch(thread int, line string, network *potential.Network, originalNetwork *potential.Network, vocab charrnn.Vocab, ch chan potential.Diff) {
 	lineChars := strings.Split(line, "")
 
 	succeeded := 0
@@ -273,7 +292,7 @@ func processLine(thread int, line string, network *potential.Network, originalNe
 	var diff potential.Diff
 
 	done := make(chan bool)
-	time.AfterFunc(10*potential.RefractoryPeriodMillis, func() {
+	time.AfterFunc(growPathExpectedMinimumSynapses*potential.RefractoryPeriodMillis, func() {
 
 		if wasSuccessful { // keep the training
 			fmt.Println("Keep diff for thread=", thread)
@@ -283,7 +302,7 @@ func processLine(thread int, line string, network *potential.Network, originalNe
 			// of cells.
 			fmt.Println("Discard diff for thread=", thread, "and regrow")
 			for _, vocabItem := range vocab.CharToItem {
-				network.GrowPathBetween(vocabItem.InputCell, vocabItem.OutputCell, growPathExpectedSynapses)
+				network.GrowPathBetween(vocabItem.InputCell, vocabItem.OutputCell, growPathExpectedMinimumSynapses)
 			}
 			diff = potential.DiffNetworks(originalNetwork, network)
 
