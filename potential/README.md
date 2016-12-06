@@ -4,4 +4,4 @@
 
 - unopinionated core library for AI and machine learning
 - no supplied inputs and outputs
-- no supplied training methods
+- no supplied specific types of input/output trainings methods

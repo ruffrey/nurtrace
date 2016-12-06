@@ -38,7 +38,5 @@ it gets pruned, then its cells get pruned.
 
 ## How to know when a cell fired - getting data out of the system
 
-When a cell is an output cell, it will have a golang `chan CellID`. A firing cell will send
-its `CellID` into the channel. This acts as an indication of "perception." There would be a
-construct where the data type that is being trained sets up the channel when it sets up inputs
-and outputs, and attaches it to the outputs.
+Each cell has an array of funcs that get called with the cell ID as the first argument
+every time the cell fires. An implementation would add callbacks to it.
