@@ -1,7 +1,6 @@
 package potential
 
 import (
-	"bleh/potential"
 	"fmt"
 	"strings"
 	"time"
@@ -13,19 +12,19 @@ the network's answer.
 
 `start` and `end` will indicate the beginning and end of when to sample data.
 */
-func Sample(seed string, data Dataset, network *Network, maxInterations int, start interface{}, end interface{}) string {
+func Sample(seed string, data Dataset, network *Network, maxInterations int, start interface{}, end interface{}) []interface{} {
 	network.Disabled = false
 	network.ResetForTraining()
 	seedChars := strings.Split(seed, "")
-	out := ""
-	outConduit := make(chan string)
+	var out []interface{}
+	outConduit := make(chan interface{})
 
 	// add a callback to each output cell that sends the
 	go func() {
 		for _, v := range data.KeyToItem {
 			network.Cells[v.OutputCell].OnFired = append(
 				network.Cells[v.OutputCell].OnFired,
-				func(cell potential.CellID) {
+				func(cell CellID) {
 					s := data.cellToKey[cell]
 					if s == start {
 						return
@@ -60,7 +59,7 @@ func Sample(seed string, data Dataset, network *Network, maxInterations int, sta
 					break
 				}
 				// fmt.Print(s)
-				out += s
+				out = append(out, s)
 				if len(out) >= maxInterations {
 					done <- true
 					break
@@ -77,7 +76,7 @@ func Sample(seed string, data Dataset, network *Network, maxInterations int, sta
 	// reset all the output cell callbacks
 	network.Disabled = true
 	for _, v := range data.KeyToItem {
-		network.Cells[v.OutputCell].OnFired = make([]func())
+		network.Cells[v.OutputCell].OnFired = make([]func(CellID), 0)
 	}
 
 	return out

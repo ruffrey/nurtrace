@@ -2,6 +2,7 @@ package potential
 
 import "time"
 
+const defaultWorkerThreads = 2
 const initialNetworkNeurons = 200
 const defaultNeuronSynapses = 5
 const pretrainNeuronsToGrow = 20
@@ -16,27 +17,47 @@ TrainingSettings are
 */
 type TrainingSettings struct {
 	Threads int
-	Data    Dataset
+	Data    *Dataset
 	// List of arrays of cells to fire for training.
-	TrainingSamples [][]CellID
-	// Solutions should correspond to the samples and will be matched on index.
-	TrainingSolutions [][]CellID
+	TrainingSamples []map[CellID]CellID
 }
 
 /*
-DataItem is the smallest and core unit of a Dataset.
+NewTrainingSettings sets up and returns a new TrainingSettings instance.
 */
-type DataItem struct {
+func NewTrainingSettings() *TrainingSettings {
+	d := Dataset{}
+	dataset := &d
+	settings := TrainingSettings{
+		Threads:         defaultWorkerThreads,
+		Data:            dataset,
+		TrainingSamples: make([]map[CellID]CellID, 0),
+	}
+	return &settings
+}
+
+/*
+PerceptionUnit is the smallest and core unit of a Dataset.
+*/
+type PerceptionUnit struct {
 	Value      interface{}
 	InputCell  CellID
 	OutputCell CellID
 }
 
 /*
-Dataset is
+Dataset helps represent the smallest units of a trainable set of data, and maps each
+unit so it can be used when training and sampling.
+
+An example of data in a dataset would be the collection of letters from a character
+neural network. Each letter would be mapped to a single input and output cell,
+because the network uses groups of letters to predict groups of letters.
+
+Another example might be inputs that are pixels coded by location and color. The outputs
+could be categories of things that are in the photos, or that the photos represent.
 */
 type Dataset struct {
-	KeyToItem map[interface{}]DataItem
+	KeyToItem map[interface{}]PerceptionUnit
 	cellToKey map[CellID]interface{}
 }
 
@@ -54,12 +75,10 @@ type Trainer interface {
 /*
 Train executes the trainer's OnTrained method once complete.
 */
-func Train(t *Trainer, settings *TrainingSettings, network *Network) {
+func Train(t Trainer, settings *TrainingSettings, network *Network) {
 	t.PrepareData(network)
 
-	if len(settings.TrainingSamples) != len(settings.TrainingSolutions) {
-		panic("TrainingSamples and TrainingSolutions should be paired on indexes and therefore equal in length.")
-	}
+	settings.Data.cellToKey = make(map[CellID]interface{})
 
 	for key, dataItem := range settings.Data.KeyToItem {
 		// grow paths between all the inputs and outputs

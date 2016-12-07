@@ -2,41 +2,56 @@ package charrnn
 
 import (
 	"bleh/potential"
-	"strings"
+	"encoding/json"
+	"fmt"
+	"io/ioutil"
+	"os"
 )
 
-// TODO: this file and train.go will be merged
-
 /*
-VocabItem has a cell for the input and the output, both of which represent the same word.
+Charrnn is the collection of training stuff to operate upon
 
-It would have been just as easy to have separate inputs and outputs.
+It implements potential.Trainer
 */
-type VocabItem struct {
-	potential.DataItem
-	Value string
+type Charrnn struct {
+	chars    []string
+	Settings *potential.TrainingSettings
 }
 
 /*
-Vocab represents the vocab
+SaveVocab saves the current vocabulary from the charrnn.
 */
-type Vocab struct {
-	CharToItem map[string]VocabItem
-	CellToChar map[potential.CellID]string
-}
-
-/*
-NewVocab generates the vocab from a bunch of text
-*/
-func NewVocab(text string, network *potential.Network) Vocab {
-	chars := strings.Split(text, "")
-	vocab := Vocab{
-		CharToItem: make(map[string]VocabItem),
-		CellToChar: make(map[potential.CellID]string),
+func (charrnn *Charrnn) SaveVocab(filename string) error {
+	data, err := json.Marshal(charrnn.Settings.Data.KeyToItem)
+	if err != nil {
+		return err
 	}
+	return ioutil.WriteFile(filename, []byte(data), os.ModePerm)
+}
 
-	for _, Character := range chars {
-		if _, exists := vocab.CharToItem[Character]; !exists {
+/*
+LoadVocab loads the known vocabulary and mappings to cells and puts it in
+the settings.
+*/
+func (charrnn *Charrnn) LoadVocab(filename string) error {
+	bytes, err := ioutil.ReadFile(filename)
+	if err != nil {
+		return err
+	}
+	err = json.Unmarshal(bytes, charrnn.Settings.Data)
+	return err
+}
+
+/*
+PrepareData is from potential.Trainer
+*/
+func (charrnn Charrnn) PrepareData(network *potential.Network) {
+	fmt.Println(charrnn.Settings)
+	charrnn.Settings.Data.KeyToItem = make(map[interface{}]potential.PerceptionUnit)
+
+	// from the training samples, build the vocabulary
+	for _, Value := range charrnn.chars {
+		if _, exists := charrnn.Settings.Data.KeyToItem[Value]; !exists {
 			InputCell := network.RandomCellKey()
 			// ensure the input and output cells are not the same!
 			var OutputCell potential.CellID
@@ -46,22 +61,17 @@ func NewVocab(text string, network *potential.Network) Vocab {
 					break
 				}
 			}
-			// inputs and outputs must never be pruned
-			network.Cells[InputCell].Tag = "in-" + Character
-			network.Cells[OutputCell].Tag = "out-" + Character
 
-			network.GrowPathBetween(InputCell, OutputCell, 10)
-
-			vocab.CharToItem[Character] = VocabItem{
-				Character,
-				InputCell,
-				OutputCell,
+			charrnn.Settings.Data.KeyToItem[Value] = potential.PerceptionUnit{
+				Value:      Value,
+				InputCell:  InputCell,
+				OutputCell: OutputCell,
 			}
 		}
 	}
 
-	start := VocabItem{
-		Character: "START",
+	start := potential.PerceptionUnit{
+		Value:     "START",
 		InputCell: network.RandomCellKey(),
 	}
 	for {
@@ -70,8 +80,8 @@ func NewVocab(text string, network *potential.Network) Vocab {
 			break
 		}
 	}
-	end := VocabItem{
-		Character: "END",
+	end := potential.PerceptionUnit{
+		Value:     "END",
 		InputCell: network.RandomCellKey(),
 	}
 	for {
@@ -81,24 +91,18 @@ func NewVocab(text string, network *potential.Network) Vocab {
 		}
 	}
 
-	network.GrowPathBetween(start.InputCell, start.OutputCell, 10)
-	network.GrowPathBetween(end.InputCell, end.OutputCell, 10)
-
 	network.Cells[start.InputCell].Tag = "in-START"
 	network.Cells[start.OutputCell].Tag = "out-START"
 	network.Cells[end.InputCell].Tag = "in-END"
 	network.Cells[end.OutputCell].Tag = "out-END"
 
-	vocab.CharToItem["START"] = start
-	vocab.CharToItem["END"] = end
+	charrnn.Settings.Data.KeyToItem["START"] = start
+	charrnn.Settings.Data.KeyToItem["END"] = end
+}
 
-	// add the reverse map, also make immortal right now
-	for char, vi := range vocab.CharToItem {
-		vocab.CellToChar[vi.InputCell] = char
-		vocab.CellToChar[vi.OutputCell] = char
-		network.Cells[vi.InputCell].Immortal = true
-		network.Cells[vi.OutputCell].Immortal = true
-	}
-
-	return vocab
+/*
+OnTrained is the callback from potential.Trainer
+*/
+func (charrnn Charrnn) OnTrained() {
+	fmt.Println("charrnn done")
 }
