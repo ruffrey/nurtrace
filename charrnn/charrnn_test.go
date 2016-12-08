@@ -72,3 +72,32 @@ func Test_Training(t *testing.T) {
 		potential.Train(c, settings, network)
 	})
 }
+
+func Test_SaveLoadVocab(t *testing.T) {
+	t.Run("saves vocab and is reloadable from disk", func(t *testing.T) {
+		bytes, err := ioutil.ReadFile("text.txt")
+		assert.NoError(t, err)
+		c := Charrnn{
+			chars:    strings.Split(string(bytes), ""),
+			Settings: potential.NewTrainingSettings(),
+		}
+		n := potential.NewNetwork()
+		network := &n
+		network.Grow(10, 5, 10)
+		c.PrepareData(network)
+		assert.NotEqual(t, 0, len(c.Settings.Data.KeyToItem))
+
+		err = c.SaveVocab("test.json")
+		assert.NoError(t, err, "failed saving vocab as json")
+		bytes, err = ioutil.ReadFile("test.json")
+		assert.NoError(t, err, "failed reading back vocab from test.json as bytes")
+		assert.NotEqual(t, 0, len(string(bytes)))
+
+		c2 := Charrnn{
+			Settings: potential.NewTrainingSettings(),
+		}
+		err = c2.LoadVocab("test.json")
+		assert.NoError(t, err, "failed reading saved vocab")
+		assert.Equal(t, len(c.Settings.Data.KeyToItem), len(c2.Settings.Data.KeyToItem))
+	})
+}

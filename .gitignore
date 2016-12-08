@@ -7,3 +7,4 @@ cprof
 potential.test
 *.pdf
 *.test
+stats.sh

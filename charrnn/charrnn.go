@@ -19,35 +19,73 @@ type Charrnn struct {
 }
 
 /*
+charPerceptionUnit is almost the same as a PerceptionUnit but the value is typed to string,
+which enables it to become json or get serialized back into json.
+*/
+type charPerceptionUnit struct {
+	Value      string
+	InputCell  potential.CellID
+	OutputCell potential.CellID
+}
+
+/*
 SaveVocab saves the current vocabulary from the charrnn.
 */
 func (charrnn *Charrnn) SaveVocab(filename string) error {
-	data, err := json.Marshal(charrnn.Settings.Data.KeyToItem)
+	data := make(map[string]charPerceptionUnit)
+	for key, value := range charrnn.Settings.Data.KeyToItem {
+		data[key.(string)] = charPerceptionUnit{
+			Value:      value.Value.(string),
+			InputCell:  value.InputCell,
+			OutputCell: value.OutputCell,
+		}
+	}
+	d, err := json.Marshal(data)
 	if err != nil {
 		return err
 	}
-	return ioutil.WriteFile(filename, []byte(data), os.ModePerm)
+	return ioutil.WriteFile(filename, []byte(d), os.ModePerm)
 }
 
 /*
 LoadVocab loads the known vocabulary and mappings to cells and puts it in
-the settings.
+the settings. It uses the charPerceptionUnit as an intermediary but
+casts it back into a generic `map[interface{}]potential.PerceptionUnit`, which
+the potential lib requires.
 */
 func (charrnn *Charrnn) LoadVocab(filename string) error {
 	bytes, err := ioutil.ReadFile(filename)
 	if err != nil {
 		return err
 	}
-	err = json.Unmarshal(bytes, charrnn.Settings.Data)
-	return err
+	data := make(map[string]charPerceptionUnit)
+	err = json.Unmarshal(bytes, &data)
+	if err != nil {
+		return err
+	}
+	if charrnn.Settings.Data.KeyToItem == nil {
+		charrnn.Settings.Data.KeyToItem = make(map[interface{}]potential.PerceptionUnit)
+	}
+	for key, value := range data {
+		charrnn.Settings.Data.KeyToItem[key] = potential.PerceptionUnit{
+			Value:      value.Value,
+			InputCell:  value.InputCell,
+			OutputCell: value.OutputCell,
+		}
+	}
+
+	return nil
 }
 
 /*
-PrepareData is from potential.Trainer
+PrepareData is from potential.Trainer. Looking at each character, build up
+a map of string: PerceptionUnit pairs.
 */
 func (charrnn Charrnn) PrepareData(network *potential.Network) {
 	fmt.Println(charrnn.Settings)
-	charrnn.Settings.Data.KeyToItem = make(map[interface{}]potential.PerceptionUnit)
+	if charrnn.Settings.Data.KeyToItem == nil { // may have been preloaded
+		charrnn.Settings.Data.KeyToItem = make(map[interface{}]potential.PerceptionUnit)
+	}
 
 	// from the training samples, build the vocabulary
 	for _, Value := range charrnn.chars {
