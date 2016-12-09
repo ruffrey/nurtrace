@@ -10,7 +10,6 @@ import (
 	"os/signal"
 	"strconv"
 	"strings"
-	"sync"
 	"syscall"
 	"time"
 
@@ -30,7 +29,7 @@ const networkDisabledFizzleOutPeriod = 100 * time.Millisecond
 var networkSaveFile = flag.String("save", "network.json", "Load/save location of the network")
 var vocabSaveFile = flag.String("vocab", "vocab.json", "Load/save location of the charrnn vocab")
 var testDataFile = flag.String("data", "shake.txt", "File location of the training data.")
-var train = flag.Int("train", 0, "Train the network with this number of workers")
+var train = flag.Uint("train", 0, "Train the network with this number of workers")
 var seed = flag.String("seed", "", "Seed the neural network with this text then sample it.")
 var doProfile = flag.String("profile", "", "Pass `cpu` or `mem` to do profiling")
 
@@ -61,28 +60,33 @@ func main() {
 	}
 
 	text := string(bytes)
-	lines := strings.Split(text, "\n")
-    settings := potential.NewTrainingSettings()
-
+	// lines := strings.Split(text, "\n")
+	chars := strings.Split(text, "")
+	settings := potential.NewTrainingSettings()
+	// TODO: lines need to be setup for batches of training data.
 	t := charrnn.Charrnn{
-        Chars: lines,
-        Settings: settings
-    }
-    err := t.LoadVocab(*vocabSaveFile)
-    if err != nil {
-        t.PrepareData(network)
-    }
+		Chars:    chars,
+		Settings: settings,
+	}
+	err = t.LoadVocab(*vocabSaveFile)
+	if err != nil {
+		t.PrepareData(network)
+		t.SaveVocab(*vocabSaveFile)
+	}
 
-	fmt.Println("Loaded training text for", *testDataFile, "length=", len(c.Settings.Data.KeyToItem))
+	fmt.Println("Loaded training text for", *testDataFile, "length=", len(t.Settings.Data.KeyToItem))
 
 	// Figure out how to run this program.
 	flag.Parse()
 	if len(*seed) > 0 {
 		fmt.Println("Sampling characters with seed text: ", *seed)
-		potential.Sample(*seed, data, network, 1000, "START", "END")
+		out := potential.Sample(*seed, t.Settings.Data, network, 1000, "START", "END")
+		for _, s := range out {
+			fmt.Print(s)
+		}
 		return
 	}
-	t.Settings.Threads := *train
+	t.Settings.Threads = *train
 	if t.Settings.Threads == 0 {
 		fmt.Println("Not enough params. Help:")
 		flag.PrintDefaults()
@@ -98,7 +102,7 @@ func main() {
 
 	network.Disabled = true // we just will never need it to fire
 
-	fmt.Println("Beginning training", threads, "simultaneous sessions")
+	fmt.Println("Beginning training", t.Settings.Threads, "simultaneous sessions")
 
 	// make sure we save any progress from a long running training
 	c := make(chan os.Signal, 2)
@@ -113,11 +117,13 @@ func main() {
 		os.Exit(1)
 	}()
 
-	err = potential.Train(t, t.Settings, network)
-	if err != nil {
-		fmt.Println("Training failed:", err)
-	}
+	potential.Train(t, t.Settings, network)
 
+	err = t.SaveVocab(*vocabSaveFile)
+	if err != nil {
+		fmt.Println("Failed saving vocab")
+		fmt.Println(err)
+	}
 	err = network.SaveToFile(*networkSaveFile)
 	if err != nil {
 		fmt.Println("Failed saving network")

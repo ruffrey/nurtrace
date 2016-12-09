@@ -12,7 +12,7 @@ the network's answer.
 
 `start` and `end` will indicate the beginning and end of when to sample data.
 */
-func Sample(seed string, data Dataset, network *Network, maxInterations int, start interface{}, end interface{}) []interface{} {
+func Sample(seed string, data *Dataset, network *Network, maxInterations int, start interface{}, end interface{}) []interface{} {
 	network.Disabled = false
 	network.ResetForTraining()
 	seedChars := strings.Split(seed, "")
@@ -25,7 +25,8 @@ func Sample(seed string, data Dataset, network *Network, maxInterations int, sta
 			network.Cells[v.OutputCell].OnFired = append(
 				network.Cells[v.OutputCell].OnFired,
 				func(cell CellID) {
-					s := data.cellToKey[cell]
+					s := data.CellToKey[cell]
+					fmt.Println(cell, s)
 					if s == start {
 						return
 					}
@@ -71,7 +72,6 @@ func Sample(seed string, data Dataset, network *Network, maxInterations int, sta
 
 	}()
 	<-done
-	fmt.Println(out)
 
 	// reset all the output cell callbacks
 	network.Disabled = true

@@ -1,5 +1,7 @@
 package charrnn
 
+// TODO: saving/restoring from disk does not work.
+
 import (
 	"bleh/potential"
 	"encoding/json"
@@ -48,7 +50,7 @@ func (charrnn *Charrnn) SaveVocab(filename string) error {
 
 /*
 LoadVocab loads the known vocabulary and mappings to cells and puts it in
-the settings. It uses the charPerceptionUnit as an intermediary but
+the charrnn.Settings. It uses the charPerceptionUnit as an intermediary but
 casts it back into a generic `map[interface{}]potential.PerceptionUnit`, which
 the potential lib requires.
 */
@@ -139,4 +141,17 @@ func (charrnn Charrnn) PrepareData(network *potential.Network) {
 	charrnn.Settings.Data.KeyToItem["START"] = start
 	charrnn.Settings.Data.KeyToItem["END"] = end
 
+	// add data
+	charrnn.Settings.Data.CellToKey = make(map[potential.CellID]interface{})
+
+	for key, dataItem := range charrnn.Settings.Data.KeyToItem {
+		// grow paths between all the inputs and outputs
+		network.GrowPathBetween(dataItem.InputCell, dataItem.OutputCell, 10)
+		// reverse the map
+		charrnn.Settings.Data.CellToKey[dataItem.InputCell] = key
+		charrnn.Settings.Data.CellToKey[dataItem.OutputCell] = key
+		// prevent accidentally pruning the input/output cells
+		network.Cells[dataItem.InputCell].Immortal = true
+		network.Cells[dataItem.OutputCell].Immortal = true
+	}
 }

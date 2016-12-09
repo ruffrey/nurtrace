@@ -76,7 +76,7 @@ could be categories of things that are in the photos, or that the photos represe
 */
 type Dataset struct {
 	KeyToItem map[interface{}]PerceptionUnit
-	cellToKey map[CellID]interface{}
+	CellToKey map[CellID]interface{}
 }
 
 /*
@@ -94,19 +94,6 @@ Train executes the trainer's OnTrained method once complete.
 */
 func Train(t Trainer, settings *TrainingSettings, network *Network) {
 	t.PrepareData(network)
-
-	settings.Data.cellToKey = make(map[CellID]interface{})
-
-	for key, dataItem := range settings.Data.KeyToItem {
-		// grow paths between all the inputs and outputs
-		network.GrowPathBetween(dataItem.InputCell, dataItem.OutputCell, 10)
-		// reverse the map
-		settings.Data.cellToKey[dataItem.InputCell] = key
-		settings.Data.cellToKey[dataItem.OutputCell] = key
-		// prevent accidentally pruning the input/output cells
-		network.Cells[dataItem.InputCell].Immortal = true
-		network.Cells[dataItem.OutputCell].Immortal = true
-	}
 
 	// TODO: thread pool
 
