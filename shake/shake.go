@@ -28,68 +28,11 @@ const sleepBetweenInputTriggers = potential.RefractoryPeriodMillis * time.Millis
 const networkDisabledFizzleOutPeriod = 100 * time.Millisecond
 
 var networkSaveFile = flag.String("save", "network.json", "Load/save location of the network")
+var vocabSaveFile = flag.String("vocab", "vocab.json", "Load/save location of the charrnn vocab")
 var testDataFile = flag.String("data", "shake.txt", "File location of the training data.")
 var train = flag.Int("train", 0, "Train the network with this number of workers")
 var seed = flag.String("seed", "", "Seed the neural network with this text then sample it.")
 var doProfile = flag.String("profile", "", "Pass `cpu` or `mem` to do profiling")
-
-func sample(vocab charrnn.Vocab, network *potential.Network) string {
-	network.Disabled = false
-	network.ResetForTraining()
-	seedChars := strings.Split(*seed, "")
-	out := ""
-	outConduit := make(chan string)
-
-	go func() {
-		for _, v := range vocab.CharToItem {
-			network.Cells[v.OutputCell].OnFired = append(
-				network.Cells[v.OutputCell].OnFired,
-				func(cell potential.CellID) {
-					s := vocab.CellToChar[cell]
-					if s == "START" {
-						return
-					}
-					outConduit <- s
-				},
-			)
-		}
-	}()
-
-	go func() {
-		network.Cells[vocab.CharToItem["START"].InputCell].FireActionPotential()
-		time.AfterFunc(sleepBetweenInputTriggers, func() {
-			for _, char := range seedChars {
-				ch := make(chan bool)
-				time.AfterFunc(sleepBetweenInputTriggers, func() {
-					network.Cells[vocab.CharToItem[char].InputCell].FireActionPotential()
-					ch <- true
-				})
-				<-ch
-			}
-		})
-	}()
-
-	done := make(chan bool)
-	go func() {
-		for {
-			select {
-			case s := <-outConduit:
-				if s == "END" {
-					done <- true
-					break
-				}
-				// fmt.Print(s)
-				out += s
-			case <-time.After(time.Second * 3):
-				done <- true
-			}
-		}
-
-	}()
-	<-done
-	fmt.Println(out)
-	return out
-}
 
 func main() {
 	// doTrace()
@@ -119,20 +62,28 @@ func main() {
 
 	text := string(bytes)
 	lines := strings.Split(text, "\n")
+    settings := potential.NewTrainingSettings()
 
-	vocab := charrnn.NewVocab(text, network)
+	t := charrnn.Charrnn{
+        Chars: lines,
+        Settings: settings
+    }
+    err := t.LoadVocab(*vocabSaveFile)
+    if err != nil {
+        t.PrepareData(network)
+    }
 
-	fmt.Println("Loaded vocab for", *testDataFile, "length=", len(vocab.CharToItem))
+	fmt.Println("Loaded training text for", *testDataFile, "length=", len(c.Settings.Data.KeyToItem))
 
 	// Figure out how to run this program.
 	flag.Parse()
 	if len(*seed) > 0 {
 		fmt.Println("Sampling characters with seed text: ", *seed)
-		sample(vocab, network)
+		potential.Sample(*seed, data, network, 1000, "START", "END")
 		return
 	}
-	threads := *train
-	if threads == 0 {
+	t.Settings.Threads := *train
+	if t.Settings.Threads == 0 {
 		fmt.Println("Not enough params. Help:")
 		flag.PrintDefaults()
 		fmt.Println("")
@@ -162,72 +113,9 @@ func main() {
 		os.Exit(1)
 	}()
 
-	totalLines := len(lines)
-	for i := 0; i < totalLines; {
-		var wg sync.WaitGroup
-
-		// train in parallel over this number of threads
-		ch := make(chan potential.Diff)
-
-		networkCopies := make(map[int]*potential.Network)
-		results := make(map[int]potential.Diff)
-		for thread := 0; thread < threads; thread++ {
-			if i >= totalLines { // ran out of lines
-				break
-			}
-
-			line := lines[i]
-			net := potential.CloneNetwork(network)
-			net.GrowRandomNeurons(pretrainNeuronsToGrow, defaultNeuronSynapses)
-			net.GrowRandomSynapses(pretrainSynapsesToGrow)
-			// fmt.Println("starting thread", thread)
-			wg.Add(1)
-			go func(net *potential.Network, thread int) {
-				processBatch(thread, line, net, network, vocab, ch)
-				wg.Done()
-			}(net, thread)
-
-			networkCopies[thread] = net
-
-			i++
-
-		}
-
-		go func() {
-			wg.Wait()
-			close(ch)
-		}()
-
-		// read results from the threads as they come in
-		for diff := range ch {
-			results[diff.Worker] = diff
-		}
-
-		// now that all threads are finished, read their results and modify the network in
-		// series
-
-		// End all network firings, let them finish, then do diffing or growing.
-
-		done := make(chan bool)
-		time.AfterFunc(networkDisabledFizzleOutPeriod, func() {
-			// TODO: move this back down into processBatch and have it return a diff instead
-			// of results
-			for thread := 0; thread < threads; thread++ {
-				diff := results[thread]
-				potential.ApplyDiff(diff, network)
-			}
-			done <- true
-		})
-		<-done
-
-		fmt.Println("Round of lines done, line=", i, "/", totalLines)
-		if i%linesBetweenPruningSessions == 0 {
-			fmt.Println("Pruning...")
-			fmt.Println("  before:", len(network.Cells), "cells,", len(network.Synapses), "synapses")
-			network.Prune()
-			fmt.Println("  after:", len(network.Cells), "cells,", len(network.Synapses), "synapses")
-		}
-
+	err = potential.Train(t, t.Settings, network)
+	if err != nil {
+		fmt.Println("Training failed:", err)
 	}
 
 	err = network.SaveToFile(*networkSaveFile)
@@ -237,80 +125,4 @@ func main() {
 		return
 	}
 	fmt.Println("Done.")
-}
-
-/*
-processBatch fires this entire line in the neural network at once, hoping to get the desired output.
-
-It will not add any synapses.
-*/
-func processBatch(thread int, line string, network *potential.Network, originalNetwork *potential.Network, vocab charrnn.Vocab, ch chan potential.Diff) {
-	lineChars := strings.Split(line, "")
-
-	succeeded := 0
-
-	// First time through, fire the receptors a bunch to stimulate the network,
-	// and see if it resulted in the expected outputs firing.
-	for ix, char := range lineChars {
-		isFirst := ix == 0
-		isLast := ix == (len(lineChars) - 1)
-		var inChar charrnn.VocabItem
-		var outChar charrnn.VocabItem
-		if isFirst {
-			inChar = vocab.CharToItem["START"]
-			outChar = vocab.CharToItem[char]
-		} else if isLast {
-			inChar = vocab.CharToItem[char]
-			outChar = vocab.CharToItem["END"]
-		} else {
-			inChar = vocab.CharToItem[lineChars[ix-1]]
-			outChar = vocab.CharToItem[char]
-		}
-
-		network.ResetForTraining()
-
-		for i := 0; i < fireCharacterIterations; i++ {
-			doneChan := make(chan bool)
-			go func(i int) {
-				time.AfterFunc(sleepBetweenInputTriggers, func() {
-					network.Cells[inChar.OutputCell].FireActionPotential()
-					doneChan <- true
-				})
-			}(i)
-			<-doneChan
-		}
-
-		if network.Cells[outChar.InputCell].WasFired {
-			succeeded++
-		}
-	}
-	wasSuccessful := succeeded == len(lineChars)
-	// fmt.Println(wasSuccessful, succeeded, "/", len(lineChars), "\n  ", line)
-	fmt.Println("disabling network=", thread)
-	network.Disabled = true
-
-	var diff potential.Diff
-
-	done := make(chan bool)
-	time.AfterFunc(growPathExpectedMinimumSynapses*potential.RefractoryPeriodMillis, func() {
-
-		if wasSuccessful { // keep the training
-			fmt.Println("Keep diff for thread=", thread)
-			diff = potential.DiffNetworks(originalNetwork, network)
-		} else {
-			// We failed to generate the desired effect, so do a significant growth
-			// of cells.
-			fmt.Println("Discard diff for thread=", thread, "and regrow")
-			for _, vocabItem := range vocab.CharToItem {
-				network.GrowPathBetween(vocabItem.InputCell, vocabItem.OutputCell, growPathExpectedMinimumSynapses)
-			}
-			diff = potential.DiffNetworks(originalNetwork, network)
-
-		}
-		diff.Worker = thread
-
-		done <- true
-	})
-	<-done
-	ch <- diff
 }

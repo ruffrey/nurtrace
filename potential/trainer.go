@@ -1,6 +1,10 @@
 package potential
 
-import "time"
+import (
+	"fmt"
+	"sync"
+	"time"
+)
 
 const defaultWorkerThreads = 2
 const initialNetworkNeurons = 200
@@ -8,7 +12,7 @@ const defaultNeuronSynapses = 5
 const pretrainNeuronsToGrow = 20
 const pretrainSynapsesToGrow = 50
 const growPathExpectedMinimumSynapses = 10
-const linesBetweenPruningSessions = 20
+const samplesBetweenPruningSessions = 20
 const sleepBetweenInputTriggers = RefractoryPeriodMillis * time.Millisecond
 const networkDisabledFizzleOutPeriod = 100 * time.Millisecond
 
@@ -16,10 +20,15 @@ const networkDisabledFizzleOutPeriod = 100 * time.Millisecond
 TrainingSettings are
 */
 type TrainingSettings struct {
-	Threads int
-	Data    *Dataset
-	// List of arrays of cells to fire for training.
-	TrainingSamples []map[CellID]CellID
+	Threads uint
+	// Data is the set of data structures that map the lowest units of the network onto input
+	// and output cells.
+	Data *Dataset
+	// TrainingSamples is a list cell parings to fire for training. The cells must be
+	// immortal and input or output cells.
+	// Example: an array of lines, where each training sample is a letter and the one
+	// that comes after it.
+	TrainingSamples [][]*TrainingSample
 }
 
 /*
@@ -31,9 +40,18 @@ func NewTrainingSettings() *TrainingSettings {
 	settings := TrainingSettings{
 		Threads:         defaultWorkerThreads,
 		Data:            dataset,
-		TrainingSamples: make([]map[CellID]CellID, 0),
+		TrainingSamples: make([][]*TrainingSample, 0),
 	}
 	return &settings
+}
+
+/*
+TrainingSample is a pairing of cells where the input should fire the output. It is just
+for training, so theoretically one cell might fire another cell.
+*/
+type TrainingSample struct {
+	InputCell  CellID
+	OutputCell CellID
 }
 
 /*
@@ -69,7 +87,6 @@ The result of training is a new network which can be diffed onto an original net
 */
 type Trainer interface {
 	PrepareData(*Network)
-	OnTrained()
 }
 
 /*
@@ -91,7 +108,92 @@ func Train(t Trainer, settings *TrainingSettings, network *Network) {
 		network.Cells[dataItem.OutputCell].Immortal = true
 	}
 
-	// TODO: do actual training from shake.go
+	// TODO: thread pool
 
-	t.OnTrained()
+	// p := pool.NewLimited(settings.Threads)
+	// defer p.Close()
+
+	var mux sync.Mutex
+	totalTrainingPairs := len(settings.TrainingSamples)
+
+	for i, batch := range settings.TrainingSamples {
+		// train in parallel over this number of threads
+		ch := make(chan Diff)
+
+		net := CloneNetwork(network)
+		net.GrowRandomNeurons(pretrainNeuronsToGrow, defaultNeuronSynapses)
+		net.GrowRandomSynapses(pretrainSynapsesToGrow)
+		go processBatch(batch, net, network, settings.Data, ch)
+
+		diff := <-ch
+		ApplyDiff(diff, network)
+
+		fmt.Println("Round of lines done, line=", i, "/", totalTrainingPairs)
+		if i%samplesBetweenPruningSessions == 0 {
+			fmt.Println("Pruning...")
+			fmt.Println("  before:", len(network.Cells), "cells,", len(network.Synapses), "synapses")
+			mux.Lock()
+			network.Prune()
+			mux.Unlock()
+			fmt.Println("  after:", len(network.Cells), "cells,", len(network.Synapses), "synapses")
+		}
+
+	}
+
+}
+
+/*
+processBatch fires this entire line in the neural network at once, hoping to get the desired output.
+
+It will not add any synapses.
+*/
+func processBatch(batch []*TrainingSample, network *Network, originalNetwork *Network, vocab *Dataset, ch chan Diff) {
+	network.ResetForTraining()
+
+	done := make(chan bool)
+
+	successes := 0
+
+	for _, ts := range batch {
+		network.Cells[ts.InputCell].FireActionPotential()
+		go time.AfterFunc(sleepBetweenInputTriggers, func() {
+			done <- true
+		})
+		<-done
+	}
+
+	// wait for firings to go through the network
+	go time.AfterFunc(sleepBetweenInputTriggers, func() {
+		for _, ts := range batch {
+			if network.Cells[ts.OutputCell].WasFired {
+				successes++
+			}
+		}
+		done <- true
+	})
+	<-done
+
+	wasSuccessful := successes == len(batch)
+
+	network.Disabled = true
+
+	var diff Diff
+
+	time.AfterFunc(growPathExpectedMinimumSynapses*RefractoryPeriodMillis, func() {
+		if wasSuccessful { // keep the training
+			fmt.Println("Keep diff for batch=", batch)
+			diff = DiffNetworks(originalNetwork, network)
+		} else {
+			// We failed to generate the desired effect, so do a significant growth
+			// of cells.
+			fmt.Println("Discard diff for batch=", batch, "and regrow")
+			for _, ts := range batch {
+				network.GrowPathBetween(ts.InputCell, ts.OutputCell, growPathExpectedMinimumSynapses)
+			}
+			diff = DiffNetworks(originalNetwork, network)
+		}
+		done <- true
+	})
+	<-done
+	ch <- diff
 }

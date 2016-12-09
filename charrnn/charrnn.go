@@ -3,7 +3,6 @@ package charrnn
 import (
 	"bleh/potential"
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
 	"os"
 )
@@ -14,7 +13,7 @@ Charrnn is the collection of training stuff to operate upon
 It implements potential.Trainer
 */
 type Charrnn struct {
-	chars    []string
+	Chars    []string
 	Settings *potential.TrainingSettings
 }
 
@@ -82,13 +81,14 @@ PrepareData is from potential.Trainer. Looking at each character, build up
 a map of string: PerceptionUnit pairs.
 */
 func (charrnn Charrnn) PrepareData(network *potential.Network) {
-	fmt.Println(charrnn.Settings)
 	if charrnn.Settings.Data.KeyToItem == nil { // may have been preloaded
 		charrnn.Settings.Data.KeyToItem = make(map[interface{}]potential.PerceptionUnit)
 	}
 
-	// from the training samples, build the vocabulary
-	for _, Value := range charrnn.chars {
+	// From the characters, ensure the vocabulary is all setup.
+	// Nothing will change in the model if this all characters already have corresponding
+	// cells, i.e. this is not the first time training the network.
+	for _, Value := range charrnn.Chars {
 		if _, exists := charrnn.Settings.Data.KeyToItem[Value]; !exists {
 			InputCell := network.RandomCellKey()
 			// ensure the input and output cells are not the same!
@@ -108,6 +108,8 @@ func (charrnn Charrnn) PrepareData(network *potential.Network) {
 		}
 	}
 
+	// Again, if this is the first time training the network, we must setup start
+	// and end indicators.
 	start := potential.PerceptionUnit{
 		Value:     "START",
 		InputCell: network.RandomCellKey(),
@@ -136,11 +138,5 @@ func (charrnn Charrnn) PrepareData(network *potential.Network) {
 
 	charrnn.Settings.Data.KeyToItem["START"] = start
 	charrnn.Settings.Data.KeyToItem["END"] = end
-}
 
-/*
-OnTrained is the callback from potential.Trainer
-*/
-func (charrnn Charrnn) OnTrained() {
-	fmt.Println("charrnn done")
 }

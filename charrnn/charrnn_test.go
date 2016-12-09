@@ -17,7 +17,7 @@ func Test_SetupVocab(t *testing.T) {
 
 		text := "kfk9\nI.2"
 		c := Charrnn{
-			chars:    strings.Split(text, ""),
+			Chars:    strings.Split(text, ""),
 			Settings: potential.NewTrainingSettings(),
 		}
 		c.PrepareData(network)
@@ -63,7 +63,7 @@ func Test_Training(t *testing.T) {
 		bytes, err := ioutil.ReadFile("text.txt")
 		assert.NoError(t, err)
 		c := Charrnn{
-			chars:    strings.Split(string(bytes), ""),
+			Chars:    strings.Split(string(bytes), ""),
 			Settings: settings,
 		}
 		n := potential.NewNetwork()
@@ -78,7 +78,7 @@ func Test_SaveLoadVocab(t *testing.T) {
 		bytes, err := ioutil.ReadFile("text.txt")
 		assert.NoError(t, err)
 		c := Charrnn{
-			chars:    strings.Split(string(bytes), ""),
+			Chars:    strings.Split(string(bytes), ""),
 			Settings: potential.NewTrainingSettings(),
 		}
 		n := potential.NewNetwork()

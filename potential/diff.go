@@ -26,10 +26,6 @@ type Diff struct {
 	   removedCells is a list of the cell IDs that no longer exist in the new network.
 	*/
 	removedCells []CellID
-	/*
-	   Worker optionally indicates which worker this was on.
-	*/
-	Worker int
 }
 
 /*
