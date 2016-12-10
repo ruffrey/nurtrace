@@ -24,32 +24,37 @@ func Test_NewDiff(t *testing.T) {
 }
 
 func Test_CloneNetwork(t *testing.T) {
-	o := NewNetwork()
-	original := &o
+	t.Run("cloning a network yields a valid copy", func(t *testing.T) {
+		o := NewNetwork()
+		original := &o
 
-	beforeCell := NewCell(original)
-	original.Cells[beforeCell.ID] = beforeCell
-	beforeCell.Network = original
+		beforeCell := NewCell(original)
+		original.Cells[beforeCell.ID] = beforeCell
+		beforeCell.Network = original
 
-	cloned := CloneNetwork(original)
-	// change something
-	cloned.SynapseLearnRate = 100
+		cloned := CloneNetwork(original)
+		// change something
+		cloned.SynapseLearnRate = 100
 
-	if cloned.SynapseLearnRate == original.SynapseLearnRate {
-		t.Error("changing props of cloned network should not change original")
-	}
+		if cloned.SynapseLearnRate == original.SynapseLearnRate {
+			t.Error("changing props of cloned network should not change original")
+		}
 
-	if &cloned.Cells[beforeCell.ID].Network == &original.Cells[beforeCell.ID].Network {
-		t.Error("cloned and original cells should not point to the same network")
-	}
+		if &cloned.Cells[beforeCell.ID].Network == &original.Cells[beforeCell.ID].Network {
+			t.Error("cloned and original cells should not point to the same network")
+		}
 
-	assert.ObjectsAreEqualValues(beforeCell, cloned.Cells[beforeCell.ID])
-	c1 := original.Cells[beforeCell.ID]
-	c2 := cloned.Cells[beforeCell.ID]
+		assert.ObjectsAreEqualValues(beforeCell, cloned.Cells[beforeCell.ID])
+		c1 := original.Cells[beforeCell.ID]
+		c2 := cloned.Cells[beforeCell.ID]
 
-	if &c1 == &c2 {
-		t.Error("pointers to same ID cell between cloned networks should not be equal")
-	}
+		if &c1 == &c2 {
+			t.Error("pointers to same ID cell between cloned networks should not be equal")
+		}
+	})
+	t.Skip("all cells and synapses have valid connections on the cloned network", func(t *testing.T) {
+
+	})
 }
 
 func Test_DiffNetworks(t *testing.T) {
@@ -86,6 +91,9 @@ func Test_ApplyDiff(t *testing.T) {
 		assert.Equal(t, int8(14), original.Synapses[syn1.ID].Millivolts,
 			"synapse millivolts failed to apply")
 	})
+	t.Skip("all synapses and cells have valid connections after applying a diff", func(t *testing.T) {
+
+	})
 }
 
 func Test_copyCellToNetwork(t *testing.T) {
@@ -105,8 +113,10 @@ func Test_copyCellToNetwork(t *testing.T) {
 		}
 	})
 	t.Skip("generates new cell ID and updates IDs when it already exists on the new network")
+	t.Skip("a re-IDd+applied cell does not disrupt network integrity")
 }
 
 func Test_copySynapseToNetwork(t *testing.T) {
 	t.Skip("generates new synapse ID and updates IDs when it already exists on the new network")
+	t.Skip("a re-IDd+applied synapse does not disrupt network integrity")
 }

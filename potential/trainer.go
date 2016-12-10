@@ -115,7 +115,7 @@ func Train(t Trainer, settings *TrainingSettings, network *Network) {
 		diff := <-ch
 		ApplyDiff(diff, network)
 
-		fmt.Println("Round of lines done, line=", i, "/", totalTrainingPairs)
+		fmt.Println("Line done,", i, "/", totalTrainingPairs)
 		if i%samplesBetweenPruningSessions == 0 {
 			fmt.Println("Pruning...")
 			fmt.Println("  before:", len(network.Cells), "cells,", len(network.Synapses), "synapses")
@@ -176,7 +176,9 @@ func processBatch(batch []*TrainingSample, network *Network, originalNetwork *Ne
 			// of cells.
 			fmt.Println("  net did not fire all cells, regrowing")
 			for _, ts := range batch {
-				network.GrowPathBetween(ts.InputCell, ts.OutputCell, GrowPathExpectedMinimumSynapses)
+				fmt.Println("  post-train diff adding synapses for", ts.InputCell, ts.OutputCell)
+				sEnd, sAdded := network.GrowPathBetween(ts.InputCell, ts.OutputCell, GrowPathExpectedMinimumSynapses)
+				fmt.Println("    added", len(sEnd)+len(sAdded), "synapses")
 			}
 			diff = DiffNetworks(originalNetwork, network)
 		}

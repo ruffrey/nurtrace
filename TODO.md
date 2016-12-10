@@ -1,6 +1,8 @@
 # TODO
 
 ## Top of the Stack
+- [ ] Vocab seems to have bad references when reloaded
+- [ ] Diffing might appear to have issues due to the code we added
 - [ ] Poor integrity:
     - when diffing, a new network might have happened to add a new cell or synapse, and during the
         same time another network would have added one with the same ID. However their dendrites are

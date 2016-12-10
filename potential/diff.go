@@ -219,11 +219,11 @@ func copyCellToNetwork(cell *Cell, newNetwork *Network) {
 	// to point to the new cell ID.
 	for synapseID := range cell.AxonSynapses {
 		copiedCell.AxonSynapses[synapseID] = true
-		newNetwork.Synapses[synapseID].FromNeuronAxon = copiedCell.ID
+		// newNetwork.Synapses[synapseID].FromNeuronAxon = copiedCell.ID
 	}
 	for synapseID := range cell.DendriteSynapses {
 		copiedCell.DendriteSynapses[synapseID] = true
-		newNetwork.Synapses[synapseID].ToNeuronDendrite = copiedCell.ID
+		// newNetwork.Synapses[synapseID].ToNeuronDendrite = copiedCell.ID
 	}
 
 }
