@@ -1,3 +1,6 @@
+preinstall:
+	go get gopkg.in/go-playground/pool.v3
+
 test:
 	go test -v
 

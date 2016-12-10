@@ -26,10 +26,6 @@ type Diff struct {
 	   removedCells is a list of the cell IDs that no longer exist in the new network.
 	*/
 	removedCells []CellID
-	/*
-	   Worker optionally indicates which worker this was on.
-	*/
-	Worker int
 }
 
 /*
@@ -193,19 +189,43 @@ func copyCellToNetwork(cell *Cell, newNetwork *Network) {
 	delete(newNetwork.Cells, copiedCell.ID)
 
 	copiedCell.ID = cell.ID
-	newNetwork.Cells[cell.ID] = copiedCell
+
+	// This is supposed to be a new cell. However, if due to an ID collision, the cell ID already
+	// existed on the newNetwork, we need to change the cell ID yet again.
+	if _, cellIDAlreadyOnNewNetwork := newNetwork.Cells[copiedCell.ID]; cellIDAlreadyOnNewNetwork {
+		fmt.Println("warn: copyCellToNetwork would have overwritten cell with same ID")
+		var newID CellID
+		for {
+			newID = NewCellID()
+			if _, alreadyExists := newNetwork.Cells[newID]; !alreadyExists {
+				break
+			}
+			fmt.Println("warn: copyCellToNetwork would have gotten dupe cell ID yet again")
+		}
+		// now change the cell ID
+		copiedCell.ID = newID
+	}
+
+	newNetwork.Cells[copiedCell.ID] = copiedCell
 	copiedCell.Network = newNetwork
 
 	copiedCell.Immortal = cell.Immortal
 	copiedCell.activating = cell.activating
 	copiedCell.Voltage = cell.Voltage
+
 	// golang does not copy a map on assignment; must loop over it.
-	for id := range cell.AxonSynapses {
-		copiedCell.AxonSynapses[id] = true
+
+	// Also, in case we had to generate a new cell ID above, we must also reset the synapses
+	// to point to the new cell ID.
+	for synapseID := range cell.AxonSynapses {
+		copiedCell.AxonSynapses[synapseID] = true
+		newNetwork.Synapses[synapseID].FromNeuronAxon = copiedCell.ID
 	}
-	for id := range cell.DendriteSynapses {
-		copiedCell.DendriteSynapses[id] = true
+	for synapseID := range cell.DendriteSynapses {
+		copiedCell.DendriteSynapses[synapseID] = true
+		newNetwork.Synapses[synapseID].ToNeuronDendrite = copiedCell.ID
 	}
+
 }
 
 /*
@@ -218,12 +238,40 @@ func copySynapseToNetwork(synapse *Synapse, newNetwork *Network) {
 	delete(newNetwork.Synapses, copiedSynapse.ID)
 
 	copiedSynapse.ID = synapse.ID
+
+	// This is supposed to be a new cell. However, if due to an ID collision, the cell ID already
+	// existed on the newNetwork, we need to change the cell ID yet again.
+	if _, synapseIDAlreadyOnNewNetwork := newNetwork.Synapses[copiedSynapse.ID]; synapseIDAlreadyOnNewNetwork {
+		fmt.Println("warn: copySynapseToNetwork would have overwritten synapse with same ID")
+		var newID SynapseID
+		for {
+			newID = NewSynapseID()
+			if _, alreadyExists := newNetwork.Synapses[newID]; !alreadyExists {
+				break
+			}
+			fmt.Println("warn: copySynapseToNetwork would have gotten dupe synapse ID yet again")
+		}
+		// now change the cell ID
+		copiedSynapse.ID = newID
+	}
+
 	newNetwork.Synapses[synapse.ID] = copiedSynapse
 	copiedSynapse.Network = newNetwork
 
 	copiedSynapse.Millivolts = synapse.Millivolts
 	copiedSynapse.FromNeuronAxon = synapse.FromNeuronAxon
 	copiedSynapse.ToNeuronDendrite = synapse.ToNeuronDendrite
+
+	// In case we had a collision in synapse IDs above and changed the synapse ID,
+	// we reset each cell's list.
+	if synapse.ID != copiedSynapse.ID {
+		delete(newNetwork.Cells[copiedSynapse.ToNeuronDendrite].DendriteSynapses, synapse.ID)
+		delete(newNetwork.Cells[copiedSynapse.FromNeuronAxon].AxonSynapses, synapse.ID)
+
+		newNetwork.Cells[copiedSynapse.ToNeuronDendrite].DendriteSynapses[copiedSynapse.ID] = true
+		newNetwork.Cells[copiedSynapse.FromNeuronAxon].AxonSynapses[copiedSynapse.ID] = true
+	}
+
 	// we do need to keep this because we might want to grow the synapse later
 	copiedSynapse.ActivationHistory = synapse.ActivationHistory
 }

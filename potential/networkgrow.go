@@ -6,6 +6,12 @@ import (
 	"sync"
 )
 
+/*
+GrowPathExpectedMinimumSynapses represents the maximum length, in synapses, between an input
+and output cell in the network.
+*/
+const GrowPathExpectedMinimumSynapses = 10
+
 // All methods on a network that relate to growing are here.
 
 /*
@@ -40,8 +46,6 @@ end dendrites.
 number of synapses that connect from startCell's tree to endCell.
 
 After `maxHops`, if there are not minSynapses, we create synapses at that layer.
-
-TODO: finish GrowPathBetween
 */
 func (network *Network) GrowPathBetween(startCell, endCell CellID, minSynapses int) (synapsesToEnd map[SynapseID]bool, synapsesAdded map[SynapseID]bool) {
 	// these are the synapses we found that are on the path from the startCell,

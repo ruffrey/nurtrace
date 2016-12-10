@@ -104,4 +104,9 @@ func Test_copyCellToNetwork(t *testing.T) {
 			t.Error("cell copied but new network prop not set to new network pointer")
 		}
 	})
+	t.Skip("generates new cell ID and updates IDs when it already exists on the new network")
+}
+
+func Test_copySynapseToNetwork(t *testing.T) {
+	t.Skip("generates new synapse ID and updates IDs when it already exists on the new network")
 }
