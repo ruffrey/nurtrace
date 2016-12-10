@@ -1,6 +1,12 @@
 # TODO
 
 ## Top of the Stack
+- [ ] Poor integrity:
+    - when diffing, a new network might have happened to add a new cell or synapse, and during the
+        same time another network would have added one with the same ID. However their dendrites are
+        different and may reference other cells. This needs smarter diffing.
+    - `warn: cannot grow path because synapse axon does not exist 1381766920 from cell= 2193275927`
+    - `error: cannot activate synapse 1278366234 from cell 2465421962 because it does not exist`
 - [ ] Find all "laws of the universe" constants and collect in one place
 - [ ] More refined learning techniques:
     - [ ] larger sets of pathways are OK - more synapses between start and end
@@ -14,9 +20,6 @@
 - [ ] profile cpu
 
 ## Optimizations and Refactoring
-- [ ] when diffing, a new network might have happened to add a new cell or synapse, and during the
-same time another network would have added one with the same ID. However their dendrites are
-different and may reference other cells. This needs smarter diffing.
 - [x] Important to save vocab with the network
 - [ ] RandomCellKey method is pretty slow at scale
 - [ ] move charrnn training from shake.go into charrnn repo, adding as much as possible to the main lib

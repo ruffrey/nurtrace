@@ -116,11 +116,11 @@ func main() {
 		t.PrepareData(network) // make sure all data is setup
 		fmt.Println("Sampling characters with seed text: ", *seed)
 		out := potential.Sample(*seed, t.Settings.Data, network, 1000, "START", "END")
-		fmt.Println()
+		fmt.Println("---")
 		for _, s := range out {
 			fmt.Print(s)
 		}
-		fmt.Println("")
+		fmt.Println("\n---")
 		return
 	}
 
