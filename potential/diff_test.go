@@ -18,8 +18,6 @@ func Test_NewDiff(t *testing.T) {
 		// tests are here
 		diff.addedCells = append(diff.addedCells, cell)
 		diff.addedSynapses = append(diff.addedSynapses, synapse)
-		diff.removedCells = append(diff.removedCells, cell.ID)
-		diff.removedSynapses = append(diff.removedSynapses, synapse.ID)
 	})
 }
 

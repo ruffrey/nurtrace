@@ -17,15 +17,7 @@ type Diff struct {
 	synapseDiffs  map[SynapseID]int8
 	synapseFires  map[SynapseID]uint
 	addedSynapses []*Synapse
-	/*
-	   removedSynapses is a list of the IDs of the synapses that no longer exist in the new network.
-	*/
-	removedSynapses []SynapseID
-	addedCells      []*Cell
-	/*
-	   removedCells is a list of the cell IDs that no longer exist in the new network.
-	*/
-	removedCells []CellID
+	addedCells    []*Cell
 }
 
 /*
@@ -66,13 +58,6 @@ func DiffNetworks(originalNetwork, newerNetwork *Network) (diff Diff) {
 			}
 		}
 	}
-	// Check if any synapses were removed
-	for id, originalNetworkSynapse := range originalNetwork.Synapses {
-		_, stillExists := newerNetwork.Synapses[id]
-		if !stillExists {
-			diff.removedSynapses = append(diff.removedSynapses, originalNetworkSynapse.ID)
-		}
-	}
 	// Get new cells that were added to the network
 	for id, newerNetworkCell := range newerNetwork.Cells {
 		_, alreadyExisted := originalNetwork.Cells[id]
@@ -83,13 +68,6 @@ func DiffNetworks(originalNetwork, newerNetwork *Network) (diff Diff) {
 			// However, that *should* be captured by the synapses, and applying the diff
 			// would add the additional synapses, and remove the gone synapses, which
 			// are stored secondarily in each Cell.
-		}
-	}
-	// Check if any cells were removed
-	for id, originalNetworkCell := range originalNetwork.Cells {
-		_, stillExists := newerNetwork.Cells[id]
-		if !stillExists {
-			diff.removedCells = append(diff.removedCells, originalNetworkCell.ID)
 		}
 	}
 
@@ -150,18 +128,6 @@ func ApplyDiff(diff Diff, originalNetwork *Network) (err error) {
 	// add the activation history
 	for synapseID, activations := range diff.synapseFires {
 		originalNetwork.Synapses[synapseID].ActivationHistory += activations
-	}
-
-	// Remove synapses
-	for _, synapseID := range diff.removedSynapses {
-		// Removes synapses from both connected cells.
-		// Will also prune cells with no synapses.
-		originalNetwork.PruneSynapse(synapseID)
-	}
-
-	// Remove cells by ID
-	for _, cellID := range diff.removedCells {
-		originalNetwork.PruneCell(cellID)
 	}
 
 	originalNetwork.RegenVersion()
