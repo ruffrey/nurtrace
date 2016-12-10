@@ -1,7 +1,6 @@
 package potential
 
 import (
-	"fmt"
 	"strings"
 	"time"
 )
@@ -26,7 +25,6 @@ func Sample(seed string, data *Dataset, network *Network, maxInterations int, st
 				network.Cells[v.OutputCell].OnFired,
 				func(cell CellID) {
 					s := data.CellToKey[cell]
-					fmt.Println(cell, s)
 					if s == start {
 						return
 					}

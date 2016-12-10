@@ -11,7 +11,6 @@ const initialNetworkNeurons = 200
 const defaultNeuronSynapses = 5
 const pretrainNeuronsToGrow = 20
 const pretrainSynapsesToGrow = 50
-const growPathExpectedMinimumSynapses = 10
 const samplesBetweenPruningSessions = 20
 const sleepBetweenInputTriggers = RefractoryPeriodMillis * time.Millisecond
 const networkDisabledFizzleOutPeriod = 100 * time.Millisecond
@@ -166,16 +165,16 @@ func processBatch(batch []*TrainingSample, network *Network, originalNetwork *Ne
 
 	var diff Diff
 
-	time.AfterFunc(growPathExpectedMinimumSynapses*RefractoryPeriodMillis, func() {
+	time.AfterFunc(GrowPathExpectedMinimumSynapses*RefractoryPeriodMillis, func() {
 		if wasSuccessful { // keep the training
-			fmt.Println("Keep diff for batch=", batch)
+			fmt.Println("  net fired all expected cells")
 			diff = DiffNetworks(originalNetwork, network)
 		} else {
 			// We failed to generate the desired effect, so do a significant growth
 			// of cells.
-			fmt.Println("Discard diff for batch=", batch, "and regrow")
+			fmt.Println("  net did not fire all cells, regrowing")
 			for _, ts := range batch {
-				network.GrowPathBetween(ts.InputCell, ts.OutputCell, growPathExpectedMinimumSynapses)
+				network.GrowPathBetween(ts.InputCell, ts.OutputCell, GrowPathExpectedMinimumSynapses)
 			}
 			diff = DiffNetworks(originalNetwork, network)
 		}

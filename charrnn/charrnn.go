@@ -79,8 +79,9 @@ func (charrnn *Charrnn) LoadVocab(filename string) error {
 }
 
 /*
-PrepareData is from potential.Trainer. Looking at each character, build up
-a map of string: PerceptionUnit pairs.
+PrepareData is from potential.Trainer.
+
+Looking at each character, build up a map of string: PerceptionUnit pairs.
 */
 func (charrnn Charrnn) PrepareData(network *potential.Network) {
 	if charrnn.Settings.Data.KeyToItem == nil { // may have been preloaded
@@ -141,12 +142,13 @@ func (charrnn Charrnn) PrepareData(network *potential.Network) {
 	charrnn.Settings.Data.KeyToItem["START"] = start
 	charrnn.Settings.Data.KeyToItem["END"] = end
 
-	// add data
+	// Reverse the map and grow paths where needed
 	charrnn.Settings.Data.CellToKey = make(map[potential.CellID]interface{})
 
 	for key, dataItem := range charrnn.Settings.Data.KeyToItem {
-		// grow paths between all the inputs and outputs
-		network.GrowPathBetween(dataItem.InputCell, dataItem.OutputCell, 10)
+		// Seems like a weird place to grow, but we actually need this for new cells,
+		// and to ensure minimum distance between all inputs and outputs.
+		network.GrowPathBetween(dataItem.InputCell, dataItem.OutputCell, potential.GrowPathExpectedMinimumSynapses)
 		// reverse the map
 		charrnn.Settings.Data.CellToKey[dataItem.InputCell] = key
 		charrnn.Settings.Data.CellToKey[dataItem.OutputCell] = key
@@ -154,4 +156,5 @@ func (charrnn Charrnn) PrepareData(network *potential.Network) {
 		network.Cells[dataItem.InputCell].Immortal = true
 		network.Cells[dataItem.OutputCell].Immortal = true
 	}
+
 }

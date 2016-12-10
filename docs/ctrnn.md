@@ -2,7 +2,6 @@
 
 It is possible this is a CTRNN implementation.
 
-Key terms:
-
-- adaptation algorithm
+- time-based firings
+- has *adaptation algorithm*
 - training on *unknown dynamical systems*

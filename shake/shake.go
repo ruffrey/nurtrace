@@ -16,15 +16,8 @@ import (
 	"github.com/pkg/profile"
 )
 
-const fireCharacterIterations = 4
-const initialNetworkNeurons = 200
+const initialNetworkNeurons = 1000
 const defaultNeuronSynapses = 5
-const pretrainNeuronsToGrow = 20
-const pretrainSynapsesToGrow = 50
-const growPathExpectedMinimumSynapses = 10
-const linesBetweenPruningSessions = 20
-const sleepBetweenInputTriggers = potential.RefractoryPeriodMillis * time.Millisecond
-const networkDisabledFizzleOutPeriod = 100 * time.Millisecond
 
 var networkSaveFile = flag.String("save", "network.json", "Load/save location of the network")
 var vocabSaveFile = flag.String("vocab", "vocab.json", "Load/save location of the charrnn vocab")
@@ -47,20 +40,22 @@ func main() {
 		neuronsToAdd := initialNetworkNeurons
 		synapsesToAdd := 0
 		network.Grow(neuronsToAdd, defaultNeuronSynapses, synapsesToAdd)
-		fmt.Println("Created network")
-		fmt.Println("Saving to disk")
+		fmt.Println("Created network,", len(network.Cells), "cells",
+			len(network.Synapses), "synapses")
 	} else {
 		fmt.Println("Loaded network from disk,", len(network.Cells), "cells",
 			len(network.Synapses), "synapses")
 	}
 
+	fmt.Println("Reading test data file", *testDataFile)
 	bytes, err := ioutil.ReadFile(*testDataFile)
 	if err != nil {
+		fmt.Println("Unable to read test data file", *testDataFile)
 		panic(err)
 	}
 
 	text := string(bytes)
-	// lines := strings.Split(text, "\n")
+	lines := strings.Split(text, "\n")
 	chars := strings.Split(text, "")
 	settings := potential.NewTrainingSettings()
 	// TODO: lines need to be setup for batches of training data.
@@ -74,18 +69,61 @@ func main() {
 		t.SaveVocab(*vocabSaveFile)
 	}
 
-	fmt.Println("Loaded training text for", *testDataFile, "length=", len(t.Settings.Data.KeyToItem))
+	// Setup the training data samples
+	//
+	// One batch will be one line, with pairs being start-<line text>-end
+	startCellID := settings.Data.KeyToItem["START"].InputCell // is that right? no?
+	endCellID := settings.Data.KeyToItem["END"].InputCell     // is that right? no?
+	for _, line := range lines {
+		var s []*potential.TrainingSample
+		chars := strings.Split(line, "")
 
-	// Figure out how to run this program.
+		if len(chars) == 0 {
+			continue
+		}
+		// first char is START indicator token
+		ts1 := potential.TrainingSample{
+			InputCell:  startCellID,
+			OutputCell: settings.Data.KeyToItem[chars[0]].InputCell,
+		}
+		s = append(s, &ts1)
+
+		// start at 1 because we need to look behind
+		for i := 1; i < len(chars); i++ {
+			ts := potential.TrainingSample{
+				InputCell:  settings.Data.KeyToItem[chars[i-1]].InputCell,
+				OutputCell: settings.Data.KeyToItem[chars[i]].InputCell,
+			}
+			s = append(s, &ts)
+		}
+		// last char is END indicator token
+		ts2 := potential.TrainingSample{
+			InputCell:  settings.Data.KeyToItem[chars[len(chars)-1]].InputCell,
+			OutputCell: endCellID,
+		}
+		s = append(s, &ts2)
+
+		settings.TrainingSamples = append(settings.TrainingSamples, s)
+	}
+
+	fmt.Println("Loaded training text for", *testDataFile, "samples=", len(t.Settings.TrainingSamples))
+
+	// Figure out how they want to run this program.
 	flag.Parse()
+
+	// Sample, then stop.
 	if len(*seed) > 0 {
+		t.PrepareData(network) // make sure all data is setup
 		fmt.Println("Sampling characters with seed text: ", *seed)
 		out := potential.Sample(*seed, t.Settings.Data, network, 1000, "START", "END")
+		fmt.Println()
 		for _, s := range out {
 			fmt.Print(s)
 		}
+		fmt.Println("")
 		return
 	}
+
 	t.Settings.Threads = *train
 	if t.Settings.Threads == 0 {
 		fmt.Println("Not enough params. Help:")
@@ -100,16 +138,17 @@ func main() {
 		defer profile.Start(profile.CPUProfile).Stop()
 	}
 
-	network.Disabled = true // we just will never need it to fire
-
-	fmt.Println("Beginning training", t.Settings.Threads, "simultaneous sessions")
-
-	// make sure we save any progress from a long running training
+	// Make sure we save any progress from a long running training that the user ends.
 	c := make(chan os.Signal, 2)
 	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
 	go func() {
 		<-c
 		now := strconv.FormatInt(time.Now().UTC().UnixNano(), 10)
+		err = t.SaveVocab(*vocabSaveFile)
+		if err != nil {
+			fmt.Println("Failed saving vocab")
+			fmt.Println(err)
+		}
 		err = network.SaveToFile("network_" + now + ".json")
 		if err != nil {
 			fmt.Println(err)
@@ -117,13 +156,19 @@ func main() {
 		os.Exit(1)
 	}()
 
+	fmt.Println("Beginning training", t.Settings.Threads, "simultaneous sessions")
+	network.Disabled = true // we just will never need it to fire
 	potential.Train(t, t.Settings, network)
 
+	// Training is over
+
+	// Ensure we save the vocab
 	err = t.SaveVocab(*vocabSaveFile)
 	if err != nil {
 		fmt.Println("Failed saving vocab")
 		fmt.Println(err)
 	}
+	// Save the network
 	err = network.SaveToFile(*networkSaveFile)
 	if err != nil {
 		fmt.Println("Failed saving network")
