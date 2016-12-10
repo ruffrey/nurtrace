@@ -119,12 +119,24 @@ func ApplyDiff(diff Diff, originalNetwork *Network) (err error) {
 	}
 
 	// New cells
+	cellIDChanges := make(map[CellID]CellID) // old:new
 	for _, cell := range diff.addedCells {
-		copyCellToNetwork(cell, originalNetwork)
+		newID := copyCellToNetwork(cell, originalNetwork)
+		if newID != cell.ID {
+			cellIDChanges[cell.ID] = newID
+		}
 	}
 
 	// New synapses
 	for _, synapse := range diff.addedSynapses {
+		// If this synapse was attached to a cell where the ID needed to change,
+		// we need to point the synapse to it
+		if newID, didChange := cellIDChanges[synapse.FromNeuronAxon]; didChange {
+			synapse.FromNeuronAxon = newID
+		}
+		if newID, didChange := cellIDChanges[synapse.ToNeuronDendrite]; didChange {
+			synapse.ToNeuronDendrite = newID
+		}
 		copySynapseToNetwork(synapse, originalNetwork)
 		// add connections to cells
 		originalNetwork.Cells[synapse.FromNeuronAxon].AxonSynapses[synapse.ID] = true
@@ -182,8 +194,10 @@ func CloneNetwork(originalNetwork *Network) *Network {
 /*
 copyCellToNetwork copies the properies of once cell to a new one, and updates the network pointer
 on the new cell to a different given network. It also adds the cell to the new network.
+
+Returns the cell ID of the copied cell, in case it had to change.
 */
-func copyCellToNetwork(cell *Cell, newNetwork *Network) {
+func copyCellToNetwork(cell *Cell, newNetwork *Network) CellID {
 	copiedCell := NewCell(newNetwork)
 	// the NewCell method automatically adds it to the network; do not allow this.
 	delete(newNetwork.Cells, copiedCell.ID)
@@ -215,22 +229,21 @@ func copyCellToNetwork(cell *Cell, newNetwork *Network) {
 
 	// golang does not copy a map on assignment; must loop over it.
 
-	// Also, in case we had to generate a new cell ID above, we must also reset the synapses
-	// to point to the new cell ID.
 	for synapseID := range cell.AxonSynapses {
 		copiedCell.AxonSynapses[synapseID] = true
-		// newNetwork.Synapses[synapseID].FromNeuronAxon = copiedCell.ID
 	}
 	for synapseID := range cell.DendriteSynapses {
 		copiedCell.DendriteSynapses[synapseID] = true
-		// newNetwork.Synapses[synapseID].ToNeuronDendrite = copiedCell.ID
 	}
 
+	return copiedCell.ID
 }
 
 /*
 copySynapseToNetwork copies the properies of once synapse to a new one, and updates the network pointer
 on the new synapse to a different given network.
+
+Returns its synapse ID in case it had to change.
 */
 func copySynapseToNetwork(synapse *Synapse, newNetwork *Network) {
 	copiedSynapse := NewSynapse(newNetwork)
@@ -262,12 +275,7 @@ func copySynapseToNetwork(synapse *Synapse, newNetwork *Network) {
 	copiedSynapse.FromNeuronAxon = synapse.FromNeuronAxon
 	copiedSynapse.ToNeuronDendrite = synapse.ToNeuronDendrite
 
-	// In case we had a collision in synapse IDs above and changed the synapse ID,
-	// we reset each cell's list.
 	if synapse.ID != copiedSynapse.ID {
-		delete(newNetwork.Cells[copiedSynapse.ToNeuronDendrite].DendriteSynapses, synapse.ID)
-		delete(newNetwork.Cells[copiedSynapse.FromNeuronAxon].AxonSynapses, synapse.ID)
-
 		newNetwork.Cells[copiedSynapse.ToNeuronDendrite].DendriteSynapses[copiedSynapse.ID] = true
 		newNetwork.Cells[copiedSynapse.FromNeuronAxon].AxonSynapses[copiedSynapse.ID] = true
 	}

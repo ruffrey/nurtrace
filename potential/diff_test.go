@@ -52,7 +52,7 @@ func Test_CloneNetwork(t *testing.T) {
 			t.Error("pointers to same ID cell between cloned networks should not be equal")
 		}
 	})
-	t.Skip("all cells and synapses have valid connections on the cloned network", func(t *testing.T) {
+	t.Run("all cells and synapses have valid connections on the cloned network", func(t *testing.T) {
 
 	})
 }
@@ -91,8 +91,32 @@ func Test_ApplyDiff(t *testing.T) {
 		assert.Equal(t, int8(14), original.Synapses[syn1.ID].Millivolts,
 			"synapse millivolts failed to apply")
 	})
-	t.Skip("all synapses and cells have valid connections after applying a diff", func(t *testing.T) {
+	t.Run("all synapses and cells have valid connections after applying a diff", func(t *testing.T) {
+		n1 := NewNetwork()
+		net1 := &n1
+		net1.Grow(50, 5, 50)
+		net2 := CloneNetwork(net1)
 
+		// make the networks different
+		net2.GrowRandomNeurons(200, 10)
+		net2.GrowRandomSynapses(100)
+
+		// precheck
+		ok, report := checkIntegrity(net1)
+		assert.True(t, ok, report)
+		ok, report = checkIntegrity(net2)
+		assert.True(t, ok, report)
+
+		// main thing
+		diff := DiffNetworks(net1, net2)
+		ApplyDiff(diff, net1)
+
+		// assertions
+		assert.Equal(t, len(net1.Synapses), (50*5)+50+(200*10)+100)
+		ok, report = checkIntegrity(net1)
+		assert.True(t, ok, report)
+	})
+	t.Run("adds new cell to the network", func(t *testing.T) {
 	})
 }
 
@@ -112,11 +136,11 @@ func Test_copyCellToNetwork(t *testing.T) {
 			t.Error("cell copied but new network prop not set to new network pointer")
 		}
 	})
-	t.Skip("generates new cell ID and updates IDs when it already exists on the new network")
-	t.Skip("a re-IDd+applied cell does not disrupt network integrity")
+	t.Run("generates new cell ID and updates IDs when it already exists on the new network", func(t *testing.T) {})
+	t.Run("a re-IDd+applied cell does not disrupt network integrity", func(t *testing.T) {})
 }
 
 func Test_copySynapseToNetwork(t *testing.T) {
-	t.Skip("generates new synapse ID and updates IDs when it already exists on the new network")
-	t.Skip("a re-IDd+applied synapse does not disrupt network integrity")
+	t.Run("generates new synapse ID and updates IDs when it already exists on the new network", func(t *testing.T) {})
+	t.Run("a re-IDd+applied synapse does not disrupt network integrity", func(t *testing.T) {})
 }
