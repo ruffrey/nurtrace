@@ -14,6 +14,7 @@ const pretrainSynapsesToGrow = 50
 const samplesBetweenPruningSessions = 20
 const sleepBetweenInputTriggers = RefractoryPeriodMillis * time.Millisecond
 const networkDisabledFizzleOutPeriod = 100 * time.Millisecond
+const maxAllowedTimeForInputTriggeringOutput = synapseDelay * GrowPathExpectedMinimumSynapses * time.Millisecond
 
 /*
 TrainingSettings are
@@ -149,7 +150,7 @@ func processBatch(batch []*TrainingSample, network *Network, originalNetwork *Ne
 	}
 
 	// wait for firings to go through the network
-	go time.AfterFunc(sleepBetweenInputTriggers, func() {
+	go time.AfterFunc(maxAllowedTimeForInputTriggeringOutput, func() {
 		for _, ts := range batch {
 			if network.Cells[ts.OutputCell].WasFired {
 				successes++
@@ -165,6 +166,7 @@ func processBatch(batch []*TrainingSample, network *Network, originalNetwork *Ne
 
 	var diff Diff
 
+	// give the network some time to wind down
 	time.AfterFunc(GrowPathExpectedMinimumSynapses*RefractoryPeriodMillis, func() {
 		if wasSuccessful { // keep the training
 			fmt.Println("  net fired all expected cells")
