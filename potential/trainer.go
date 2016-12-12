@@ -14,7 +14,7 @@ const pretrainSynapsesToGrow = 50
 const samplesBetweenPruningSessions = 20
 const sleepBetweenInputTriggers = RefractoryPeriodMillis * time.Millisecond
 const networkDisabledFizzleOutPeriod = 100 * time.Millisecond
-const maxAllowedTimeForInputTriggeringOutput = synapseDelay * GrowPathExpectedMinimumSynapses * time.Millisecond
+const maxAllowedTimeForInputTriggeringOutput = synapseDelay * GrowPathExpectedMinimumSynapses
 
 /*
 TrainingSettings are

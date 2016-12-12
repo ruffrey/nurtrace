@@ -147,17 +147,16 @@ func (charrnn Charrnn) PrepareData(network *potential.Network) {
 	charrnn.Settings.Data.CellToKey = make(map[potential.CellID]interface{})
 
 	for key, dataItem := range charrnn.Settings.Data.KeyToItem {
-		// Seems like a weird place to grow, but we actually need this for new cells,
-		// and to ensure minimum distance between all inputs and outputs.
-		fmt.Println("  charrnn adding synapses for", key)
-		_, sAdded := network.GrowPathBetween(dataItem.InputCell, dataItem.OutputCell, potential.GrowPathExpectedMinimumSynapses)
-		fmt.Println("  charrnn added synapses:", len(sAdded), "for", key)
 		// reverse the map
 		charrnn.Settings.Data.CellToKey[dataItem.InputCell] = key
 		charrnn.Settings.Data.CellToKey[dataItem.OutputCell] = key
 		// prevent accidentally pruning the input/output cells
 		network.Cells[dataItem.InputCell].Immortal = true
 		network.Cells[dataItem.OutputCell].Immortal = true
+
+		// Seems like a weird place to grow, but we actually need this for new cells,
+		// and to ensure minimum distance between all inputs and outputs.
+		network.GrowPathBetween(dataItem.InputCell, dataItem.OutputCell, potential.GrowPathExpectedMinimumSynapses)
 	}
 	fmt.Println("charrnn data setup complete")
 }
