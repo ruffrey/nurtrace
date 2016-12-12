@@ -9,9 +9,9 @@ import (
 const defaultWorkerThreads = 2
 const initialNetworkNeurons = 200
 const defaultNeuronSynapses = 5
-const pretrainNeuronsToGrow = 20
-const pretrainSynapsesToGrow = 50
-const samplesBetweenPruningSessions = 20
+const pretrainNeuronsToGrow = 10
+const pretrainSynapsesToGrow = 20
+const samplesBetweenPruningSessions = 15
 const sleepBetweenInputTriggers = RefractoryPeriodMillis * time.Millisecond
 const networkDisabledFizzleOutPeriod = 100 * time.Millisecond
 const maxAllowedTimeForInputTriggeringOutput = synapseDelay * GrowPathExpectedMinimumSynapses
