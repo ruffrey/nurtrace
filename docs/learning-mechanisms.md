@@ -1,5 +1,6 @@
 # Mechanisms of learning
 
+
 - Start with a fully random set of cells and syanpses.
 - Assign inputs and outputs to cells.
 - Forge a path of neurons/synapses from each input to its output.
@@ -17,4 +18,12 @@
     - reinforce all synapses along the way
 - After several full chunks of learning:
     - degrade unused synapse by 1/2 millivolts until 0
-    - remove once getting close to zero
+    - prune synapse once getting close to zero
+    - cells with no synapses get pruned
+
+## Concepts of learning
+
+- Do not prune cells or synapses during a diff.
+    - it means we cannot really add networks together
+    - pruning's purpose is *to remove noise*
+    - *only prune on the main network*

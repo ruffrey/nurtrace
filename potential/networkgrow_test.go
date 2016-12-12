@@ -202,4 +202,10 @@ func Test_GrowPathBetween_Integrity(t *testing.T) {
 			network.GrowPathBetween(input, output, 20)
 		}
 	})
+	t.Run("does not add synapses when there are already enough", func(t *testing.T) {
+
+	})
+	t.Run("adds valid synapses and all cells have working connections after growth", func(t *testing.T) {
+
+	})
 }

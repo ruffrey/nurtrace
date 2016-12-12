@@ -64,7 +64,7 @@ func NewNetwork() Network {
 		Disabled: false,
 		Synapses: make(map[SynapseID]*Synapse),
 		Cells:    make(map[CellID]*Cell),
-		SynapseMinFireThreshold: 4,
+		SynapseMinFireThreshold: defaultSynapseMinFireThreshold,
 		SynapseLearnRate:        lr,
 		actualSynapseMin:        int8(-128) + lr,
 		actualSynapseMax:        int8(127) - lr,

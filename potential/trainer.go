@@ -9,12 +9,13 @@ import (
 const defaultWorkerThreads = 2
 const initialNetworkNeurons = 200
 const defaultNeuronSynapses = 5
-const pretrainNeuronsToGrow = 20
-const pretrainSynapsesToGrow = 50
-const samplesBetweenPruningSessions = 20
+const pretrainNeuronsToGrow = 10
+const pretrainSynapsesToGrow = 20
+const samplesBetweenPruningSessions = 16
+const defaultSynapseMinFireThreshold = 8
 const sleepBetweenInputTriggers = RefractoryPeriodMillis * time.Millisecond
 const networkDisabledFizzleOutPeriod = 100 * time.Millisecond
-const maxAllowedTimeForInputTriggeringOutput = synapseDelay * GrowPathExpectedMinimumSynapses * time.Millisecond
+const maxAllowedTimeForInputTriggeringOutput = synapseDelay * GrowPathExpectedMinimumSynapses
 
 /*
 TrainingSettings are
@@ -108,15 +109,16 @@ func Train(t Trainer, settings *TrainingSettings, network *Network) {
 		ch := make(chan Diff)
 
 		net := CloneNetwork(network)
-		net.GrowRandomNeurons(pretrainNeuronsToGrow, defaultNeuronSynapses)
-		net.GrowRandomSynapses(pretrainSynapsesToGrow)
 		go processBatch(batch, net, network, settings.Data, ch)
 
 		diff := <-ch
 		ApplyDiff(diff, network)
 
-		fmt.Println("Round of lines done, line=", i, "/", totalTrainingPairs)
+		fmt.Println("Line done,", i, "/", totalTrainingPairs)
 		if i%samplesBetweenPruningSessions == 0 {
+			if i == 0 { // do not prune before getting started!
+				continue
+			}
 			fmt.Println("Pruning...")
 			fmt.Println("  before:", len(network.Cells), "cells,", len(network.Synapses), "synapses")
 			mux.Lock()
@@ -170,13 +172,19 @@ func processBatch(batch []*TrainingSample, network *Network, originalNetwork *Ne
 	time.AfterFunc(GrowPathExpectedMinimumSynapses*RefractoryPeriodMillis, func() {
 		if wasSuccessful { // keep the training
 			fmt.Println("  net fired all expected cells")
-			diff = DiffNetworks(originalNetwork, network)
 		} else {
 			// We failed to generate the desired effect, so do a significant growth
 			// of cells.
 			fmt.Println("  net did not fire all cells, regrowing")
+			// grow some random stuff
+			network.GrowRandomNeurons(pretrainNeuronsToGrow, defaultNeuronSynapses)
+			network.GrowRandomSynapses(pretrainSynapsesToGrow)
+
 			for _, ts := range batch {
-				network.GrowPathBetween(ts.InputCell, ts.OutputCell, GrowPathExpectedMinimumSynapses)
+				// grow paths between synapses, too
+				fmt.Println("  post-train diff adding synapses for", ts.InputCell, ts.OutputCell)
+				sEnd, sAdded := network.GrowPathBetween(ts.InputCell, ts.OutputCell, GrowPathExpectedMinimumSynapses)
+				fmt.Println("    added", len(sEnd)+len(sAdded), "synapses")
 			}
 			diff = DiffNetworks(originalNetwork, network)
 		}

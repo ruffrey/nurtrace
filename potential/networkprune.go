@@ -1,6 +1,9 @@
 package potential
 
-import "fmt"
+import (
+	"fmt"
+	"math"
+)
 
 /*
 Prune traverses the network looking for neurons to degrade or reinforce.
@@ -49,20 +52,14 @@ func (network *Network) Prune() {
 				}
 			} else if synapse.ActivationHistory > 0 {
 				// did not meet minimum fire threshold, so punish it by moving toward zero
-				if isPositive {
-					newMV := synapse.Millivolts + network.SynapseLearnRate
-					if newMV > network.actualSynapseMax {
-						synapse.Millivolts = network.actualSynapseMax
-					} else {
-						synapse.Millivolts = newMV
-					}
+				distanceToZero := math.Abs(0 - float64(synapse.Millivolts))
+				halfDistance := int8(math.Ceil(distanceToZero / 2))
+				if halfDistance < 3 {
+					synapse.Millivolts = 0
+				} else if isPositive {
+					synapse.Millivolts -= halfDistance
 				} else {
-					newMV := synapse.Millivolts - network.SynapseLearnRate
-					if newMV < network.actualSynapseMin {
-						synapse.Millivolts = network.actualSynapseMax
-					} else {
-						synapse.Millivolts = newMV
-					}
+					synapse.Millivolts += halfDistance
 				}
 			} else {
 				// it never fired during the training session, so it should be removed.
