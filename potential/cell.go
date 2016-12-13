@@ -3,7 +3,6 @@ package potential
 import (
 	"fmt"
 	"math/rand"
-	"time"
 )
 
 /*
@@ -23,13 +22,6 @@ synapseAPBoost is how much a synapse's ActivationHistory should be incremented e
 its firing results in activation (strengthening the synapse)
 */
 const synapseAPBoost uint = 1
-
-/*
-RefractoryPeriodMillis represents after a neuron fires, the amount of time (ms) is will
-be blocked from firing again.
-*/
-const RefractoryPeriodMillis = 4
-const refractory = RefractoryPeriodMillis * time.Millisecond
 
 /*
 CellID should be unique for all cells in a network.
@@ -163,8 +155,8 @@ func (cell *Cell) ApplyVoltage(change int8, fromSynapse *Synapse) (didFire bool)
 
 	// Block during action potential cycle or when network is disabled.
 	if cell.activating || cell.Network.Disabled {
-		// disable more voltage applications from cells once the network has been disabled,
-		// which will let the network firings sizzle out after a refractory period or so.
+		// disable any more voltage applications from cells once the network has been disabled,
+		// which will let the network firings sizzle out after a refractory period.
 		return didFire
 	}
 

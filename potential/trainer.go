@@ -13,7 +13,6 @@ const pretrainNeuronsToGrow = 10
 const pretrainSynapsesToGrow = 20
 const samplesBetweenPruningSessions = 16
 const defaultSynapseMinFireThreshold = 8
-const sleepBetweenInputTriggers = RefractoryPeriodMillis * time.Millisecond
 const networkDisabledFizzleOutPeriod = 100 * time.Millisecond
 
 /*
