@@ -17,7 +17,7 @@ func Sample(seed string, data *Dataset, network *Network, maxInterations int, st
 	seedChars := strings.Split(seed, "")
 	var out []interface{}
 	outConduit := make(chan interface{})
-	maxTimeout := time.Second * 5 // do not let samples run longer than this
+	maxTimeout := time.Second * 1 // do not let samples run longer than this
 
 	// add a callback to each output cell that sends the result back
 	go func() {
@@ -35,13 +35,7 @@ func Sample(seed string, data *Dataset, network *Network, maxInterations int, st
 		}
 	}()
 
-	network.Cells[data.KeyToItem[start].InputCell].FireActionPotential()
-	network.Step()
-	for _, char := range seedChars {
-		network.Cells[data.KeyToItem[char].InputCell].FireActionPotential()
-		network.Step()
-	}
-
+	// wait for the output to come through the network
 	done := make(chan bool)
 	go func() {
 		for {
@@ -57,17 +51,22 @@ func Sample(seed string, data *Dataset, network *Network, maxInterations int, st
 					done <- true
 					break
 				}
-				hasMore := network.Step()
-				if !hasMore {
-					done <- true
-					break
-				}
 			case <-time.After(maxTimeout):
 				done <- true
+				break
 			}
 		}
 
 	}()
+
+	// fire one cell per step, in order.
+	network.Cells[data.KeyToItem[start].InputCell].FireActionPotential()
+	network.Step()
+	for _, char := range seedChars {
+		network.Cells[data.KeyToItem[char].InputCell].FireActionPotential()
+		network.Step()
+	}
+
 	<-done
 
 	// reset all the output cell callbacks
