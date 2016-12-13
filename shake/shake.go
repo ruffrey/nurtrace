@@ -29,6 +29,9 @@ var doProfile = flag.String("profile", "", "Pass `cpu` or `mem` to do profiling"
 func main() {
 	// doTrace()
 
+	// Figure out how they want to run this program.
+	flag.Parse()
+
 	// start by initializing the network from disk or whatever
 	var network *potential.Network
 	var err error
@@ -66,7 +69,6 @@ func main() {
 	err = t.LoadVocab(*vocabSaveFile)
 	if err != nil {
 		t.PrepareData(network)
-		t.SaveVocab(*vocabSaveFile)
 	}
 
 	// Setup the training data samples
@@ -107,9 +109,6 @@ func main() {
 	}
 
 	fmt.Println("Loaded training text for", *testDataFile, "samples=", len(t.Settings.TrainingSamples))
-
-	// Figure out how they want to run this program.
-	flag.Parse()
 
 	// Sample, then stop.
 	if len(*seed) > 0 {
