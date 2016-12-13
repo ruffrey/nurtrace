@@ -1,7 +1,8 @@
 # TODO
 
 ## Top of the Stack
-- [ ] some kind of issue with diffing back from multiple networks that were independently trained
+- [ ] some kind of issue with diffing back from multiple networks that were independently trained,
+    or vocab is getting out of sync.
 - [x] try firing sweeps (`network.Step()`) instead of timing, to avoid issues with timeout functions
 - [ ] More refined learning techniques:
     - [ ] ensure everything in learning-mechanisms.md is done
@@ -11,6 +12,7 @@
     - [ ] if it fails, do a prune on the network copy, then GrowPathBetween, and apply it to the original
 - [ ] Find all "laws of the universe" constants and collect in one place
 - [ ] Periodically save back the threaded training to original
+- [ ] Remove network versioning as it does not provide much value
 
 ## Optimizations and Refactoring
 - [ ] If vocab is saved, network must be also
