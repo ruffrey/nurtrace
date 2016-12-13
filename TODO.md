@@ -9,6 +9,7 @@
 - [ ] more aggressive pruning and optimize learning more granularly to reduce randomness:
     - [ ] if it fails, do a prune on the network copy, then GrowPathBetween, and apply it to the original
 - [ ] Find all "laws of the universe" constants and collect in one place
+- [ ] Periodically save back the threaded training to original
 
 ## Optimizations and Refactoring
 - [ ] If vocab is saved, network must be also

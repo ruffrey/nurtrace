@@ -91,40 +91,51 @@ type Trainer interface {
 /*
 Train executes the trainer's OnTrained method once complete.
 */
-func Train(t Trainer, settings *TrainingSettings, network *Network) {
-	t.PrepareData(network)
-
-	// TODO: thread pool
-
-	// p := pool.NewLimited(settings.Threads)
-	// defer p.Close()
-
+func Train(t Trainer, settings *TrainingSettings, originalNetwork *Network) {
 	var mux sync.Mutex
-	totalTrainingPairs := len(settings.TrainingSamples)
+	var wg sync.WaitGroup
 
-	for i, batch := range settings.TrainingSamples {
-		net := CloneNetwork(network)
-		createdEffect, diff := processBatch(batch, net, network, settings.Data)
+	t.PrepareData(originalNetwork)
 
-		if !createdEffect {
-			ApplyDiff(diff, network)
-		}
+	for thread := uint(0); thread < settings.Threads; thread++ {
+		wg.Add(1)
+		go func(thread uint) {
+			network := CloneNetwork(originalNetwork)
 
-		fmt.Println("Line done,", i, "/", totalTrainingPairs)
-		if i%samplesBetweenPruningSessions == 0 {
-			if i == 0 { // do not prune before getting started!
-				continue
+			totalTrainingPairs := len(settings.TrainingSamples)
+
+			for i, batch := range settings.TrainingSamples {
+				net := CloneNetwork(network)
+				createdEffect, diff := processBatch(batch, net, network, settings.Data)
+
+				if !createdEffect {
+					ApplyDiff(diff, network)
+				}
+
+				fmt.Println("Line done,", i, "/", totalTrainingPairs)
+				if i%samplesBetweenPruningSessions == 0 {
+					if i == 0 { // do not prune before getting started!
+						continue
+					}
+					fmt.Println("Pruning...")
+					fmt.Println("  before:", len(network.Cells), "cells,", len(network.Synapses), "synapses")
+					network.Prune()
+					fmt.Println("  after:", len(network.Cells), "cells,", len(network.Synapses), "synapses")
+				}
+
 			}
-			fmt.Println("Pruning...")
-			fmt.Println("  before:", len(network.Cells), "cells,", len(network.Synapses), "synapses")
-			mux.Lock()
-			network.Prune()
-			mux.Unlock()
-			fmt.Println("  after:", len(network.Cells), "cells,", len(network.Synapses), "synapses")
-		}
 
+			fmt.Println("Network on thread", thread, "done")
+			mux.Lock()
+			finalDiff := DiffNetworks(originalNetwork, network)
+			ApplyDiff(finalDiff, originalNetwork)
+			mux.Unlock()
+			fmt.Println("Applied diff on thread", thread)
+			wg.Done()
+		}(thread)
 	}
 
+	wg.Wait()
 }
 
 /*
