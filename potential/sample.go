@@ -18,7 +18,7 @@ func Sample(seed string, data *Dataset, network *Network, maxInterations int, st
 	var out []interface{}
 	outConduit := make(chan interface{})
 
-	// add a callback to each output cell that sends the
+	// add a callback to each output cell that sends the result back
 	go func() {
 		for _, v := range data.KeyToItem {
 			network.Cells[v.OutputCell].OnFired = append(
@@ -34,19 +34,12 @@ func Sample(seed string, data *Dataset, network *Network, maxInterations int, st
 		}
 	}()
 
-	go func() {
-		network.Cells[data.KeyToItem[start].InputCell].FireActionPotential()
-		time.AfterFunc(sleepBetweenInputTriggers, func() {
-			for _, char := range seedChars {
-				ch := make(chan bool)
-				time.AfterFunc(sleepBetweenInputTriggers, func() {
-					network.Cells[data.KeyToItem[char].InputCell].FireActionPotential()
-					ch <- true
-				})
-				<-ch
-			}
-		})
-	}()
+	network.Cells[data.KeyToItem[start].InputCell].FireActionPotential()
+	network.Step()
+	for _, char := range seedChars {
+		network.Cells[data.KeyToItem[char].InputCell].FireActionPotential()
+		network.Step()
+	}
 
 	done := make(chan bool)
 	go func() {
@@ -61,6 +54,10 @@ func Sample(seed string, data *Dataset, network *Network, maxInterations int, st
 				out = append(out, s)
 				if len(out) >= maxInterations {
 					done <- true
+					break
+				}
+				hasMore := network.Step()
+				if !hasMore {
 					break
 				}
 			case <-time.After(time.Second * 3):
