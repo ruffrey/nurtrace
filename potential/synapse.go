@@ -52,7 +52,7 @@ func NewSynapse(network *Network) *Synapse {
 		if _, alreadyExists := network.Synapses[id]; !alreadyExists {
 			break
 		}
-		fmt.Println("warn: would have gotten dupe synapse ID")
+		// fmt.Println("warn: would have gotten dupe synapse ID")
 	}
 	mv := int8(randomIntBetween(synapseMin, synapseMax))
 	s := Synapse{

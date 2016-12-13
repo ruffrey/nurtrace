@@ -1,9 +1,6 @@
 package potential
 
-import (
-	"fmt"
-	"math/rand"
-)
+import "math/rand"
 
 /*
 apResting comes from standard neuroscience Membrane Potential. This, and all voltages
@@ -97,7 +94,7 @@ func NewCell(network *Network) *Cell {
 		if _, alreadyExists := network.Cells[id]; !alreadyExists {
 			break
 		}
-		fmt.Println("warn: would have gotten dupe cell ID")
+		// fmt.Println("warn: would have gotten dupe cell ID")
 	}
 	c := Cell{
 		ID:               id,
