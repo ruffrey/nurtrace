@@ -2,7 +2,6 @@ package potential
 
 import (
 	"testing"
-	"time"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -37,18 +36,10 @@ func Test_SynapseActivateNotExist(t *testing.T) {
 		assert.Equal(t, false, cell.WasFired, "brand new cell should have WasFired==false")
 		assert.Equal(t, int8(-70), cell.Voltage, "brand new cell should have voltage==-70")
 
-		ch := make(chan bool)
-		go func() {
-			_, err := synapse.Activate()
-			assert.Nil(t, err, "no error when activating dendrite")
-			time.Sleep(SynapseEffectDelayMicrosecs * 2 * time.Millisecond)
-			ch <- true
-		}()
+		didFire, err := synapse.Activate()
+		assert.Nil(t, err, "no error when activating dendrite")
 
-		for range ch {
-			close(ch)
-		}
-
+		assert.Equal(t, false, didFire, "cell should not have fired with such low voltage")
 		assert.Equal(t, false, cell.WasFired,
 			"new cell should be fired after its dendrite synapse activates")
 
@@ -68,17 +59,9 @@ func Test_SynapseActivateNotExist(t *testing.T) {
 		// base state
 		assert.Equal(t, false, cell.WasFired, "brand new cell should have WasFired==false")
 
-		ch := make(chan bool)
-		go func() {
-			_, err := synapse.Activate()
-			assert.Nil(t, err, "no error when activating dendrite")
-			time.Sleep(SynapseEffectDelayMicrosecs * 2 * time.Millisecond)
-			ch <- true
-		}()
-
-		for range ch {
-			close(ch)
-		}
+		didFire, err := synapse.Activate()
+		assert.Nil(t, err, "no error when activating dendrite")
+		assert.Equal(t, true, didFire, "cell should have fired due to high voltage")
 
 		assert.Equal(t, true, cell.WasFired,
 			"new cell should be fired after its dendrite synapse activates")

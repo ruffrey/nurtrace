@@ -25,16 +25,6 @@ its firing results in activation (strengthening the synapse)
 const synapseAPBoost uint = 1
 
 /*
-SynapseEffectDelayMicrosecs is the time between another cell's axon firing and the
-cell at the end of the synapse getting a voltage boost. The primary reason for
-this delay is to normalize timing across all machines. Without it, faster
-machines will process voltage changes faster, and a network trained on one
-set of hardware will not be usable on another set.
-*/
-const SynapseEffectDelayMicrosecs = 100
-const synapseDelay = SynapseEffectDelayMicrosecs * time.Microsecond
-
-/*
 RefractoryPeriodMillis represents after a neuron fires, the amount of time (ms) is will
 be blocked from firing again.
 */
