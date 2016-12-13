@@ -149,72 +149,47 @@ func (cell *Cell) FireActionPotential() {
 		go cb(cell.ID)
 	}
 
-	done := make(chan bool)
-	// activate all synapses on its axon
-	// using a goroutine seems to help avoid crashes where there are concurrent
-	// reads and writes of the same map. That would happen if
-	go func() {
-		for synapseID := range cell.AxonSynapses {
-			if cell.Network.Disabled {
-				// This will likely happen when setting the network to disabled, because
-				// timeouts will still need to wait to finish then try to fire the network.
-				// While technically it should be ok to let the network fizzle out on its
-				// own in the ApplyVoltage check for network being disabled, stopping here
-				// will save some precious CPU.
-				// fmt.Println("warn: network stopped during FireActionPotential")
-				break
-			}
-			synapse, exists := cell.Network.Synapses[synapseID]
-			if !exists {
-				fmt.Println("error: cannot activate synapse", synapseID, "from cell", cell.ID,
-					"because it does not exist")
-				continue
-			}
-			// fmt.Println("  activating synapse", synapse, "\n  from cell", cell.ID)
-			err := synapse.Activate()
-			if err != nil {
-				fmt.Println("error: synapse activate fail:", err)
-			}
+	for synapseID := range cell.AxonSynapses {
+		if cell.Network.Disabled {
+			// This will likely happen when setting the network to disabled, because
+			// timeouts will still need to wait to finish then try to fire the network.
+			// While technically it should be ok to let the network fizzle out on its
+			// own in the ApplyVoltage check for network being disabled, stopping here
+			// will save some precious CPU.
+			// fmt.Println("warn: network stopped during FireActionPotential")
+			break
 		}
-		done <- true
-	}()
-
-	time.AfterFunc(refractory, func() {
-		cell.Voltage = apResting
-		cell.activating = false
-	})
-	<-done
+		cell.Network.AddSynapseToNextStep(synapseID)
+	}
 }
 
 /*
 ApplyVoltage changes the cell's voltage by a specified amount much.
+
 Care is taken to prevent the tiny int8 variables from overflowing.
-Voltage may not change for a few milliseconds depending on `SynapseEffectDelayMicrosecs`.
 */
-func (cell *Cell) ApplyVoltage(change int8, fromSynapse *Synapse) {
-	// fmt.Println("ApplyVoltage", cell.ID, cell.Network.Disabled, &cell.Network)
-	if cell.Network.Disabled {
+func (cell *Cell) ApplyVoltage(change int8, fromSynapse *Synapse) (didFire bool) {
+	didFire = false
+
+	// Block during action potential cycle or when network is disabled.
+	if cell.activating || cell.Network.Disabled {
 		// disable more voltage applications from cells once the network has been disabled,
 		// which will let the network firings sizzle out after a refractory period or so.
-		// fmt.Println("warn: attempt to apply voltage when network disabled")
-		return
+		return didFire
 	}
 
-	time.AfterFunc(synapseDelay, func() {
-		if cell.activating {
-			// Block during action potential cycle
-			return
-		}
-		// Neither alone will be outside int8 bounds, but we need to prevent
-		// possible int8 buffer overflow in the result.
-		var newPossibleVoltage int16
-		newPossibleVoltage = int16(change) + int16(cell.Voltage)
-		if newPossibleVoltage > apThreshold {
-			// when a synapse firing results in firing an Action Potential, it counts toward making
-			// the synapse stronger, so we increment the ActivationHistory a second time
-			fromSynapse.ActivationHistory += synapseAPBoost
-			cell.FireActionPotential()
-		}
-		cell.Voltage = int8(newPossibleVoltage)
-	})
+	// Neither alone will be outside int8 bounds, but we need to prevent
+	// possible int8 buffer overflow in the result.
+	var newPossibleVoltage int16
+	newPossibleVoltage = int16(change) + int16(cell.Voltage)
+	if newPossibleVoltage > apThreshold {
+		// when a synapse firing results in firing an Action Potential, it counts toward making
+		// the synapse stronger, so we increment the ActivationHistory a second time
+		fromSynapse.ActivationHistory += synapseAPBoost
+		cell.FireActionPotential()
+		didFire = true
+	}
+	cell.Voltage = int8(newPossibleVoltage)
+
+	return didFire
 }

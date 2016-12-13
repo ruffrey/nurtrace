@@ -50,6 +50,11 @@ type Network struct {
 	// addition will create an int8 overflow.
 	actualSynapseMin int8
 	actualSynapseMax int8
+
+	// nextSynapsesToActivate will fire their axon cell on the next step. always true
+	nextSynapsesToActivate map[SynapseID]bool
+
+	resetCellsOnNextStep map[CellID]bool
 }
 
 /*

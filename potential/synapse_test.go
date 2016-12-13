@@ -20,7 +20,7 @@ func Test_SynapseActivateNotExist(t *testing.T) {
 		synapse := NewSynapse(network)
 		synapse.ToNeuronDendrite = NewCellID()
 
-		err := synapse.Activate()
+		_, err := synapse.Activate()
 		assert.Error(t, err, "err should exist when activating bad dendrite")
 	})
 
@@ -39,7 +39,7 @@ func Test_SynapseActivateNotExist(t *testing.T) {
 
 		ch := make(chan bool)
 		go func() {
-			err := synapse.Activate()
+			_, err := synapse.Activate()
 			assert.Nil(t, err, "no error when activating dendrite")
 			time.Sleep(SynapseEffectDelayMicrosecs * 2 * time.Millisecond)
 			ch <- true
@@ -70,7 +70,7 @@ func Test_SynapseActivateNotExist(t *testing.T) {
 
 		ch := make(chan bool)
 		go func() {
-			err := synapse.Activate()
+			_, err := synapse.Activate()
 			assert.Nil(t, err, "no error when activating dendrite")
 			time.Sleep(SynapseEffectDelayMicrosecs * 2 * time.Millisecond)
 			ch <- true
