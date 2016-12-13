@@ -2,7 +2,6 @@ package potential
 
 import (
 	"testing"
-	"time"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -63,9 +62,9 @@ func Test_BasicNetworkFiring(t *testing.T) {
 			cellID := network.RandomCellKey()
 			cell := network.Cells[cellID]
 			cell.FireActionPotential()
-			time.Sleep(1 * time.Millisecond)
+			network.Step()
 		}
-		time.Sleep(100 * time.Millisecond)
+		network.Step()
 	})
 }
 

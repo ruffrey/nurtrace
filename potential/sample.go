@@ -17,6 +17,7 @@ func Sample(seed string, data *Dataset, network *Network, maxInterations int, st
 	seedChars := strings.Split(seed, "")
 	var out []interface{}
 	outConduit := make(chan interface{})
+	maxTimeout := time.Second * 5 // do not let samples run longer than this
 
 	// add a callback to each output cell that sends the result back
 	go func() {
@@ -58,9 +59,10 @@ func Sample(seed string, data *Dataset, network *Network, maxInterations int, st
 				}
 				hasMore := network.Step()
 				if !hasMore {
+					done <- true
 					break
 				}
-			case <-time.After(time.Second * 3):
+			case <-time.After(maxTimeout):
 				done <- true
 			}
 		}
