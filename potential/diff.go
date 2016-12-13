@@ -130,7 +130,7 @@ func ApplyDiff(diff Diff, originalNetwork *Network) (err error) {
 		originalNetwork.Synapses[synapseID].ActivationHistory += activations
 	}
 
-	originalNetwork.RegenVersion()
+	// originalNetwork.RegenVersion()
 
 	return nil
 }

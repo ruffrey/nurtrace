@@ -136,6 +136,8 @@ func (network *Network) ResetForTraining() {
 		cell.WasFired = false
 		cell.Voltage = apResting
 	}
+	network.nextSynapsesToActivate = make(map[SynapseID]bool)
+	network.resetCellsOnNextStep = make(map[CellID]bool)
 	network.Disabled = false
 }
 
