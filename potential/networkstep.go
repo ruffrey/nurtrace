@@ -39,10 +39,11 @@ func (network *Network) Step() (hasMore bool) {
 		cell.activating = false
 	}
 
+	hasMore = len(nextFiring) > 0 || len(nextCellResets) > 0
+
 	network.nextSynapsesToActivate = nextFiring
 	network.resetCellsOnNextStep = nextCellResets
 
-	hasMore = len(nextFiring) > 0
 	return hasMore
 }
 

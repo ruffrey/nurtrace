@@ -73,6 +73,8 @@ func NewNetwork() Network {
 		SynapseLearnRate:        lr,
 		actualSynapseMin:        int8(-128) + lr,
 		actualSynapseMax:        int8(127) - lr,
+		nextSynapsesToActivate:  make(map[SynapseID]bool),
+		resetCellsOnNextStep:    make(map[CellID]bool),
 	}
 }
 

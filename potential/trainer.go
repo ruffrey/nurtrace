@@ -104,14 +104,12 @@ func Train(t Trainer, settings *TrainingSettings, network *Network) {
 	totalTrainingPairs := len(settings.TrainingSamples)
 
 	for i, batch := range settings.TrainingSamples {
-		// train in parallel over this number of threads
-		ch := make(chan Diff)
-
 		net := CloneNetwork(network)
-		go processBatch(batch, net, network, settings.Data, ch)
+		createdEffect, diff := processBatch(batch, net, network, settings.Data)
 
-		diff := <-ch
-		ApplyDiff(diff, network)
+		if !createdEffect {
+			ApplyDiff(diff, network)
+		}
 
 		fmt.Println("Line done,", i, "/", totalTrainingPairs)
 		if i%samplesBetweenPruningSessions == 0 {
@@ -135,24 +133,23 @@ processBatch fires this entire line in the neural network at once, hoping to get
 
 It will not add any synapses.
 */
-func processBatch(batch []*TrainingSample, network *Network, originalNetwork *Network, vocab *Dataset, ch chan Diff) {
+func processBatch(batch []*TrainingSample, network *Network, originalNetwork *Network, vocab *Dataset) (wasSuccessful bool, diff Diff) {
 	network.ResetForTraining()
-
-	done := make(chan bool)
 
 	successes := 0
 
 	for _, ts := range batch {
 		network.Cells[ts.InputCell].FireActionPotential()
-		go time.AfterFunc(sleepBetweenInputTriggers, func() {
-			done <- true
-		})
-		<-done
+		// TODO: should we step here? or not?
+		network.Step()
 	}
 
 	// give for firings time to go through the network
 	for i := 0; i < GrowPathExpectedMinimumSynapses; i++ {
-		network.Step()
+		hasMore := network.Step()
+		if !hasMore {
+			break
+		}
 	}
 	for _, ts := range batch {
 		if network.Cells[ts.OutputCell].WasFired {
@@ -160,34 +157,34 @@ func processBatch(batch []*TrainingSample, network *Network, originalNetwork *Ne
 		}
 	}
 
-	wasSuccessful := successes == len(batch)
+	wasSuccessful = successes == len(batch)
 
+	// wind down the network
 	network.Disabled = true
+	hasMore := network.Step()
 
-	var diff Diff
+	if hasMore {
+		fmt.Println("warn: more cell firings existed after disabling network and stepping")
+	}
 
-	// give the network some time to wind down
-	time.AfterFunc(GrowPathExpectedMinimumSynapses*RefractoryPeriodMillis, func() {
-		if wasSuccessful { // keep the training
-			fmt.Println("  net fired all expected cells")
-		} else {
-			// We failed to generate the desired effect, so do a significant growth
-			// of cells.
-			fmt.Println("  net did not fire all cells, regrowing")
-			// grow some random stuff
-			network.GrowRandomNeurons(pretrainNeuronsToGrow, defaultNeuronSynapses)
-			network.GrowRandomSynapses(pretrainSynapsesToGrow)
+	if !wasSuccessful {
+		// We failed to generate the desired effect, so do a significant growth
+		// of cells.
+		fmt.Println("  net did not fire all cells, regrowing")
+		// grow some random stuff
+		network.GrowRandomNeurons(pretrainNeuronsToGrow, defaultNeuronSynapses)
+		network.GrowRandomSynapses(pretrainSynapsesToGrow)
 
-			for _, ts := range batch {
-				// grow paths between synapses, too
-				fmt.Println("  post-train diff adding synapses for", ts.InputCell, ts.OutputCell)
-				sEnd, sAdded := network.GrowPathBetween(ts.InputCell, ts.OutputCell, GrowPathExpectedMinimumSynapses)
-				fmt.Println("    added", len(sEnd)+len(sAdded), "synapses")
-			}
-			diff = DiffNetworks(originalNetwork, network)
+		for _, ts := range batch {
+			// grow paths between synapses, too
+			fmt.Println("  post-train diff adding synapses for", ts.InputCell, ts.OutputCell)
+			sEnd, sAdded := network.GrowPathBetween(ts.InputCell, ts.OutputCell, GrowPathExpectedMinimumSynapses)
+			fmt.Println("    added", len(sEnd)+len(sAdded), "synapses")
 		}
-		done <- true
-	})
-	<-done
-	ch <- diff
+		diff = DiffNetworks(originalNetwork, network)
+	} else {
+		fmt.Println("  net fired all expected cells, no changes")
+	}
+
+	return wasSuccessful, diff
 }
