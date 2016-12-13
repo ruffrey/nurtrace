@@ -36,7 +36,6 @@ from the newerNetwork.
 */
 func DiffNetworks(originalNetwork, newerNetwork *Network) (diff Diff) {
 	diff = NewDiff()
-	diff.NetworkVersion = originalNetwork.Version
 
 	// Get new synapses and the millivolt differences between existing synapses
 	for id, newerNetworkSynapse := range newerNetwork.Synapses {
@@ -90,11 +89,6 @@ no need to copy any changes from existing cell voltages.
 This will update the network version, also.
 */
 func ApplyDiff(diff Diff, originalNetwork *Network) (err error) {
-	// Sanity check
-	if originalNetwork.Version != diff.NetworkVersion {
-		err = fmt.Errorf("Diffing networks failed due to version mismatch: original=%s, newer=%s", originalNetwork.Version, diff.NetworkVersion)
-		return err
-	}
 
 	// New cells
 	cellIDChanges := make(map[CellID]CellID) // old:new
@@ -130,8 +124,6 @@ func ApplyDiff(diff Diff, originalNetwork *Network) (err error) {
 		originalNetwork.Synapses[synapseID].ActivationHistory += activations
 	}
 
-	// originalNetwork.RegenVersion()
-
 	return nil
 }
 
@@ -144,8 +136,6 @@ It involves resetting pointers.
 func CloneNetwork(originalNetwork *Network) *Network {
 	n := NewNetwork()
 	newNetwork := &n
-	newNetwork.SynapseLearnRate = originalNetwork.SynapseLearnRate
-	newNetwork.SynapseMinFireThreshold = originalNetwork.SynapseMinFireThreshold
 
 	for _, cell := range originalNetwork.Cells {
 		copyCellToNetwork(cell, newNetwork)

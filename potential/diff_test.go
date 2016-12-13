@@ -32,9 +32,10 @@ func Test_CloneNetwork(t *testing.T) {
 
 		cloned := CloneNetwork(original)
 		// change something
-		cloned.SynapseLearnRate = 100
+		three := SynapseID(333)
+		cloned.nextSynapsesToActivate[three] = true
 
-		if cloned.SynapseLearnRate == original.SynapseLearnRate {
+		if cloned.nextSynapsesToActivate[three] == original.nextSynapsesToActivate[three] {
 			t.Error("changing props of cloned network should not change original")
 		}
 

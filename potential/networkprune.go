@@ -32,20 +32,20 @@ func (network *Network) Prune() {
 			isPositive := synapse.Millivolts >= 0
 
 			// when applying voltages, we must be careful to not overflow the int8 size
-			if synapse.ActivationHistory >= network.SynapseMinFireThreshold {
+			if synapse.ActivationHistory >= defaultSynapseMinFireThreshold {
 				// it was activated enough, so we bump it away from zero.
 				// needs cleanup refactoring.
 				if isPositive {
-					newMV := synapse.Millivolts + network.SynapseLearnRate
-					if newMV > network.actualSynapseMax {
-						synapse.Millivolts = network.actualSynapseMax
+					newMV := synapse.Millivolts + synapseLearnRate
+					if newMV > actualSynapseMax {
+						synapse.Millivolts = actualSynapseMax
 					} else {
 						synapse.Millivolts = newMV
 					}
 				} else {
-					newMV := synapse.Millivolts - network.SynapseLearnRate
-					if newMV < network.actualSynapseMin {
-						synapse.Millivolts = network.actualSynapseMin
+					newMV := synapse.Millivolts - synapseLearnRate
+					if newMV < actualSynapseMin {
+						synapse.Millivolts = actualSynapseMin
 					} else {
 						synapse.Millivolts = newMV
 					}

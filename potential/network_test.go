@@ -33,23 +33,6 @@ func Test_NewNetwork(t *testing.T) {
 	})
 }
 
-func Test_NetworkVersioning(t *testing.T) {
-	t.Run("changes the version when calling RegenVersion", func(t *testing.T) {
-		n := NewNetwork()
-		network := &n
-
-		v1 := network.Version
-		network.RegenVersion()
-		v2 := network.Version
-		network.RegenVersion()
-		v3 := network.Version
-
-		assert.NotEqual(t, v1, v2)
-		assert.NotEqual(t, v1, v3)
-		assert.NotEqual(t, v2, v3)
-	})
-}
-
 func Test_BasicNetworkFiring(t *testing.T) {
 	t.Run("does not panic during forced FireActionPotential", func(t *testing.T) {
 		network := NewNetwork()

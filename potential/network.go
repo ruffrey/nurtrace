@@ -1,10 +1,8 @@
 package potential
 
 import (
-	"encoding/hex"
 	"encoding/json"
 	"fmt"
-	"hash/crc32"
 	"io/ioutil"
 	"math/rand"
 	"os"
@@ -15,7 +13,6 @@ import (
 Network is a full neural network
 */
 type Network struct {
-	Version string
 	/*
 		Indicates whether neurons are allowed to fire. Setting it disabled will stop firing
 		in a few milliseconds.
@@ -32,24 +29,7 @@ type Network struct {
 	*/
 	Cells map[CellID]*Cell
 
-	// There are two factors that result in degrading a synapse:
-
-	/*
-		The minimum count of times a synapse fired in a given round between Grow cycles, with
-		a millivolts=0 value.
-	*/
-	SynapseMinFireThreshold uint
-	/*
-	   How much a synapse should get bumped when it is being reinforced
-	*/
-	SynapseLearnRate int8
-
 	// private
-
-	// actualSynapseMin and Max helps make math less intensive if there is never a chance synapse
-	// addition will create an int8 overflow.
-	actualSynapseMin int8
-	actualSynapseMax int8
 
 	// nextSynapsesToActivate will fire their axon cell on the next step. always true
 	nextSynapsesToActivate map[SynapseID]bool
@@ -63,30 +43,13 @@ when called. Seems like a good time.
 */
 func NewNetwork() Network {
 	rand.Seed(time.Now().Unix())
-	lr := int8(1)
 	return Network{
-		Version:  "0",
 		Disabled: false,
 		Synapses: make(map[SynapseID]*Synapse),
 		Cells:    make(map[CellID]*Cell),
-		SynapseMinFireThreshold: defaultSynapseMinFireThreshold,
-		SynapseLearnRate:        lr,
-		actualSynapseMin:        int8(-128) + lr,
-		actualSynapseMax:        int8(127) - lr,
-		nextSynapsesToActivate:  make(map[SynapseID]bool),
-		resetCellsOnNextStep:    make(map[CellID]bool),
+		nextSynapsesToActivate: make(map[SynapseID]bool),
+		resetCellsOnNextStep:   make(map[CellID]bool),
 	}
-}
-
-/*
-RegenVersion generates a new network version and sets the Version property.
-*/
-func (network *Network) RegenVersion() {
-	n := []byte(fmt.Sprintf("%v", network))
-
-	hasher := crc32.NewIEEE()
-	hasher.Write(n)
-	network.Version = hex.EncodeToString(hasher.Sum(nil))
 }
 
 func randomIntBetween(min, max int) int {
@@ -146,7 +109,7 @@ PrintCells logs the network cells to console
 */
 func (network *Network) PrintCells() {
 	fmt.Println("----------")
-	fmt.Println("Network version=", network.Version)
+	fmt.Println("Network")
 	for _, cell := range network.Cells {
 		fmt.Println("  --------\ncell id=", cell.ID)
 		fmt.Println("  voltage=", cell.Voltage)

@@ -1,23 +1,20 @@
 # TODO
 
 ## Top of the Stack
-- [ ] some kind of issue with diffing back from multiple networks that were independently trained,
-    or vocab is getting out of sync.
-- [x] try firing sweeps (`network.Step()`) instead of timing, to avoid issues with timeout functions
+- [ ] issue with diffing multiple networks that were independently trained, or vocab is getting out of sync.
 - [ ] More refined learning techniques:
     - [ ] ensure everything in learning-mechanisms.md is done
     - [ ] larger sets of pathways are OK - more synapses between start and end
-- [x] do multiple threads differently so they wont block on each batch of lines
-- [ ] more aggressive pruning and optimize learning more granularly to reduce randomness:
-    - [ ] if it fails, do a prune on the network copy, then GrowPathBetween, and apply it to the original
-- [ ] Find all "laws of the universe" constants and collect in one place
+    - [ ] more aggressive pruning and optimize learning more granularly to reduce randomness:
+    - [ ] if it fails, do a prune on the network copy, then GrowPathBetween, and apply it to the original (?)
+- [x] Find all "laws of the universe" constants and collect in one place
 - [ ] Periodically save back the threaded training to original
-- [ ] Remove network versioning as it does not provide much value
+- [x] Remove network versioning as it does not provide much value
 
 ## Optimizations and Refactoring
 - [ ] If vocab is saved, network must be also
 - [ ] RandomCellKey method is pretty slow at scale
-- [ ] move charrnn training from shake.go into charrnn repo, adding as much as possible to the main lib
+- [x] move charrnn training from shake.go into charrnn repo, adding as much as possible to the main lib
 
 ## Later - once it works
 - [ ] code for word level and phrase level neural networks

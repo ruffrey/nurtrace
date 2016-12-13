@@ -3,17 +3,9 @@ package potential
 import (
 	"fmt"
 	"sync"
-	"time"
 )
 
 const defaultWorkerThreads = 2
-const initialNetworkNeurons = 200
-const defaultNeuronSynapses = 5
-const pretrainNeuronsToGrow = 10
-const pretrainSynapsesToGrow = 20
-const samplesBetweenPruningSessions = 16
-const defaultSynapseMinFireThreshold = 8
-const networkDisabledFizzleOutPeriod = 100 * time.Millisecond
 
 /*
 TrainingSettings are
@@ -183,8 +175,8 @@ func processBatch(batch []*TrainingSample, network *Network, originalNetwork *Ne
 		// of cells.
 		// fmt.Println("  net did not fire all cells, regrowing")
 		// grow some random stuff
-		network.GrowRandomNeurons(pretrainNeuronsToGrow, defaultNeuronSynapses)
-		network.GrowRandomSynapses(pretrainSynapsesToGrow)
+		network.GrowRandomNeurons(retrainNeuronsToGrow, defaultNeuronSynapses)
+		network.GrowRandomSynapses(retrainRandomSynapsesToGrow)
 
 		for _, ts := range batch {
 			// grow paths between synapses, too

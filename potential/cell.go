@@ -3,24 +3,6 @@ package potential
 import "math/rand"
 
 /*
-apResting comes from standard neuroscience Membrane Potential. This, and all voltages
-in the lib, conveniently fit in tiny 8 bit integers.
-*/
-const apResting int8 = -70
-
-/*
-apThreshold represents the millivolts where an action potential will result.
-int16 is needed for comparisons.
-*/
-const apThreshold int16 = -55
-
-/*
-synapseAPBoost is how much a synapse's ActivationHistory should be incremented extra when
-its firing results in activation (strengthening the synapse)
-*/
-const synapseAPBoost uint = 1
-
-/*
 CellID should be unique for all cells in a network.
 */
 type CellID uint32
