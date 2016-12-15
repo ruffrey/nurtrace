@@ -1,7 +1,9 @@
 # TODO
 
 ## Top of the Stack
-- [ ] issue with diffing multiple networks that were independently trained, or vocab is getting out of sync.
+- [ ] issue with integrity
+    - when there are multiple threads, pruning tends to fail on the next load from disk fresh training
+    - diffing multiple networks that were independently trained, or vocab is getting out of sync.
 - [ ] More refined learning techniques:
     - [ ] ensure everything in learning-mechanisms.md is done
     - [ ] larger sets of pathways are OK - more synapses between start and end

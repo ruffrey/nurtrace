@@ -3,6 +3,8 @@ package potential
 import (
 	"fmt"
 	"sync"
+
+	"github.com/y0ssar1an/q"
 )
 
 const defaultWorkerThreads = 2
@@ -115,13 +117,13 @@ func Train(t Trainer, settings *TrainingSettings, originalNetwork *Network) {
 					// beforeCells := len(network.Cells)
 					// beforeSynapses := len(network.Synapses)
 					if !ok {
-						fmt.Println(report)
+						q.Q(report)
 						panic("integrity failed BEFORE prune")
 					}
 					network.Prune()
 					ok, report := CheckIntegrity(network)
 					if !ok {
-						fmt.Println(report)
+						q.Q(report)
 						panic("integrity failed AFTER prune")
 					}
 					// afterCells := len(network.Cells)

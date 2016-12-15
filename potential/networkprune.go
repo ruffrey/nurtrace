@@ -19,7 +19,7 @@ func (network *Network) Prune() {
 	// Next we move the less used synapses toward zero, because doing this later would prune the
 	// brand new synapses. This is a good time to apply the learning rate to synapses
 	// which were activated, too.
-	var synapsesToRemove []*Synapse
+	synapsesToRemove := make(map[SynapseID]bool)
 	// fmt.Println("  processing learning on cells, total=", len(network.Cells))
 	for _, cell := range network.Cells {
 		for synapseID := range cell.DendriteSynapses { // could also be axons, but, meh.
@@ -63,7 +63,7 @@ func (network *Network) Prune() {
 				}
 			} else {
 				// it never fired during the training session, so it should be removed.
-				synapsesToRemove = append(synapsesToRemove, synapse)
+				synapsesToRemove[synapse.ID] = true
 			}
 
 			// Reset the activation history until the next Prune cycle.
@@ -77,8 +77,8 @@ func (network *Network) Prune() {
 	// Actually pruning synapses is done after the previous loop because it can
 	// trigger removal of Cells, which can subsequently mess up the range operation
 	// happening over the same array of cells.
-	for _, synapse := range synapsesToRemove {
-		network.PruneSynapse(synapse.ID)
+	for synapseID := range synapsesToRemove {
+		network.PruneSynapse(synapseID)
 	}
 	// fmt.Println("  done pruning")
 }
