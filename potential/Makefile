@@ -1,5 +1,5 @@
 preinstall:
-	go get gopkg.in/go-playground/pool.v3
+	go get github.com/golang/glog
 
 test:
 	go test -v

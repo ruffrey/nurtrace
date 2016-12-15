@@ -114,34 +114,37 @@ func (charrnn Charrnn) PrepareData(network *potential.Network) {
 
 	// Again, if this is the first time training the network, we must setup start
 	// and end indicators.
-	start := potential.PerceptionUnit{
-		Value:     "START",
-		InputCell: network.RandomCellKey(),
-	}
-	for {
-		start.OutputCell = network.RandomCellKey()
-		if start.InputCell != start.OutputCell {
-			break
-		}
-	}
-	end := potential.PerceptionUnit{
-		Value:     "END",
-		InputCell: network.RandomCellKey(),
-	}
-	for {
-		end.OutputCell = network.RandomCellKey()
-		if end.InputCell != end.OutputCell {
-			break
-		}
-	}
 
-	network.Cells[start.InputCell].Tag = "in-START"
-	network.Cells[start.OutputCell].Tag = "out-START"
-	network.Cells[end.InputCell].Tag = "in-END"
-	network.Cells[end.OutputCell].Tag = "out-END"
+	if _, exists := charrnn.Settings.Data.KeyToItem["START"]; !exists {
+		start := potential.PerceptionUnit{
+			Value:     "START",
+			InputCell: network.RandomCellKey(),
+		}
+		for {
+			start.OutputCell = network.RandomCellKey()
+			if start.InputCell != start.OutputCell {
+				break
+			}
+		}
+		end := potential.PerceptionUnit{
+			Value:     "END",
+			InputCell: network.RandomCellKey(),
+		}
+		for {
+			end.OutputCell = network.RandomCellKey()
+			if end.InputCell != end.OutputCell {
+				break
+			}
+		}
 
-	charrnn.Settings.Data.KeyToItem["START"] = start
-	charrnn.Settings.Data.KeyToItem["END"] = end
+		network.Cells[start.InputCell].Tag = "in-START"
+		network.Cells[start.OutputCell].Tag = "out-START"
+		network.Cells[end.InputCell].Tag = "in-END"
+		network.Cells[end.OutputCell].Tag = "out-END"
+
+		charrnn.Settings.Data.KeyToItem["START"] = start
+		charrnn.Settings.Data.KeyToItem["END"] = end
+	}
 
 	// Reverse the map and grow paths where needed
 	charrnn.Settings.Data.CellToKey = make(map[potential.CellID]interface{})
