@@ -1,14 +1,17 @@
 package potential
 
-type integrityReport struct {
+/*
+IntegrityReport lists all bad connections in a network that was tested.
+*/
+type IntegrityReport struct {
 	cellHasMissingAxonSynapse     map[CellID]SynapseID
 	cellHasMissingDendriteSynapse map[CellID]SynapseID
 	synapseHasMissingDendriteCell map[SynapseID]CellID
 	synapseHasMissingAxonCell     map[SynapseID]CellID
 }
 
-func newIntegrityReport() integrityReport {
-	return integrityReport{
+func newIntegrityReport() IntegrityReport {
+	return IntegrityReport{
 		cellHasMissingAxonSynapse:     make(map[CellID]SynapseID),
 		cellHasMissingDendriteSynapse: make(map[CellID]SynapseID),
 		synapseHasMissingDendriteCell: make(map[SynapseID]CellID),
@@ -16,23 +19,24 @@ func newIntegrityReport() integrityReport {
 	}
 }
 
-func (report *integrityReport) isOK() bool {
+func (report *IntegrityReport) isOK() bool {
 	return len(report.cellHasMissingAxonSynapse) == 0 && len(report.cellHasMissingDendriteSynapse) == 0 && len(report.synapseHasMissingAxonCell) == 0 && len(report.synapseHasMissingDendriteCell) == 0
 }
 
-func checkIntegrity(network *Network) (bool, integrityReport) {
+/*
+CheckIntegrity tells you whether a network has bad connections between cells.
+*/
+func CheckIntegrity(network *Network) (bool, IntegrityReport) {
 	report := newIntegrityReport()
 
 	for cellID, cell := range network.Cells {
 		for synapseID := range cell.AxonSynapses {
-			_, ok := network.Synapses[synapseID]
-			if !ok {
+			if _, ok := network.Synapses[synapseID]; !ok {
 				report.cellHasMissingAxonSynapse[cellID] = synapseID
 			}
 		}
 		for synapseID := range cell.DendriteSynapses {
-			_, ok := network.Synapses[synapseID]
-			if !ok {
+			if _, ok := network.Synapses[synapseID]; !ok {
 				report.cellHasMissingDendriteSynapse[cellID] = synapseID
 			}
 		}

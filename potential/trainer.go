@@ -86,7 +86,11 @@ Train executes the trainer's OnTrained method once complete.
 func Train(t Trainer, settings *TrainingSettings, originalNetwork *Network) {
 	var mux sync.Mutex
 	var wg sync.WaitGroup
-
+	ok, report := CheckIntegrity(originalNetwork)
+	if !ok {
+		fmt.Println(report)
+		panic("integrity failed before training")
+	}
 	t.PrepareData(originalNetwork)
 
 	for thread := uint(0); thread < settings.Threads; thread++ {
@@ -110,7 +114,16 @@ func Train(t Trainer, settings *TrainingSettings, originalNetwork *Network) {
 					}
 					// beforeCells := len(network.Cells)
 					// beforeSynapses := len(network.Synapses)
+					if !ok {
+						fmt.Println(report)
+						panic("integrity failed BEFORE prune")
+					}
 					network.Prune()
+					ok, report := CheckIntegrity(network)
+					if !ok {
+						fmt.Println(report)
+						panic("integrity failed AFTER prune")
+					}
 					// afterCells := len(network.Cells)
 					// afterSynapses := len(network.Synapses)
 					// fmt.Println("Prune", thread, i, "/", totalTrainingPairs, " cells=", afterCells, "synapses=", afterSynapses, "removed cells=", beforeCells-afterCells, "removed synapses=", beforeSynapses-afterSynapses)

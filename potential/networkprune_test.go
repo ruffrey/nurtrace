@@ -6,6 +6,33 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+func Test_PruneNetwork(t *testing.T) {
+	t.Run("pruning a network maintains integrity", func(t *testing.T) {
+		n := NewNetwork()
+		network := &n
+		network.Grow(1000, 10, 1000)
+		ok, report := CheckIntegrity(network)
+		assert.Equal(t, true, ok, report)
+
+		// add firing to cells
+		half := len(network.Synapses) / 2
+		iter := 0
+		for _, synapse := range network.Synapses {
+			iter++
+			if iter > half {
+				break
+			}
+			synapse.ActivationHistory = 100
+		}
+
+		network.Prune()
+		ok, report = CheckIntegrity(network)
+		assert.Equal(t, true, ok, report)
+		assert.Equal(t, 1000, len(network.Cells), "did not prune the right amount of cells")
+		assert.Equal(t, 5500, len(network.Synapses), "did not prune the right number of synapses")
+	})
+}
+
 func Test_PruneSynapse(t *testing.T) {
 	var network *Network
 	var synapse *Synapse
@@ -35,7 +62,7 @@ func Test_PruneSynapse(t *testing.T) {
 	t.Run("maintains integrity after removal", func(t *testing.T) {
 		before()
 		network.PruneSynapse(synapse.ID)
-		ok, _ := checkIntegrity(network)
+		ok, _ := CheckIntegrity(network)
 		assert.Equal(t, true, ok)
 	})
 	t.Run("removes synapses from the actual network cells (not copying)", func(t *testing.T) {

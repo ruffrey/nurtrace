@@ -161,5 +161,13 @@ func LoadNetworkFromFile(filepath string) (*Network, error) {
 	for _, cell := range network.Cells {
 		cell.Network = network
 	}
+
+	if ok, report := CheckIntegrity(network); !ok {
+		fmt.Println("cellHasMissingAxonSynapse=", report.cellHasMissingAxonSynapse)
+		fmt.Println("cellHasMissingDendriteSynapse=", report.cellHasMissingDendriteSynapse)
+		fmt.Println("synapseHasMissingAxonCell=", report.synapseHasMissingAxonCell)
+		fmt.Println("synapseHasMissingDendriteCell=", report.synapseHasMissingDendriteCell)
+		return network, fmt.Errorf("Failed loading network from file %s", filepath)
+	}
 	return network, nil
 }

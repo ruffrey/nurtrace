@@ -28,7 +28,7 @@ func Test_NewNetwork(t *testing.T) {
 		n := NewNetwork()
 		network := &n
 		network.Grow(100, 10, 100)
-		ok, _ := checkIntegrity(network)
+		ok, _ := CheckIntegrity(network)
 		assert.Equal(t, true, ok, "new network has integrity issues")
 	})
 }
@@ -90,6 +90,9 @@ func Test_NetworkSerialization(t *testing.T) {
 		n2, err := net2.ToJSON()
 		assert.NoError(t, err)
 		assert.EqualValues(t, n1, n2, "loaded network does not match original")
+
+		ok, report := CheckIntegrity(net2)
+		assert.Equal(t, true, ok, report)
 	})
 
 }

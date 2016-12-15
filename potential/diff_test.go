@@ -52,7 +52,27 @@ func Test_CloneNetwork(t *testing.T) {
 		}
 	})
 	t.Run("all cells and synapses have valid connections on the cloned network", func(t *testing.T) {
+		o := NewNetwork()
+		original := &o
+		o.Grow(1000, 10, 1000)
 
+		ok, report := CheckIntegrity(original)
+		assert.True(t, ok, "A freshly grown network had bad integrity", report)
+
+		cloned := CloneNetwork(original)
+
+		ok, report = CheckIntegrity(cloned)
+		assert.True(t, ok, "A freshly cloned network had bad integrity", report)
+	})
+	t.Run("cloned network has the same synapses and cells", func(t *testing.T) {
+		o := NewNetwork()
+		original := &o
+		o.Grow(100, 10, 100)
+
+		cloned := CloneNetwork(original)
+
+		assert.ObjectsAreEqualValues(*original, *cloned)
+		assert.Equal(t, len(original.Synapses), len(cloned.Synapses))
 	})
 }
 
@@ -80,9 +100,19 @@ func Test_ApplyDiff(t *testing.T) {
 		syn1 := NewSynapse(original)
 		syn1.Millivolts = 7
 
+		// must link to a cell for integrity check
+		cell := NewCell(original)
+		syn1.FromNeuronAxon = cell.ID
+		syn1.ToNeuronDendrite = cell.ID
+
 		cloned := CloneNetwork(original)
 
 		cloned.Synapses[syn1.ID].Millivolts = 14
+		ok, report := CheckIntegrity(cloned)
+		if !ok {
+			cloned.PrintCells()
+		}
+		assert.True(t, ok, "cloned network has bad integrity", report)
 
 		diff := DiffNetworks(original, cloned)
 		ApplyDiff(diff, original)
@@ -101,9 +131,9 @@ func Test_ApplyDiff(t *testing.T) {
 		net2.GrowRandomSynapses(100)
 
 		// precheck
-		ok, report := checkIntegrity(net1)
+		ok, report := CheckIntegrity(net1)
 		assert.True(t, ok, report)
-		ok, report = checkIntegrity(net2)
+		ok, report = CheckIntegrity(net2)
 		assert.True(t, ok, report)
 
 		// main thing
@@ -112,7 +142,7 @@ func Test_ApplyDiff(t *testing.T) {
 
 		// assertions
 		assert.Equal(t, len(net1.Synapses), (50*5)+50+(200*10)+100)
-		ok, report = checkIntegrity(net1)
+		ok, report = CheckIntegrity(net1)
 		assert.True(t, ok, report)
 	})
 	t.Run("adds new cell to the network", func(t *testing.T) {
