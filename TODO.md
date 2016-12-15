@@ -2,6 +2,8 @@
 
 ## Top of the Stack
 - [ ] issue with integrity
+    - most likely caused by synapse naming collisions during diff. it happens faster when there
+        are multiple networks
     - when there are multiple threads, pruning tends to fail on the next load from disk fresh training
     - diffing multiple networks that were independently trained, or vocab is getting out of sync.
 - [ ] More refined learning techniques:

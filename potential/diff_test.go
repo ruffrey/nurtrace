@@ -91,6 +91,35 @@ func Test_DiffNetworks(t *testing.T) {
 		assert.Equal(t, len(diff.synapseDiffs), 1, "Should be 1 synapse diff")
 		assert.Equal(t, diff.synapseDiffs[syn1.ID], int8(5), "Synapse diff should be NEW - OLD")
 	})
+	t.Run("diffing unrelated networks works", func(t *testing.T) {
+		n1 := NewNetwork()
+		n2 := NewNetwork()
+		net1 := &n1
+		net2 := &n2
+
+		n1.Grow(2000, 10, 1000)
+		n2.Grow(2000, 10, 1000)
+
+		diff := DiffNetworks(net1, net2)
+
+		ApplyDiff(diff, net1)
+		ok, report := CheckIntegrity(net1)
+		assert.True(t, ok, "merging unrelated networks failed integrity check", report)
+
+		// make sure a prune works afterward
+		half := len(net1.Synapses) / 2
+		iter := 0
+		for _, synapse := range net1.Synapses {
+			iter++
+			if iter > half {
+				break
+			}
+			synapse.ActivationHistory = 100
+		}
+		net1.Prune()
+		ok, report = CheckIntegrity(net1)
+		assert.True(t, ok, "pruning failed after merging totally different networks", report)
+	})
 }
 
 func Test_ApplyDiff(t *testing.T) {

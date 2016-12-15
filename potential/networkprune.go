@@ -22,7 +22,7 @@ func (network *Network) Prune() {
 	synapsesToRemove := make(map[SynapseID]bool)
 	// fmt.Println("  processing learning on cells, total=", len(network.Cells))
 	for _, cell := range network.Cells {
-		for synapseID := range cell.DendriteSynapses { // could also be axons, but, meh.
+		for synapseID := range cell.AxonSynapses { // could also be axons, but, meh.
 			synapse, exists := network.Synapses[synapseID]
 			if !exists {
 				fmt.Println("warn: cannot evaluate synapse", synapseID,
@@ -151,14 +151,20 @@ func (network *Network) PruneCell(cellID CellID) {
 		fmt.Println("warn: attempt to prune cell which does not exist", cellID)
 		return
 	}
-	if cell.Immortal {
-		return
-	}
+
+	// with good code, the following should not be necessary.
 	for synapseID := range cell.DendriteSynapses {
 		network.PruneSynapse(synapseID)
 	}
 	for synapseID := range cell.AxonSynapses {
 		network.PruneSynapse(synapseID)
 	}
+
+	// Do this after removing synapses, because otherwise we can end up with
+	// orphan synapses.
+	if cell.Immortal {
+		return
+	}
+
 	delete(network.Cells, cellID)
 }
