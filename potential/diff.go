@@ -33,6 +33,16 @@ func NewDiff() Diff {
 /*
 DiffNetworks produces a diff from the original network, showing the forward changes
 from the newerNetwork.
+
+A synapse is the same if it:
+- has the same cell ID
+- has the same dendrite connection
+- has the same axon connection
+
+We cannot know if a cell is the same or not, but it does not create an integrity problem,
+so that's fine. A cell is really just a collection of synapses.
+
+
 */
 func DiffNetworks(originalNetwork, newerNetwork *Network) (diff Diff) {
 	diff = NewDiff()
@@ -45,18 +55,31 @@ func DiffNetworks(originalNetwork, newerNetwork *Network) (diff Diff) {
 			// later we can need to update the synapse to be pointing to the originalNetwork
 			// dendrite and axon cells. it will still be pointing to the old ones.
 			diff.addedSynapses = append(diff.addedSynapses, newerNetworkSynapse)
-		} else {
-			// this synapse already existed, so we will calculate the diff
-			diff.synapseDiffs[id] = newerNetworkSynapse.Millivolts - originalSynapse.Millivolts
+			continue
+		}
 
-			// Track how many times it fired, so when many training sessions are in play
-			// we know if a cell should be considered for pruning. It is not a diff but will be
-			// added later.
-			if newerNetworkSynapse.ActivationHistory > 0 {
-				diff.synapseFires[id] = newerNetworkSynapse.ActivationHistory
-			}
+		// the syanpse ID is not unique on the original network.
+		// we need to make sure we didn't happen to generate it in a collision, though.
+		isSame := newerNetworkSynapse.ToNeuronDendrite == originalSynapse.ToNeuronDendrite && newerNetworkSynapse.FromNeuronAxon == originalSynapse.FromNeuronAxon
+		if !isSame {
+			// tricked us! it generated the same random synapse ID, but the connections
+			// to cells are different. treat it like a new synapse. During the copy
+			// to the original network, its it will get regenerated to be unique.
+			diff.addedSynapses = append(diff.addedSynapses, newerNetworkSynapse)
+			continue
+		}
+
+		// this synapse already existed, so we will calculate the diff
+		diff.synapseDiffs[id] = newerNetworkSynapse.Millivolts - originalSynapse.Millivolts
+
+		// Track how many times it fired, so when many training sessions are in play
+		// we know if a cell should be considered for pruning. It is not a diff but will be
+		// added later.
+		if newerNetworkSynapse.ActivationHistory > 0 {
+			diff.synapseFires[id] = newerNetworkSynapse.ActivationHistory
 		}
 	}
+
 	// Get new cells that were added to the network
 	for id, newerNetworkCell := range newerNetwork.Cells {
 		_, alreadyExisted := originalNetwork.Cells[id]
@@ -171,8 +194,12 @@ func copyCellToNetwork(cell *Cell, newNetwork *Network) CellID {
 		fmt.Println("warn: copyCellToNetwork would have overwritten cell with same ID")
 		var newID CellID
 		for {
+			// new ID must be unique on both old and new network, otherwise we might get
+			// incorrect wiring.
 			newID = NewCellID()
-			if _, alreadyExists := newNetwork.Cells[newID]; !alreadyExists {
+			_, alreadyExistsOnNew := newNetwork.Cells[newID]
+			_, alreadyExistsOnOld := cell.Network.Cells[newID]
+			if !alreadyExistsOnNew && !alreadyExistsOnOld {
 				break
 			}
 			fmt.Println("warn: copyCellToNetwork would have gotten dupe cell ID yet again")
@@ -213,14 +240,18 @@ func copySynapseToNetwork(synapse *Synapse, newNetwork *Network) SynapseID {
 
 	copiedSynapse.ID = synapse.ID
 
-	// This is supposed to be a new cell. However, if due to an ID collision, the synapse ID already
+	// This is supposed to be a new synapse. However, if due to an ID collision, the synapse ID already
 	// existed on the newNetwork, we need to change the synapse ID yet again.
 	if _, synapseIDAlreadyOnNewNetwork := newNetwork.Synapses[copiedSynapse.ID]; synapseIDAlreadyOnNewNetwork {
 		fmt.Println("warn: copySynapseToNetwork would have overwritten synapse with same ID")
 		var newID SynapseID
 		for {
+			// new ID must be unique on both old and new network, otherwise we might get
+			// incorrect wiring.
 			newID = NewSynapseID()
-			if _, alreadyExists := newNetwork.Synapses[newID]; !alreadyExists {
+			_, alreadyExistsOnNew := newNetwork.Synapses[newID]
+			_, alreadyExistsOnOld := synapse.Network.Synapses[newID]
+			if !alreadyExistsOnNew && !alreadyExistsOnOld {
 				break
 			}
 			fmt.Println("warn: copySynapseToNetwork would have gotten dupe synapse ID yet again")
@@ -229,7 +260,7 @@ func copySynapseToNetwork(synapse *Synapse, newNetwork *Network) SynapseID {
 		copiedSynapse.ID = newID
 	}
 
-	newNetwork.Synapses[synapse.ID] = copiedSynapse
+	newNetwork.Synapses[copiedSynapse.ID] = copiedSynapse
 	copiedSynapse.Network = newNetwork
 
 	copiedSynapse.Millivolts = synapse.Millivolts
