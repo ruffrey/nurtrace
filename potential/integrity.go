@@ -1,5 +1,7 @@
 package potential
 
+import "fmt"
+
 /*
 IntegrityReport lists all bad connections in a network that was tested.
 */
@@ -17,6 +19,16 @@ func newIntegrityReport() IntegrityReport {
 		synapseHasMissingDendriteCell: make(map[SynapseID]CellID),
 		synapseHasMissingAxonCell:     make(map[SynapseID]CellID),
 	}
+}
+
+/*
+Print outputs the contents of the report to stdout
+*/
+func (report *IntegrityReport) Print() {
+	fmt.Println("cellHasMissingAxonSynapse", report.cellHasMissingAxonSynapse)
+	fmt.Println("cellHasMissingDendriteSynapse", report.cellHasMissingDendriteSynapse)
+	fmt.Println("synapseHasMissingDendriteCell", report.synapseHasMissingDendriteCell)
+	fmt.Println("synapseHasMissingAxonCell", report.synapseHasMissingAxonCell)
 }
 
 func (report *IntegrityReport) isOK() bool {

@@ -3,6 +3,8 @@ package potential
 import (
 	"fmt"
 	"math"
+
+	"github.com/y0ssar1an/q"
 )
 
 /*
@@ -16,6 +18,12 @@ Additionally, it checks when the cells that connect to a synapse have no more sy
 and removes those cells if they have none.
 */
 func (network *Network) Prune() {
+	network.nextSynapsesToActivate = make(map[SynapseID]bool)
+	network.resetCellsOnNextStep = make(map[CellID]bool)
+	if ok, report := CheckIntegrity(network); !ok {
+		q.Q("Prune: network has no integrity BEFORE pruning", report)
+		panic("no integrity")
+	}
 	// Next we move the less used synapses toward zero, because doing this later would prune the
 	// brand new synapses. This is a good time to apply the learning rate to synapses
 	// which were activated, too.
@@ -73,14 +81,20 @@ func (network *Network) Prune() {
 	}
 	// fmt.Println("  done")
 
-	// fmt.Println("  synapses to remove=", len(synapsesToRemove))
+	fmt.Println("  synapses to remove=", len(synapsesToRemove))
 	// Actually pruning synapses is done after the previous loop because it can
 	// trigger removal of Cells, which can subsequently mess up the range operation
 	// happening over the same array of cells.
 	for synapseID := range synapsesToRemove {
 		network.PruneSynapse(synapseID)
 	}
-	// fmt.Println("  done pruning")
+	fmt.Println("  done pruning")
+
+	if ok, report := CheckIntegrity(network); !ok {
+		fmt.Println("Prune: network has no integrity AFTER pruning")
+		report.Print()
+		panic("no integrity")
+	}
 }
 
 /*
@@ -154,9 +168,11 @@ func (network *Network) PruneCell(cellID CellID) {
 
 	// with good code, the following should not be necessary.
 	for synapseID := range cell.DendriteSynapses {
+		fmt.Println("warn: should not need to prune dendrite synapse from cell")
 		network.PruneSynapse(synapseID)
 	}
 	for synapseID := range cell.AxonSynapses {
+		fmt.Println("warn: should not need to prune axon synapse from cell")
 		network.PruneSynapse(synapseID)
 	}
 

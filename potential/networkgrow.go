@@ -22,8 +22,6 @@ fired a lot.
 */
 func (network *Network) Grow(neuronsToAdd, defaultNeuronSynapses, synapsesToAdd int) {
 	// fmt.Println("Grow session start")
-	network.Prune()
-
 	network.GrowRandomNeurons(neuronsToAdd, defaultNeuronSynapses)
 
 	network.GrowRandomSynapses(synapsesToAdd)

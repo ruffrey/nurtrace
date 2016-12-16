@@ -2,15 +2,11 @@
 
 ## Top of the Stack
 - [ ] issue with integrity
-    - most likely caused by synapse naming collisions during diff. it happens (?only?) when there
-        are multiple networks
-    - when there are multiple threads, pruning tends to fail on the next load from disk fresh training
-    - diffing multiple networks that were independently trained, or vocab is getting out of sync
-    - maybe it is because diffing does not currently handle pruning unused old cells or synapses,
-        and we do not prune after the final merge. so a network is going to have pruned
-        synapses and perhaps cells! but those won't be reflected on the original network.
-    [ ] solve the problem of pruning cells and/or synapses and then having collisions and leaving
-        them dangling, when merging networks back together.
+    - When we add a cell during ApplyDiff, occasionally it is missing one of its synapses
+    - This ONLY occurs after pruning.
+    - Pruning is leaving cells with synapses that are listed on the cell, but not on the network.
+    - However, the network passes an integrity check after being pruned.
+    - Applying the diff of a network that was pruned is breaking.
 - [ ] More refined learning techniques:
     - [ ] ensure everything in learning-mechanisms.md is done
     - [ ] larger sets of pathways are OK - more synapses between start and end

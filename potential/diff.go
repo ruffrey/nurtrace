@@ -1,6 +1,10 @@
 package potential
 
-import "fmt"
+import (
+	"fmt"
+
+	"github.com/y0ssar1an/q"
+)
 
 /*
 Diff holds the changed values in the second network since the original network was cloned.
@@ -18,6 +22,23 @@ type Diff struct {
 	synapseFires  map[SynapseID]uint
 	addedSynapses []*Synapse
 	addedCells    []*Cell
+}
+
+/*
+Print prints the diff to stdout
+*/
+func (diff *Diff) Print() {
+	fmt.Println("Diff")
+	fmt.Println("  synapseDiffs", diff.synapseDiffs)
+	fmt.Println("  synapseFires", diff.synapseFires)
+	fmt.Println("  addedSynapse")
+	for _, s := range diff.addedSynapses {
+		fmt.Println("    ", s.ID)
+	}
+	fmt.Println("  addedCells")
+	for _, c := range diff.addedCells {
+		fmt.Println("    ", c.ID)
+	}
 }
 
 /*
@@ -112,12 +133,17 @@ no need to copy any changes from existing cell voltages.
 This will update the network version, also.
 */
 func ApplyDiff(diff Diff, originalNetwork *Network) (err error) {
-
+	if ok, report := CheckIntegrity(originalNetwork); !ok {
+		fmt.Println("ApplyDiff: originalNetwork has no integrity BEFORE")
+		report.Print()
+		panic("no integrity")
+	}
 	// New cells
 	cellIDChanges := make(map[CellID]CellID) // old:new
 	for _, cell := range diff.addedCells {
 		newID := copyCellToNetwork(cell, originalNetwork)
 		if newID != cell.ID {
+			fmt.Println("cell ID did change", cell.ID, newID)
 			cellIDChanges[cell.ID] = newID
 		}
 	}
@@ -127,20 +153,30 @@ func ApplyDiff(diff Diff, originalNetwork *Network) (err error) {
 		// If this synapse was attached to a cell where the cell.ID needed to change,
 		// we need to point this synapse to it
 		if newCellID, didChange := cellIDChanges[synapse.FromNeuronAxon]; didChange {
+			fmt.Println("axon ID did change", synapse.FromNeuronAxon, newCellID)
 			synapse.FromNeuronAxon = newCellID
 		}
 		if newCellID, didChange := cellIDChanges[synapse.ToNeuronDendrite]; didChange {
+			fmt.Println("dendrite ID did change", synapse.ToNeuronDendrite, newCellID)
 			synapse.ToNeuronDendrite = newCellID
 		}
 
 		// If the synapse already existed on the new network, and its id
 		// got reassigned, we need to update this synapses cells to point to
-		// the new synapse id. If it wasn't reassigned, the following is a no-op.
+		// the new synapse id.
 		newSynapseID := copySynapseToNetwork(synapse, originalNetwork)
+		if newSynapseID != synapse.ID {
+			fmt.Println("synapse ID did change", synapse.ID, newSynapseID)
+		}
 		// add connections to cells
-		newSyn := originalNetwork.Synapses[newSynapseID]
-		originalNetwork.Cells[newSyn.FromNeuronAxon].AxonSynapses[newSynapseID] = true
-		originalNetwork.Cells[newSyn.ToNeuronDendrite].DendriteSynapses[newSynapseID] = true
+		newSyn, on := originalNetwork.Synapses[newSynapseID]
+		if !on {
+			fmt.Println("synapse ID was not copied to original network", newSynapseID)
+		}
+		axon := originalNetwork.Cells[newSyn.FromNeuronAxon]
+		dendrite := originalNetwork.Cells[newSyn.ToNeuronDendrite]
+		dendrite.DendriteSynapses[newSynapseID] = true
+		axon.AxonSynapses[newSynapseID] = true
 	}
 
 	// Update voltages and activations on existing synapses
@@ -150,6 +186,13 @@ func ApplyDiff(diff Diff, originalNetwork *Network) (err error) {
 	// add the activation history
 	for synapseID, activations := range diff.synapseFires {
 		originalNetwork.Synapses[synapseID].ActivationHistory += activations
+	}
+
+	if ok, report := CheckIntegrity(originalNetwork); !ok {
+		fmt.Println("ApplyDiff: originalNetwork has no integrity AFTER")
+		diff.Print()
+		report.Print()
+		panic("no integrity")
 	}
 
 	return nil
@@ -162,6 +205,11 @@ doing distributed training.
 It involves resetting pointers.
 */
 func CloneNetwork(originalNetwork *Network) *Network {
+	if ok, report := CheckIntegrity(originalNetwork); !ok {
+		q.Q("CloneNetwork: originalNetwork has no integrity", report)
+		panic("no integrity")
+	}
+
 	n := NewNetwork()
 	newNetwork := &n
 
@@ -172,6 +220,10 @@ func CloneNetwork(originalNetwork *Network) *Network {
 		copySynapseToNetwork(synapse, newNetwork)
 	}
 
+	if ok, report := CheckIntegrity(newNetwork); !ok {
+		q.Q("CloneNetwork failed to produce network with integrity", report)
+		panic("no integrity")
+	}
 	return newNetwork
 }
 

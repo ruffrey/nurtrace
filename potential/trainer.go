@@ -2,9 +2,8 @@ package potential
 
 import (
 	"fmt"
+	"math/rand"
 	"sync"
-
-	"github.com/y0ssar1an/q"
 )
 
 const defaultWorkerThreads = 2
@@ -86,8 +85,9 @@ type Trainer interface {
 Train executes the trainer's OnTrained method once complete.
 */
 func Train(t Trainer, settings *TrainingSettings, originalNetwork *Network) {
-	var mux sync.Mutex
 	var wg sync.WaitGroup
+	chNetworkSync := make(chan *Network)
+	done := make(chan bool)
 	ok, report := CheckIntegrity(originalNetwork)
 	if !ok {
 		fmt.Println(report)
@@ -95,12 +95,18 @@ func Train(t Trainer, settings *TrainingSettings, originalNetwork *Network) {
 	}
 	t.PrepareData(originalNetwork)
 
+	// It is important to only prune on the original network.
+	// Diffing does not capture what was removed - that is a
+	// surprising rabbit hole. So if you diff and prune on an
+	// off-network, you can end up getting orphaned synapses.
+	// To effectively train in a distributed way, across machines,
+	// it may be necessary to implement better diffing that
+	// does account for removed synapses and cells.
+
 	for thread := uint(0); thread < settings.Threads; thread++ {
 		wg.Add(1)
 		go func(thread uint) {
 			network := CloneNetwork(originalNetwork)
-
-			// totalTrainingPairs := len(settings.TrainingSamples)
 
 			for i, batch := range settings.TrainingSamples {
 				net := CloneNetwork(network)
@@ -114,36 +120,48 @@ func Train(t Trainer, settings *TrainingSettings, originalNetwork *Network) {
 					if i == 0 { // do not prune before getting started!
 						continue
 					}
-					// beforeCells := len(network.Cells)
-					// beforeSynapses := len(network.Synapses)
-					if !ok {
-						q.Q(report)
-						panic("integrity failed BEFORE prune")
-					}
-					network.Prune()
-					ok, report := CheckIntegrity(network)
-					if !ok {
-						q.Q(report)
-						panic("integrity failed AFTER prune")
-					}
-					// afterCells := len(network.Cells)
-					// afterSynapses := len(network.Synapses)
-					// fmt.Println("Prune", thread, i, "/", totalTrainingPairs, " cells=", afterCells, "synapses=", afterSynapses, "removed cells=", beforeCells-afterCells, "removed synapses=", beforeSynapses-afterSynapses)
+					chNetworkSync <- network
 				}
 
 			}
 
 			fmt.Println("Network on thread", thread, "done")
-			mux.Lock()
-			finalDiff := DiffNetworks(originalNetwork, network)
-			ApplyDiff(finalDiff, originalNetwork)
-			mux.Unlock()
+			chNetworkSync <- network
 			fmt.Println("Applied diff on thread", thread)
 			wg.Done()
 		}(thread)
 	}
 
-	wg.Wait()
+	go func() {
+		wg.Wait()
+		done <- true
+	}()
+
+	for {
+		select {
+		case network := <-chNetworkSync:
+			r := rand.Int()
+			fmt.Println("diff start", r)
+			oDiff := DiffNetworks(originalNetwork, network)
+			if ok, report := CheckIntegrity(originalNetwork); !ok {
+				fmt.Println("bad integrity", r)
+				fmt.Println(report)
+				panic("original network integrity failed BEFORE diff")
+			}
+			ApplyDiff(oDiff, originalNetwork)
+			fmt.Println("diff end  ", r)
+			if ok, report := CheckIntegrity(originalNetwork); !ok {
+				fmt.Println("bad integrity", r)
+				fmt.Println(report)
+				panic("original network integrity failed AFTER diff")
+			}
+		case <-done:
+			fmt.Println("quit")
+			return
+		}
+	}
+
+	// TODO: final prune?
 }
 
 /*
