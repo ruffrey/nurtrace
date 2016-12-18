@@ -108,8 +108,7 @@ func Train(t Trainer, settings *TrainingSettings, originalNetwork *Network) {
 			network := CloneNetwork(originalNetwork)
 
 			for i, batch := range settings.TrainingSamples {
-				net := CloneNetwork(network)
-				createdEffect, diff := processBatch(batch, net, network, settings.Data)
+				createdEffect, diff := processBatch(batch, network, settings.Data)
 
 				if !createdEffect {
 					ApplyDiff(diff, network)
@@ -140,15 +139,7 @@ func Train(t Trainer, settings *TrainingSettings, originalNetwork *Network) {
 		select {
 		case network := <-chNetworkSync:
 			oDiff := DiffNetworks(originalNetwork, network)
-			if ok, report := CheckIntegrity(originalNetwork); !ok {
-				fmt.Println(report)
-				panic("original network integrity failed BEFORE diff")
-			}
 			ApplyDiff(oDiff, originalNetwork)
-			if ok, report := CheckIntegrity(originalNetwork); !ok {
-				fmt.Println(report)
-				panic("original network integrity failed AFTER diff")
-			}
 		case <-done:
 			fmt.Println("quit")
 			return
@@ -163,12 +154,18 @@ processBatch fires this entire line in the neural network at once, hoping to get
 
 It will not add any synapses.
 */
-func processBatch(batch []*TrainingSample, network *Network, originalNetwork *Network, vocab *Dataset) (wasSuccessful bool, diff Diff) {
+func processBatch(batch []*TrainingSample, originalNetwork *Network, vocab *Dataset) (wasSuccessful bool, diff Diff) {
+	network := CloneNetwork(originalNetwork)
 	network.ResetForTraining()
 
 	successes := 0
 
 	for _, ts := range batch {
+		// cell, ok := network.Cells[ts.InputCell]
+		// if !ok {
+		// 	fmt.Println("error: input cell missing from network", ts)
+		// }
+		// cell.FireActionPotential()
 		network.Cells[ts.InputCell].FireActionPotential()
 		// TODO: should we step here? or not?
 		network.Step()
@@ -181,6 +178,7 @@ func processBatch(batch []*TrainingSample, network *Network, originalNetwork *Ne
 			break
 		}
 	}
+	// see how many of the cells we wanted actually fired
 	for _, ts := range batch {
 		if network.Cells[ts.OutputCell].WasFired {
 			successes++
@@ -199,21 +197,16 @@ func processBatch(batch []*TrainingSample, network *Network, originalNetwork *Ne
 
 	if !wasSuccessful {
 		// We failed to generate the desired effect, so do a significant growth
-		// of cells.
-		// fmt.Println("  net did not fire all cells, regrowing")
-		// grow some random stuff
+		// of cells. Grow some random stuff to introduce a little noise and new
+		// things to grab onto.
 		network.GrowRandomNeurons(retrainNeuronsToGrow, defaultNeuronSynapses)
 		network.GrowRandomSynapses(retrainRandomSynapsesToGrow)
 
+		// (re)grow paths between each expected input and output.
 		for _, ts := range batch {
-			// grow paths between synapses, too
-			// fmt.Println("  post-train diff adding synapses for", ts.InputCell, ts.OutputCell)
 			network.GrowPathBetween(ts.InputCell, ts.OutputCell, GrowPathExpectedMinimumSynapses)
-			// fmt.Println("    added", len(sEnd)+len(sAdded), "synapses")
 		}
 		diff = DiffNetworks(originalNetwork, network)
-	} else {
-		// fmt.Println("  net fired all expected cells, no changes")
 	}
 
 	return wasSuccessful, diff

@@ -175,12 +175,11 @@ func ApplyDiff(diff Diff, originalNetwork *Network) (err error) {
 		// add connections to cells
 		newSyn, on := originalNetwork.Synapses[newSynapseID]
 		if !on {
-			fmt.Println("synapse ID was not copied to original network", newSynapseID)
+			fmt.Println("error: synapse ID was not copied to original network", newSynapseID)
+			panic("synapse not copied to network during ApplyDiff")
 		}
-		axon := originalNetwork.Cells[newSyn.FromNeuronAxon]
-		dendrite := originalNetwork.Cells[newSyn.ToNeuronDendrite]
-		dendrite.DendriteSynapses[newSynapseID] = true
-		axon.AxonSynapses[newSynapseID] = true
+		originalNetwork.Cells[newSyn.ToNeuronDendrite].DendriteSynapses[newSynapseID] = true
+		originalNetwork.Cells[newSyn.FromNeuronAxon].AxonSynapses[newSynapseID] = true
 	}
 
 	// Update voltages and activations on existing synapses
@@ -299,7 +298,7 @@ func copySynapseToNetwork(synapse *Synapse, newNetwork *Network) SynapseID {
 	// This is supposed to be a new synapse. However, if due to an ID collision, the synapse ID already
 	// existed on the newNetwork, we need to change the synapse ID yet again.
 	if _, synapseIDAlreadyOnNewNetwork := newNetwork.Synapses[copiedSynapse.ID]; synapseIDAlreadyOnNewNetwork {
-		fmt.Println("warn: copySynapseToNetwork would have overwritten synapse with same ID")
+		// fmt.Println("warn: copySynapseToNetwork would have overwritten synapse with same ID")
 		var newID SynapseID
 		for {
 			// new ID must be unique on both old and new network, otherwise we might get

@@ -8,7 +8,9 @@
     - However, the network passes an integrity check after being pruned.
     - Applying the diff of a network that was pruned is breaking.
 - [ ] synapse diffs are never greater than zero now (might be ok?)
-- [ ] got this issue - with no pruning:
+- [ ] infrequently, an added cell has one dendrite connection where the synapse
+is not on the network after applying a diff
+- [x] got this issue - with no pruning:
 ```
 $ go run shake.go -train=4
 Loaded network from disk, 1630 cells 18186 synapses
