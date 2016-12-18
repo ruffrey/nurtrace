@@ -88,6 +88,10 @@ func main() {
 			InputCell:  startCellID,
 			OutputCell: settings.Data.KeyToItem[chars[0]].InputCell,
 		}
+		if ts1.InputCell == 0 {
+			fmt.Println(ts1)
+			panic("nope")
+		}
 		s = append(s, &ts1)
 
 		// start at 1 because we need to look behind
@@ -96,12 +100,20 @@ func main() {
 				InputCell:  settings.Data.KeyToItem[chars[i-1]].InputCell,
 				OutputCell: settings.Data.KeyToItem[chars[i]].InputCell,
 			}
+			if ts.InputCell == 0 {
+				fmt.Println(ts)
+				panic(i)
+			}
 			s = append(s, &ts)
 		}
 		// last char is END indicator token
 		ts2 := potential.TrainingSample{
 			InputCell:  settings.Data.KeyToItem[chars[len(chars)-1]].InputCell,
 			OutputCell: endCellID,
+		}
+		if ts2.InputCell == 0 {
+			fmt.Println(ts2)
+			panic("nope")
 		}
 		s = append(s, &ts2)
 
