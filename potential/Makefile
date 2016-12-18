@@ -1,5 +1,7 @@
 preinstall:
 	go get github.com/golang/glog
+	go get github.com/stretchr/testify/assert
+	go get github.com/y0ssar1an/q
 
 test:
 	go test -v
