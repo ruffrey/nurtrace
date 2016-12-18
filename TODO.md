@@ -7,6 +7,7 @@
     - Pruning is leaving cells with synapses that are listed on the cell, but not on the network.
     - However, the network passes an integrity check after being pruned.
     - Applying the diff of a network that was pruned is breaking.
+- [ ] synapse diffs are never greater than zero now (might be ok?)
 - [ ] More refined learning techniques:
     - [ ] ensure everything in learning-mechanisms.md is done
     - [ ] larger sets of pathways are OK - more synapses between start and end
