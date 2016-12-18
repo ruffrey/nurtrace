@@ -85,7 +85,7 @@ Train executes the trainer's OnTrained method once complete.
 */
 func Train(t Trainer, settings *TrainingSettings, originalNetwork *Network) {
 	var wg sync.WaitGroup
-	chNetworkSync := make(chan *Network)
+	chNetworkSync := make(chan *Network, 1)
 	done := make(chan bool)
 	ok, report := CheckIntegrity(originalNetwork)
 	if !ok {
