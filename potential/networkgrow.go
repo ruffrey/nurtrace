@@ -213,7 +213,6 @@ func (network *Network) GrowRandomSynapses(synapsesToAdd int) {
 		synapse.FromNeuronAxon = sender.ID
 		sender.AxonSynapses[synapse.ID] = true
 		receiver.DendriteSynapses[synapse.ID] = true
-		// fmt.Println("created synapse", synapse)
 		i++
 	}
 }
