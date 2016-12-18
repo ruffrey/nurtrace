@@ -82,6 +82,12 @@ func Test_DiffNetworks(t *testing.T) {
 		original := &o
 		syn1 := NewSynapse(original)
 		syn1.Millivolts = 5
+		// add cell for integrity
+		c := NewCell(original)
+		syn1.ToNeuronDendrite = c.ID
+		syn1.FromNeuronAxon = c.ID
+		c.AxonSynapses[syn1.ID] = true
+		c.DendriteSynapses[syn1.ID] = true
 
 		cloned := CloneNetwork(original)
 
