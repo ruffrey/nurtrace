@@ -51,6 +51,8 @@ func NewDiff() Diff {
 	}
 }
 
+const zero int8 = 0
+
 /*
 DiffNetworks produces a diff from the original network, showing the forward changes
 from the newerNetwork.
@@ -91,12 +93,15 @@ func DiffNetworks(originalNetwork, newerNetwork *Network) (diff Diff) {
 		}
 
 		// this synapse already existed, so we will calculate the diff
-		diff.synapseDiffs[id] = newerNetworkSynapse.Millivolts - originalSynapse.Millivolts
+		d := newerNetworkSynapse.Millivolts - originalSynapse.Millivolts
+		if d != zero {
+			diff.synapseDiffs[id] = d
+		}
 
 		// Track how many times it fired, so when many training sessions are in play
 		// we know if a cell should be considered for pruning. It is not a diff but will be
 		// added later.
-		if newerNetworkSynapse.ActivationHistory > 0 {
+		if newerNetworkSynapse.ActivationHistory != 0 {
 			diff.synapseFires[id] = newerNetworkSynapse.ActivationHistory
 		}
 	}
@@ -106,12 +111,11 @@ func DiffNetworks(originalNetwork, newerNetwork *Network) (diff Diff) {
 		_, alreadyExisted := originalNetwork.Cells[id]
 		if !alreadyExisted {
 			diff.addedCells = append(diff.addedCells, newerNetworkCell)
-		} else {
-			// Here, we could theoretically get diff information on existing cells.
-			// However, that *should* be captured by the synapses, and applying the diff
-			// would add the additional synapses, and remove the gone synapses, which
-			// are stored secondarily in each Cell.
 		}
+		// Here, we could theoretically get diff information on existing cells.
+		// However, that *should* be captured by the synapses, and applying the diff
+		// would add the additional synapses, and remove the gone synapses, which
+		// are stored secondarily in each Cell.
 	}
 
 	return diff
