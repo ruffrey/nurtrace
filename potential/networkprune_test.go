@@ -30,6 +30,36 @@ func Test_PruneNetwork(t *testing.T) {
 		assert.Equal(t, true, ok, report)
 		assert.Equal(t, 1000, len(network.Cells), "did not prune the right amount of cells")
 		assert.Equal(t, 5500, len(network.Synapses), "did not prune the right number of synapses")
+
+		t.Run("and can be diffed onto another network", func(t *testing.T) {
+			on := NewNetwork()
+			otherNetwork := &on
+			otherNetwork.Grow(1000, 5, 100)
+			half = len(otherNetwork.Synapses) / 2
+			iter = 0
+			for _, synapse := range otherNetwork.Synapses {
+				iter++
+				if iter > half {
+					break
+				}
+				synapse.ActivationHistory = 100
+			}
+			otherNetwork.Prune()
+			ok, _ := CheckIntegrity(otherNetwork)
+
+			// precheck
+			assert.Equal(t, true, ok)
+
+			diff := DiffNetworks(otherNetwork, network)
+			ApplyDiff(diff, otherNetwork)
+
+			ok, report := CheckIntegrity(otherNetwork)
+			assert.Equal(t, true, ok)
+			if !ok {
+				report.Print()
+			}
+
+		})
 	})
 }
 

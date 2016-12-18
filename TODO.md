@@ -13,6 +13,7 @@
     - [ ] more aggressive pruning and optimize learning more granularly to reduce randomness:
     - [ ] if it fails, do a prune on the network copy, then GrowPathBetween, and apply it to the original (?)
 - [ ] Periodically save back the threaded training to original
+    - currently we lose all training on a crash
 - [ ] add logging with glog
 
 ## Optimizations and Refactoring
