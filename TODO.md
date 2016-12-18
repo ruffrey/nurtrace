@@ -20,7 +20,7 @@
 ## Optimizations and Refactoring
 - [ ] If vocab is saved, network must be also
 - [ ] RandomCellKey method is pretty slow at scale
-- [x] move charrnn training from shake.go into charrnn repo, adding as much as possible to the main lib
+- [ ] occasionally fail diff when using more workers than threads
 
 ## Later - once it works
 - [ ] code for word level and phrase level neural networks

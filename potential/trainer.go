@@ -2,7 +2,6 @@ package potential
 
 import (
 	"fmt"
-	"math/rand"
 	"sync"
 )
 
@@ -140,18 +139,13 @@ func Train(t Trainer, settings *TrainingSettings, originalNetwork *Network) {
 	for {
 		select {
 		case network := <-chNetworkSync:
-			r := rand.Int()
-			fmt.Println("diff start", r)
 			oDiff := DiffNetworks(originalNetwork, network)
 			if ok, report := CheckIntegrity(originalNetwork); !ok {
-				fmt.Println("bad integrity", r)
 				fmt.Println(report)
 				panic("original network integrity failed BEFORE diff")
 			}
 			ApplyDiff(oDiff, originalNetwork)
-			fmt.Println("diff end  ", r)
 			if ok, report := CheckIntegrity(originalNetwork); !ok {
-				fmt.Println("bad integrity", r)
 				fmt.Println(report)
 				panic("original network integrity failed AFTER diff")
 			}
