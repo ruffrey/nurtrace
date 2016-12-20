@@ -134,18 +134,22 @@ func (network *Network) PruneSynapse(synapseID SynapseID) {
 	network.removeSynapseFromCell(synapseID, synapse.FromNeuronAxon, true)
 	network.removeSynapseFromCell(synapseID, synapse.ToNeuronDendrite, false)
 
+	network.synMux.Lock()
 	delete(network.Synapses, synapse.ID)
+	network.synMux.Unlock()
 	// this synapse is now dead
 }
 
 func (network *Network) removeSynapseFromCell(s SynapseID, c CellID, isAxon bool) {
 	cell, exists := network.Cells[c]
 	if exists {
+		network.synMux.Lock()
 		if isAxon {
 			delete(cell.AxonSynapses, s)
 		} else {
 			delete(cell.DendriteSynapses, s)
 		}
+		network.synMux.Unlock()
 	} else {
 		fmt.Println("warn: cannot prune synapse", s, "(isAxon=", isAxon, ") from cell",
 			c, " which does not exist")
