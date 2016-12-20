@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"math/rand"
 	"os"
+	"sync"
 	"time"
 )
 
@@ -22,7 +23,7 @@ type Network struct {
 	   Synapses are where the magic happens.
 	*/
 	Synapses map[SynapseID]*Synapse
-
+	synMux   sync.Mutex
 	/*
 		Cells are the neurons that hold the actual structure of the potential brain.
 		However, with perception layers and
