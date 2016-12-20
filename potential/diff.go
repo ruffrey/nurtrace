@@ -268,14 +268,29 @@ on the new synapse to a different given network.
 Returns its synapse ID in case it had to change.
 */
 func copySynapseToNetwork(synapse *Synapse, newNetwork *Network) SynapseID {
+	copiedSynapse := NewSynapse(newNetwork)
+
+	// this could change below. we won't add the copied synapse to the network until the ID is
+	// set for sure.
+	copiedSynapse.ID = synapse.ID
+
+	// add these above the section where id change can happen,
+	// because we'd need them at the end of that block.
+	copiedSynapse.FromNeuronAxon = synapse.FromNeuronAxon
+	copiedSynapse.ToNeuronDendrite = synapse.ToNeuronDendrite
+
+	// this is a good time to copy additional properties to the new synapse
+	copiedSynapse.Network = newNetwork
+	copiedSynapse.Millivolts = synapse.Millivolts
+	// we do need to keep this propety because we will want to grow/prune the synapse later
+	copiedSynapse.ActivationHistory = synapse.ActivationHistory
+
+	// lock old and new networks to prevent map reads while we are adding
+	// or removing map values!
 	newNetwork.synMux.Lock()
 	synapse.Network.synMux.Lock()
-
-	copiedSynapse := NewSynapse(newNetwork)
 	// the NewSynapse method automatically adds it to the network; do not allow this.
 	delete(newNetwork.Synapses, copiedSynapse.ID)
-
-	copiedSynapse.ID = synapse.ID
 
 	// This is supposed to be a new synapse. However, if due to an ID collision, the synapse ID already
 	// existed on the newNetwork, we need to change the synapse ID yet again.
@@ -295,25 +310,17 @@ func copySynapseToNetwork(synapse *Synapse, newNetwork *Network) SynapseID {
 		}
 		// now change the synapse ID
 		copiedSynapse.ID = newID
+
+		// Make sure that this synapse's cells have an ID reffing it. This is not necessary
+		// to do for all synapse copies; only if we changed the synapse ID, we need to update
+		// its cells.
+		newNetwork.Cells[copiedSynapse.ToNeuronDendrite].DendriteSynapses[copiedSynapse.ID] = true
+		newNetwork.Cells[copiedSynapse.FromNeuronAxon].AxonSynapses[copiedSynapse.ID] = true
 	}
 
 	newNetwork.Synapses[copiedSynapse.ID] = copiedSynapse
 	newNetwork.synMux.Unlock()
 	synapse.Network.synMux.Unlock()
-	copiedSynapse.Network = newNetwork
-
-	copiedSynapse.Millivolts = synapse.Millivolts
-	copiedSynapse.FromNeuronAxon = synapse.FromNeuronAxon
-	copiedSynapse.ToNeuronDendrite = synapse.ToNeuronDendrite
-
-	// synapse ID changed so we need to update its cells
-	if synapse.ID != copiedSynapse.ID {
-		newNetwork.Cells[copiedSynapse.ToNeuronDendrite].DendriteSynapses[copiedSynapse.ID] = true
-		newNetwork.Cells[copiedSynapse.FromNeuronAxon].AxonSynapses[copiedSynapse.ID] = true
-	}
-
-	// we do need to keep this because we might want to grow the synapse later
-	copiedSynapse.ActivationHistory = synapse.ActivationHistory
 
 	return copiedSynapse.ID
 }

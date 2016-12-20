@@ -71,7 +71,8 @@ func Test_CloneNetwork(t *testing.T) {
 
 		cloned := CloneNetwork(original)
 
-		assert.ObjectsAreEqualValues(*original, *cloned)
+		assert.ObjectsAreEqualValues(original.Cells, cloned.Cells)
+		assert.ObjectsAreEqualValues(original.Synapses, cloned.Synapses)
 		assert.Equal(t, len(original.Synapses), len(cloned.Synapses))
 	})
 }

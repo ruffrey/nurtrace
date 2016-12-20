@@ -93,6 +93,15 @@ func (network *Network) Prune() {
 	if ok, report := CheckIntegrity(network); !ok {
 		fmt.Println("Prune: network has no integrity AFTER pruning")
 		report.Print()
+		fmt.Println("intended to remove synapses:", synapsesToRemove)
+		for cellID, synapseID := range report.cellHasMissingAxonSynapse {
+			fmt.Println("  cellHasMissingAxonSynapse", cellID, network.Cells[cellID])
+			fmt.Println("  cellHasMissingAxonSynapse", synapseID, network.Synapses[synapseID])
+		}
+		for cellID, synapseID := range report.cellHasMissingDendriteSynapse {
+			fmt.Println("  cellHasMissingDendriteSynapse", cellID, network.Cells[cellID])
+			fmt.Println("  cellHasMissingDendriteSynapse", synapseID, network.Synapses[synapseID])
+		}
 		panic("no integrity")
 	}
 }
