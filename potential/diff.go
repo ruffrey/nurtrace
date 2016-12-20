@@ -1,10 +1,6 @@
 package potential
 
-import (
-	"fmt"
-
-	"github.com/y0ssar1an/q"
-)
+import "fmt"
 
 /*
 Diff holds the changed values in the second network since the original network was cloned.
@@ -208,11 +204,6 @@ doing distributed training.
 It involves resetting pointers.
 */
 func CloneNetwork(originalNetwork *Network) *Network {
-	if ok, report := CheckIntegrity(originalNetwork); !ok {
-		q.Q("CloneNetwork: originalNetwork has no integrity", report)
-		panic("no integrity")
-	}
-
 	n := NewNetwork()
 	newNetwork := &n
 
@@ -223,10 +214,6 @@ func CloneNetwork(originalNetwork *Network) *Network {
 		copySynapseToNetwork(synapse, newNetwork)
 	}
 
-	if ok, report := CheckIntegrity(newNetwork); !ok {
-		q.Q("CloneNetwork failed to produce network with integrity", report)
-		panic("no integrity")
-	}
 	return newNetwork
 }
 
