@@ -7,10 +7,10 @@ import (
 )
 
 func Test_PruneNetwork(t *testing.T) {
-	t.Run("pruning a network maintains integrity", func(t *testing.T) {
+	t.Run("pruning a very large network maintains integrity", func(t *testing.T) {
 		n := NewNetwork()
 		network := &n
-		network.Grow(1000, 10, 1000)
+		network.Grow(4000, 10, 4000)
 		ok, report := CheckIntegrity(network)
 		assert.Equal(t, true, ok, report)
 
@@ -28,13 +28,13 @@ func Test_PruneNetwork(t *testing.T) {
 		network.Prune()
 		ok, report = CheckIntegrity(network)
 		assert.Equal(t, true, ok, report)
-		assert.Equal(t, 1000, len(network.Cells), "did not prune the right amount of cells")
-		assert.Equal(t, 5500, len(network.Synapses), "did not prune the right number of synapses")
+		assert.Equal(t, 4000, len(network.Cells), "did not prune the right amount of cells")
+		assert.Equal(t, 22000, len(network.Synapses), "did not prune the right number of synapses")
 
 		t.Run("and can be diffed onto another network", func(t *testing.T) {
 			on := NewNetwork()
 			otherNetwork := &on
-			otherNetwork.Grow(1000, 5, 100)
+			otherNetwork.Grow(4000, 5, 1000)
 			half = len(otherNetwork.Synapses) / 2
 			iter = 0
 			for _, synapse := range otherNetwork.Synapses {

@@ -16,7 +16,7 @@ func Test_NewDiff(t *testing.T) {
 		synapse := NewSynapse(network)
 
 		// tests are here
-		diff.addedCells = append(diff.addedCells, cell)
+		diff.addedCells[cell.ID] = cell
 		diff.addedSynapses = append(diff.addedSynapses, synapse)
 	})
 }
@@ -73,6 +73,7 @@ func Test_CloneNetwork(t *testing.T) {
 
 		assert.ObjectsAreEqualValues(original.Cells, cloned.Cells)
 		assert.ObjectsAreEqualValues(original.Synapses, cloned.Synapses)
+		assert.Equal(t, len(original.Cells), len(cloned.Cells))
 		assert.Equal(t, len(original.Synapses), len(cloned.Synapses))
 	})
 }
@@ -98,14 +99,14 @@ func Test_DiffNetworks(t *testing.T) {
 		assert.Equal(t, len(diff.synapseDiffs), 1, "Should be 1 synapse diff")
 		assert.Equal(t, diff.synapseDiffs[syn1.ID], int8(5), "Synapse diff should be NEW - OLD")
 	})
-	t.Run("diffing unrelated networks works", func(t *testing.T) {
+	t.Run("diffing large unrelated networks works", func(t *testing.T) {
 		n1 := NewNetwork()
 		n2 := NewNetwork()
 		net1 := &n1
 		net2 := &n2
 
-		n1.Grow(2000, 10, 1000)
-		n2.Grow(2000, 10, 1000)
+		n1.Grow(4000, 10, 1000)
+		n2.Grow(4000, 10, 1000)
 
 		diff := DiffNetworks(net1, net2)
 

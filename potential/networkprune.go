@@ -30,7 +30,7 @@ func (network *Network) Prune() {
 	synapsesToRemove := make(map[SynapseID]bool)
 	// fmt.Println("  processing learning on cells, total=", len(network.Cells))
 	for _, cell := range network.Cells {
-		for synapseID := range cell.AxonSynapses { // could also be axons, but, meh.
+		for synapseID := range cell.AxonSynapses { // could also be dendrites, but, meh.
 			synapse, exists := network.Synapses[synapseID]
 			if !exists {
 				fmt.Println("warn: cannot evaluate synapse", synapseID,
@@ -166,6 +166,7 @@ func (network *Network) removeSynapseFromCell(s SynapseID, c CellID, isAxon bool
 PruneCell removes a cell and its synapses. It is independent of PruneSynapse.
 */
 func (network *Network) PruneCell(cellID CellID) {
+	fmt.Println("Pruning cell", cellID)
 	cell, ok := network.Cells[cellID]
 	if !ok {
 		fmt.Println("warn: attempt to prune cell which does not exist", cellID)
