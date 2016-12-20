@@ -159,17 +159,17 @@ func ApplyDiff(diff Diff, originalNetwork *Network) (err error) {
 			fmt.Println("synapse ID did change", synapse.ID, "to", newSynapseID)
 
 			// old axon connection removed from cell if cell is new
-			if newCellID, isNewCell := diff.addedCells[synapse.FromNeuronAxon]; isNewCell {
-				fmt.Println("removing old synapse reference from new cell (axon)",
-					synapse.FromNeuronAxon, newCellID)
+			if _, isNewCell := diff.addedCells[synapse.FromNeuronAxon]; isNewCell {
+				fmt.Println("  removing old synapse reference from new cell (axon)",
+					synapse.FromNeuronAxon)
 
 				delete(originalNetwork.Cells[synapse.FromNeuronAxon].AxonSynapses, synapse.ID)
 			}
 
 			// old dendrite connection removed from cell if cell is new
-			if newCellID, isNewCell := diff.addedCells[synapse.ToNeuronDendrite]; isNewCell {
-				fmt.Println("removing old synapse reference from new cell (dendrite)",
-					synapse.ToNeuronDendrite, newCellID)
+			if _, isNewCell := diff.addedCells[synapse.ToNeuronDendrite]; isNewCell {
+				fmt.Println("  removing old synapse reference from new cell (dendrite)",
+					synapse.ToNeuronDendrite)
 
 				delete(originalNetwork.Cells[synapse.ToNeuronDendrite].DendriteSynapses, synapse.ID)
 			}
