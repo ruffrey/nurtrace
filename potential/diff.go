@@ -166,16 +166,8 @@ func ApplyDiff(diff Diff, originalNetwork *Network) (err error) {
 		// the new synapse id.
 		newSynapseID := copySynapseToNetwork(synapse, originalNetwork)
 		if newSynapseID != synapse.ID {
-			fmt.Println("synapse ID did change", synapse.ID, newSynapseID)
+			fmt.Println("synapse ID did change", synapse.ID, "to", newSynapseID)
 		}
-		// add connections to cells
-		newSyn, on := originalNetwork.Synapses[newSynapseID]
-		if !on {
-			fmt.Println("error: synapse ID was not copied to original network", newSynapseID)
-			panic("synapse not copied to network during ApplyDiff")
-		}
-		originalNetwork.Cells[newSyn.ToNeuronDendrite].DendriteSynapses[newSynapseID] = true
-		originalNetwork.Cells[newSyn.FromNeuronAxon].AxonSynapses[newSynapseID] = true
 	}
 
 	// Update voltages and activations on existing synapses
