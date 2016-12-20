@@ -252,6 +252,11 @@ on the new synapse to a different given network.
 Returns its synapse ID in case it had to change.
 */
 func copySynapseToNetwork(synapse *Synapse, newNetwork *Network) SynapseID {
+	// lock old and new networks to prevent map reads while we are adding
+	// or removing map values!
+	newNetwork.synMux.Lock()
+	synapse.Network.synMux.Lock()
+
 	copiedSynapse := NewSynapse(newNetwork)
 
 	// add these above the section where id change can happen,
@@ -265,10 +270,6 @@ func copySynapseToNetwork(synapse *Synapse, newNetwork *Network) SynapseID {
 	// we do need to keep this propety because we will want to grow/prune the synapse later
 	copiedSynapse.ActivationHistory = synapse.ActivationHistory
 
-	// lock old and new networks to prevent map reads while we are adding
-	// or removing map values!
-	synapse.Network.synMux.Lock()
-	newNetwork.synMux.Lock()
 	// the NewSynapse method automatically adds it to the network; do not allow this.
 	delete(newNetwork.Synapses, copiedSynapse.ID)
 
@@ -303,8 +304,8 @@ func copySynapseToNetwork(synapse *Synapse, newNetwork *Network) SynapseID {
 	}
 
 	newNetwork.Synapses[copiedSynapse.ID] = copiedSynapse
-	newNetwork.synMux.Unlock()
 	synapse.Network.synMux.Unlock()
+	newNetwork.synMux.Unlock()
 
 	return copiedSynapse.ID
 }

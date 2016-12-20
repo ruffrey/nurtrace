@@ -142,6 +142,7 @@ func Train(t Trainer, settings *TrainingSettings, originalNetwork *Network) {
 			ApplyDiff(oDiff, originalNetwork)
 		case <-done:
 			fmt.Println("quit")
+			originalNetwork.Prune()
 			return
 		}
 	}
