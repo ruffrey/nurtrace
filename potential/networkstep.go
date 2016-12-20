@@ -7,6 +7,9 @@ Step fires the next round of cells.
 
 The current array of cells to be fired get removed, and the cells on their
 synapses are found and replaced in the firing list.
+
+When a cell fires, we stop its activation for the next step, much like a real
+neuron will go through a refractory period after it fires.
 */
 func (network *Network) Step() (hasMore bool) {
 	nextFiring := make(map[SynapseID]bool)
