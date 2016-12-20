@@ -110,10 +110,6 @@ Unless the neuron is immortal, then just remove the synapse.
 func (network *Network) PruneSynapse(synapseID SynapseID) {
 	// fmt.Println("remove synapse=", synapseID)
 	var synapse *Synapse
-	var dendrite *Cell
-	var axon *Cell
-	var exists bool
-	var cellHasNoSynapses bool
 
 	synapse, ok := network.Synapses[synapseID]
 	if !ok {
@@ -126,40 +122,37 @@ func (network *Network) PruneSynapse(synapseID SynapseID) {
 	// any input. But that is something to revisit. It is likely these cells would eventually
 	// build up more synapses via the grow process, or never fire and be pruned later.
 
-	axon, exists = network.Cells[synapse.FromNeuronAxon]
-	if exists {
-		delete(axon.AxonSynapses, synapse.ID)
-	} else {
-		fmt.Println("warn: cannot prune synapse", synapse.ID, "FromNeuronAxon",
-			synapse.FromNeuronAxon, "does not exist")
-	}
-	dendrite, exists = network.Cells[synapse.ToNeuronDendrite]
-	if exists {
-		delete(dendrite.DendriteSynapses, synapse.ID)
-	} else {
-		fmt.Println("warn: cannot prune synapse", synapse.ID, "ToNeuronDendrite",
-			synapse.ToNeuronDendrite, "does not exist")
-	}
-
-	// after removing the synapses, see if these cells can be removed.
-	cellHasNoSynapses = len(axon.AxonSynapses) == 0 && len(axon.DendriteSynapses) == 0
-	if cellHasNoSynapses {
-		network.PruneCell(axon.ID)
-	}
-	cellHasNoSynapses = len(dendrite.AxonSynapses) == 0 && len(dendrite.DendriteSynapses) == 0
-	if cellHasNoSynapses {
-		network.PruneCell(dendrite.ID)
-	}
+	network.removeSynapseFromCell(synapseID, synapse.FromNeuronAxon, true)
+	network.removeSynapseFromCell(synapseID, synapse.ToNeuronDendrite, false)
 
 	delete(network.Synapses, synapse.ID)
 	// this synapse is now dead
+}
+
+func (network *Network) removeSynapseFromCell(s SynapseID, c CellID, isAxon bool) {
+	cell, exists := network.Cells[c]
+	if exists {
+		if isAxon {
+			delete(cell.AxonSynapses, s)
+		} else {
+			delete(cell.DendriteSynapses, s)
+		}
+	} else {
+		fmt.Println("warn: cannot prune synapse", s, "(isAxon=", isAxon, ") from cell",
+			c, " which does not exist")
+	}
+
+	// after removing the synapses, see if this cell can be removed.
+	cellHasNoSynapses := len(cell.AxonSynapses) == 0 && len(cell.DendriteSynapses) == 0
+	if cellHasNoSynapses {
+		network.PruneCell(c)
+	}
 }
 
 /*
 PruneCell removes a cell and its synapses. It is independent of PruneSynapse.
 */
 func (network *Network) PruneCell(cellID CellID) {
-	// fmt.Println("prune cell=", cellID)
 	cell, ok := network.Cells[cellID]
 	if !ok {
 		fmt.Println("warn: attempt to prune cell which does not exist", cellID)

@@ -101,6 +101,7 @@ func main() {
 				OutputCell: settings.Data.KeyToItem[chars[i]].InputCell,
 			}
 			if ts.InputCell == 0 {
+				fmt.Println("training sample has input cell where ID input cell is zero")
 				fmt.Println(ts)
 				panic(i)
 			}
@@ -113,6 +114,7 @@ func main() {
 		}
 		if ts2.InputCell == 0 {
 			fmt.Println(ts2)
+			fmt.Println("training sample has input cell where ID input cell is zero")
 			panic("nope")
 		}
 		s = append(s, &ts2)
