@@ -267,10 +267,10 @@ func copySynapseToNetwork(synapse *Synapse, newNetwork *Network) SynapseID {
 
 	// lock old and new networks to prevent map reads while we are adding
 	// or removing map values!
+	synapse.Network.synMux.Lock()
 	newNetwork.synMux.Lock()
 	// the NewSynapse method automatically adds it to the network; do not allow this.
 	delete(newNetwork.Synapses, copiedSynapse.ID)
-	newNetwork.synMux.Unlock()
 
 	// this could change below. we won't add the copied synapse to the network until the ID is
 	// set for sure.
@@ -302,8 +302,6 @@ func copySynapseToNetwork(synapse *Synapse, newNetwork *Network) SynapseID {
 		newNetwork.Cells[copiedSynapse.FromNeuronAxon].AxonSynapses[copiedSynapse.ID] = true
 	}
 
-	synapse.Network.synMux.Lock()
-	newNetwork.synMux.Lock()
 	newNetwork.Synapses[copiedSynapse.ID] = copiedSynapse
 	newNetwork.synMux.Unlock()
 	synapse.Network.synMux.Unlock()
