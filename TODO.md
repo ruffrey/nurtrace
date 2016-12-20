@@ -2,14 +2,9 @@
 
 ## Top of the Stack
 - [ ] issue with integrity
-    [ ] pruning has integrity issues afterward
-    - When we add a cell during ApplyDiff, occasionally it is missing one of its synapses
-    - This ONLY occurs after pruning.
-    - Pruning is leaving cells with synapses that are listed on the cell, but not on the network.
-    - However, the network passes an integrity check after being pruned.
-    - Applying the diff of a network that was pruned is breaking.
-    - [ ] synapse diffs are never greater than zero now (might be ok?)
-    - [ ] infrequently, an added cell has one synapse connection where the synapse is not on the network after applying a diff
+    - when the synapse ID changes during ApplyDiff, then Prune is called, and it gets pruned,
+    we end up with that synapse being listed still on its axon and dendrite, however it does
+    not exist on the network.
 - [ ] More refined learning techniques:
     - [ ] ensure everything in learning-mechanisms.md is done
     - [ ] larger sets of pathways are OK - more synapses between start and end
