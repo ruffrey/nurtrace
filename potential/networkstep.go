@@ -12,7 +12,6 @@ When a cell fires, we stop its activation for the next step, much like a real
 neuron will go through a refractory period after it fires.
 */
 func (network *Network) Step() (hasMore bool) {
-	nextFiring := make(map[SynapseID]bool)
 	nextCellResets := make(map[CellID]bool)
 
 	for synapseID := range network.nextSynapsesToActivate {
@@ -42,9 +41,9 @@ func (network *Network) Step() (hasMore bool) {
 		cell.activating = false
 	}
 
-	hasMore = len(nextFiring) > 0 || len(nextCellResets) > 0
+	hasMore = len(nextCellResets) > 0
 
-	network.nextSynapsesToActivate = nextFiring
+	network.nextSynapsesToActivate = make(map[SynapseID]bool)
 	network.resetCellsOnNextStep = nextCellResets
 
 	return hasMore
