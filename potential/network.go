@@ -7,7 +7,6 @@ import (
 	"math/rand"
 	"os"
 	"sync"
-	"time"
 )
 
 /*
@@ -43,7 +42,6 @@ NewNetwork is a constructor that, which also happens to reset the random number 
 when called. Seems like a good time.
 */
 func NewNetwork() Network {
-	rand.Seed(time.Now().Unix())
 	return Network{
 		Disabled: false,
 		Synapses: make(map[SynapseID]*Synapse),
@@ -122,7 +120,7 @@ func (network *Network) Print() {
 	}
 	for _, syn := range network.Synapses {
 		fmt.Println("  --------\n  synapse id=", syn.ID)
-		fmt.Println("  millivoltes=", syn.Millivolts)
+		fmt.Println("  millivolts=", syn.Millivolts)
 		fmt.Println("  axon=", syn.FromNeuronAxon)
 		fmt.Println("  dendrite=", syn.ToNeuronDendrite)
 	}

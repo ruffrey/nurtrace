@@ -1,6 +1,7 @@
 package potential
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -190,7 +191,7 @@ func Test_ApplyDiff(t *testing.T) {
 }
 
 func Test_ApplyDiff_TrickeryIntegrityTests(t *testing.T) {
-	t.Run("when a cell is new and one of its synapses has been re-ID-d due to collision", func(t *testing.T) {
+	t.Run("when a cell is new and another already exists one of its synapses has been re-ID-d due to collision", func(t *testing.T) {
 		t.Run("the old synapse ID is removed from the dendrite synapse list", func(t *testing.T) {
 			n := NewNetwork()
 			network := &n
@@ -202,8 +203,17 @@ func Test_ApplyDiff_TrickeryIntegrityTests(t *testing.T) {
 			// which purposely collides with one already on the network
 			// we are merging onto
 			cell := NewCell(network)
+			delete(network.Cells, cell.ID)
+			cell.ID = 1
+			network.Cells[cell.ID] = cell
 			s1 := NewSynapse(network)
+			delete(network.Synapses, s1.ID)
+			s1.ID = 101
+			network.Synapses[s1.ID] = s1
 			receiver := NewCell(network)
+			delete(network.Cells, receiver.ID)
+			receiver.ID = 2
+			network.Cells[receiver.ID] = receiver
 			s1.FromNeuronAxon = cell.ID
 			cell.AxonSynapses[s1.ID] = true
 			s1.ToNeuronDendrite = receiver.ID
@@ -212,6 +222,7 @@ func Test_ApplyDiff_TrickeryIntegrityTests(t *testing.T) {
 			assert.Equal(t, true, pretestok)
 			assert.Equal(t, 1, len(network.Synapses))
 			assert.Equal(t, 2, len(network.Cells))
+			fmt.Println("network before")
 			network.Print()
 
 			n2 := NewNetwork()
@@ -219,35 +230,40 @@ func Test_ApplyDiff_TrickeryIntegrityTests(t *testing.T) {
 			s2 := NewSynapse(net2)
 			delete(net2.Synapses, s2.ID)
 			assert.Equal(t, 0, len(net2.Synapses))
-			s2.ID = s1.ID
+			s2.ID = 101
 			net2.Synapses[s2.ID] = s2
-			assert.Equal(t, 1, len(net2.Synapses))
 			cell2 := NewCell(net2)
+			delete(net2.Cells, cell2.ID)
+			cell2.ID = 1
+			net2.Cells[cell2.ID] = cell2
 			receiver2 := NewCell(net2)
+			delete(net2.Cells, receiver2.ID)
+			receiver2.ID = 44
+			net2.Cells[receiver2.ID] = receiver
 			s2.FromNeuronAxon = cell2.ID
 			s2.ToNeuronDendrite = receiver2.ID
 			cell2.AxonSynapses[s2.ID] = true
 			receiver2.DendriteSynapses[s2.ID] = true
+			assert.Equal(t, 1, len(net2.Synapses))
+			assert.Equal(t, 2, len(net2.Cells))
 			pretestNet2ok, _ := CheckIntegrity(net2)
 			assert.Equal(t, true, pretestNet2ok)
+			fmt.Println("net2 before")
+			net2.Print()
 
 			// now do the diffing and checking
 			diff := DiffNetworks(network, net2)
+			fmt.Println("diff:")
+			diff.Print()
 			assert.Equal(t, 0, len(diff.synapseDiffs))
-			assert.Equal(t, 2, len(diff.addedCells))
+			assert.Equal(t, 1, len(diff.addedCells))
 			assert.Equal(t, 0, len(diff.synapseFires))
 			assert.Equal(t, 1, len(diff.addedSynapses))
 			assert.Equal(t, s2, diff.addedSynapses[0])
 			// the diff is right. let's apply it.
 
 			ApplyDiff(diff, network)
-			assert.Equal(t, 6, len(network.Synapses), "wrong number of synapses on original network after diff applied", network.Synapses)
-			// check that the synapse ID changed
-			_, copiedSynapseExistence := network.Synapses[s2.ID]
-			if copiedSynapseExistence {
-				network.Print()
-			}
-			assert.Equal(t, false, copiedSynapseExistence, "copied synapse should have new synapse ID")
+			assert.Equal(t, 2, len(network.Synapses), "wrong number of synapses on original network after diff applied", network.Synapses)
 
 			postMergeIntegrityOK, report := CheckIntegrity(network)
 			assert.Equal(t, true, postMergeIntegrityOK)

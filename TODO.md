@@ -14,6 +14,7 @@
 - [ ] Periodically save back the threaded training to original
     - currently we lose all training on a crash
     - saving can also cause concurrent map read/writes and fail
+- [ ] add methods for making and removing connections between synapses and cells on a network
 
 ## Optimizations and Refactoring
 - [ ] If vocab is saved, network must be also

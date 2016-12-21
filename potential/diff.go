@@ -108,6 +108,8 @@ func DiffNetworks(originalNetwork, newerNetwork *Network) (diff Diff) {
 		_, alreadyExisted := originalNetwork.Cells[id]
 		if !alreadyExisted {
 			diff.addedCells[id] = newerNetworkCell
+		} else {
+			fmt.Println("cell already exists on network", id)
 		}
 		// Here, we could theoretically get diff information on existing cells.
 		// However, that *should* be captured by the synapses, and applying the diff
