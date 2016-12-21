@@ -207,6 +207,7 @@ func Test_ApplyDiff_TrickeryIntegrityTests(t *testing.T) {
 			cell.ID = 1
 			network.Cells[cell.ID] = cell
 			s1 := NewSynapse(network)
+			s1.Millivolts = 7
 			delete(network.Synapses, s1.ID)
 			s1.ID = 101
 			network.Synapses[s1.ID] = s1
@@ -228,6 +229,7 @@ func Test_ApplyDiff_TrickeryIntegrityTests(t *testing.T) {
 			n2 := NewNetwork()
 			net2 := &n2
 			s2 := NewSynapse(net2)
+			s2.Millivolts = 10
 			delete(net2.Synapses, s2.ID)
 			assert.Equal(t, 0, len(net2.Synapses))
 			s2.ID = 101
@@ -239,7 +241,7 @@ func Test_ApplyDiff_TrickeryIntegrityTests(t *testing.T) {
 			receiver2 := NewCell(net2)
 			delete(net2.Cells, receiver2.ID)
 			receiver2.ID = 44
-			net2.Cells[receiver2.ID] = receiver
+			net2.Cells[receiver2.ID] = receiver2
 			s2.FromNeuronAxon = cell2.ID
 			s2.ToNeuronDendrite = receiver2.ID
 			cell2.AxonSynapses[s2.ID] = true
@@ -270,6 +272,8 @@ func Test_ApplyDiff_TrickeryIntegrityTests(t *testing.T) {
 			if !postMergeIntegrityOK {
 				report.Print()
 			}
+			fmt.Println("END NETWORK")
+			network.Print()
 		})
 		// t.Run("the old synapse ID is removed from the axon synapse list", func(t *testing.T) {
 		//

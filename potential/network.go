@@ -112,14 +112,14 @@ Print logs the network cells to console
 func (network *Network) Print() {
 	fmt.Println("----------")
 	fmt.Println("Network")
-	for _, cell := range network.Cells {
-		fmt.Println("  --------\n  cell id=", cell.ID)
+	for id, cell := range network.Cells {
+		fmt.Println("  --------\n  cell key=", id, "ID=", cell.ID)
 		fmt.Println("  voltage=", cell.Voltage)
 		fmt.Println("  synapses to axon=", cell.AxonSynapses)
 		fmt.Println("  synapses to dendrite=", cell.DendriteSynapses)
 	}
-	for _, syn := range network.Synapses {
-		fmt.Println("  --------\n  synapse id=", syn.ID)
+	for id, syn := range network.Synapses {
+		fmt.Println("  --------\n  synapse key=", id, "ID=", syn.ID)
 		fmt.Println("  millivolts=", syn.Millivolts)
 		fmt.Println("  axon=", syn.FromNeuronAxon)
 		fmt.Println("  dendrite=", syn.ToNeuronDendrite)
