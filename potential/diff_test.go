@@ -1,7 +1,6 @@
 package potential
 
 import (
-	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -148,7 +147,7 @@ func Test_ApplyDiff(t *testing.T) {
 		cloned.Synapses[syn1.ID].Millivolts = 14
 		ok, report := CheckIntegrity(cloned)
 		if !ok {
-			cloned.PrintCells()
+			cloned.Print()
 		}
 		assert.True(t, ok, "cloned network has bad integrity", report)
 
@@ -195,9 +194,8 @@ func Test_ApplyDiff_TrickeryIntegrityTests(t *testing.T) {
 		t.Run("the old synapse ID is removed from the dendrite synapse list", func(t *testing.T) {
 			n := NewNetwork()
 			network := &n
-			network.Grow(2, 2, 0)
-			assert.Equal(t, 2, len(network.Cells))
-			assert.Equal(t, 4, len(network.Synapses))
+			assert.Equal(t, 0, len(network.Cells))
+			assert.Equal(t, 0, len(network.Synapses))
 
 			// create a new cell with a known ID
 			// we will create a second network and add a cell on there
@@ -212,7 +210,9 @@ func Test_ApplyDiff_TrickeryIntegrityTests(t *testing.T) {
 			receiver.DendriteSynapses[s1.ID] = true
 			pretestok, _ := CheckIntegrity(network)
 			assert.Equal(t, true, pretestok)
-			assert.Equal(t, 5, len(network.Synapses))
+			assert.Equal(t, 1, len(network.Synapses))
+			assert.Equal(t, 2, len(network.Cells))
+			network.Print()
 
 			n2 := NewNetwork()
 			net2 := &n2
@@ -239,15 +239,15 @@ func Test_ApplyDiff_TrickeryIntegrityTests(t *testing.T) {
 			assert.Equal(t, 1, len(diff.addedSynapses))
 			assert.Equal(t, s2, diff.addedSynapses[0])
 			// the diff is right. let's apply it.
-			fmt.Println("YO1", s2.ID)
 
 			ApplyDiff(diff, network)
 			assert.Equal(t, 6, len(network.Synapses), "wrong number of synapses on original network after diff applied", network.Synapses)
 			// check that the synapse ID changed
-			fmt.Println("YO2", s2.ID)
-			network.PrintCells()
 			_, copiedSynapseExistence := network.Synapses[s2.ID]
-			assert.Equal(t, false, copiedSynapseExistence)
+			if copiedSynapseExistence {
+				network.Print()
+			}
+			assert.Equal(t, false, copiedSynapseExistence, "copied synapse should have new synapse ID")
 
 			postMergeIntegrityOK, report := CheckIntegrity(network)
 			assert.Equal(t, true, postMergeIntegrityOK)

@@ -109,17 +109,24 @@ func (network *Network) ResetForTraining() {
 }
 
 /*
-PrintCells logs the network cells to console
+Print logs the network cells to console
 */
-func (network *Network) PrintCells() {
+func (network *Network) Print() {
 	fmt.Println("----------")
 	fmt.Println("Network")
 	for _, cell := range network.Cells {
-		fmt.Println("  --------\ncell id=", cell.ID)
+		fmt.Println("  --------\n  cell id=", cell.ID)
 		fmt.Println("  voltage=", cell.Voltage)
 		fmt.Println("  synapses to axon=", cell.AxonSynapses)
 		fmt.Println("  synapses to dendrite=", cell.DendriteSynapses)
 	}
+	for _, syn := range network.Synapses {
+		fmt.Println("  --------\n  synapse id=", syn.ID)
+		fmt.Println("  millivoltes=", syn.Millivolts)
+		fmt.Println("  axon=", syn.FromNeuronAxon)
+		fmt.Println("  dendrite=", syn.ToNeuronDendrite)
+	}
+	fmt.Println("----------")
 }
 
 /*
@@ -167,10 +174,7 @@ func LoadNetworkFromFile(filepath string) (*Network, error) {
 	}
 
 	if ok, report := CheckIntegrity(network); !ok {
-		fmt.Println("cellHasMissingAxonSynapse=", report.cellHasMissingAxonSynapse)
-		fmt.Println("cellHasMissingDendriteSynapse=", report.cellHasMissingDendriteSynapse)
-		fmt.Println("synapseHasMissingAxonCell=", report.synapseHasMissingAxonCell)
-		fmt.Println("synapseHasMissingDendriteCell=", report.synapseHasMissingDendriteCell)
+		report.Print()
 		return network, fmt.Errorf("Failed loading network from file %s", filepath)
 	}
 	return network, nil
