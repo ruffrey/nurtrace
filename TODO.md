@@ -1,10 +1,11 @@
 # TODO
 
 ## Top of the Stack
-- [ ] issue with integrity
-    - when the synapse ID changes during ApplyDiff, then Prune is called, and it gets pruned,
+- [ ] issues with integrity
+    - [x] when the synapse ID changes during ApplyDiff, then Prune is called, and it gets pruned,
     we end up with that synapse being listed still on its axon and dendrite, however it does
     not exist on the network.
+    - [ ] issue with integrity of ApplyDiff
 - [ ] More refined learning techniques:
     - [ ] ensure everything in learning-mechanisms.md is done
     - [ ] larger sets of pathways are OK - more synapses between start and end
