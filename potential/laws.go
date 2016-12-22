@@ -13,6 +13,13 @@ Any ratios or constants that keep the network reliably predictable across hardwa
 and training or sampling sessions should be in this file.
 */
 
+// actualSynapseMin and actualSynapseMax helps make math less intensive if there is
+// never a chance synapse addition will create an int8 overflow.
+//
+// DO NOT CHANGE THESE TWO.
+const actualSynapseMin int8 = -128 + synapseLearnRate
+const actualSynapseMax int8 = 127 - synapseLearnRate
+
 /*
 synapseLearnRate is how much a synapse should get bumped when it is being reinforced.
 
@@ -23,11 +30,6 @@ When de-reinforcing or degrading a synapse, it will get reduced at 1/2 the dista
 to zero, until it is 2, then it will become zero.
 */
 const synapseLearnRate int8 = 1
-
-// actualSynapseMin and actualSynapseMax helps make math less intensive if there is never a chance synapse
-// addition will create an int8 overflow.
-const actualSynapseMin int8 = -128 + synapseLearnRate
-const actualSynapseMax int8 = 127 - synapseLearnRate
 
 /*
 apResting comes from standard neuroscience Membrane Potential. This, and all voltages
