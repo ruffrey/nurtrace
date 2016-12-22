@@ -245,7 +245,7 @@ func Test_ApplyDiff_TrickeryIntegrityTests(t *testing.T) {
 		delete(net2.Synapses, n2Syn1.ID)
 		delete(net2.Synapses, n2Syn2.ID)
 		n2Syn1.ID = 101 // synapse ID collision with first network
-		n2Syn2.ID = 26  // synapse ID collision with first network
+		n2Syn2.ID = 26
 		net2.Synapses[n2Syn1.ID] = n2Syn1
 		net2.Synapses[n2Syn2.ID] = n2Syn2
 
@@ -284,6 +284,16 @@ func Test_ApplyDiff_TrickeryIntegrityTests(t *testing.T) {
 		t.Run("and can withstand pruning some things yet keep network integrity", func(t *testing.T) {
 			network.Synapses[26].ActivationHistory = 100
 			network.Prune()
+			fmt.Println("Network AFTER")
+			network.Print()
+
+			_, syn21 := network.Synapses[21]
+			assert.Equal(t, false, syn21, "synapse 21 still exists")
+			_, syn101 := network.Synapses[101]
+			assert.Equal(t, false, syn101, "synapse 101 still exists")
+			_, syn102 := network.Synapses[102]
+			assert.Equal(t, false, syn102, "synapse 102 still exists")
+
 			assert.Equal(t, 1, len(network.Synapses))
 			assert.Equal(t, 2, len(network.Cells))
 			ok, report = CheckIntegrity(network)

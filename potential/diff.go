@@ -295,13 +295,14 @@ func copySynapseToNetwork(synapse *Synapse, newNetwork *Network) SynapseID {
 		}
 		// now change the synapse ID
 		copiedSynapse.ID = newID
-
-		// Make sure that this synapse's cells have an ID reffing it. This is not necessary
-		// to do for all synapse copies; only if we changed the synapse ID, we need to update
-		// its cells.
-		newNetwork.Cells[copiedSynapse.ToNeuronDendrite].DendriteSynapses[copiedSynapse.ID] = true
-		newNetwork.Cells[copiedSynapse.FromNeuronAxon].AxonSynapses[copiedSynapse.ID] = true
 	}
+
+	// Make sure that this synapse's cells have an ID reffing it. This IS necessary whether or not the
+	// synapse ID changed. If there happened to also
+	// be a cell ID collision for its axon or dendrite,
+	// the connection on the cell to this synapse would be missing.
+	newNetwork.Cells[copiedSynapse.ToNeuronDendrite].DendriteSynapses[copiedSynapse.ID] = true
+	newNetwork.Cells[copiedSynapse.FromNeuronAxon].AxonSynapses[copiedSynapse.ID] = true
 
 	newNetwork.Synapses[copiedSynapse.ID] = copiedSynapse
 	synapse.Network.synMux.Unlock()

@@ -3,8 +3,6 @@ package potential
 import (
 	"fmt"
 	"math"
-
-	"github.com/y0ssar1an/q"
 )
 
 /*
@@ -21,7 +19,8 @@ func (network *Network) Prune() {
 	network.nextSynapsesToActivate = make(map[SynapseID]bool)
 	network.resetCellsOnNextStep = make(map[CellID]bool)
 	if ok, report := CheckIntegrity(network); !ok {
-		q.Q("Prune: network has no integrity BEFORE pruning", report)
+		fmt.Println("Prune: network has no integrity BEFORE pruning")
+		report.Print()
 		panic("no integrity")
 	}
 	// Next we move the less used synapses toward zero, because doing this later would prune the
