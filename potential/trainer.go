@@ -82,6 +82,16 @@ type Trainer interface {
 
 /*
 Train executes the trainer's OnTrained method once complete.
+
+ONLY prune on the original network:
+
+It is important to ONLY PRUNE on the original network. Diffing does not capture
+what was removed - that is a surprising rabbit hole. So if you diff and prune on an
+off-network, you can end up getting orphaned synapses - and bad integrity.
+
+To effectively train in a distributed way, across machines, it may be necessary
+to implement better diffing that does account for removed synapses and cells. But
+for now this is more than adequate.
 */
 func Train(t Trainer, settings *TrainingSettings, originalNetwork *Network) {
 	var wg sync.WaitGroup
@@ -94,14 +104,7 @@ func Train(t Trainer, settings *TrainingSettings, originalNetwork *Network) {
 	}
 	t.PrepareData(originalNetwork)
 
-	// It is important to only prune on the original network.
-	// Diffing does not capture what was removed - that is a
-	// surprising rabbit hole. So if you diff and prune on an
-	// off-network, you can end up getting orphaned synapses.
-	// To effectively train in a distributed way, across machines,
-	// it may be necessary to implement better diffing that
-	// does account for removed synapses and cells.
-
+	// DO NOT PRUNE on the cloned networks! See not in method comment above.
 	for thread := uint(0); thread < settings.Threads; thread++ {
 		wg.Add(1)
 		go func(thread uint) {
@@ -114,10 +117,11 @@ func Train(t Trainer, settings *TrainingSettings, originalNetwork *Network) {
 					ApplyDiff(diff, network)
 				}
 
-				if i%samplesBetweenPruningSessions == 0 {
-					if i == 0 { // do not prune before getting started!
+				if i%samplesBetweenMergingSessions == 0 {
+					if i == 0 { // do not allow diffing/pruning before getting started!
 						continue
 					}
+
 					chNetworkSync <- network
 				}
 
@@ -140,9 +144,9 @@ func Train(t Trainer, settings *TrainingSettings, originalNetwork *Network) {
 		case network := <-chNetworkSync:
 			oDiff := DiffNetworks(originalNetwork, network)
 			ApplyDiff(oDiff, originalNetwork)
-		case <-done:
-			fmt.Println("quit")
+			// DO NOT prune on the one-off network that has not been merged back to main.
 			originalNetwork.Prune()
+		case <-done:
 			return
 		}
 	}

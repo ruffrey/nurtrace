@@ -48,11 +48,11 @@ const synapseAPBoost uint = 1
 // There are two factors that result in degrading a synapse:
 /*
  */
-const samplesBetweenPruningSessions = 16
+const samplesBetweenMergingSessions = 16
 
 /*
 defaultSynapseMinFireThreshold represents the minimum we expect a synapse to fire between
-Pruning sessions (`samplesBetweenPruningSessions`), for this cell to get reinforced.
+pruning sessions (`samplesBetweenMergingSessions`), for this cell to get reinforced.
 */
 const defaultSynapseMinFireThreshold = 8
 
