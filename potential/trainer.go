@@ -94,9 +94,19 @@ to implement better diffing that does account for removed synapses and cells. Bu
 for now this is more than adequate.
 */
 func Train(t Trainer, settings *TrainingSettings, originalNetwork *Network) {
+	// The next two are used to block until all threads are done and the function may return.
 	var wg sync.WaitGroup
-	chNetworkSync := make(chan *Network, 1)
 	done := make(chan bool)
+
+	// The next three are used to synchronize 1) merging of thread networks onto original,
+	// and 2) cloning of original network. Otherwise things get quickly out of sync, and
+	// race conditions cause nil pointer reference issues when network is overwritten with
+	// the latest originalNetwork.
+	var origNetCloneMux sync.Mutex              // only clone networks inside this mutex
+	chNetworkSync := make(chan *Network, 1)     // blocking channel for sending net to be merged
+	chNetworkSyncCallback := make(chan bool, 1) // blocking channel waiting for response of net merge
+
+	// precheck
 	ok, report := CheckIntegrity(originalNetwork)
 	if !ok {
 		fmt.Println(report)
@@ -132,14 +142,19 @@ func Train(t Trainer, settings *TrainingSettings, originalNetwork *Network) {
 					if i == 0 { // do not allow diffing/pruning before getting started!
 						continue
 					}
-
+					origNetCloneMux.Lock()
 					chNetworkSync <- network
+					<-chNetworkSyncCallback
+					// after merging back changes, get up to date with the latest network
+					network = CloneNetwork(originalNetwork)
+					origNetCloneMux.Unlock()
 				}
 
 			}
 
 			fmt.Println("Network on thread", thread, "done")
 			chNetworkSync <- network
+			<-chNetworkSyncCallback
 			fmt.Println("Applied diff on thread", thread)
 			wg.Done()
 		}(thread)
@@ -192,6 +207,7 @@ func Train(t Trainer, settings *TrainingSettings, originalNetwork *Network) {
 				// 	panic("no integrity")
 				// }
 			}
+			chNetworkSyncCallback <- true
 		case <-done:
 			return
 		}
