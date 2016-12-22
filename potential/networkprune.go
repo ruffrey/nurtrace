@@ -165,7 +165,7 @@ func (network *Network) removeSynapseFromCell(s SynapseID, c CellID, isAxon bool
 PruneCell removes a cell and its synapses. It is independent of PruneSynapse.
 */
 func (network *Network) PruneCell(cellID CellID) {
-	fmt.Println("Pruning cell", cellID)
+	// fmt.Println("Pruning cell", cellID)
 	cell, ok := network.Cells[cellID]
 	if !ok {
 		fmt.Println("warn: attempt to prune cell which does not exist", cellID)
