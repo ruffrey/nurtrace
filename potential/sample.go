@@ -1,9 +1,6 @@
 package potential
 
-import (
-	"strings"
-	"time"
-)
+import "time"
 
 /*
 Sample activates the network with the seed data and replies with
@@ -11,10 +8,9 @@ the network's answer.
 
 `start` and `end` will indicate the beginning and end of when to sample data.
 */
-func Sample(seed string, data *Dataset, network *Network, maxInterations int, start interface{}, end interface{}) []interface{} {
+func Sample(seedKeys []interface{}, data *Dataset, network *Network, maxInterations int, start interface{}, end interface{}) []interface{} {
 	network.Disabled = false
 	network.ResetForTraining()
-	seedChars := strings.Split(seed, "")
 	var out []interface{}
 	outConduit := make(chan interface{})
 	maxTimeout := time.Second * 1 // do not let samples run longer than this
@@ -62,8 +58,8 @@ func Sample(seed string, data *Dataset, network *Network, maxInterations int, st
 	// fire one cell per step, in order.
 	network.Cells[data.KeyToItem[start].InputCell].FireActionPotential()
 	network.Step()
-	for _, char := range seedChars {
-		network.Cells[data.KeyToItem[char].InputCell].FireActionPotential()
+	for _, perceptionUnit := range seedKeys {
+		network.Cells[data.KeyToItem[perceptionUnit].InputCell].FireActionPotential()
 		network.Step()
 	}
 

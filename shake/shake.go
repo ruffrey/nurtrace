@@ -126,7 +126,15 @@ func main() {
 	if len(*seed) > 0 {
 		t.PrepareData(network) // make sure all data is setup
 		fmt.Println("Sampling characters with seed text: ", *seed)
-		out := potential.Sample(*seed, t.Settings.Data, network, 1000, "START", "END")
+		seedChars := strings.Split(*seed, "")
+		// keys are type interface{} and need to be copied into a new array of that
+		// type. they cannot be downcast. https://golang.org/doc/faq#convert_slice_of_interface
+		// (might want to add this as a helper to charrnn)
+		var seedKeys []interface{}
+		for _, stringKeyChar := range seedChars {
+			seedKeys = append(seedKeys, stringKeyChar)
+		}
+		out := potential.Sample(seedKeys, t.Settings.Data, network, 1000, "START", "END")
 		fmt.Println("---")
 		for _, s := range out {
 			fmt.Print(s)
