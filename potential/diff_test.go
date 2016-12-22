@@ -191,7 +191,7 @@ func Test_ApplyDiff(t *testing.T) {
 }
 
 func Test_ApplyDiff_TrickeryIntegrityTests(t *testing.T) {
-	t.Run("a cell ID is new and its synapse IDs are not new so they get reassigned", func(t *testing.T) {
+	t.Run("a cell ID is new and one synapse ID is not unique so it gets reassigned", func(t *testing.T) {
 		// network 1
 		n := NewNetwork()
 		network := &n
@@ -237,15 +237,15 @@ func Test_ApplyDiff_TrickeryIntegrityTests(t *testing.T) {
 		delete(net2.Cells, n2Cell1.ID)
 		delete(net2.Cells, n2Cell2.ID)
 		n2Cell1.ID = 21
-		n2Cell2.ID = 22
+		n2Cell2.ID = 12 // cell ID collision with first network
 		net2.Cells[n2Cell1.ID] = n2Cell1
 		net2.Cells[n2Cell2.ID] = n2Cell2
 		n2Syn1 := NewSynapse(net2)
 		n2Syn2 := NewSynapse(net2)
 		delete(net2.Synapses, n2Syn1.ID)
 		delete(net2.Synapses, n2Syn2.ID)
-		n2Syn1.ID = 201
-		n2Syn2.ID = 202
+		n2Syn1.ID = 101 // synapse ID collision with first network
+		n2Syn2.ID = 102 // synapse ID collision with first network
 		net2.Synapses[n2Syn1.ID] = n2Syn1
 		net2.Synapses[n2Syn2.ID] = n2Syn2
 
@@ -266,6 +266,20 @@ func Test_ApplyDiff_TrickeryIntegrityTests(t *testing.T) {
 			report.Print()
 		}
 
+		// time to test some things
+		diff := DiffNetworks(network, net2)
+		// diff.Print()
+		assert.Equal(t, 1, len(diff.addedCells))
+		assert.Equal(t, 2, len(diff.addedSynapses))
+
+		ApplyDiff(diff, network)
+
+		// network.Print()
+		assert.Equal(t, 4, len(network.Synapses))
+		assert.Equal(t, 3, len(network.Cells))
+
+		ok, report = CheckIntegrity(network)
+		assert.Equal(t, true, ok, "no integrity after apply diff")
 	})
 	t.Skip("when a cell is new and another already exists one of its synapses has been re-ID-d due to collision", func(t *testing.T) {
 		t.Run("the old synapse ID is removed from the dendrite synapse list", func(t *testing.T) {
