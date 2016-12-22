@@ -1,3 +1,4 @@
 *.dot
 *.json
 visualize
+*.gephi
