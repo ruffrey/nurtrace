@@ -2,15 +2,8 @@ package potential
 
 import (
 	"fmt"
-	"math"
 	"sync"
 )
-
-/*
-GrowPathExpectedMinimumSynapses represents the maximum length, in synapses, between an input
-and output cell in the network.
-*/
-const GrowPathExpectedMinimumSynapses = 10
 
 // All methods on a network that relate to growing are here.
 
@@ -53,9 +46,7 @@ func (network *Network) GrowPathBetween(startCell, endCell CellID, minSynapses i
 	// to the end cell
 	synapsesAdded = make(map[SynapseID]bool)
 
-	avgSynPerCell := float64(len(network.Synapses) / len(network.Cells))
-	// semi-hardcoded number of max hops. this was arbitrary.
-	maxHops := int(math.Max(math.Min(avgSynPerCell, 50.0), 20))
+	maxHops := network.maxHops
 
 	mux := sync.Mutex{}
 	var lastCellID CellID

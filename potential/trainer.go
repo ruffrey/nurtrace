@@ -181,7 +181,7 @@ func processBatch(batch []*TrainingSample, originalNetwork *Network, vocab *Data
 	}
 
 	// give for firings time to go through the network
-	for i := 0; i < GrowPathExpectedMinimumSynapses; i++ {
+	for i := 0; i < growPathExpectedMinimumSynapses; i++ {
 		hasMore := network.Step()
 		if !hasMore {
 			break
@@ -213,7 +213,7 @@ func processBatch(batch []*TrainingSample, originalNetwork *Network, vocab *Data
 
 		// (re)grow paths between each expected input and output.
 		for _, ts := range batch {
-			network.GrowPathBetween(ts.InputCell, ts.OutputCell, GrowPathExpectedMinimumSynapses)
+			network.GrowPathBetween(ts.InputCell, ts.OutputCell, growPathExpectedMinimumSynapses)
 		}
 		diff = DiffNetworks(originalNetwork, network)
 	}
