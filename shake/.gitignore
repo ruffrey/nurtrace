@@ -1,3 +1,2 @@
-network*.json
+*.json
 shake
-vocab*.json

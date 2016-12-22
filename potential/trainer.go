@@ -12,7 +12,7 @@ const defaultWorkerThreads = 2
 TrainingSettings are
 */
 type TrainingSettings struct {
-	Threads uint
+	Threads int
 	// Data is the set of data structures that map the lowest units of the network onto input
 	// and output cells.
 	Data *Dataset
@@ -116,11 +116,12 @@ func Train(t Trainer, settings *TrainingSettings, originalNetwork *Network) {
 	t.PrepareData(originalNetwork)
 
 	// DO NOT PRUNE on the cloned networks! See not in method comment above.
-	partSize := math.Ceil(float64(len(settings.TrainingSamples)) / float64(settings.Threads))
+	lenAllSamples := len(settings.TrainingSamples)
+	partSize := math.Ceil(float64(lenAllSamples) / float64(settings.Threads))
 	fmt.Println(partSize, "samples per thread")
-	for thread := uint(0); thread < settings.Threads; thread++ {
+	for thread := 0; thread < settings.Threads; thread++ {
 		wg.Add(1)
-		go func(thread uint) {
+		go func(thread int) {
 			network := CloneNetwork(originalNetwork)
 			from := int(float64(thread) * partSize)
 			to := int(float64(thread+1) * partSize)
@@ -171,7 +172,7 @@ func Train(t Trainer, settings *TrainingSettings, originalNetwork *Network) {
 		done <- true
 	}()
 
-	var mergeNum uint
+	var mergeNum int
 	for {
 		select {
 		case network := <-chNetworkSync:
@@ -212,6 +213,8 @@ func Train(t Trainer, settings *TrainingSettings, originalNetwork *Network) {
 				// 	}
 				// 	panic("no integrity")
 				// }
+				fmt.Println("Progress:",
+					math.Floor(((float64(mergeNum)*float64(samplesBetweenMergingSessions))/float64(lenAllSamples))*100), "%")
 			}
 			chNetworkSyncCallback <- true
 		case <-done:

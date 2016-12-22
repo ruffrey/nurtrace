@@ -22,7 +22,7 @@ const defaultNeuronSynapses = 5
 var networkSaveFile = flag.String("save", "network.json", "Load/save location of the network")
 var vocabSaveFile = flag.String("vocab", "vocab.json", "Load/save location of the charrnn vocab")
 var testDataFile = flag.String("data", "shake.txt", "File location of the training data.")
-var train = flag.Uint("train", 0, "Train the network with this number of workers")
+var train = flag.Int("train", 0, "Train the network with this number of workers")
 var seed = flag.String("seed", "", "Seed the neural network with this text then sample it.")
 var doProfile = flag.String("profile", "", "Pass `cpu` or `mem` to do profiling")
 
