@@ -162,7 +162,7 @@ func Train(t Trainer, settings *TrainingSettings, originalNetwork *Network) {
 			fmt.Println("Network on thread", thread, "done")
 			chNetworkSync <- network
 			<-chNetworkSyncCallback
-			fmt.Println("Applied diff on thread", thread)
+			fmt.Println("Applied final diff on thread", thread)
 			wg.Done()
 		}(thread)
 	}
