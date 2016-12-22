@@ -46,8 +46,8 @@ func main() {
 		fmt.Println("Created network,", len(network.Cells), "cells",
 			len(network.Synapses), "synapses")
 	} else {
-		fmt.Println("Loaded network from disk,", len(network.Cells), "cells",
-			len(network.Synapses), "synapses")
+		fmt.Println("Loaded network from disk")
+		network.PrintTotals()
 	}
 
 	fmt.Println("Reading test data file", *testDataFile)

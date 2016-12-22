@@ -159,7 +159,7 @@ func (charrnn Charrnn) PrepareData(network *potential.Network) {
 
 		// Seems like a weird place to grow, but we actually need this for new cells,
 		// and to ensure minimum distance between all inputs and outputs.
-		network.GrowPathBetween(dataItem.InputCell, dataItem.OutputCell, potential.growPathExpectedMinimumSynapses)
+		network.GrowPathBetween(dataItem.InputCell, dataItem.OutputCell, potential.GrowPathExpectedMinimumSynapses)
 	}
 	fmt.Println("charrnn data setup complete")
 }

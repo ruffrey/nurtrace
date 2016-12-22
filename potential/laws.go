@@ -76,14 +76,14 @@ yield the expected output firing.
 const retrainRandomSynapsesToGrow = 20
 
 /*
-growPathExpectedMinimumSynapses represents the maximum allowed number of synapses between an input
+GrowPathExpectedMinimumSynapses represents the maximum allowed number of synapses between an input
 and output cell in the network which get added when an input cell fails to fire the output cell.
 */
-const growPathExpectedMinimumSynapses = 10
+const GrowPathExpectedMinimumSynapses = 10
 
 /*
 ratioMaxHopsBetweenCellsDuringPathTrace is how many steps (synapses) are in between an input an output
-cell before we forge a path up to `growPathExpectedMinimumSynapses` in between them.
+cell before we forge a path up to `GrowPathExpectedMinimumSynapses` in between them.
 */
 func ratioMaxHopsBetweenCellsDuringPathTrace(network *Network) int {
 	avgSynPerCell := float64(len(network.Synapses) / len(network.Cells))
