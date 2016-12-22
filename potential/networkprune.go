@@ -152,7 +152,7 @@ func (network *Network) removeSynapseFromCell(s SynapseID, c CellID, isAxon bool
 		network.synMux.Unlock()
 	} else {
 		fmt.Println("warn: cannot prune synapse", s, "(isAxon=", isAxon, ") from cell",
-			c, " which does not exist")
+			c, " cell does not exist")
 	}
 
 	// after removing the synapses, see if this cell can be removed.

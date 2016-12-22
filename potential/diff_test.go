@@ -191,7 +191,83 @@ func Test_ApplyDiff(t *testing.T) {
 }
 
 func Test_ApplyDiff_TrickeryIntegrityTests(t *testing.T) {
-	t.Run("when a cell is new and another already exists one of its synapses has been re-ID-d due to collision", func(t *testing.T) {
+	t.Run("a cell ID is new and its synapse IDs are not new so they get reassigned", func(t *testing.T) {
+		// network 1
+		n := NewNetwork()
+		network := &n
+		n1Cell1 := NewCell(network)
+		n1Cell2 := NewCell(network)
+		delete(network.Cells, n1Cell1.ID)
+		delete(network.Cells, n1Cell2.ID)
+		n1Cell1.ID = 11
+		n1Cell2.ID = 12
+		network.Cells[n1Cell1.ID] = n1Cell1
+		network.Cells[n1Cell2.ID] = n1Cell2
+		n1Syn1 := NewSynapse(network)
+		n1Syn2 := NewSynapse(network)
+		delete(network.Synapses, n1Syn1.ID)
+		delete(network.Synapses, n1Syn2.ID)
+		n1Syn1.ID = 101
+		n1Syn2.ID = 102
+		network.Synapses[n1Syn1.ID] = n1Syn1
+		network.Synapses[n1Syn2.ID] = n1Syn2
+
+		n1Syn1.FromNeuronAxon = n1Cell1.ID
+		n1Syn1.ToNeuronDendrite = n1Cell2.ID
+		n1Cell1.AxonSynapses[n1Syn1.ID] = true
+		n1Cell2.DendriteSynapses[n1Syn1.ID] = true
+
+		n1Syn2.FromNeuronAxon = n1Cell2.ID
+		n1Syn2.ToNeuronDendrite = n1Cell1.ID
+		n1Cell1.DendriteSynapses[n1Syn2.ID] = true
+		n1Cell2.AxonSynapses[n1Syn2.ID] = true
+
+		ok, report := CheckIntegrity(network)
+		assert.Equal(t, true, ok)
+		if !ok {
+			fmt.Println("network")
+			report.Print()
+		}
+
+		// network 2
+		n2 := NewNetwork()
+		net2 := &n2
+		n2Cell1 := NewCell(net2)
+		n2Cell2 := NewCell(net2)
+		delete(net2.Cells, n2Cell1.ID)
+		delete(net2.Cells, n2Cell2.ID)
+		n2Cell1.ID = 21
+		n2Cell2.ID = 22
+		net2.Cells[n2Cell1.ID] = n2Cell1
+		net2.Cells[n2Cell2.ID] = n2Cell2
+		n2Syn1 := NewSynapse(net2)
+		n2Syn2 := NewSynapse(net2)
+		delete(net2.Synapses, n2Syn1.ID)
+		delete(net2.Synapses, n2Syn2.ID)
+		n2Syn1.ID = 201
+		n2Syn2.ID = 202
+		net2.Synapses[n2Syn1.ID] = n2Syn1
+		net2.Synapses[n2Syn2.ID] = n2Syn2
+
+		n2Syn1.FromNeuronAxon = n2Cell1.ID
+		n2Syn1.ToNeuronDendrite = n2Cell2.ID
+		n2Cell1.AxonSynapses[n2Syn1.ID] = true
+		n2Cell2.DendriteSynapses[n2Syn1.ID] = true
+
+		n2Syn2.FromNeuronAxon = n2Cell2.ID
+		n2Syn2.ToNeuronDendrite = n2Cell1.ID
+		n2Cell1.DendriteSynapses[n2Syn2.ID] = true
+		n2Cell2.AxonSynapses[n2Syn2.ID] = true
+
+		ok, report = CheckIntegrity(net2)
+		assert.Equal(t, true, ok)
+		if !ok {
+			fmt.Println("net2")
+			report.Print()
+		}
+
+	})
+	t.Skip("when a cell is new and another already exists one of its synapses has been re-ID-d due to collision", func(t *testing.T) {
 		t.Run("the old synapse ID is removed from the dendrite synapse list", func(t *testing.T) {
 			n := NewNetwork()
 			network := &n
@@ -275,12 +351,6 @@ func Test_ApplyDiff_TrickeryIntegrityTests(t *testing.T) {
 			fmt.Println("END NETWORK")
 			network.Print()
 		})
-		// t.Run("the old synapse ID is removed from the axon synapse list", func(t *testing.T) {
-		//
-		// })
-		// t.Run("the network has integrity after the diff is applied", func(t *testing.T) {
-		//
-		// })
 	})
 }
 
