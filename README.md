@@ -25,5 +25,6 @@ train a neural network.
 [ ] Prebuilt network training for:
     [ ] character and word recurrent neural networks
     [ ] image classification
+    [ ] binary decision
 [ ] Tools for measuring training speed
 [ ] Cross platform GUI app for all of it

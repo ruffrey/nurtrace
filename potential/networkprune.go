@@ -87,7 +87,6 @@ func (network *Network) Prune() {
 	for synapseID := range synapsesToRemove {
 		network.PruneSynapse(synapseID)
 	}
-	fmt.Println("  done pruning")
 
 	if ok, report := CheckIntegrity(network); !ok {
 		fmt.Println("Prune: network has no integrity AFTER pruning")

@@ -1,11 +1,11 @@
 # TODO
 
 ## Top of the Stack
-- [ ] issues with integrity
+- [x] issues with integrity
     - [x] when the synapse ID changes during ApplyDiff, then Prune is called, and it gets pruned,
     we end up with that synapse being listed still on its axon and dendrite, however it does
     not exist on the network.
-    - [ ] issue with integrity of ApplyDiff
+    - [x] issue with integrity of ApplyDiff
 - [ ] More refined learning techniques:
     - [ ] ensure everything in learning-mechanisms.md is done
     - [ ] larger sets of pathways are OK - more synapses between start and end
@@ -14,7 +14,6 @@
 - [ ] Periodically save back the threaded training to original
     - currently we lose all training on a crash
     - saving can also cause concurrent map read/writes and fail
-- [ ] add methods for making and removing connections between synapses and cells on a network
 
 ## Optimizations and Refactoring
 - [ ] If vocab is saved, network must be also
@@ -22,6 +21,9 @@
 - [ ] occasionally fail diff when using more workers than threads
 - [ ] add logging with glog
 - [ ] occasionally log progress percentage
+- [ ] return errors instead of logging or doing a panic
+- [ ] add methods for making and removing connections between synapses and cells on a network
+    - the dual relationship assignment, which also requires mutexes, are error prone
 
 ## Later - once it works
 - [ ] code for word level and phrase level neural networks

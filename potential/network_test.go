@@ -137,3 +137,18 @@ func Test_ResetForTraining(t *testing.T) {
 		assert.Equal(t, uint(12), network.Synapses[s.ID].ActivationHistory)
 	})
 }
+
+func Test_NetworkPrint(t *testing.T) {
+	t.Run("network.Print works", func(t *testing.T) {
+		n := NewNetwork()
+		network := &n
+		network.Grow(5, 2, 5)
+		network.Print()
+	})
+	t.Run("network.PrintTotals works", func(t *testing.T) {
+		n := NewNetwork()
+		network := &n
+		network.Grow(5, 2, 5)
+		network.PrintTotals()
+	})
+}

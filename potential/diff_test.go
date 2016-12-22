@@ -404,3 +404,16 @@ func Test_copySynapseToNetwork(t *testing.T) {
 	t.Run("generates new synapse ID and updates IDs when it already exists on the new network", func(t *testing.T) {})
 	t.Run("a re-IDd+applied synapse does not disrupt network integrity", func(t *testing.T) {})
 }
+
+func Test_DiffPrint(t *testing.T) {
+	t.Run("diff.Print works", func(t *testing.T) {
+		n1 := NewNetwork()
+		n2 := NewNetwork()
+		net1 := &n1
+		net2 := &n2
+		net1.Grow(5, 2, 5)
+		net2.Grow(5, 2, 5)
+		diff := DiffNetworks(net1, net2)
+		diff.Print()
+	})
+}

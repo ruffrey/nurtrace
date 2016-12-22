@@ -67,9 +67,7 @@ func main() {
 		Settings: settings,
 	}
 	err = t.LoadVocab(*vocabSaveFile)
-	if err != nil {
-		t.PrepareData(network)
-	}
+	t.PrepareData(network)
 
 	// Setup the training data samples
 	//
@@ -102,7 +100,7 @@ func main() {
 			}
 			if ts.InputCell == 0 {
 				fmt.Println("training sample has input cell where ID input cell is zero")
-				fmt.Println(ts)
+				fmt.Println(i, chars[i], chars[i-1], ts)
 				panic(i)
 			}
 			s = append(s, &ts)
@@ -114,7 +112,7 @@ func main() {
 		}
 		if ts2.InputCell == 0 {
 			fmt.Println(ts2)
-			fmt.Println("training sample has input cell where ID input cell is zero")
+			fmt.Println("training sample END has input cell where ID input cell is zero")
 			panic("nope")
 		}
 		s = append(s, &ts2)
