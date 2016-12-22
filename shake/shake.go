@@ -22,7 +22,6 @@ const defaultNeuronSynapses = 5
 var networkSaveFile = flag.String("save", "network.json", "Load/save location of the network")
 var vocabSaveFile = flag.String("vocab", "vocab.json", "Load/save location of the charrnn vocab")
 var testDataFile = flag.String("data", "shake.txt", "File location of the training data.")
-var train = flag.Int("train", 0, "Train the network with this number of workers")
 var seed = flag.String("seed", "", "Seed the neural network with this text then sample it.")
 var doProfile = flag.String("profile", "", "Pass `cpu` or `mem` to do profiling")
 
@@ -143,13 +142,6 @@ func main() {
 		return
 	}
 
-	t.Settings.Threads = *train
-	if t.Settings.Threads == 0 {
-		fmt.Println("Not enough params. Help:")
-		flag.PrintDefaults()
-		fmt.Println("")
-		return
-	}
 	// only profile during training
 	if *doProfile == "mem" {
 		defer profile.Start(profile.MemProfile).Stop()
@@ -175,7 +167,7 @@ func main() {
 		os.Exit(1)
 	}()
 
-	fmt.Println("Beginning training", t.Settings.Threads, "simultaneous sessions")
+	fmt.Println("Beginning training")
 	network.Disabled = true // we just will never need it to fire
 	potential.Train(t, t.Settings, network)
 

@@ -3,16 +3,14 @@ package potential
 import (
 	"fmt"
 	"math"
+	"runtime"
 	"sync"
 )
-
-const defaultWorkerThreads = 2
 
 /*
 TrainingSettings are
 */
 type TrainingSettings struct {
-	Threads int
 	// Data is the set of data structures that map the lowest units of the network onto input
 	// and output cells.
 	Data *Dataset
@@ -21,6 +19,8 @@ type TrainingSettings struct {
 	// Example: an array of lines, where each training sample is a letter and the one
 	// that comes after it.
 	TrainingSamples [][]*TrainingSample
+
+	threads int
 }
 
 /*
@@ -30,7 +30,7 @@ func NewTrainingSettings() *TrainingSettings {
 	d := Dataset{}
 	dataset := &d
 	settings := TrainingSettings{
-		Threads:         defaultWorkerThreads,
+		threads:         runtime.NumCPU(),
 		Data:            dataset,
 		TrainingSamples: make([][]*TrainingSample, 0),
 	}
@@ -117,9 +117,9 @@ func Train(t Trainer, settings *TrainingSettings, originalNetwork *Network) {
 
 	// DO NOT PRUNE on the cloned networks! See not in method comment above.
 	lenAllSamples := len(settings.TrainingSamples)
-	partSize := math.Ceil(float64(lenAllSamples) / float64(settings.Threads))
+	partSize := math.Ceil(float64(lenAllSamples) / float64(settings.threads))
 	fmt.Println(partSize, "samples per thread")
-	for thread := 0; thread < settings.Threads; thread++ {
+	for thread := 0; thread < settings.threads; thread++ {
 		wg.Add(1)
 		go func(thread int) {
 			network := CloneNetwork(originalNetwork)
@@ -191,7 +191,7 @@ func Train(t Trainer, settings *TrainingSettings, originalNetwork *Network) {
 			// }
 
 			mergeNum++
-			if mergeNum%settings.Threads == 0 {
+			if mergeNum%settings.threads == 0 {
 				// DO NOT prune on the one-off network that has not been merged back to main.
 				// if ok, report := CheckIntegrity(network); !ok {
 				// 	fmt.Println("Prune: network has no integrity BEFORE pruning")
