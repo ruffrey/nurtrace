@@ -114,7 +114,18 @@ func Train(t Trainer, settings *TrainingSettings, originalNetwork *Network) {
 				createdEffect, diff := processBatch(batch, network, settings.Data)
 
 				if !createdEffect {
+					// if ok, report := CheckIntegrity(originalNetwork); !ok {
+					// 	fmt.Println("ApplyDiff: network has no integrity BEFORE")
+					// 	report.Print()
+					// 	panic("no integrity")
+					// }
 					ApplyDiff(diff, network)
+					// if ok, report := CheckIntegrity(originalNetwork); !ok {
+					// 	fmt.Println("ApplyDiff: network has no integrity AFTER")
+					// 	diff.Print()
+					// 	report.Print()
+					// 	panic("no integrity")
+					// }
 				}
 
 				if i%samplesBetweenMergingSessions == 0 {
@@ -144,11 +155,42 @@ func Train(t Trainer, settings *TrainingSettings, originalNetwork *Network) {
 		select {
 		case network := <-chNetworkSync:
 			oDiff := DiffNetworks(originalNetwork, network)
+			// if ok, report := CheckIntegrity(originalNetwork); !ok {
+			// 	fmt.Println("ApplyDiff: originalNetwork has no integrity BEFORE")
+			// 	report.Print()
+			// 	panic("no integrity")
+			// }
 			ApplyDiff(oDiff, originalNetwork)
+			// if ok, report := CheckIntegrity(originalNetwork); !ok {
+			// 	fmt.Println("ApplyDiff: originalNetwork has no integrity AFTER")
+			// 	diff.Print()
+			// 	report.Print()
+			// 	panic("no integrity")
+			// }
+
 			mergeNum++
 			if mergeNum%settings.Threads == 0 {
 				// DO NOT prune on the one-off network that has not been merged back to main.
+				// if ok, report := CheckIntegrity(network); !ok {
+				// 	fmt.Println("Prune: network has no integrity BEFORE pruning")
+				// 	report.Print()
+				// 	panic("no integrity")
+				// }
 				originalNetwork.Prune()
+				// if ok, report := CheckIntegrity(network); !ok {
+				// 	fmt.Println("Prune: network has no integrity AFTER pruning")
+				// 	report.Print()
+				// 	fmt.Println("intended to remove synapses:", synapsesToRemove)
+				// 	for cellID, synapseID := range report.cellHasMissingAxonSynapse {
+				// 		fmt.Println("  cellHasMissingAxonSynapse", cellID, network.Cells[cellID])
+				// 		fmt.Println("  cellHasMissingAxonSynapse", synapseID, network.Synapses[synapseID])
+				// 	}
+				// 	for cellID, synapseID := range report.cellHasMissingDendriteSynapse {
+				// 		fmt.Println("  cellHasMissingDendriteSynapse", cellID, network.Cells[cellID])
+				// 		fmt.Println("  cellHasMissingDendriteSynapse", synapseID, network.Synapses[synapseID])
+				// 	}
+				// 	panic("no integrity")
+				// }
 			}
 		case <-done:
 			return

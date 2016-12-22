@@ -18,11 +18,7 @@ and removes those cells if they have none.
 func (network *Network) Prune() {
 	network.nextSynapsesToActivate = make(map[SynapseID]bool)
 	network.resetCellsOnNextStep = make(map[CellID]bool)
-	if ok, report := CheckIntegrity(network); !ok {
-		fmt.Println("Prune: network has no integrity BEFORE pruning")
-		report.Print()
-		panic("no integrity")
-	}
+
 	// Next we move the less used synapses toward zero, because doing this later would prune the
 	// brand new synapses. This is a good time to apply the learning rate to synapses
 	// which were activated, too.

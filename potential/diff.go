@@ -134,11 +134,6 @@ no need to copy any changes from existing cell voltages.
 This will update the network version, also.
 */
 func ApplyDiff(diff Diff, originalNetwork *Network) (err error) {
-	if ok, report := CheckIntegrity(originalNetwork); !ok {
-		fmt.Println("ApplyDiff: originalNetwork has no integrity BEFORE")
-		report.Print()
-		panic("no integrity")
-	}
 	// New cells
 	for _, cell := range diff.addedCells {
 		copyCellToNetwork(cell, originalNetwork)
@@ -183,13 +178,6 @@ func ApplyDiff(diff Diff, originalNetwork *Network) (err error) {
 	// add the activation history
 	for synapseID, activations := range diff.synapseFires {
 		originalNetwork.Synapses[synapseID].ActivationHistory += activations
-	}
-
-	if ok, report := CheckIntegrity(originalNetwork); !ok {
-		fmt.Println("ApplyDiff: originalNetwork has no integrity AFTER")
-		diff.Print()
-		report.Print()
-		panic("no integrity")
 	}
 
 	return nil
