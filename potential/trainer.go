@@ -139,13 +139,17 @@ func Train(t Trainer, settings *TrainingSettings, originalNetwork *Network) {
 		done <- true
 	}()
 
+	var mergeNum uint
 	for {
 		select {
 		case network := <-chNetworkSync:
 			oDiff := DiffNetworks(originalNetwork, network)
 			ApplyDiff(oDiff, originalNetwork)
-			// DO NOT prune on the one-off network that has not been merged back to main.
-			originalNetwork.Prune()
+			mergeNum++
+			if mergeNum%settings.Threads == 0 {
+				// DO NOT prune on the one-off network that has not been merged back to main.
+				originalNetwork.Prune()
+			}
 		case <-done:
 			return
 		}

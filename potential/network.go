@@ -128,6 +128,15 @@ func (network *Network) Print() {
 }
 
 /*
+PrintTotals lists the most basic info about the network.
+*/
+func (network *Network) PrintTotals() {
+	fmt.Println("Network")
+	fmt.Println(" ", len(network.Cells), "cells")
+	fmt.Println(" ", len(network.Synapses), "synapses")
+}
+
+/*
 ToJSON gives a json representation of the neural network.
 */
 func (network *Network) ToJSON() (string, error) {

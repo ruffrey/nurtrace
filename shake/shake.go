@@ -188,5 +188,7 @@ func main() {
 		fmt.Println(err)
 		return
 	}
+
+	network.PrintTotals()
 	fmt.Println("Done.")
 }
