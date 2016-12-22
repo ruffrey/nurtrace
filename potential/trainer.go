@@ -2,6 +2,7 @@ package potential
 
 import (
 	"fmt"
+	"math"
 	"sync"
 )
 
@@ -115,12 +116,17 @@ func Train(t Trainer, settings *TrainingSettings, originalNetwork *Network) {
 	t.PrepareData(originalNetwork)
 
 	// DO NOT PRUNE on the cloned networks! See not in method comment above.
+	partSize := math.Ceil(float64(len(settings.TrainingSamples)) / float64(settings.Threads))
+	fmt.Println(partSize, "samples per thread")
 	for thread := uint(0); thread < settings.Threads; thread++ {
 		wg.Add(1)
 		go func(thread uint) {
 			network := CloneNetwork(originalNetwork)
-
-			for i, batch := range settings.TrainingSamples {
+			from := int(float64(thread) * partSize)
+			to := int(float64(thread+1) * partSize)
+			fmt.Println("thread", thread, "from", from, "to", to)
+			samples := settings.TrainingSamples[from:to]
+			for i, batch := range samples {
 				createdEffect, diff := processBatch(batch, network, settings.Data)
 
 				if !createdEffect {
