@@ -284,8 +284,6 @@ func Test_ApplyDiff_TrickeryIntegrityTests(t *testing.T) {
 		t.Run("and can withstand pruning some things yet keep network integrity", func(t *testing.T) {
 			network.Synapses[26].ActivationHistory = 100
 			network.Prune()
-			fmt.Println("Network AFTER")
-			network.Print()
 
 			_, syn21 := network.Synapses[21]
 			assert.Equal(t, false, syn21, "synapse 21 still exists")
@@ -335,8 +333,6 @@ func Test_ApplyDiff_TrickeryIntegrityTests(t *testing.T) {
 			assert.Equal(t, true, pretestok)
 			assert.Equal(t, 1, len(network.Synapses))
 			assert.Equal(t, 2, len(network.Cells))
-			// fmt.Println("network before")
-			// network.Print()
 
 			n2 := NewNetwork()
 			net2 := &n2
@@ -362,13 +358,9 @@ func Test_ApplyDiff_TrickeryIntegrityTests(t *testing.T) {
 			assert.Equal(t, 2, len(net2.Cells))
 			pretestNet2ok, _ := CheckIntegrity(net2)
 			assert.Equal(t, true, pretestNet2ok)
-			// fmt.Println("net2 before")
-			// net2.Print()
 
 			// now do the diffing and checking
 			diff := DiffNetworks(network, net2)
-			// fmt.Println("diff:")
-			// diff.Print()
 			assert.Equal(t, 0, len(diff.synapseDiffs))
 			assert.Equal(t, 1, len(diff.addedCells))
 			assert.Equal(t, 0, len(diff.synapseFires))
@@ -384,8 +376,6 @@ func Test_ApplyDiff_TrickeryIntegrityTests(t *testing.T) {
 			if !postMergeIntegrityOK {
 				report.Print()
 			}
-			// fmt.Println("END NETWORK")
-			// network.Print()
 		})
 	})
 }
