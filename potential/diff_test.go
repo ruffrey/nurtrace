@@ -313,8 +313,8 @@ func Test_ApplyDiff_TrickeryIntegrityTests(t *testing.T) {
 			assert.Equal(t, true, pretestok)
 			assert.Equal(t, 1, len(network.Synapses))
 			assert.Equal(t, 2, len(network.Cells))
-			fmt.Println("network before")
-			network.Print()
+			// fmt.Println("network before")
+			// network.Print()
 
 			n2 := NewNetwork()
 			net2 := &n2
@@ -340,13 +340,13 @@ func Test_ApplyDiff_TrickeryIntegrityTests(t *testing.T) {
 			assert.Equal(t, 2, len(net2.Cells))
 			pretestNet2ok, _ := CheckIntegrity(net2)
 			assert.Equal(t, true, pretestNet2ok)
-			fmt.Println("net2 before")
-			net2.Print()
+			// fmt.Println("net2 before")
+			// net2.Print()
 
 			// now do the diffing and checking
 			diff := DiffNetworks(network, net2)
-			fmt.Println("diff:")
-			diff.Print()
+			// fmt.Println("diff:")
+			// diff.Print()
 			assert.Equal(t, 0, len(diff.synapseDiffs))
 			assert.Equal(t, 1, len(diff.addedCells))
 			assert.Equal(t, 0, len(diff.synapseFires))
@@ -362,8 +362,8 @@ func Test_ApplyDiff_TrickeryIntegrityTests(t *testing.T) {
 			if !postMergeIntegrityOK {
 				report.Print()
 			}
-			fmt.Println("END NETWORK")
-			network.Print()
+			// fmt.Println("END NETWORK")
+			// network.Print()
 		})
 	})
 }
