@@ -59,6 +59,31 @@ func Test_PruneNetwork(t *testing.T) {
 
 		})
 	})
+
+	t.Run("degrades millivolts toward zero when cell activated less than desired times", func(t *testing.T) {
+		network := NewNetwork()
+		synapsePositive := NewSynapse(network)
+		synapseNegative := NewSynapse(network)
+		synapsePositive.Millivolts = 5
+		synapseNegative.Millivolts = -5
+		cell := NewCell(network)
+		cell.AxonSynapses[synapsePositive.ID] = true
+		cell.AxonSynapses[synapseNegative.ID] = true
+		cell.DendriteSynapses[synapsePositive.ID] = true
+		cell.DendriteSynapses[synapseNegative.ID] = true
+		synapsePositive.FromNeuronAxon = cell.ID
+		synapsePositive.ToNeuronDendrite = cell.ID
+		synapseNegative.FromNeuronAxon = cell.ID
+		synapseNegative.ToNeuronDendrite = cell.ID
+
+		synapsePositive.ActivationHistory = defaultSynapseMinFireThreshold - 1
+		synapseNegative.ActivationHistory = defaultSynapseMinFireThreshold - 1
+
+		network.Prune()
+
+		assert.Equal(t, int8(2), synapsePositive.Millivolts)
+		assert.Equal(t, int8(-2), synapseNegative.Millivolts)
+	})
 }
 
 func Test_PruneSynapse(t *testing.T) {

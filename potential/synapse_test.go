@@ -67,6 +67,15 @@ func Test_SynapseActivateNotExist(t *testing.T) {
 	})
 }
 
+func Test_SynapseStringer(t *testing.T) {
+	t.Run("String works without crashing", func(t *testing.T) {
+		network := NewNetwork()
+		synapse := NewSynapse(network)
+		s := synapse.String()
+		assert.NotEmpty(t, s)
+	})
+}
+
 func Test_SynapseActivate(t *testing.T) {
 
 }
