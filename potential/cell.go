@@ -1,6 +1,9 @@
 package potential
 
-import "math/rand"
+import (
+	"fmt"
+	"math/rand"
+)
 
 /*
 CellID should be unique for all cells in a network.
@@ -153,4 +156,22 @@ func (cell *Cell) ApplyVoltage(change int8, fromSynapse *Synapse) (didFire bool)
 	cell.Voltage = int8(newPossibleVoltage)
 
 	return didFire
+}
+
+func (cell *Cell) String() string {
+	s := fmt.Sprintf("Cell %d", cell.ID)
+	s += fmt.Sprintf("\n  Immortal=%t", cell.Immortal)
+	s += fmt.Sprintf("\n  Voltage=%d", cell.Voltage)
+	s += fmt.Sprintf("\n  Tag=%s", cell.Tag)
+
+	s += fmt.Sprintf("\n  AxonSynapses (%d)", len(cell.AxonSynapses))
+	for id := range cell.AxonSynapses {
+		s += fmt.Sprintf("\n    %d", id)
+	}
+	s += fmt.Sprintf("\n  DendriteSynapses (%d)", len(cell.DendriteSynapses))
+	for id := range cell.DendriteSynapses {
+		s += fmt.Sprintf("\n    %d", id)
+	}
+
+	return s
 }

@@ -86,3 +86,13 @@ func (synapse *Synapse) Activate() (didFire bool, err error) {
 
 	return didFire, nil
 }
+
+func (synapse *Synapse) String() string {
+	s := fmt.Sprintf("Synapse %d", synapse.ID)
+	s += fmt.Sprintf("\n  Millivolts=%d", synapse.Millivolts)
+	s += fmt.Sprintf("\n  ActivationHistory=%d", synapse.ActivationHistory)
+	s += fmt.Sprintf("\n  FromNeuronAxon=%d", synapse.FromNeuronAxon)
+	s += fmt.Sprintf("\n  ToNeuronDendrite=%d", synapse.ToNeuronDendrite)
+
+	return s
+}
