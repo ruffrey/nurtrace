@@ -190,8 +190,7 @@ doing distributed training.
 It involves resetting pointers.
 */
 func CloneNetwork(originalNetwork *Network) *Network {
-	n := NewNetwork()
-	newNetwork := &n
+	newNetwork := NewNetwork()
 
 	for _, cell := range originalNetwork.Cells {
 		copyCellToNetwork(cell, newNetwork)

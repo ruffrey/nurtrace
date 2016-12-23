@@ -11,8 +11,7 @@ import (
 
 func Test_SetupVocab(t *testing.T) {
 	t.Run("making new vocab adds all unique characters to a map", func(t *testing.T) {
-		n := potential.NewNetwork()
-		network := &n
+		network := potential.NewNetwork()
 		network.Grow(10, 10, 0)
 
 		text := "kfk9\nI.2"
@@ -66,8 +65,7 @@ func Test_Training(t *testing.T) {
 			Chars:    strings.Split(string(bytes), ""),
 			Settings: settings,
 		}
-		n := potential.NewNetwork()
-		network := &n
+		network := potential.NewNetwork()
 		network.Grow(10, 5, 10)
 		potential.Train(c, settings, network)
 	})
@@ -81,8 +79,7 @@ func Test_SaveLoadVocab(t *testing.T) {
 			Chars:    strings.Split(string(bytes), ""),
 			Settings: potential.NewTrainingSettings(),
 		}
-		n := potential.NewNetwork()
-		network := &n
+		network := potential.NewNetwork()
 		network.Grow(10, 5, 10)
 		c.PrepareData(network)
 		assert.NotEqual(t, 0, len(c.Settings.Data.KeyToItem))

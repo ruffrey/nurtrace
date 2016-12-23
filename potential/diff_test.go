@@ -9,8 +9,7 @@ import (
 
 func Test_NewDiff(t *testing.T) {
 	t.Run("initializes maps and arrays so immediate assignment does not panic", func(t *testing.T) {
-		n := NewNetwork()
-		network := &n
+		network := NewNetwork()
 		diff := NewDiff()
 
 		cell := NewCell(network)
@@ -24,8 +23,7 @@ func Test_NewDiff(t *testing.T) {
 
 func Test_CloneNetwork(t *testing.T) {
 	t.Run("cloning a network yields a valid copy", func(t *testing.T) {
-		o := NewNetwork()
-		original := &o
+		original := NewNetwork()
 
 		beforeCell := NewCell(original)
 		original.Cells[beforeCell.ID] = beforeCell
@@ -53,9 +51,8 @@ func Test_CloneNetwork(t *testing.T) {
 		}
 	})
 	t.Run("all cells and synapses have valid connections on the cloned network", func(t *testing.T) {
-		o := NewNetwork()
-		original := &o
-		o.Grow(1000, 10, 1000)
+		original := NewNetwork()
+		original.Grow(1000, 10, 1000)
 
 		ok, report := CheckIntegrity(original)
 		assert.True(t, ok, "A freshly grown network had bad integrity", report)
@@ -66,9 +63,8 @@ func Test_CloneNetwork(t *testing.T) {
 		assert.True(t, ok, "A freshly cloned network had bad integrity", report)
 	})
 	t.Run("cloned network has the same synapses and cells", func(t *testing.T) {
-		o := NewNetwork()
-		original := &o
-		o.Grow(100, 10, 100)
+		original := NewNetwork()
+		original.Grow(100, 10, 100)
 
 		cloned := CloneNetwork(original)
 
@@ -81,8 +77,7 @@ func Test_CloneNetwork(t *testing.T) {
 
 func Test_DiffNetworks(t *testing.T) {
 	t.Run("synapse millivolt diff is NEW minus OLD", func(t *testing.T) {
-		o := NewNetwork()
-		original := &o
+		original := NewNetwork()
 		syn1 := NewSynapse(original)
 		syn1.Millivolts = 5
 		// add cell for integrity
@@ -101,13 +96,11 @@ func Test_DiffNetworks(t *testing.T) {
 		assert.Equal(t, diff.synapseDiffs[syn1.ID], int8(5), "Synapse diff should be NEW - OLD")
 	})
 	t.Run("diffing large unrelated networks works", func(t *testing.T) {
-		n1 := NewNetwork()
-		n2 := NewNetwork()
-		net1 := &n1
-		net2 := &n2
+		net1 := NewNetwork()
+		net2 := NewNetwork()
 
-		n1.Grow(4000, 10, 1000)
-		n2.Grow(4000, 10, 1000)
+		net1.Grow(4000, 10, 1000)
+		net2.Grow(4000, 10, 1000)
 
 		diff := DiffNetworks(net1, net2)
 
@@ -133,8 +126,7 @@ func Test_DiffNetworks(t *testing.T) {
 
 func Test_ApplyDiff(t *testing.T) {
 	t.Run("synapse millivolts are properly applied", func(t *testing.T) {
-		o := NewNetwork()
-		original := &o
+		original := NewNetwork()
 		syn1 := NewSynapse(original)
 		syn1.Millivolts = 7
 
@@ -159,8 +151,7 @@ func Test_ApplyDiff(t *testing.T) {
 			"synapse millivolts failed to apply")
 	})
 	t.Run("all synapses and cells have valid connections after applying a diff", func(t *testing.T) {
-		n1 := NewNetwork()
-		net1 := &n1
+		net1 := NewNetwork()
 		net1.Grow(50, 5, 50)
 		net2 := CloneNetwork(net1)
 
@@ -193,8 +184,7 @@ func Test_ApplyDiff(t *testing.T) {
 func Test_ApplyDiff_TrickeryIntegrityTests(t *testing.T) {
 	t.Run("a cell ID is new and one synapse ID is not unique so it gets reassigned, keeps network integrity", func(t *testing.T) {
 		// network 1
-		n := NewNetwork()
-		network := &n
+		network := NewNetwork()
 		n1Cell1 := NewCell(network)
 		n1Cell2 := NewCell(network)
 		delete(network.Cells, n1Cell1.ID)
@@ -230,8 +220,7 @@ func Test_ApplyDiff_TrickeryIntegrityTests(t *testing.T) {
 		}
 
 		// network 2
-		n2 := NewNetwork()
-		net2 := &n2
+		net2 := NewNetwork()
 		n2Cell1 := NewCell(net2)
 		n2Cell2 := NewCell(net2)
 		delete(net2.Cells, n2Cell1.ID)
@@ -303,8 +292,7 @@ func Test_ApplyDiff_TrickeryIntegrityTests(t *testing.T) {
 	})
 	t.Skip("when a cell is new and another already exists one of its synapses has been re-ID-d due to collision", func(t *testing.T) {
 		t.Run("the old synapse ID is removed from the dendrite synapse list", func(t *testing.T) {
-			n := NewNetwork()
-			network := &n
+			network := NewNetwork()
 			assert.Equal(t, 0, len(network.Cells))
 			assert.Equal(t, 0, len(network.Synapses))
 
@@ -334,8 +322,7 @@ func Test_ApplyDiff_TrickeryIntegrityTests(t *testing.T) {
 			assert.Equal(t, 1, len(network.Synapses))
 			assert.Equal(t, 2, len(network.Cells))
 
-			n2 := NewNetwork()
-			net2 := &n2
+			net2 := NewNetwork()
 			s2 := NewSynapse(net2)
 			s2.Millivolts = 10
 			delete(net2.Synapses, s2.ID)
@@ -382,10 +369,8 @@ func Test_ApplyDiff_TrickeryIntegrityTests(t *testing.T) {
 
 func Test_copyCellToNetwork(t *testing.T) {
 	t.Run("copying a cell sets the pointer to a new network", func(t *testing.T) {
-		on := NewNetwork()
-		originalNetwork := &on
-		nn := NewNetwork()
-		newNetwork := &nn
+		originalNetwork := NewNetwork()
+		newNetwork := NewNetwork()
 		originalCell := NewCell(originalNetwork)
 		copyCellToNetwork(originalCell, newNetwork)
 		copiedCell, exists := newNetwork.Cells[originalCell.ID]
@@ -407,10 +392,8 @@ func Test_copySynapseToNetwork(t *testing.T) {
 
 func Test_DiffPrint(t *testing.T) {
 	t.Run("diff.Print works", func(t *testing.T) {
-		n1 := NewNetwork()
-		n2 := NewNetwork()
-		net1 := &n1
-		net2 := &n2
+		net1 := NewNetwork()
+		net2 := NewNetwork()
 		net1.Grow(5, 2, 5)
 		net2.Grow(5, 2, 5)
 		diff := DiffNetworks(net1, net2)

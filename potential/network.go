@@ -45,8 +45,8 @@ type Network struct {
 NewNetwork is a constructor that, which also happens to reset the random number generator
 when called. Seems like a good time.
 */
-func NewNetwork() Network {
-	return Network{
+func NewNetwork() *Network {
+	n := Network{
 		Disabled: false,
 		Synapses: make(map[SynapseID]*Synapse),
 		Cells:    make(map[CellID]*Cell),
@@ -54,6 +54,7 @@ func NewNetwork() Network {
 		resetCellsOnNextStep:   make(map[CellID]bool),
 		maxHops:                20,
 	}
+	return &n
 }
 
 func randomIntBetween(min, max int) int {
@@ -168,8 +169,7 @@ func (network *Network) SaveToFile(filepath string) (err error) {
 LoadNetworkFromFile reads a saved network from disk and creates a new network from it.
 */
 func LoadNetworkFromFile(filepath string) (*Network, error) {
-	n := NewNetwork()
-	network := &n
+	network := NewNetwork()
 	bytes, err := ioutil.ReadFile(filepath)
 	if err != nil {
 		return network, err

@@ -9,8 +9,7 @@ import (
 
 func Test_NetworkGrow(t *testing.T) {
 	t.Run("Grow() adds the right number of cells and synapses", func(t *testing.T) {
-		n := NewNetwork()
-		network := &n
+		network := NewNetwork()
 		network.Grow(50, 5, 200)
 
 		assert.Equal(t, 50, len(network.Cells))
@@ -30,8 +29,7 @@ func Test_GrowPathBetween(t *testing.T) {
 	var layer2D *Synapse
 
 	before := func() {
-		n := NewNetwork()
-		network = &n
+		network = NewNetwork()
 
 		// synapses are in (parens)
 		//
@@ -106,8 +104,7 @@ func Test_GrowPathBetween(t *testing.T) {
 	})
 	t.Run("does not find synapses past the maxHops", func(t *testing.T) {
 		before()
-		n := NewNetwork()
-		network = &n
+		network = NewNetwork()
 
 		var lastCell *Cell
 		var lastHoppedCell *Cell
@@ -152,8 +149,7 @@ func Test_GrowPathBetween(t *testing.T) {
 		assert.Equal(t, 11, len(lastHoppedCell.AxonSynapses))
 	})
 	t.Run("does not panic on a large network with many synapses", func(t *testing.T) {
-		n := NewNetwork()
-		network = &n
+		network = NewNetwork()
 		network.Grow(500, 10, 0)
 		input := network.RandomCellKey()
 		var output CellID
@@ -166,8 +162,7 @@ func Test_GrowPathBetween(t *testing.T) {
 		network.GrowPathBetween(input, output, 10)
 	})
 	t.Run("changes the number of synapses during runs", func(t *testing.T) {
-		n := NewNetwork()
-		network := &n
+		network := NewNetwork()
 		network.Grow(500, 0, 0)
 		for i := 0; i < 10; i++ {
 			input := network.RandomCellKey()
@@ -187,8 +182,7 @@ func Test_GrowPathBetween(t *testing.T) {
 
 func Test_GrowPathBetween_Integrity(t *testing.T) {
 	t.Run("passes the integrity after growing many deep paths on a large network", func(t *testing.T) {
-		n := NewNetwork()
-		network := &n
+		network := NewNetwork()
 		network.Grow(500, 5, 100)
 		for i := 0; i < 10; i++ {
 			input := network.RandomCellKey()

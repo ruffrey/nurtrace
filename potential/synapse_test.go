@@ -9,8 +9,7 @@ import (
 func Test_SynapseActivateNotExist(t *testing.T) {
 	var network *Network
 	before := func() {
-		n := NewNetwork()
-		network = &n
+		network = NewNetwork()
 	}
 
 	t.Run("when synapse references the network but its dendrite not in cells it returns error", func(t *testing.T) {

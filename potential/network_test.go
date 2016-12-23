@@ -7,8 +7,7 @@ import (
 )
 
 func Test_NewNetwork(t *testing.T) {
-	o := NewNetwork()
-	original := &o
+	original := NewNetwork()
 
 	t.Run("Cell map is initialized and can add cell immediately", func(t *testing.T) {
 		cell := NewCell(original)
@@ -25,8 +24,7 @@ func Test_NewNetwork(t *testing.T) {
 	})
 
 	t.Run("new network passes integrity check", func(t *testing.T) {
-		n := NewNetwork()
-		network := &n
+		network := NewNetwork()
 		network.Grow(100, 10, 100)
 		ok, _ := CheckIntegrity(network)
 		assert.Equal(t, true, ok, "new network has integrity issues")
@@ -57,8 +55,7 @@ func Test_NetworkSerialization(t *testing.T) {
 	var cell1, cell2 *Cell
 	before := func() {
 		// setup
-		n := NewNetwork()
-		network = &n
+		network = NewNetwork()
 		synapse = NewSynapse(network)
 		// cell 1 fires into cell 2
 		cell1 = NewCell(network)
@@ -99,8 +96,7 @@ func Test_NetworkSerialization(t *testing.T) {
 
 func Test_ResetForTraining(t *testing.T) {
 	t.Run("resets cell props activating, voltage, wasFired", func(t *testing.T) {
-		n := NewNetwork()
-		network := &n
+		network := NewNetwork()
 
 		// pretest
 		cell1 := NewCell(network)
@@ -126,8 +122,7 @@ func Test_ResetForTraining(t *testing.T) {
 	// To make sure we don't do this accidentally because it seems like the right thing,
 	// and break synapse pruning.
 	t.Run("does not reset synapse ActivationHistory", func(t *testing.T) {
-		n := NewNetwork()
-		network := &n
+		network := NewNetwork()
 
 		s := NewSynapse(network)
 		s.ActivationHistory = 12
@@ -140,14 +135,12 @@ func Test_ResetForTraining(t *testing.T) {
 
 func Test_NetworkPrint(t *testing.T) {
 	t.Run("network.Print works", func(t *testing.T) {
-		n := NewNetwork()
-		network := &n
+		network := NewNetwork()
 		network.Grow(5, 2, 5)
 		network.Print()
 	})
 	t.Run("network.PrintTotals works", func(t *testing.T) {
-		n := NewNetwork()
-		network := &n
+		network := NewNetwork()
 		network.Grow(5, 2, 5)
 		network.PrintTotals()
 	})

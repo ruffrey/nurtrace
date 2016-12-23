@@ -55,6 +55,6 @@ func Test_Sampling(t *testing.T) {
 		network.GrowPathBetween(data.KeyToItem["START"].InputCell, data.KeyToItem["A"].InputCell, 20)
 		network.GrowPathBetween(data.KeyToItem["A"].InputCell, data.KeyToItem["END"].InputCell, 20)
 
-		Sample(seedKeys, &data, &network, 10, "START", "END")
+		Sample(seedKeys, &data, network, 10, "START", "END")
 	})
 }

@@ -8,8 +8,7 @@ import (
 
 func Test_NewCell(t *testing.T) {
 	t.Run("calling NewCell() also adds it to the network", func(t *testing.T) {
-		n := NewNetwork()
-		network := &n
+		network := NewNetwork()
 		cell := NewCell(network)
 		network.Cells[cell.ID] = cell
 		cell.Network = network
