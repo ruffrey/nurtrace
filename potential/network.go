@@ -52,6 +52,7 @@ func NewNetwork() Network {
 		Cells:    make(map[CellID]*Cell),
 		nextSynapsesToActivate: make(map[SynapseID]bool),
 		resetCellsOnNextStep:   make(map[CellID]bool),
+		maxHops:                20,
 	}
 }
 

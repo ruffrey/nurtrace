@@ -7,6 +7,7 @@
     - [ ] larger sets of pathways are OK - more synapses between start and end
     - [ ] more aggressive pruning and optimize learning more granularly to reduce randomness
     - [x] if it fails, do a prune on the network copy, then GrowPathBetween, and apply it to the original (?)
+- [ ] NewNetwork should return a pointer
 
 ## Priority II
 - [ ] profile CPU again
