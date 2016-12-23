@@ -14,7 +14,7 @@ import (
 var networkJSONFile = flag.String("network", "network.json", "Input location of the network JSON")
 var outFile = flag.String("out", "network.dot", "Output location of the DOT file")
 
-const directed bool = true
+const directed bool = false
 
 func main() {
 	flag.Parse()
@@ -43,5 +43,7 @@ func main() {
 		fmt.Println("Failed to save!")
 		panic(err)
 	}
+	fmt.Println("You can render the dot file using Dataviz:")
+	fmt.Println("  sfdp -x -Goverlap=scale -Tpng", *outFile, "> output.png")
 	fmt.Println("Done")
 }
