@@ -37,8 +37,7 @@ func main() {
 	network, err = potential.LoadNetworkFromFile(*networkSaveFile)
 	if err != nil {
 		fmt.Println("Unable to load network from file; creating new one.", err)
-		newN := potential.NewNetwork()
-		network = &newN
+		network = potential.NewNetwork()
 		neuronsToAdd := initialNetworkNeurons
 		synapsesToAdd := 0
 		network.Grow(neuronsToAdd, defaultNeuronSynapses, synapsesToAdd)
