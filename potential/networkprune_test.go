@@ -148,6 +148,21 @@ func Test_PruneSynapse(t *testing.T) {
 		_, ok = network.Cells[cell2.ID]
 		assert.Equal(t, false, ok, "cell2 not removed from network when synapses were zero during synapse prune")
 	})
+	t.Run("does not crash when synapse does not exist", func(t *testing.T) {
+		n := NewNetwork()
+		n.PruneSynapse(54)
+	})
+	t.Run("removeSynapseFromCell panics when cell does not exist", func(t *testing.T) {
+		n := NewNetwork()
+		s := NewSynapse(n)
+		c := NewCell(network)
+		s.ToNeuronDendrite = 732
+		s.FromNeuronAxon = c.ID
+		// cell does not reference back
+		assert.Panics(t, func() {
+			network.removeSynapseFromCell(s.ID, 732, false)
+		})
+	})
 }
 
 func Test_PruneCell(t *testing.T) {
