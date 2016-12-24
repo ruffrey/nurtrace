@@ -183,7 +183,7 @@ func LoadNetworkFromFile(filepath string) (*Network, error) {
 
 	if ok, report := CheckIntegrity(network); !ok {
 		report.Print()
-		return network, fmt.Errorf("Failed loading network from file %s", filepath)
+		return network, fmt.Errorf("Cannot load network with bad integrity from file %s", filepath)
 	}
 	return network, nil
 }

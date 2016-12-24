@@ -1,6 +1,8 @@
 package potential
 
 import (
+	"io/ioutil"
+	"os"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -90,6 +92,48 @@ func Test_NetworkSerialization(t *testing.T) {
 
 		ok, report := CheckIntegrity(net2)
 		assert.Equal(t, true, ok, report)
+	})
+
+	t.Run("loading a network that has bad integrity returns an error", func(t *testing.T) {
+		// setup
+		filepath := "_bad_net_integ.test.json"
+		n := NewNetwork()
+		c := NewCell(n)
+		c.AxonSynapses[5] = true
+		s := NewSynapse(n)
+		s.FromNeuronAxon = c.ID
+		s.ToNeuronDendrite = 11
+		assert.Equal(t, 1, len(n.Cells))
+		assert.Equal(t, 1, len(n.Synapses))
+		integrity, _ := CheckIntegrity(n)
+		assert.Equal(t, false, integrity,
+			"pre-setup network should purposely have bad integrity")
+		err := n.SaveToFile(filepath)
+		assert.NoError(t, err, "pre-setup network failed")
+		// test
+		_, err = LoadNetworkFromFile(filepath)
+		assert.Error(t, err, "loading a network with poor integrity did not return error")
+		if err == nil {
+			t.Fail()
+			return
+		}
+		assert.Equal(t, err.Error(),
+			"Cannot load network with bad integrity from file "+filepath)
+	})
+
+	t.Run("loading a non-existant file network returns an error", func(t *testing.T) {
+		_, err := LoadNetworkFromFile("/kasdjfkk/asdkfjdsk")
+		assert.Error(t, err)
+		assert.NotEmpty(t, err)
+	})
+
+	t.Run("loading a network with bad json returns an error", func(t *testing.T) {
+		filepath := "_net_test_notjson.test.json"
+		err := ioutil.WriteFile(filepath, []byte("asdf not json"), os.ModePerm)
+		assert.NoError(t, err)
+		_, err = LoadNetworkFromFile(filepath)
+		assert.Error(t, err)
+		assert.NotEmpty(t, err)
 	})
 
 }

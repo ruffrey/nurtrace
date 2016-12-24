@@ -85,11 +85,86 @@ func Test_PruneNetwork(t *testing.T) {
 		assert.Equal(t, int8(-2), synapseNegative.Millivolts)
 	})
 
-	t.Run("pruning removes synapses that did not activate", func(t *testing.T) {
+	t.Run("pruning sets synapse millivolts to zero when synapse activated less than desired times and is half distance to zero is 2 or less", func(t *testing.T) {
+		network := NewNetwork()
+		synapsePositive := NewSynapse(network)
+		synapseNegative := NewSynapse(network)
+		synapsePositive.Millivolts = 3
+		synapseNegative.Millivolts = -3
+		cell := NewCell(network)
+		cell.AxonSynapses[synapsePositive.ID] = true
+		cell.AxonSynapses[synapseNegative.ID] = true
+		cell.DendriteSynapses[synapsePositive.ID] = true
+		cell.DendriteSynapses[synapseNegative.ID] = true
+		synapsePositive.FromNeuronAxon = cell.ID
+		synapsePositive.ToNeuronDendrite = cell.ID
+		synapseNegative.FromNeuronAxon = cell.ID
+		synapseNegative.ToNeuronDendrite = cell.ID
 
+		synapsePositive.ActivationHistory = defaultSynapseMinFireThreshold - 1
+		synapseNegative.ActivationHistory = defaultSynapseMinFireThreshold - 1
+
+		network.Prune()
+
+		assert.Equal(t, int8(0), synapsePositive.Millivolts)
+		assert.Equal(t, int8(0), synapseNegative.Millivolts)
+	})
+	t.Run("pruning does not bump millivolts outside int8 bounds", func(t *testing.T) {
+		network := NewNetwork()
+		synapsePositive := NewSynapse(network)
+		synapseNegative := NewSynapse(network)
+		synapsePositive.Millivolts = 126
+		synapseNegative.Millivolts = -127
+		cell := NewCell(network)
+		cell.AxonSynapses[synapsePositive.ID] = true
+		cell.AxonSynapses[synapseNegative.ID] = true
+		cell.DendriteSynapses[synapsePositive.ID] = true
+		cell.DendriteSynapses[synapseNegative.ID] = true
+		synapsePositive.FromNeuronAxon = cell.ID
+		synapsePositive.ToNeuronDendrite = cell.ID
+		synapseNegative.FromNeuronAxon = cell.ID
+		synapseNegative.ToNeuronDendrite = cell.ID
+
+		synapsePositive.ActivationHistory = defaultSynapseMinFireThreshold + 5
+		synapseNegative.ActivationHistory = defaultSynapseMinFireThreshold + 5
+
+		network.Prune()
+
+		assert.Equal(t, int8(125), synapsePositive.Millivolts)
+		assert.Equal(t, int8(-126), synapseNegative.Millivolts)
+	})
+	t.Run("pruning removes synapses that did not activate", func(t *testing.T) {
+		// setup
+		network := NewNetwork()
+		s1 := NewSynapse(network)
+		s2 := NewSynapse(network)
+		c3 := NewCell(network)
+		c4 := NewCell(network)
+
+		s1.FromNeuronAxon = c3.ID
+		c3.AxonSynapses[s1.ID] = true
+
+		s2.ToNeuronDendrite = c4.ID
+		c4.DendriteSynapses[s2.ID] = true
+
+		s2.FromNeuronAxon = c3.ID
+		c3.AxonSynapses[s2.ID] = true
+
+		s1.ToNeuronDendrite = c4.ID
+		c4.DendriteSynapses[s1.ID] = true
+
+		// prechecks
+		integrity, _ := CheckIntegrity(network)
+		assert.Equal(t, true, integrity)
+		assert.Equal(t, 2, len(network.Cells))
+		assert.Equal(t, 2, len(network.Synapses))
+
+		// test
+		network.Prune()
+		assert.Equal(t, 0, len(network.Synapses))
 	})
 
-	t.Run("pruning bumps synapse millivolts that did activate", func(t *testing.T) {
+	t.Run("pruning bumps sufficiently activated synapse millivolts by the learn rate", func(t *testing.T) {
 
 	})
 }

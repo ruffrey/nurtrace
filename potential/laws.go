@@ -17,8 +17,10 @@ and training or sampling sessions should be in this file.
 // never a chance synapse addition will create an int8 overflow.
 //
 // DO NOT CHANGE THESE TWO.
-const actualSynapseMin int8 = -128 + synapseLearnRate
-const actualSynapseMax int8 = 127 - synapseLearnRate
+// must be one outside the bounds, plus/minus the learning rate. otherwise
+// the int8 will FLIP ITS PLUS or MINUS!!
+const actualSynapseMin int8 = -127 + synapseLearnRate
+const actualSynapseMax int8 = 126 - synapseLearnRate
 
 /*
 synapseLearnRate is how much a synapse should get bumped when it is being reinforced.
@@ -88,7 +90,12 @@ ratioMaxHopsBetweenCellsDuringPathTrace is how many steps (synapses) are in betw
 cell before we forge a path up to `GrowPathExpectedMinimumSynapses` in between them.
 */
 func ratioMaxHopsBetweenCellsDuringPathTrace(network *Network) int {
-	avgSynPerCell := float64(len(network.Synapses) / len(network.Cells))
+	lenSyn := len(network.Synapses)
+	lenCell := len(network.Cells)
+	if lenCell == 0 {
+		return 0 // prevents divide by zero panic
+	}
+	avgSynPerCell := float64(lenSyn / lenCell)
 	// semi-hardcoded number of max hops. this was arbitrary.
 	maxHops := int(math.Max(math.Min(avgSynPerCell, 50.0), 20))
 	return maxHops
