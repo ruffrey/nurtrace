@@ -24,6 +24,9 @@ func Test_CellStringer(t *testing.T) {
 	t.Run("String works without crashing", func(t *testing.T) {
 		network := NewNetwork()
 		cell := NewCell(network)
+		synapse := NewSynapse(network)
+		cell.AxonSynapses[synapse.ID] = true
+		cell.DendriteSynapses[synapse.ID] = true
 		s := cell.String()
 		assert.NotEmpty(t, s)
 	})

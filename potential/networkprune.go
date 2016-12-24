@@ -156,13 +156,11 @@ func (network *Network) PruneCell(cellID CellID) {
 	}
 
 	// with good code, the following should not be necessary.
-	for synapseID := range cell.DendriteSynapses {
-		fmt.Println("warn: should not need to prune dendrite synapse from cell")
-		network.PruneSynapse(synapseID)
+	if len(cell.DendriteSynapses) > 0 {
+		panic(fmt.Sprintf("Should not need to prune dendrite synapse from cell=%d (%v)", cellID, cell.DendriteSynapses))
 	}
-	for synapseID := range cell.AxonSynapses {
-		fmt.Println("warn: should not need to prune axon synapse from cell")
-		network.PruneSynapse(synapseID)
+	if len(cell.AxonSynapses) > 0 {
+		panic(fmt.Sprintf("Should not need to prune axon synapse from cell=%d (%v)", cellID, cell.AxonSynapses))
 	}
 
 	// Do this after removing synapses, because otherwise we can end up with

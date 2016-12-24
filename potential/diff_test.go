@@ -125,7 +125,7 @@ func Test_DiffNetworks(t *testing.T) {
 }
 
 func Test_ApplyDiff(t *testing.T) {
-	t.Run("synapse millivolts are properly applied", func(t *testing.T) {
+	t.Run("synapse millivolts and activation history are properly applied", func(t *testing.T) {
 		original := NewNetwork()
 		syn1 := NewSynapse(original)
 		syn1.Millivolts = 7
@@ -138,6 +138,8 @@ func Test_ApplyDiff(t *testing.T) {
 		cloned := CloneNetwork(original)
 
 		cloned.Synapses[syn1.ID].Millivolts = 14
+		cloned.Synapses[syn1.ID].ActivationHistory = 42
+		original.Synapses[syn1.ID].ActivationHistory = 3
 		ok, report := CheckIntegrity(cloned)
 		if !ok {
 			cloned.Print()
@@ -145,10 +147,15 @@ func Test_ApplyDiff(t *testing.T) {
 		assert.True(t, ok, "cloned network has bad integrity", report)
 
 		diff := DiffNetworks(original, cloned)
+		assert.Equal(t, 1, len(diff.synapseDiffs))
+		assert.Equal(t, 1, len(diff.synapseFires))
+		assert.Equal(t, int8(7), diff.synapseDiffs[syn1.ID])
+		assert.Equal(t, uint(42), diff.synapseFires[syn1.ID])
 		ApplyDiff(diff, original)
 
 		assert.Equal(t, int8(14), original.Synapses[syn1.ID].Millivolts,
 			"synapse millivolts failed to apply")
+		assert.Equal(t, uint(45), original.Synapses[syn1.ID].ActivationHistory)
 	})
 	t.Run("all synapses and cells have valid connections after applying a diff", func(t *testing.T) {
 		net1 := NewNetwork()
@@ -176,6 +183,7 @@ func Test_ApplyDiff(t *testing.T) {
 	})
 	t.Run("adds new cell to the network", func(t *testing.T) {
 	})
+
 	t.Run("adds new synapse to the network", func(t *testing.T) {
 
 	})
@@ -290,7 +298,7 @@ func Test_ApplyDiff_TrickeryIntegrityTests(t *testing.T) {
 			}
 		})
 	})
-	t.Skip("when a cell is new and another already exists one of its synapses has been re-ID-d due to collision", func(t *testing.T) {
+	t.Run("when a cell is new and another already exists one of its synapses has been re-ID-d due to collision", func(t *testing.T) {
 		t.Run("the old synapse ID is removed from the dendrite synapse list", func(t *testing.T) {
 			network := NewNetwork()
 			assert.Equal(t, 0, len(network.Cells))

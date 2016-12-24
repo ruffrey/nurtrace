@@ -16,6 +16,16 @@ func Test_Sampling(t *testing.T) {
 		seedKeys = append(seedKeys, "START")
 		seedKeys = append(seedKeys, "START")
 		seedKeys = append(seedKeys, "START")
+		seedKeys = append(seedKeys, "START")
+		seedKeys = append(seedKeys, "START")
+		seedKeys = append(seedKeys, "START")
+		seedKeys = append(seedKeys, "START")
+		seedKeys = append(seedKeys, "START")
+		seedKeys = append(seedKeys, "START")
+		seedKeys = append(seedKeys, "A")
+		seedKeys = append(seedKeys, "A")
+		seedKeys = append(seedKeys, "A")
+		seedKeys = append(seedKeys, "A")
 		seedKeys = append(seedKeys, "A")
 		seedKeys = append(seedKeys, "A")
 		seedKeys = append(seedKeys, "A")
@@ -55,6 +65,20 @@ func Test_Sampling(t *testing.T) {
 		network.GrowPathBetween(data.KeyToItem["START"].InputCell, data.KeyToItem["A"].InputCell, 20)
 		network.GrowPathBetween(data.KeyToItem["A"].InputCell, data.KeyToItem["END"].InputCell, 20)
 
-		Sample(seedKeys, &data, network, 10, "START", "END")
+		t.Run("under max iterations", func(t *testing.T) {
+			Sample(seedKeys, &data, network, 1000, data.KeyToItem["START"].Value, data.KeyToItem["END"].Value)
+		})
+		t.Run("over max iterations", func(t *testing.T) {
+			Sample(seedKeys, &data, network, 2, data.KeyToItem["START"].Value, data.KeyToItem["END"].Value)
+		})
+		t.Run("when hitting end", func(t *testing.T) {
+			seedKeys = append(seedKeys, "END")
+			seedKeys = append(seedKeys, "END")
+			seedKeys = append(seedKeys, "END")
+			seedKeys = append(seedKeys, "END")
+			Sample(seedKeys, &data, network, 1000, "START", "END")
+		})
+
+		// also sample with max iterations
 	})
 }

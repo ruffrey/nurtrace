@@ -76,11 +76,7 @@ RandomCellKey gets the key of a random one in the map.
 This is pretty slow, as it turns out.
 */
 func (network *Network) RandomCellKey() (randCellID CellID) {
-	lenCells := len(network.Cells)
-	if lenCells == 0 {
-		panic("Cannot call RandomCellKey() on network with no cells")
-	}
-	iterate := randomIntBetween(0, lenCells-1)
+	iterate := randomIntBetween(0, len(network.Cells)-1)
 	i := 0
 	for k := range network.Cells {
 		if i == iterate {

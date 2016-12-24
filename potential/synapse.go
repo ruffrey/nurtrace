@@ -71,10 +71,6 @@ its dendrite cell.
 */
 func (synapse *Synapse) Activate() (didFire bool, err error) {
 	didFire = false
-
-	if synapse == nil {
-		fmt.Println("critical error: synapse is nil", synapse)
-	}
 	synapse.ActivationHistory++
 	dendriteCell, exists := synapse.Network.Cells[synapse.ToNeuronDendrite]
 	if !exists {

@@ -149,3 +149,41 @@ func Test_PruneSynapse(t *testing.T) {
 		assert.Equal(t, false, ok, "cell2 not removed from network when synapses were zero during synapse prune")
 	})
 }
+
+func Test_PruneCell(t *testing.T) {
+	t.Run("does not crash when cell is not on network", func(t *testing.T) {
+		network := NewNetwork()
+		NewCell(network)
+		network.PruneCell(1)
+	})
+	t.Run("removes a non-Immortal cell from the network", func(t *testing.T) {
+		network := NewNetwork()
+		cell := NewCell(network)
+		cell.Immortal = false
+		assert.Equal(t, 1, len(network.Cells))
+		network.PruneCell(cell.ID)
+		assert.Equal(t, 0, len(network.Cells))
+	})
+	t.Run("does not remove an immortal cell from the network", func(t *testing.T) {
+		network := NewNetwork()
+		cell := NewCell(network)
+		cell.Immortal = true
+		assert.Equal(t, 1, len(network.Cells))
+		network.PruneCell(cell.ID)
+		assert.Equal(t, 1, len(network.Cells))
+	})
+	t.Run("panics when there are synapses still on the cell", func(t *testing.T) {
+		network := NewNetwork()
+		cell1 := NewCell(network)
+		cell1.DendriteSynapses[556] = true
+		cell2 := NewCell(network)
+		cell2.AxonSynapses[213] = true
+
+		assert.Panics(t, func() {
+			network.PruneCell(cell1.ID)
+		})
+		assert.Panics(t, func() {
+			network.PruneCell(cell2.ID)
+		})
+	})
+}
