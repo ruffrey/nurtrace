@@ -60,7 +60,7 @@ func Test_PruneNetwork(t *testing.T) {
 		})
 	})
 
-	t.Run("degrades millivolts toward zero when cell activated less than desired times", func(t *testing.T) {
+	t.Run("pruning degrades synapse millivolts toward zero when synapse activated less than desired times", func(t *testing.T) {
 		network := NewNetwork()
 		synapsePositive := NewSynapse(network)
 		synapseNegative := NewSynapse(network)
@@ -83,6 +83,14 @@ func Test_PruneNetwork(t *testing.T) {
 
 		assert.Equal(t, int8(2), synapsePositive.Millivolts)
 		assert.Equal(t, int8(-2), synapseNegative.Millivolts)
+	})
+
+	t.Run("pruning removes synapses that did not activate", func(t *testing.T) {
+
+	})
+
+	t.Run("pruning bumps synapse millivolts that did activate", func(t *testing.T) {
+
 	})
 }
 
