@@ -245,6 +245,7 @@ func Train(settings *TrainingSettings, originalNetwork *Network, isRemoteWorkerW
 				if err != nil {
 					panic(err)
 				}
+				defer w.conn.Close()
 				w.TranserExecutable()
 				copiedSettings := copySettingsWithNewSamples(settings, samples)
 				tempSettingsFile := randFilename("settings", "gob")
