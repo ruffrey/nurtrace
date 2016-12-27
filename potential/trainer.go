@@ -1,9 +1,15 @@
 package potential
 
 import (
+	"encoding/gob"
 	"fmt"
+	"io/ioutil"
+	"log"
 	"math"
+	"math/rand"
+	"os"
 	"runtime"
+	"strings"
 	"sync"
 )
 
@@ -20,7 +26,8 @@ type TrainingSettings struct {
 	// that comes after it.
 	TrainingSamples [][]*TrainingSample
 
-	threads int
+	threads    int
+	Workerfile string
 }
 
 /*
@@ -35,6 +42,59 @@ func NewTrainingSettings() *TrainingSettings {
 		TrainingSamples: make([][]*TrainingSample, 0),
 	}
 	return &settings
+}
+
+func copySettingsWithNewSamples(originalSettings *TrainingSettings, samples [][]*TrainingSample) *TrainingSettings {
+	settings := NewTrainingSettings()
+	settings.threads = originalSettings.threads
+	settings.Data = originalSettings.Data
+	settings.TrainingSamples = samples
+	return settings
+}
+
+/*
+LoadTrainingSettingsFromFile loads the training settings from a file on disk.
+*/
+func LoadTrainingSettingsFromFile(localFilepath string) (*TrainingSettings, error) {
+	settings := NewTrainingSettings()
+
+	file, err := os.Open(localFilepath)
+	if err != nil {
+		return settings, err
+	}
+	// Create a decoder and receive a value.
+	dec := gob.NewDecoder(file)
+	err = dec.Decode(&settings)
+	if err != nil {
+		log.Fatal("decode:", err)
+	}
+
+	return settings, err
+}
+
+/*
+SaveTrainingSettingsToFile dumps the training settings as json to disk.
+*/
+func SaveTrainingSettingsToFile(settings *TrainingSettings, localFilepath string) error {
+	file, err := os.Create(localFilepath)
+	if err != nil {
+		return err
+	}
+	// Create an encoder and send a value.
+	enc := gob.NewEncoder(file)
+	err = enc.Encode(settings)
+	if err != nil {
+		log.Fatal("encode:", err)
+	}
+
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func randFilename(prefix string, ext string) string {
+	return fmt.Sprintf("%s_%d.%s", prefix, rand.Uint32(), ext)
 }
 
 /*
@@ -72,17 +132,8 @@ type Dataset struct {
 }
 
 /*
-Trainer provides a way to run simulations on a neural network, then capture the results
-and keep them, or re-strengthen the network.
-
-The result of training is a new network which can be diffed onto an original network.
-*/
-type Trainer interface {
-	PrepareData(*Network)
-}
-
-/*
-Train executes the trainer's OnTrained method once complete.
+Train runs the training samples on local and remote threads, and applies them to
+the originalNetwork.
 
 ONLY prune on the original network:
 
@@ -94,11 +145,12 @@ To effectively train in a distributed way, across machines, it may be necessary
 to implement better diffing that does account for removed synapses and cells. But
 for now this is more than adequate.
 */
-func Train(t Trainer, settings *TrainingSettings, originalNetwork *Network) {
+func Train(settings *TrainingSettings, originalNetwork *Network) {
 	// The next two are used to block until all threads are done and the function may return.
 	var wg sync.WaitGroup
 	done := make(chan bool)
-
+	// list of remote worker server locations that we will ssh into
+	var remoteWorkers []string
 	// The next three are used to synchronize 1) merging of thread networks onto original,
 	// and 2) cloning of original network. Otherwise things get quickly out of sync, and
 	// race conditions cause nil pointer reference issues when network is overwritten with
@@ -107,19 +159,32 @@ func Train(t Trainer, settings *TrainingSettings, originalNetwork *Network) {
 	chNetworkSync := make(chan *Network, 1)     // blocking channel for sending net to be merged
 	chNetworkSyncCallback := make(chan bool, 1) // blocking channel waiting for response of net merge
 
+	if settings.Workerfile != "" {
+		b, err := ioutil.ReadFile(settings.Workerfile)
+		if err != nil {
+			panic(err)
+		}
+		rw := strings.Split(string(b), "\n")
+		for _, w := range rw {
+			if w != "" {
+				remoteWorkers = append(remoteWorkers, w)
+			}
+		}
+	}
+
 	// precheck
 	ok, report := CheckIntegrity(originalNetwork)
 	if !ok {
 		fmt.Println(report)
 		panic("integrity failed before training")
 	}
-	t.PrepareData(originalNetwork)
 
-	// DO NOT PRUNE on the cloned networks! See not in method comment above.
+	// DO NOT PRUNE on the cloned networks! See note in method comment above.
 	lenAllSamples := len(settings.TrainingSamples)
-	partSize := math.Ceil(float64(lenAllSamples) / float64(settings.threads))
+	jobChunks := settings.threads + len(remoteWorkers)
+	partSize := math.Ceil(float64(lenAllSamples) / float64(jobChunks))
 	fmt.Println(partSize, "samples per thread")
-	for thread := 0; thread < settings.threads; thread++ {
+	for thread := 0; thread < jobChunks; thread++ {
 		wg.Add(1)
 		go func(thread int) {
 			network := CloneNetwork(originalNetwork)
@@ -127,6 +192,39 @@ func Train(t Trainer, settings *TrainingSettings, originalNetwork *Network) {
 			to := int(float64(thread+1) * partSize)
 			fmt.Println("thread", thread, "from", from, "to", to)
 			samples := settings.TrainingSamples[from:to]
+
+			// first we start the remote workers
+			if thread < len(remoteWorkers) {
+				w, err := NewWorker(remoteWorkers[thread])
+				if err != nil {
+					panic(err)
+				}
+				w.TranserExecutable()
+				copiedSettings := copySettingsWithNewSamples(settings, samples)
+				tempSettingsFile := randFilename("settings", "gob")
+				tempNetworkFile := randFilename("network", "json")
+				err = SaveTrainingSettingsToFile(copiedSettings, tempSettingsFile)
+				if err != nil {
+					panic(err)
+				}
+				err = network.SaveToFile(tempNetworkFile)
+				if err != nil {
+					panic(err)
+				}
+				network, err = w.Train(tempSettingsFile, tempNetworkFile)
+				if err != nil {
+					fmt.Println("Error from remote worker", w.host)
+					panic(err)
+				}
+				fmt.Println("Network on remote thread", thread, "done")
+				chNetworkSync <- network
+				<-chNetworkSyncCallback
+				fmt.Println("Applied final diff on remote thread", thread)
+				wg.Done()
+				return
+			}
+
+			// normal local worker
 			for i, batch := range samples {
 				createdEffect, diff := processBatch(batch, network, settings.Data)
 
@@ -159,10 +257,10 @@ func Train(t Trainer, settings *TrainingSettings, originalNetwork *Network) {
 
 			}
 
-			fmt.Println("Network on thread", thread, "done")
+			fmt.Println("Network on local thread", thread, "done")
 			chNetworkSync <- network
 			<-chNetworkSyncCallback
-			fmt.Println("Applied final diff on thread", thread)
+			fmt.Println("Applied final diff on local thread", thread)
 			wg.Done()
 		}(thread)
 	}

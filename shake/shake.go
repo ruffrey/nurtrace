@@ -59,6 +59,7 @@ func main() {
 	lines := strings.Split(text, "\n")
 	chars := strings.Split(text, "")
 	settings := potential.NewTrainingSettings()
+	settings.Workerfile = "Workerfile"
 	// TODO: lines need to be setup for batches of training data.
 	t := charrnn.Charrnn{
 		Chars:    chars,
@@ -168,7 +169,7 @@ func main() {
 
 	fmt.Println("Beginning training")
 	network.Disabled = true // we just will never need it to fire
-	potential.Train(t, t.Settings, network)
+	potential.Train(t.Settings, network)
 
 	// Training is over
 
