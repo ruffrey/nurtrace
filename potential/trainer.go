@@ -193,7 +193,9 @@ func Train(settings *TrainingSettings, originalNetwork *Network, isRemoteWorkerW
 	for thread := 0; thread < jobChunks; thread++ {
 		wg.Add(1)
 		go func(thread int) {
+			origNetCloneMux.Lock()
 			network := CloneNetwork(originalNetwork)
+			origNetCloneMux.Unlock()
 			from := int(float64(thread) * partSize)
 			to := int(float64(thread+1) * partSize)
 			// protect likely array out of bounds on last thread
@@ -258,7 +260,7 @@ func Train(settings *TrainingSettings, originalNetwork *Network, isRemoteWorkerW
 
 			}
 
-			fmt.Println(isRemoteWorkerWithTag, "network on local thread", thread, "done")
+			fmt.Println(isRemoteWorkerWithTag, "local thread", thread, "done")
 			chNetworkSync <- network
 			<-chNetworkSyncCallback
 			fmt.Println(isRemoteWorkerWithTag, "applied final diff on local thread", thread)
