@@ -28,7 +28,7 @@ type TrainingSettings struct {
 	// that comes after it.
 	TrainingSamples [][]*TrainingSample
 
-	threads    int
+	Threads    int
 	Workerfile string
 }
 
@@ -39,7 +39,7 @@ func NewTrainingSettings() *TrainingSettings {
 	d := Dataset{}
 	dataset := &d
 	settings := TrainingSettings{
-		threads:         runtime.NumCPU(),
+		Threads:         runtime.NumCPU(),
 		Data:            dataset,
 		TrainingSamples: make([][]*TrainingSample, 0),
 	}
@@ -69,7 +69,7 @@ func LoadTrainingSettingsFromFile(localFilepath string) (*TrainingSettings, erro
 	if err != nil {
 		log.Fatal("decode:", err)
 	}
-	settings.threads = runtime.NumCPU() // use number of threads on the remote machine
+	settings.Threads = runtime.NumCPU() // use number of threads on the remote machine
 	return settings, err
 }
 
@@ -150,11 +150,16 @@ for now this is more than adequate.
 */
 func Train(settings *TrainingSettings, originalNetwork *Network, isRemoteWorkerWithTag string) {
 	shouldPrune := isRemoteWorkerWithTag == ""
+	if shouldPrune {
+		isRemoteWorkerWithTag = "<local>"
+	}
 	// The next two are used to block until all threads are done and the function may return.
 	var wg sync.WaitGroup
 	done := make(chan bool)
 	// list of remote worker server locations that we will ssh into
 	var remoteWorkers []string
+	var remoteWorkerWeights []int
+	var remoteWorkerTotalWeights int
 	// The next three are used to synchronize 1) merging of thread networks onto original,
 	// and 2) cloning of original network. Otherwise things get quickly out of sync, and
 	// race conditions cause nil pointer reference issues when network is overwritten with
@@ -171,7 +176,15 @@ func Train(settings *TrainingSettings, originalNetwork *Network, isRemoteWorkerW
 		rw := strings.Split(string(b), "\n")
 		for _, w := range rw {
 			if w != "" {
-				remoteWorkers = append(remoteWorkers, w)
+				parts := strings.Split(w, " ")
+				if len(parts) != 2 {
+					panic("Workfile should have thread weight followed by hostname:port")
+				}
+				weight, _ := strconv.Atoi(parts[0])
+				hostPort := parts[1]
+				remoteWorkers = append(remoteWorkers, hostPort)
+				remoteWorkerWeights = append(remoteWorkerWeights, weight)
+				remoteWorkerTotalWeights += weight
 			}
 		}
 	}
@@ -185,29 +198,39 @@ func Train(settings *TrainingSettings, originalNetwork *Network, isRemoteWorkerW
 
 	// DO NOT PRUNE on the cloned networks! See note in method comment above.
 	lenAllSamples := len(settings.TrainingSamples)
-	jobChunks := settings.threads + len(remoteWorkers)
+	jobChunks := settings.Threads + remoteWorkerTotalWeights
 	partSize := math.Ceil(float64(lenAllSamples) / float64(jobChunks))
-	maxSampleIndex := (len(settings.TrainingSamples) - 1)
+	maxSampleIndex := len(settings.TrainingSamples) - 1
 	fmt.Println(isRemoteWorkerWithTag, partSize,
-		"samples per thread,", settings.threads, "threads")
+		"samples per thread,", settings.Threads, "local threads,",
+		remoteWorkerTotalWeights, "remote threads")
+	sampleCursor := 0
 	for thread := 0; thread < jobChunks; thread++ {
 		wg.Add(1)
+		isRemote := thread < len(remoteWorkers)
+		var threadIteration int
+		to := thread + 1
+		if isRemote {
+			threadIteration += remoteWorkerWeights[thread]
+		}
+		to *= int(partSize)
+		// protect likely array out of bounds on last thread
+		if to > maxSampleIndex {
+			to = maxSampleIndex
+		}
+		samples := settings.TrainingSamples[sampleCursor:to]
+
+		fmt.Println("thread", thread, "from", sampleCursor, "to", to, "remote=", isRemote)
+		sampleCursor = to
+
+		origNetCloneMux.Lock()
+		network := CloneNetwork(originalNetwork)
+		origNetCloneMux.Unlock()
+
 		go func(thread int) {
-			origNetCloneMux.Lock()
-			network := CloneNetwork(originalNetwork)
-			origNetCloneMux.Unlock()
-			from := int(float64(thread) * partSize)
-			to := int(float64(thread+1) * partSize)
-			// protect likely array out of bounds on last thread
-			if to > maxSampleIndex {
-				to = maxSampleIndex
-			}
-			samples := settings.TrainingSamples[from:to]
 
 			// first we start the remote workers
-			if thread < len(remoteWorkers) {
-				fmt.Println("remote thread", thread, "from", from, "to", to)
-
+			if isRemote {
 				w, err := NewWorker(remoteWorkers[thread])
 				if err != nil {
 					panic(err)
@@ -229,14 +252,13 @@ func Train(settings *TrainingSettings, originalNetwork *Network, isRemoteWorkerW
 					fmt.Println("Error from remote worker", w.host)
 					panic(err)
 				}
-				fmt.Println("Network on remote thread", thread, "done")
+				fmt.Println("Remote thread", thread, w.host, "done")
 				chNetworkSync <- network
 				<-chNetworkSyncCallback
 				fmt.Println("Applied final diff on remote thread", thread)
 				wg.Done()
 				return
 			}
-			fmt.Println(isRemoteWorkerWithTag, "local thread", thread, "from", from, "to", to)
 
 			// normal local worker
 			for i, batch := range samples {
@@ -281,7 +303,7 @@ func Train(settings *TrainingSettings, originalNetwork *Network, isRemoteWorkerW
 			ApplyDiff(oDiff, originalNetwork)
 
 			mergeNum++
-			if mergeNum%settings.threads == 0 {
+			if mergeNum%settings.Threads == 0 {
 				// DO NOT prune on the one-off network that has not been merged back to main.
 				if shouldPrune {
 					originalNetwork.Prune()

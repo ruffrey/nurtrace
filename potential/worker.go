@@ -2,6 +2,7 @@ package potential
 
 import (
 	"fmt"
+	"io"
 	"io/ioutil"
 	"os"
 	"strings"
@@ -163,8 +164,20 @@ func (w *Worker) Train(localTrainingSettingsJSONLocation string, localTrainingNe
 		return finalNetwork, err
 	}
 	defer session.Close()
-	bytes, err := session.CombinedOutput(workerLocation)
-	fmt.Println(string(bytes))
+
+	// do stderr on
+	stdout, err := session.StdoutPipe()
+	if err != nil {
+		return finalNetwork, err
+	}
+	stderr, err := session.StderrPipe()
+	if err != nil {
+		return finalNetwork, err
+	}
+	go io.Copy(os.Stdout, stdout)
+	go io.Copy(os.Stderr, stderr)
+
+	err = session.Run(workerLocation)
 	if err != nil {
 		fmt.Print(w.host, " ")
 		fmt.Println(err)
@@ -217,11 +230,11 @@ func RunWorker() (err error) {
 		return err
 	}
 	hn, _ := os.Hostname()
-	prefix := "worker <" + hn + ">"
+	prefix := "<" + hn + ">"
 	Train(settings, originalNetwork, prefix)
 	err = originalNetwork.SaveToFile(networkLocation)
 	if err != nil {
-		fmt.Println("worker <"+hn+">", err)
+		fmt.Println(prefix, err)
 		return err
 	}
 	return nil
