@@ -288,8 +288,10 @@ func copySynapseToNetwork(synapse *Synapse, newNetwork *Network) SynapseID {
 	// synapse ID changed. If there happened to also
 	// be a cell ID collision for its axon or dendrite,
 	// the connection on the cell to this synapse would be missing.
+	newNetwork.cellMux.Lock()
 	newNetwork.Cells[copiedSynapse.ToNeuronDendrite].DendriteSynapses[copiedSynapse.ID] = true
 	newNetwork.Cells[copiedSynapse.FromNeuronAxon].AxonSynapses[copiedSynapse.ID] = true
+	newNetwork.cellMux.Unlock()
 
 	newNetwork.Synapses[copiedSynapse.ID] = copiedSynapse
 	synapse.Network.synMux.Unlock()

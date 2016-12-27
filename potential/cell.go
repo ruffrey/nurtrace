@@ -93,7 +93,9 @@ func NewCell(network *Network) *Cell {
 		OnFired:          make([]func(CellID), 0),
 	}
 	cell := &c
+	network.cellMux.Lock()
 	network.Cells[cell.ID] = cell
+	network.cellMux.Unlock()
 	return cell
 }
 

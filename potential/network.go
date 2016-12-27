@@ -27,7 +27,8 @@ type Network struct {
 		Cells are the neurons that hold the actual structure of the potential brain.
 		However, with perception layers and
 	*/
-	Cells map[CellID]*Cell
+	Cells   map[CellID]*Cell
+	cellMux sync.Mutex
 
 	// private
 

@@ -1,10 +1,18 @@
 package potential
 
 import (
+	"encoding/gob"
 	"fmt"
+	"io/ioutil"
+	"log"
 	"math"
+	"math/rand"
+	"os"
 	"runtime"
+	"strconv"
+	"strings"
 	"sync"
+	"time"
 )
 
 /*
@@ -20,7 +28,8 @@ type TrainingSettings struct {
 	// that comes after it.
 	TrainingSamples [][]*TrainingSample
 
-	threads int
+	Threads    int
+	Workerfile string
 }
 
 /*
@@ -30,11 +39,65 @@ func NewTrainingSettings() *TrainingSettings {
 	d := Dataset{}
 	dataset := &d
 	settings := TrainingSettings{
-		threads:         runtime.NumCPU(),
+		Threads:         runtime.NumCPU(),
 		Data:            dataset,
 		TrainingSamples: make([][]*TrainingSample, 0),
 	}
 	return &settings
+}
+
+func copySettingsWithNewSamples(originalSettings *TrainingSettings, samples [][]*TrainingSample) *TrainingSettings {
+	settings := NewTrainingSettings()
+	settings.Data = originalSettings.Data
+	settings.TrainingSamples = samples
+	return settings
+}
+
+/*
+LoadTrainingSettingsFromFile loads the training settings from a file on disk.
+*/
+func LoadTrainingSettingsFromFile(localFilepath string) (*TrainingSettings, error) {
+	settings := NewTrainingSettings()
+
+	file, err := os.Open(localFilepath)
+	if err != nil {
+		return settings, err
+	}
+	// Create a decoder and receive a value.
+	dec := gob.NewDecoder(file)
+	err = dec.Decode(&settings)
+	if err != nil {
+		log.Fatal("decode:", err)
+	}
+	settings.Threads = runtime.NumCPU() // use number of threads on the remote machine
+	return settings, err
+}
+
+/*
+SaveTrainingSettingsToFile dumps the training settings as json to disk.
+*/
+func SaveTrainingSettingsToFile(settings *TrainingSettings, localFilepath string) error {
+	file, err := os.Create(localFilepath)
+	if err != nil {
+		return err
+	}
+	// Create an encoder and send a value.
+	enc := gob.NewEncoder(file)
+	err = enc.Encode(settings)
+	if err != nil {
+		log.Fatal("encode:", err)
+	}
+
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+// use the current time for easy reading, but also generate a random token
+func randFilename(prefix string, ext string) string {
+	now := strconv.FormatInt(time.Now().UTC().UnixNano(), 10)
+	return fmt.Sprintf("%s_%s_%d.%s", prefix, now, rand.Uint32(), ext)
 }
 
 /*
@@ -72,17 +135,8 @@ type Dataset struct {
 }
 
 /*
-Trainer provides a way to run simulations on a neural network, then capture the results
-and keep them, or re-strengthen the network.
-
-The result of training is a new network which can be diffed onto an original network.
-*/
-type Trainer interface {
-	PrepareData(*Network)
-}
-
-/*
-Train executes the trainer's OnTrained method once complete.
+Train runs the training samples on local and remote threads, and applies them to
+the originalNetwork.
 
 ONLY prune on the original network:
 
@@ -94,11 +148,18 @@ To effectively train in a distributed way, across machines, it may be necessary
 to implement better diffing that does account for removed synapses and cells. But
 for now this is more than adequate.
 */
-func Train(t Trainer, settings *TrainingSettings, originalNetwork *Network) {
+func Train(settings *TrainingSettings, originalNetwork *Network, isRemoteWorkerWithTag string) {
+	shouldPrune := isRemoteWorkerWithTag == ""
+	if shouldPrune {
+		isRemoteWorkerWithTag = "<local>"
+	}
 	// The next two are used to block until all threads are done and the function may return.
 	var wg sync.WaitGroup
 	done := make(chan bool)
-
+	// list of remote worker server locations that we will ssh into
+	var remoteWorkers []string
+	var remoteWorkerWeights []int
+	var remoteWorkerTotalWeights int
 	// The next three are used to synchronize 1) merging of thread networks onto original,
 	// and 2) cloning of original network. Otherwise things get quickly out of sync, and
 	// race conditions cause nil pointer reference issues when network is overwritten with
@@ -107,42 +168,115 @@ func Train(t Trainer, settings *TrainingSettings, originalNetwork *Network) {
 	chNetworkSync := make(chan *Network, 1)     // blocking channel for sending net to be merged
 	chNetworkSyncCallback := make(chan bool, 1) // blocking channel waiting for response of net merge
 
+	if settings.Workerfile != "" {
+		b, err := ioutil.ReadFile(settings.Workerfile)
+		if err != nil {
+			panic(err)
+		}
+		rw := strings.Split(string(b), "\n")
+		for _, w := range rw {
+			if w != "" {
+				parts := strings.Split(w, " ")
+				if len(parts) != 2 {
+					panic("Workfile should have thread weight followed by hostname:port")
+				}
+				weight, _ := strconv.Atoi(parts[0])
+				hostPort := parts[1]
+				remoteWorkers = append(remoteWorkers, hostPort)
+				remoteWorkerWeights = append(remoteWorkerWeights, weight)
+				remoteWorkerTotalWeights += weight
+			}
+		}
+	}
+
 	// precheck
 	ok, report := CheckIntegrity(originalNetwork)
 	if !ok {
-		fmt.Println(report)
+		fmt.Println(isRemoteWorkerWithTag, report)
 		panic("integrity failed before training")
 	}
-	t.PrepareData(originalNetwork)
 
-	// DO NOT PRUNE on the cloned networks! See not in method comment above.
+	// DO NOT PRUNE on the cloned networks! See note in method comment above.
 	lenAllSamples := len(settings.TrainingSamples)
-	partSize := math.Ceil(float64(lenAllSamples) / float64(settings.threads))
-	fmt.Println(partSize, "samples per thread")
-	for thread := 0; thread < settings.threads; thread++ {
+	jobChunks := settings.Threads + remoteWorkerTotalWeights
+	partSize := math.Ceil(float64(lenAllSamples) / float64(jobChunks))
+	maxSampleIndex := len(settings.TrainingSamples) - 1
+	fmt.Println(isRemoteWorkerWithTag, partSize,
+		"samples per chunk,", settings.Threads, "local threads,",
+		remoteWorkerTotalWeights, "remote weights")
+	sampleCursor := 0
+	threadIteration := 0
+	for thread := 0; threadIteration < jobChunks; thread++ {
 		wg.Add(1)
+		isRemote := thread < len(remoteWorkers)
+
+		if isRemote {
+			threadIteration += remoteWorkerWeights[thread]
+		} else {
+			threadIteration++
+		}
+		to := threadIteration * int(partSize)
+		// protect likely array out of bounds on last thread
+		if to > maxSampleIndex {
+			to = maxSampleIndex
+		}
+		fmt.Println(sampleCursor, to)
+		samples := settings.TrainingSamples[sampleCursor:to]
+
+		if isRemote {
+			fmt.Println(isRemoteWorkerWithTag, "thread", thread, "from",
+				sampleCursor, "to", to, "on", remoteWorkers[thread])
+		} else {
+			fmt.Println(isRemoteWorkerWithTag, "thread", thread, "from",
+				sampleCursor, "to", to)
+		}
+
+		sampleCursor = to
+
+		origNetCloneMux.Lock()
+		network := CloneNetwork(originalNetwork)
+		origNetCloneMux.Unlock()
+
 		go func(thread int) {
-			network := CloneNetwork(originalNetwork)
-			from := int(float64(thread) * partSize)
-			to := int(float64(thread+1) * partSize)
-			fmt.Println("thread", thread, "from", from, "to", to)
-			samples := settings.TrainingSamples[from:to]
+
+			// first we start the remote workers
+			if isRemote {
+				w, err := NewWorker(remoteWorkers[thread])
+				if err != nil {
+					panic(err)
+				}
+				defer w.conn.Close()
+				w.TranserExecutable()
+				copiedSettings := copySettingsWithNewSamples(settings, samples)
+				tempSettingsFile := randFilename("settings", "gob")
+				tempNetworkFile := randFilename("network", "json")
+				err = SaveTrainingSettingsToFile(copiedSettings, tempSettingsFile)
+				if err != nil {
+					panic(err)
+				}
+				err = network.SaveToFile(tempNetworkFile)
+				if err != nil {
+					panic(err)
+				}
+				network, err = w.Train(tempSettingsFile, tempNetworkFile)
+				if err != nil {
+					fmt.Println("Error from remote worker", w.host)
+					panic(err)
+				}
+				fmt.Println("Remote thread", thread, w.host, "done")
+				chNetworkSync <- network
+				<-chNetworkSyncCallback
+				fmt.Println("Applied final diff on remote thread", thread)
+				wg.Done()
+				return
+			}
+
+			// normal local worker
 			for i, batch := range samples {
 				createdEffect, diff := processBatch(batch, network, settings.Data)
 
 				if !createdEffect {
-					// if ok, report := CheckIntegrity(originalNetwork); !ok {
-					// 	fmt.Println("ApplyDiff: network has no integrity BEFORE")
-					// 	report.Print()
-					// 	panic("no integrity")
-					// }
 					ApplyDiff(diff, network)
-					// if ok, report := CheckIntegrity(originalNetwork); !ok {
-					// 	fmt.Println("ApplyDiff: network has no integrity AFTER")
-					// 	diff.Print()
-					// 	report.Print()
-					// 	panic("no integrity")
-					// }
 				}
 
 				if i%samplesBetweenMergingSessions == 0 {
@@ -159,10 +293,10 @@ func Train(t Trainer, settings *TrainingSettings, originalNetwork *Network) {
 
 			}
 
-			fmt.Println("Network on thread", thread, "done")
+			fmt.Println(isRemoteWorkerWithTag, "local thread", thread, "done")
 			chNetworkSync <- network
 			<-chNetworkSyncCallback
-			fmt.Println("Applied final diff on thread", thread)
+			fmt.Println(isRemoteWorkerWithTag, "applied final diff on local thread", thread)
 			wg.Done()
 		}(thread)
 	}
@@ -177,43 +311,15 @@ func Train(t Trainer, settings *TrainingSettings, originalNetwork *Network) {
 		select {
 		case network := <-chNetworkSync:
 			oDiff := DiffNetworks(originalNetwork, network)
-			// if ok, report := CheckIntegrity(originalNetwork); !ok {
-			// 	fmt.Println("ApplyDiff: originalNetwork has no integrity BEFORE")
-			// 	report.Print()
-			// 	panic("no integrity")
-			// }
 			ApplyDiff(oDiff, originalNetwork)
-			// if ok, report := CheckIntegrity(originalNetwork); !ok {
-			// 	fmt.Println("ApplyDiff: originalNetwork has no integrity AFTER")
-			// 	diff.Print()
-			// 	report.Print()
-			// 	panic("no integrity")
-			// }
 
 			mergeNum++
-			if mergeNum%settings.threads == 0 {
+			if mergeNum%settings.Threads == 0 {
 				// DO NOT prune on the one-off network that has not been merged back to main.
-				// if ok, report := CheckIntegrity(network); !ok {
-				// 	fmt.Println("Prune: network has no integrity BEFORE pruning")
-				// 	report.Print()
-				// 	panic("no integrity")
-				// }
-				originalNetwork.Prune()
-				// if ok, report := CheckIntegrity(network); !ok {
-				// 	fmt.Println("Prune: network has no integrity AFTER pruning")
-				// 	report.Print()
-				// 	fmt.Println("intended to remove synapses:", synapsesToRemove)
-				// 	for cellID, synapseID := range report.cellHasMissingAxonSynapse {
-				// 		fmt.Println("  cellHasMissingAxonSynapse", cellID, network.Cells[cellID])
-				// 		fmt.Println("  cellHasMissingAxonSynapse", synapseID, network.Synapses[synapseID])
-				// 	}
-				// 	for cellID, synapseID := range report.cellHasMissingDendriteSynapse {
-				// 		fmt.Println("  cellHasMissingDendriteSynapse", cellID, network.Cells[cellID])
-				// 		fmt.Println("  cellHasMissingDendriteSynapse", synapseID, network.Synapses[synapseID])
-				// 	}
-				// 	panic("no integrity")
-				// }
-				fmt.Println("Progress:",
+				if shouldPrune {
+					originalNetwork.Prune()
+				}
+				fmt.Println(isRemoteWorkerWithTag, "Progress:",
 					math.Floor(((float64(mergeNum)*float64(samplesBetweenMergingSessions))/float64(lenAllSamples))*100), "%")
 			}
 			chNetworkSyncCallback <- true
@@ -222,7 +328,6 @@ func Train(t Trainer, settings *TrainingSettings, originalNetwork *Network) {
 		}
 	}
 
-	// TODO: final prune?
 }
 
 /*
