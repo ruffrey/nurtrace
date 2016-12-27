@@ -205,22 +205,32 @@ func Train(settings *TrainingSettings, originalNetwork *Network, isRemoteWorkerW
 		"samples per thread,", settings.Threads, "local threads,",
 		remoteWorkerTotalWeights, "remote threads")
 	sampleCursor := 0
-	for thread := 0; thread < jobChunks; thread++ {
+	threadIteration := 0
+	for thread := 0; threadIteration < jobChunks; thread++ {
 		wg.Add(1)
 		isRemote := thread < len(remoteWorkers)
-		var threadIteration int
-		to := thread + 1
+
 		if isRemote {
 			threadIteration += remoteWorkerWeights[thread]
+		} else {
+			threadIteration++
 		}
-		to *= int(partSize)
+		to := threadIteration * int(partSize)
 		// protect likely array out of bounds on last thread
 		if to > maxSampleIndex {
 			to = maxSampleIndex
 		}
+		fmt.Println(sampleCursor, to)
 		samples := settings.TrainingSamples[sampleCursor:to]
 
-		fmt.Println("thread", thread, "from", sampleCursor, "to", to, "remote=", isRemote)
+		if isRemote {
+			fmt.Println(isRemoteWorkerWithTag, "thread", thread, "from",
+				sampleCursor, "to", to, "on", remoteWorkers[thread])
+		} else {
+			fmt.Println(isRemoteWorkerWithTag, "thread", thread, "from",
+				sampleCursor, "to", to)
+		}
+
 		sampleCursor = to
 
 		origNetCloneMux.Lock()
