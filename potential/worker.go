@@ -139,7 +139,8 @@ func (w *Worker) SCPGetFile(remoteFileLocation string, toLocalLocation string) (
 	return nil
 }
 
-// Train runs the training session on a remote server
+// Train runs the training session on a remote server. The remote party will
+// be doing `RunWorker()`.
 func (w *Worker) Train(localTrainingSettingsJSONLocation string, localTrainingNetworkJSONLocation string) (finalNetwork *Network, err error) {
 	fmt.Println("Transferring settings to", w.host)
 	err = w.SCPSendFile(localTrainingSettingsJSONLocation, trainingSettingsLocation)
@@ -169,7 +170,21 @@ func (w *Worker) Train(localTrainingSettingsJSONLocation string, localTrainingNe
 		fmt.Println(err)
 		return finalNetwork, err
 	}
-	// it is finished; write the remote file back over the local file
+	// it is finished; write the remote file back over the local file.
+	// deleting the file first prevents some weird error where it was
+	// spitting out invalid json; like it was overwriting itself.
+	err = os.Remove(localTrainingNetworkJSONLocation)
+	if err != nil {
+		return finalNetwork, err
+	}
+	f, err := os.Create(localTrainingNetworkJSONLocation)
+	if err != nil {
+		return finalNetwork, err
+	}
+	err = f.Close()
+	if err != nil {
+		return finalNetwork, err
+	}
 	err = w.SCPGetFile(networkLocation, localTrainingNetworkJSONLocation)
 	if err != nil {
 		return finalNetwork, err
@@ -201,9 +216,12 @@ func RunWorker() (err error) {
 	if err != nil {
 		return err
 	}
-	Train(settings, originalNetwork)
+	hn, _ := os.Hostname()
+	prefix := "worker <" + hn + ">"
+	Train(settings, originalNetwork, prefix)
 	err = originalNetwork.SaveToFile(networkLocation)
 	if err != nil {
+		fmt.Println("worker <"+hn+">", err)
 		return err
 	}
 	return nil

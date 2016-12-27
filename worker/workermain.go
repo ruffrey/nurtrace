@@ -12,5 +12,5 @@ func main() {
 		panic(err)
 	}
 	hn, _ := os.Hostname()
-	fmt.Println("Training finished", hn)
+	fmt.Println("Remote training finished", hn)
 }

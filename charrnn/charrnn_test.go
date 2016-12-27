@@ -68,7 +68,7 @@ func Test_Training(t *testing.T) {
 		network := potential.NewNetwork()
 		network.Grow(10, 5, 10)
 		c.PrepareData(network)
-		potential.Train(settings, network)
+		potential.Train(settings, network, "")
 	})
 }
 

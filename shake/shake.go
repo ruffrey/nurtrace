@@ -169,7 +169,7 @@ func main() {
 
 	fmt.Println("Beginning training")
 	network.Disabled = true // we just will never need it to fire
-	potential.Train(t.Settings, network)
+	potential.Train(t.Settings, network, "")
 
 	// Training is over
 
