@@ -170,5 +170,7 @@ func (network *Network) PruneCell(cellID CellID) {
 		return
 	}
 
+	network.cellMux.Lock()
 	delete(network.Cells, cellID)
+	network.cellMux.Unlock()
 }
