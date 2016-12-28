@@ -79,3 +79,64 @@ func Test_SynapseStringer(t *testing.T) {
 func Test_SynapseActivate(t *testing.T) {
 
 }
+
+func Test_SynapseReinforce(t *testing.T) {
+	t.Run("reinforcing a negative synapse will make it more negative", func(t *testing.T) {
+		network := NewNetwork()
+		synapse := NewSynapse(network)
+		synapse.Millivolts = -4
+		synapse.reinforce()
+
+		assert.Equal(t, -4-synapseLearnRate, synapse.Millivolts)
+	})
+	t.Run("reinforcing a positive synapse will make it more positive", func(t *testing.T) {
+		network := NewNetwork()
+		synapse := NewSynapse(network)
+		synapse.Millivolts = 3
+		synapse.reinforce()
+
+		assert.Equal(t, 3+synapseLearnRate, synapse.Millivolts)
+	})
+	t.Run("reinforcing a synapse to its limit will not overflow integer", func(t *testing.T) {
+		network := NewNetwork()
+		s1 := NewSynapse(network)
+		s1.Millivolts = 125
+		s1.reinforce()
+		assert.Equal(t, int8(125), s1.Millivolts)
+		s1.Millivolts = 126
+		s1.reinforce()
+		assert.Equal(t, int8(125), s1.Millivolts)
+
+		s2 := NewSynapse(network)
+		s2.Millivolts = -126
+		s2.reinforce()
+		assert.Equal(t, int8(-126), s2.Millivolts)
+		s2.Millivolts = -127
+		s2.reinforce()
+		assert.Equal(t, int8(-126), s2.Millivolts)
+	})
+}
+
+// func Test_SynapseFlip(t *testing.T) {
+// 	t.Run("positive synapse goes negative", func(t *testing.T) {
+// 		network := NewNetwork()
+// 		synapse := NewSynapse(network)
+// 		synapse.Millivolts = 31
+// 		synapse.flip()
+// 		assert.Equal(t, int8(-31), synapse.Millivolts)
+// 	})
+// 	t.Run("negative synapse goes positive", func(t *testing.T) {
+// 		network := NewNetwork()
+// 		synapse := NewSynapse(network)
+// 		synapse.Millivolts = -27
+// 		synapse.flip()
+// 		assert.Equal(t, int8(27), synapse.Millivolts)
+// 	})
+// 	t.Run("0 mv synapse does nothing", func(t *testing.T) {
+// 		network := NewNetwork()
+// 		synapse := NewSynapse(network)
+// 		synapse.Millivolts = 0
+// 		synapse.flip()
+// 		assert.Equal(t, int8(0), synapse.Millivolts)
+// 	})
+// }

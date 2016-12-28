@@ -38,6 +38,9 @@ type Synapse struct {
 	FromNeuronAxon    CellID
 	ToNeuronDendrite  CellID
 	ActivationHistory uint `json:"-"` // unnecessary to recreate synapse
+	// private vars for backtracing
+	goodPath bool
+	badPath  bool
 }
 
 /*
@@ -81,6 +84,26 @@ func (synapse *Synapse) Activate() (didFire bool, err error) {
 	didFire = dendriteCell.ApplyVoltage(synapse.Millivolts, synapse)
 
 	return didFire, nil
+}
+
+func (synapse *Synapse) reinforce() {
+	isPositive := synapse.Millivolts >= 0
+	if isPositive {
+		newMV := synapse.Millivolts + synapseLearnRate
+		if newMV > actualSynapseMax {
+			synapse.Millivolts = actualSynapseMax
+		} else {
+			synapse.Millivolts = newMV
+		}
+		return
+	}
+	// negative
+	newMV := synapse.Millivolts - synapseLearnRate
+	if newMV < actualSynapseMin {
+		synapse.Millivolts = actualSynapseMin
+	} else {
+		synapse.Millivolts = newMV
+	}
 }
 
 func (synapse *Synapse) String() string {

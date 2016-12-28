@@ -39,21 +39,7 @@ func (network *Network) Prune() {
 			if synapse.ActivationHistory >= defaultSynapseMinFireThreshold {
 				// it was activated enough, so we bump it away from zero.
 				// needs cleanup refactoring.
-				if isPositive {
-					newMV := synapse.Millivolts + synapseLearnRate
-					if newMV > actualSynapseMax {
-						synapse.Millivolts = actualSynapseMax
-					} else {
-						synapse.Millivolts = newMV
-					}
-				} else {
-					newMV := synapse.Millivolts - synapseLearnRate
-					if newMV < actualSynapseMin {
-						synapse.Millivolts = actualSynapseMin
-					} else {
-						synapse.Millivolts = newMV
-					}
-				}
+				synapse.reinforce()
 			} else if synapse.ActivationHistory > 0 {
 				// did not meet minimum fire threshold, so punish it by moving toward zero
 				distanceToZero := math.Abs(0 - float64(synapse.Millivolts))
