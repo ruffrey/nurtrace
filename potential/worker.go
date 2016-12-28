@@ -29,12 +29,16 @@ type Worker struct {
 func NewWorker(hostAndPort string) (w *Worker, err error) {
 	u := os.Getenv("USER")
 	w = &Worker{host: hostAndPort}
+	keyname := os.Getenv("KEYNAME")
+	if keyname == "" {
+		keyname = "id_rsa"
+	}
 
 	// Dial your ssh server.
 	w.conn, err = ssh.Dial("tcp", w.host, &ssh.ClientConfig{
 		User: u,
 		Auth: []ssh.AuthMethod{
-			publicKeyFile(os.Getenv("HOME") + "/.ssh/id_rsa"),
+			publicKeyFile(os.Getenv("HOME") + "/.ssh/" + keyname),
 		},
 	})
 	if err != nil {
