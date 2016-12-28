@@ -342,17 +342,12 @@ func processBatch(batch []*TrainingSample, originalNetwork *Network, vocab *Data
 	successes := 0
 
 	for _, ts := range batch {
-		// cell, ok := network.Cells[ts.InputCell]
-		// if !ok {
-		// 	fmt.Println("error: input cell missing from network", ts)
-		// }
-		// cell.FireActionPotential()
 		network.Cells[ts.InputCell].FireActionPotential()
 		// TODO: should we step here? or not?
 		network.Step()
 	}
 
-	// give for firings time to go through the network
+	// give firings time to travel through the network
 	for i := 0; i < GrowPathExpectedMinimumSynapses; i++ {
 		hasMore := network.Step()
 		if !hasMore {

@@ -14,6 +14,8 @@ Once they have been degraded to no net effect (0 millivolts), they should be rem
 
 Additionally, it checks when the cells that connect to a synapse have no more synapses,
 and removes those cells if they have none.
+
+TODO: Prune might be old and unnecessary soon
 */
 func (network *Network) Prune() {
 	network.nextSynapsesToActivate = make(map[SynapseID]bool)
@@ -23,7 +25,6 @@ func (network *Network) Prune() {
 	// brand new synapses. This is a good time to apply the learning rate to synapses
 	// which were activated, too.
 	synapsesToRemove := make(map[SynapseID]bool)
-	// fmt.Println("  processing learning on cells, total=", len(network.Cells))
 	for _, cell := range network.Cells {
 		for synapseID := range cell.AxonSynapses { // could also be dendrites, but, meh.
 			synapse, exists := network.Synapses[synapseID]
@@ -74,7 +75,6 @@ func (network *Network) Prune() {
 			synapse.ActivationHistory = 0
 		}
 	}
-	// fmt.Println("  done")
 
 	fmt.Println("  synapses to remove=", len(synapsesToRemove))
 	// Actually pruning synapses is done after the previous loop because it can
@@ -157,12 +157,12 @@ func (network *Network) PruneCell(cellID CellID) {
 	}
 
 	// with good code, the following should not be necessary.
-	if len(cell.DendriteSynapses) > 0 {
-		panic(fmt.Sprintf("Should not need to prune dendrite synapse from cell=%d (%v)", cellID, cell.DendriteSynapses))
-	}
-	if len(cell.AxonSynapses) > 0 {
-		panic(fmt.Sprintf("Should not need to prune axon synapse from cell=%d (%v)", cellID, cell.AxonSynapses))
-	}
+	// if len(cell.DendriteSynapses) > 0 {
+	// 	panic(fmt.Sprintf("Should not need to prune dendrite synapse from cell=%d (%v)", cellID, cell.DendriteSynapses))
+	// }
+	// if len(cell.AxonSynapses) > 0 {
+	// 	panic(fmt.Sprintf("Should not need to prune axon synapse from cell=%d (%v)", cellID, cell.AxonSynapses))
+	// }
 
 	// Do this after removing synapses, because otherwise we can end up with
 	// orphan synapses.
