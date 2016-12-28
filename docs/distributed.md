@@ -7,13 +7,15 @@ multiple physical devices.
 
 ### Master Server
 
-Keeps the original network and persists it to disk or a location
-reachable via the internet.
+Keeps the original network and persists it to disk.
 
 ### Worker
 
 Any computer, such as a desktop PC, a server, or a smartphone,
 that trains a network.
+
+The master server must be able to ssh into all workers as the
+same user.
 
 ## Training
 
@@ -33,8 +35,3 @@ Training flow:
 - workers pull the latest network and training data and send back the resulting network
 - master diffs and merges it
 - workers request a new set of data
-
-### Strategy 2, for smaller sets of data:
-
-- workers pull latest network and training data and send back the resulting network
-- master diffs and merges new network
