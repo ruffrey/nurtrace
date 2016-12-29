@@ -103,10 +103,6 @@ func (network *Network) ResetForTraining() {
 		cell.activating = false
 		cell.WasFired = false
 	}
-	for _, synapse := range network.Synapses {
-		synapse.badPath = false
-		synapse.goodPath = false
-	}
 	network.nextSynapsesToActivate = make(map[SynapseID]bool)
 	network.resetCellsOnNextStep = make(map[CellID]bool)
 	network.Disabled = false

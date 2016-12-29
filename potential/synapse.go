@@ -38,9 +38,6 @@ type Synapse struct {
 	FromNeuronAxon    CellID
 	ToNeuronDendrite  CellID
 	ActivationHistory uint `json:"-"` // unnecessary to recreate synapse
-	// private vars for backtracing
-	goodPath bool
-	badPath  bool
 }
 
 /*

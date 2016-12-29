@@ -4,10 +4,9 @@
 - [ ] backtracing
   - [ ] training batch path tracing output->input and marking good synapses
   - [ ] training batch path tracing output->input and marking bad synapses
-  - [ ] duplicate a synapse when it goes over the int8 limit
+  - [x] duplicate a synapse when it goes over the int8 limit
   - [ ] inhibit the beginning of bad synapse paths
   - [ ] reinforce good synapses
-- [x] NewNetwork should return a pointer
 
 ## Priority II
 - [ ] profile CPU again
@@ -27,4 +26,3 @@
 - [ ] Add word-level and phrase-level neural networks
 - [ ] look for properties of types that can probably be private (lower case them)
 - [ ] Generic training and data that can be driven by a UI
-- [x] distributed computing methods
