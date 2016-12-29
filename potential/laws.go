@@ -82,8 +82,12 @@ const retrainRandomSynapsesToGrow = 20
 /*
 GrowPathExpectedMinimumSynapses represents the maximum allowed number of synapses between an input
 and output cell in the network which get added when an input cell fails to fire the output cell.
+
+By default, it assumes each new synapse has a default mv value of they synapse learn rate (not
+true for randomly grown synapses) and we will grow enough to essentially fire the cell if all
+these synapses fire.
 */
-const GrowPathExpectedMinimumSynapses = 10
+const GrowPathExpectedMinimumSynapses = int((int16(apResting) - apThreshold) / int16(synapseLearnRate))
 
 /*
 ratioMaxHopsBetweenCellsDuringPathTrace is how many steps (synapses) are in between an input an output

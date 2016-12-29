@@ -113,7 +113,7 @@ func (network *Network) GrowPathBetween(startCell, endCell CellID, minSynapses i
 			synapse := NewSynapse(network)
 			synapsesAdded[synapse.ID] = true
 			// somewhat arbitrarily decided to set the synapses to the highest value allowed
-			synapse.Millivolts = int8(synapseMax)
+			synapse.Millivolts = synapseLearnRate
 
 			synapse.FromNeuronAxon = lastCellID
 			network.Cells[lastCellID].AxonSynapses[synapse.ID] = true

@@ -335,13 +335,20 @@ processBatch fires this entire line in the neural network at once, hoping to get
 
 It will not add any synapses.
 */
-func processBatch(batch []*TrainingSample, originalNetwork *Network, vocab *Dataset) (wasSuccessful bool, diff Diff) {
+func processBatch(batch []*TrainingSample, originalNetwork *Network, data *Dataset) (wasSuccessful bool, diff Diff) {
+	firedOutputBatches := make([]*TrainingSample, 0)
+	unfiredOutputBatches := make([]*TrainingSample, 0)
+	expectedOutputCells := make(map[CellID]bool)
+	allInputCells := make(map[CellID]bool)
+	noisyOutputCells := make(map[CellID]bool)
 	network := CloneNetwork(originalNetwork)
+
 	network.ResetForTraining()
 
-	successes := 0
-
 	for _, ts := range batch {
+		expectedOutputCells[ts.OutputCell] = true // need these later to know which cells should not have fired
+		allInputCells[ts.InputCell] = true
+
 		network.Cells[ts.InputCell].FireActionPotential()
 		// TODO: should we step here? or not?
 		network.Step()
@@ -357,11 +364,17 @@ func processBatch(batch []*TrainingSample, originalNetwork *Network, vocab *Data
 	// see how many of the cells we wanted actually fired
 	for _, ts := range batch {
 		if network.Cells[ts.OutputCell].WasFired {
-			successes++
+			firedOutputBatches = append(firedOutputBatches, ts)
+		} else {
+			unfiredOutputBatches = append(unfiredOutputBatches, ts)
 		}
 	}
-
-	wasSuccessful = successes == len(batch)
+	// which cells should not have fired
+	for _, unit := range data.KeyToItem {
+		if _, wasExpected := expectedOutputCells[unit.OutputCell]; !wasExpected && network.Cells[unit.OutputCell].WasFired {
+			noisyOutputCells[unit.OutputCell] = true
+		}
+	}
 
 	// wind down the network
 	network.Disabled = true
@@ -371,7 +384,22 @@ func processBatch(batch []*TrainingSample, originalNetwork *Network, vocab *Data
 		fmt.Println("warn: more cell firings existed after disabling network and stepping")
 	}
 
+	wasSuccessful = len(unfiredOutputBatches) == 0 && len(noisyOutputCells) == 0
+
 	if !wasSuccessful {
+		// most critical part of training, ensure we backprop and whatnot
+
+		// merge all the good synapses
+		goodSynapses := make(map[SynapseID]bool)
+		for _, ts := range firedOutputBatches {
+			gs := backwardTraceFirings(network, ts.OutputCell, ts.InputCell)
+			for synapseID := range gs {
+				goodSynapses[synapseID] = true
+			}
+		}
+		badSynapses := backwardTraceNoise(network, allInputCells, noisyOutputCells, goodSynapses)
+		applyBacktrace(network, goodSynapses, badSynapses)
+
 		// We failed to generate the desired effect, so do a significant growth
 		// of cells. Grow some random stuff to introduce a little noise and new
 		// things to grab onto.
@@ -379,7 +407,7 @@ func processBatch(batch []*TrainingSample, originalNetwork *Network, vocab *Data
 		network.GrowRandomSynapses(retrainRandomSynapsesToGrow)
 
 		// (re)grow paths between each expected input and output.
-		for _, ts := range batch {
+		for _, ts := range unfiredOutputBatches {
 			network.GrowPathBetween(ts.InputCell, ts.OutputCell, GrowPathExpectedMinimumSynapses)
 		}
 		diff = DiffNetworks(originalNetwork, network)

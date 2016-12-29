@@ -62,14 +62,14 @@ original input cell.
 - ignore cells that were on the happy path
 - ignore synapses that weren't excitatory
 */
-func backwardTraceNoise(network *Network, inputCell CellID, unexpectedOutputCells []CellID, goodSynapses map[SynapseID]bool) (badSynapses map[SynapseID]bool) {
+func backwardTraceNoise(network *Network, inputCells map[CellID]bool, unexpectedOutputCells map[CellID]bool, goodSynapses map[SynapseID]bool) (badSynapses map[SynapseID]bool) {
 	badSynapses = make(map[SynapseID]bool)
 
 	var wg sync.WaitGroup
 	var mux sync.Mutex
 	var walkBack func(cellID CellID)
 	walkBack = func(cellID CellID) {
-		if cellID == inputCell {
+		if _, isInputCell := inputCells[cellID]; isInputCell {
 			return
 		}
 
@@ -102,7 +102,7 @@ func backwardTraceNoise(network *Network, inputCell CellID, unexpectedOutputCell
 		}()
 	}
 
-	for _, cellID := range unexpectedOutputCells {
+	for cellID := range unexpectedOutputCells {
 		go walkBack(cellID)
 		wg.Wait()
 	}
