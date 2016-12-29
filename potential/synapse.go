@@ -61,7 +61,9 @@ func NewSynapse(network *Network) *Synapse {
 		Millivolts: mv,
 	}
 	synapse := &s
+	network.synMux.Lock()
 	network.Synapses[id] = synapse
+	network.synMux.Unlock()
 	return synapse
 }
 
