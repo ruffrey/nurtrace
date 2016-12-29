@@ -227,12 +227,14 @@ func copyCellToNetwork(cell *Cell, newNetwork *Network) {
 
 	// golang does not copy a map on assignment; must loop over it.
 
+	newNetwork.cellMux.Lock()
 	for synapseID := range cell.AxonSynapses {
 		copiedCell.AxonSynapses[synapseID] = true
 	}
 	for synapseID := range cell.DendriteSynapses {
 		copiedCell.DendriteSynapses[synapseID] = true
 	}
+	newNetwork.cellMux.Unlock()
 }
 
 /*
@@ -244,10 +246,11 @@ Returns its synapse ID in case it had to change.
 func copySynapseToNetwork(synapse *Synapse, newNetwork *Network) SynapseID {
 	// lock old and new networks to prevent map reads while we are adding
 	// or removing map values!
-	newNetwork.synMux.Lock()
-	synapse.Network.synMux.Lock()
 
 	copiedSynapse := NewSynapse(newNetwork)
+
+	newNetwork.synMux.Lock()
+	synapse.Network.synMux.Lock()
 
 	// add these above the section where id change can happen,
 	// because we'd need them at the end of that block.

@@ -25,9 +25,16 @@ func backwardTraceFirings(network *Network, fromOutput CellID, toInput CellID) (
 		wg.Add(1)
 		go func() {
 			// find all of synapses, then cells that could have fired this cell
-			for synapseID := range network.Cells[cellID].DendriteSynapses {
+			network.cellMux.Lock()
+			dendrites := network.Cells[cellID].DendriteSynapses
+			network.cellMux.Unlock()
+			for synapseID := range dendrites {
+				network.synMux.Lock()
 				synapse := network.Synapses[synapseID]
+				network.synMux.Unlock()
+				network.cellMux.Lock()
 				axon := network.Cells[synapse.FromNeuronAxon]
+				network.cellMux.Unlock()
 				isExcitatory := synapse.Millivolts > 0
 				// walk up the synapse to see if its cell was fired
 				// and if it was excitatory. We want to keep walking
@@ -79,17 +86,24 @@ func backwardTraceNoise(network *Network, inputCells map[CellID]bool, unexpected
 		wg.Add(1)
 		go func() {
 			// find all of synapses, then cells that could have fired this cell
-			for synapseID := range network.Cells[cellID].DendriteSynapses {
+			network.cellMux.Lock()
+			dendrites := network.Cells[cellID].DendriteSynapses
+			network.cellMux.Unlock()
+			for synapseID := range dendrites {
 				// the synapse is already known to be on the good path
 				if _, isGood := goodSynapses[synapseID]; isGood {
 					continue
 				}
+				network.synMux.Lock()
 				synapse := network.Synapses[synapseID]
+				network.synMux.Unlock()
 				notExcitatory := synapse.Millivolts < 1
 				if notExcitatory {
 					continue
 				}
+				network.cellMux.Lock()
 				axon := network.Cells[synapse.FromNeuronAxon]
+				network.cellMux.Unlock()
 				if !axon.WasFired {
 					continue
 				}
