@@ -1,6 +1,6 @@
 # Mechanisms of learning
 
-- Start with a fully random set of cells and syanpses.
+- Start with a fully random set of cells and synapses.
 - Assign inputs and outputs to cells.
 - Forge a path of neurons/synapses from each input to its output.
     - one input firing should trigger the output to fire.
