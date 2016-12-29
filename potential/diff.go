@@ -211,11 +211,14 @@ Returns the cell ID of the copied cell, in case it had to change.
 func copyCellToNetwork(cell *Cell, newNetwork *Network) {
 	copiedCell := NewCell(newNetwork)
 	// the NewCell method automatically adds it to the network; do not allow this.
+	newNetwork.cellMux.Lock()
 	delete(newNetwork.Cells, copiedCell.ID)
 
 	copiedCell.ID = cell.ID
 
 	newNetwork.Cells[copiedCell.ID] = copiedCell
+	newNetwork.cellMux.Unlock()
+
 	copiedCell.Network = newNetwork
 
 	copiedCell.Immortal = cell.Immortal

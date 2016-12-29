@@ -203,7 +203,7 @@ func Train(settings *TrainingSettings, originalNetwork *Network, isRemoteWorkerW
 	maxSampleIndex := len(settings.TrainingSamples) - 1
 	fmt.Println(isRemoteWorkerWithTag, partSize,
 		"samples per chunk,", settings.Threads, "local threads,",
-		remoteWorkerTotalWeights, "remote weights")
+		remoteWorkerTotalWeights, "remote weights (", jobChunks, "chunks )")
 	sampleCursor := 0
 	threadIteration := 0
 	for thread := 0; threadIteration < jobChunks; thread++ {

@@ -43,9 +43,12 @@ func backwardTraceFirings(network *Network, fromOutput CellID, toInput CellID) (
 		}()
 	}
 
+	done := make(chan bool)
 	go func() {
 		wg.Wait()
+		done <- true
 	}()
+	<-done
 
 	walkBack(fromOutput)
 

@@ -2,11 +2,12 @@
 
 ## Priority I
 - [ ] backtracing
-  - [ ] training batch path tracing output->input and marking good synapses
-  - [ ] training batch path tracing output->input and marking bad synapses
+  - [x] training batch path tracing output->input and marking good synapses
+  - [x] training batch path tracing output->input and marking bad synapses
   - [x] duplicate a synapse when it goes over the int8 limit
-  - [ ] inhibit the beginning of bad synapse paths
-  - [ ] reinforce good synapses
+  - [x] inhibit bad synapse paths
+  - [x] reinforce good synapses
+  - [ ] backtracing or training with backtracing seems to hang
 
 ## Priority II
 - [ ] profile CPU again
