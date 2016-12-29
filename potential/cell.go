@@ -168,3 +168,13 @@ func (cell *Cell) String() string {
 
 	return s
 }
+
+func (cell *Cell) addDendrite(synapseID SynapseID) {
+	cell.Network.Synapses[synapseID].ToNeuronDendrite = cell.ID
+	cell.DendriteSynapses[synapseID] = true
+}
+
+func (cell *Cell) addAxon(synapseID SynapseID) {
+	cell.Network.Synapses[synapseID].FromNeuronAxon = cell.ID
+	cell.AxonSynapses[synapseID] = true
+}

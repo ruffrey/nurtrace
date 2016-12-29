@@ -97,46 +97,34 @@ func Test_SynapseReinforce(t *testing.T) {
 
 		assert.Equal(t, 3+synapseLearnRate, synapse.Millivolts)
 	})
-	t.Run("reinforcing a synapse to its limit will not overflow integer", func(t *testing.T) {
+	t.Run("reinforcing a synapse to its limit will not overflow integer and will add new duplicate synapses", func(t *testing.T) {
 		network := NewNetwork()
+
+		cell := NewCell(network)
+
 		s1 := NewSynapse(network)
 		s1.Millivolts = 125
+		cell.addAxon(s1.ID)
+		cell.addDendrite(s1.ID)
 		s1.reinforce()
-		assert.Equal(t, int8(125), s1.Millivolts)
+		assert.Equal(t, int8(62), s1.Millivolts)
+		assert.Equal(t, 2, len(network.Synapses))
+
 		s1.Millivolts = 126
 		s1.reinforce()
-		assert.Equal(t, int8(125), s1.Millivolts)
+		assert.Equal(t, int8(62), s1.Millivolts)
+		assert.Equal(t, 3, len(network.Synapses))
 
 		s2 := NewSynapse(network)
 		s2.Millivolts = -126
+		cell.addAxon(s2.ID)
+		cell.addDendrite(s2.ID)
 		s2.reinforce()
-		assert.Equal(t, int8(-126), s2.Millivolts)
+		assert.Equal(t, int8(-63), s2.Millivolts)
+		assert.Equal(t, 5, len(network.Synapses))
 		s2.Millivolts = -127
 		s2.reinforce()
-		assert.Equal(t, int8(-126), s2.Millivolts)
+		assert.Equal(t, int8(-63), s2.Millivolts)
+		assert.Equal(t, 6, len(network.Synapses))
 	})
 }
-
-// func Test_SynapseFlip(t *testing.T) {
-// 	t.Run("positive synapse goes negative", func(t *testing.T) {
-// 		network := NewNetwork()
-// 		synapse := NewSynapse(network)
-// 		synapse.Millivolts = 31
-// 		synapse.flip()
-// 		assert.Equal(t, int8(-31), synapse.Millivolts)
-// 	})
-// 	t.Run("negative synapse goes positive", func(t *testing.T) {
-// 		network := NewNetwork()
-// 		synapse := NewSynapse(network)
-// 		synapse.Millivolts = -27
-// 		synapse.flip()
-// 		assert.Equal(t, int8(27), synapse.Millivolts)
-// 	})
-// 	t.Run("0 mv synapse does nothing", func(t *testing.T) {
-// 		network := NewNetwork()
-// 		synapse := NewSynapse(network)
-// 		synapse.Millivolts = 0
-// 		synapse.flip()
-// 		assert.Equal(t, int8(0), synapse.Millivolts)
-// 	})
-// }
