@@ -1,13 +1,15 @@
 # TODO
 
 ## Priority I
-- [ ] backtracing
+- [x] backtracing
   - [x] training batch path tracing output->input and marking good synapses
   - [x] training batch path tracing output->input and marking bad synapses
   - [x] duplicate a synapse when it goes over the int8 limit
   - [x] inhibit bad synapse paths
   - [x] reinforce good synapses
-  - [ ] backtracing or training with backtracing seems to hang
+  - [x] backtracing or training with backtracing seems to hang
+- [ ] memory seems to be leaking during training
+- [ ] backtracing has possibility of hanging due to circular circuits, possibly
 
 ## Priority II
 - [ ] profile CPU again
@@ -26,4 +28,4 @@
 - [ ] Design distributed training architecture: desktop UI, CLI/services, server, cloud?
 - [ ] Add word-level and phrase-level neural networks
 - [ ] look for properties of types that can probably be private (lower case them)
-- [ ] Generic training and data that can be driven by a UI
+- [ ] Genericize training and data so it can be driven by a UI
