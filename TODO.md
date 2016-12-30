@@ -1,15 +1,15 @@
 # TODO
 
 ## Priority I
-- [x] backtracing
-  - [x] training batch path tracing output->input and marking good synapses
-  - [x] training batch path tracing output->input and marking bad synapses
-  - [x] duplicate a synapse when it goes over the int8 limit
-  - [x] inhibit bad synapse paths
-  - [x] reinforce good synapses
-  - [x] backtracing or training with backtracing seems to hang
+- [ ] write unit tests
+  - [ ] backtrace good - tree search
+  - [ ] backtrace bad - tree search
+  - [ ] apply backtrace
+  - [ ] processBatch
 - [ ] memory seems to be leaking during training
 - [ ] backtracing has possibility of hanging due to circular circuits, possibly
+- [ ] backtraced paths, particularly the "bad" ones, are not marking very many synapses
+- [ ] recheck to make sure distributed training works
 
 ## Priority II
 - [ ] profile CPU again
