@@ -1,6 +1,10 @@
 package potential
 
-import "sync"
+import (
+	"fmt"
+	"math/rand"
+	"sync"
+)
 
 /*
 backwardTraceFiringsGood traverses the trees backward, from output to input.
@@ -12,10 +16,12 @@ To find good synapses, follow excitatory cells from the expected output to the
 input cell.
 */
 func backwardTraceFirings(network *Network, fromOutput CellID, toInput CellID) (goodSynapses map[SynapseID]bool) {
+	r := rand.Uint32()
+	fmt.Println("good start", r)
 	goodSynapses = make(map[SynapseID]bool)
 
 	var wg sync.WaitGroup
-	var mux sync.Mutex
+	ch := make(chan SynapseID)
 	var walkBack func(cellID CellID)
 	walkBack = func(cellID CellID) {
 		if cellID == toInput {
@@ -40,9 +46,7 @@ func backwardTraceFirings(network *Network, fromOutput CellID, toInput CellID) (
 				// and if it was excitatory. We want to keep walking
 				// up the excitatory cells.
 				if axon.WasFired && isExcitatory {
-					mux.Lock()
-					goodSynapses[synapseID] = true
-					mux.Unlock()
+					ch <- synapseID
 					walkBack(synapse.FromNeuronAxon)
 				}
 			}
@@ -50,15 +54,18 @@ func backwardTraceFirings(network *Network, fromOutput CellID, toInput CellID) (
 		}()
 	}
 
-	done := make(chan bool)
 	go func() {
+		walkBack(fromOutput)
 		wg.Wait()
-		done <- true
+		close(ch)
 	}()
-	<-done
 
-	walkBack(fromOutput)
+	for synapseID := range ch {
+		goodSynapses[synapseID] = true
+	}
 
+	fmt.Println("good end ", r, ", goodSynapses=", len(goodSynapses),
+		"synapses=", len(network.Synapses))
 	return goodSynapses
 }
 
@@ -73,10 +80,12 @@ original input cell.
 - ignore synapses that weren't excitatory
 */
 func backwardTraceNoise(network *Network, inputCells map[CellID]bool, unexpectedOutputCells map[CellID]bool, goodSynapses map[SynapseID]bool) (badSynapses map[SynapseID]bool) {
+	r := rand.Uint32()
+	fmt.Println("bad  start", r)
 	badSynapses = make(map[SynapseID]bool)
 
 	var wg sync.WaitGroup
-	var mux sync.Mutex
+	var ch chan SynapseID
 	var walkBack func(cellID CellID)
 	walkBack = func(cellID CellID) {
 		if _, isInputCell := inputCells[cellID]; isInputCell {
@@ -110,9 +119,7 @@ func backwardTraceNoise(network *Network, inputCells map[CellID]bool, unexpected
 				// so this isn't so much paths as all the bad synapses
 				// finding the one-way paths is trickier, and an optimization
 				// problem
-				mux.Lock()
-				badSynapses[synapseID] = true
-				mux.Unlock()
+				ch <- synapseID
 				walkBack(synapse.FromNeuronAxon)
 			}
 			wg.Done()
@@ -120,10 +127,20 @@ func backwardTraceNoise(network *Network, inputCells map[CellID]bool, unexpected
 	}
 
 	for cellID := range unexpectedOutputCells {
-		go walkBack(cellID)
-		wg.Wait()
+		ch = make(chan SynapseID)
+		go func() {
+			walkBack(cellID)
+			wg.Wait()
+			close(ch)
+		}()
+
+		for synapseID := range ch {
+			goodSynapses[synapseID] = true
+		}
 	}
 
+	fmt.Println("bad  end ", r, "badSynapses=", len(badSynapses),
+		"synapses=", len(network.Synapses))
 	return badSynapses
 }
 
