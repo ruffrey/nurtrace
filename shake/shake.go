@@ -59,7 +59,7 @@ func main() {
 	lines := strings.Split(text, "\n")
 	chars := strings.Split(text, "")
 	settings := potential.NewTrainingSettings()
-	// settings.Workerfile = "Workerfile"
+	settings.Workerfile = "Workerfile"
 	// TODO: lines need to be setup for batches of training data.
 	t := charrnn.Charrnn{
 		Chars:    chars,

@@ -243,6 +243,7 @@ func Train(settings *TrainingSettings, originalNetwork *Network, isRemoteWorkerW
 			if isRemote {
 				w, err := NewWorker(remoteWorkers[thread])
 				if err != nil {
+					fmt.Println("error making new worker", remoteWorkers[thread])
 					panic(err)
 				}
 				defer w.conn.Close()
