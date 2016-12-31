@@ -1,10 +1,6 @@
 package potential
 
-import (
-	"fmt"
-	"math/rand"
-	"sync"
-)
+import "sync"
 
 /*
 backwardTraceFiringsGood traverses the trees backward, from output to input.
@@ -16,8 +12,6 @@ To find good synapses, follow excitatory cells from the expected output to the
 input cell.
 */
 func backwardTraceFirings(network *Network, fromOutput CellID, toInput CellID) (goodSynapses map[SynapseID]bool) {
-	r := rand.Uint32()
-	fmt.Println("good start", r)
 	goodSynapses = make(map[SynapseID]bool)
 
 	var wg sync.WaitGroup
@@ -64,8 +58,6 @@ func backwardTraceFirings(network *Network, fromOutput CellID, toInput CellID) (
 		goodSynapses[synapseID] = true
 	}
 
-	fmt.Println("good end ", r, ", goodSynapses=", len(goodSynapses),
-		"synapses=", len(network.Synapses))
 	return goodSynapses
 }
 
@@ -80,8 +72,6 @@ original input cell.
 - ignore synapses that weren't excitatory
 */
 func backwardTraceNoise(network *Network, inputCells map[CellID]bool, unexpectedOutputCells map[CellID]bool, goodSynapses map[SynapseID]bool) (badSynapses map[SynapseID]bool) {
-	r := rand.Uint32()
-	fmt.Println("bad  start", r)
 	badSynapses = make(map[SynapseID]bool)
 
 	var wg sync.WaitGroup
@@ -139,8 +129,6 @@ func backwardTraceNoise(network *Network, inputCells map[CellID]bool, unexpected
 		}
 	}
 
-	fmt.Println("bad  end ", r, "badSynapses=", len(badSynapses),
-		"synapses=", len(network.Synapses))
 	return badSynapses
 }
 
@@ -151,15 +139,49 @@ output cell.
 
 It  reinforces the good path synapses, too.
 */
-func applyBacktrace(network *Network, goodSynapses map[SynapseID]bool, badPathEntrySynapses map[SynapseID]bool) {
-	for synapseID := range goodSynapses {
-		network.Synapses[synapseID].reinforce()
-	}
-	for noisySynapseID := range badPathEntrySynapses {
-		inhibitor := NewSynapse(network)
-		inhibitor.Millivolts = -network.Synapses[noisySynapseID].Millivolts
-		outletCellID := network.Synapses[noisySynapseID].ToNeuronDendrite
+func applyBacktrace(network *Network, inputCells map[CellID]bool, goodSynapses map[SynapseID]bool, badPathEntrySynapses map[SynapseID]bool) {
+	lenGoodSynapses := len(goodSynapses)
+	goodAxons := make(map[CellID]bool) // might need these later
 
-		network.Cells[outletCellID].addDendrite(inhibitor.ID)
+	for synapseID := range goodSynapses {
+		synapse := network.Synapses[synapseID]
+		synapse.reinforce()
+		goodAxons[synapse.FromNeuronAxon] = true
 	}
+
+	for noisySynapseID := range badPathEntrySynapses {
+		noisySynapse := network.Synapses[noisySynapseID]
+		// This inhibitor is a new synapse that will counteract
+		// the "noisy" synapse which contributed to the wrong cell firing.
+		inhibitor := NewSynapse(network)
+		inhibitor.Millivolts = -noisySynapse.Millivolts
+		unwantedOutputCell := network.Cells[noisySynapse.ToNeuronDendrite]
+
+		unwantedOutputCell.addDendrite(inhibitor.ID)
+
+		// have a random good synapse axon cell fire the inhibitor
+		var randCellID CellID
+		if lenGoodSynapses > 0 {
+			randCellID = randCell(goodAxons)
+		} else {
+			randCellID = randCell(inputCells)
+		}
+		network.Cells[randCellID].addAxon(inhibitor.ID)
+	}
+}
+
+func randCell(cellMap map[CellID]bool) (randCellID CellID) {
+	iterate := randomIntBetween(0, len(cellMap)-1)
+	i := 0
+	for k := range cellMap {
+		if i == iterate {
+			randCellID = CellID(k)
+			break
+		}
+		i++
+	}
+	if randCellID == CellID(0) {
+		panic("Should never get cell ID 0")
+	}
+	return randCellID
 }

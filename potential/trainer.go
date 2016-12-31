@@ -398,7 +398,7 @@ func processBatch(batch []*TrainingSample, originalNetwork *Network, data *Datas
 			}
 		}
 		badSynapses := backwardTraceNoise(network, allInputCells, noisyOutputCells, goodSynapses)
-		applyBacktrace(network, goodSynapses, badSynapses)
+		applyBacktrace(network, allInputCells, goodSynapses, badSynapses)
 
 		// We failed to generate the desired effect, so do a significant growth
 		// of cells. Grow some random stuff to introduce a little noise and new
