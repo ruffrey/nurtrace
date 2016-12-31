@@ -15,6 +15,7 @@ func backwardTraceFirings(network *Network, fromOutput CellID, toInput CellID) (
 	goodSynapses = make(map[SynapseID]bool)
 	walkedCells := make(map[CellID]bool) // prevent walking forever in looping circuits
 
+	var mux sync.Mutex
 	var wg sync.WaitGroup
 	ch := make(chan SynapseID)
 	var walkBack func(cellID CellID)
@@ -25,7 +26,9 @@ func backwardTraceFirings(network *Network, fromOutput CellID, toInput CellID) (
 		if _, already := walkedCells[cellID]; already {
 			return
 		}
+		mux.Lock()
 		walkedCells[cellID] = true
+		mux.Unlock()
 
 		wg.Add(1)
 		go func() {
@@ -80,6 +83,7 @@ func backwardTraceNoise(network *Network, inputCells map[CellID]bool, unexpected
 	badSynapses = make(map[SynapseID]bool)
 	walkedCells := make(map[CellID]bool) // prevent walking forever in looping circuits
 
+	var mux sync.Mutex
 	var wg sync.WaitGroup
 	var ch chan SynapseID
 	var walkBack func(cellID CellID)
@@ -90,7 +94,9 @@ func backwardTraceNoise(network *Network, inputCells map[CellID]bool, unexpected
 		if _, already := walkedCells[cellID]; already {
 			return
 		}
+		mux.Lock()
 		walkedCells[cellID] = true
+		mux.Unlock()
 
 		wg.Add(1)
 		go func() {
