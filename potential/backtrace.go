@@ -23,10 +23,11 @@ func backwardTraceFirings(network *Network, fromOutput CellID, toInput CellID) (
 		if cellID == toInput {
 			return
 		}
+		mux.Lock()
 		if _, already := walkedCells[cellID]; already {
+			mux.Unlock()
 			return
 		}
-		mux.Lock()
 		walkedCells[cellID] = true
 		mux.Unlock()
 
@@ -91,10 +92,11 @@ func backwardTraceNoise(network *Network, inputCells map[CellID]bool, unexpected
 		if _, isInputCell := inputCells[cellID]; isInputCell {
 			return
 		}
+		mux.Lock()
 		if _, already := walkedCells[cellID]; already {
+			mux.Unlock()
 			return
 		}
-		mux.Lock()
 		walkedCells[cellID] = true
 		mux.Unlock()
 
