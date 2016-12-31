@@ -13,6 +13,7 @@ input cell.
 */
 func backwardTraceFirings(network *Network, fromOutput CellID, toInput CellID) (goodSynapses map[SynapseID]bool) {
 	goodSynapses = make(map[SynapseID]bool)
+	walkedCells := make(map[CellID]bool) // prevent walking forever in looping circuits
 
 	var wg sync.WaitGroup
 	ch := make(chan SynapseID)
@@ -21,6 +22,10 @@ func backwardTraceFirings(network *Network, fromOutput CellID, toInput CellID) (
 		if cellID == toInput {
 			return
 		}
+		if _, already := walkedCells[cellID]; already {
+			return
+		}
+		walkedCells[cellID] = true
 
 		wg.Add(1)
 		go func() {
@@ -73,6 +78,7 @@ original input cell.
 */
 func backwardTraceNoise(network *Network, inputCells map[CellID]bool, unexpectedOutputCells map[CellID]bool, goodSynapses map[SynapseID]bool) (badSynapses map[SynapseID]bool) {
 	badSynapses = make(map[SynapseID]bool)
+	walkedCells := make(map[CellID]bool) // prevent walking forever in looping circuits
 
 	var wg sync.WaitGroup
 	var ch chan SynapseID
@@ -81,6 +87,10 @@ func backwardTraceNoise(network *Network, inputCells map[CellID]bool, unexpected
 		if _, isInputCell := inputCells[cellID]; isInputCell {
 			return
 		}
+		if _, already := walkedCells[cellID]; already {
+			return
+		}
+		walkedCells[cellID] = true
 
 		wg.Add(1)
 		go func() {
