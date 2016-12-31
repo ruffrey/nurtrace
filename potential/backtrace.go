@@ -116,9 +116,9 @@ func backwardTraceNoise(network *Network, inputCells map[CellID]bool, unexpected
 				if !axon.WasFired {
 					continue
 				}
-				// so this isn't so much paths as all the bad synapses
-				// finding the one-way paths is trickier, and an optimization
-				// problem
+				// This isn't so much "paths" as just all the bad synapses.
+				// Finding the one-way paths is trickier, and an optimization
+				// problem.
 				ch <- synapseID
 				walkBack(synapse.FromNeuronAxon)
 			}
@@ -135,7 +135,7 @@ func backwardTraceNoise(network *Network, inputCells map[CellID]bool, unexpected
 		}()
 
 		for synapseID := range ch {
-			goodSynapses[synapseID] = true
+			badSynapses[synapseID] = true
 		}
 	}
 
