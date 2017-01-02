@@ -232,7 +232,6 @@ func readWorkerfile(filename string) (remoteWorkers []string, remoteWorkerWeight
 	rw := strings.Split(string(b), "\n")
 	for _, w := range rw {
 		if w != "" && !(string(w[0]) == "#") {
-			fmt.Println("w=", w)
 			parts := strings.Split(w, " ")
 			if len(parts) != 2 {
 				err = fmt.Errorf("Workfile should have thread weight followed by hostname:port - %s", w)
@@ -243,8 +242,6 @@ func readWorkerfile(filename string) (remoteWorkers []string, remoteWorkerWeight
 			remoteWorkers = append(remoteWorkers, hostPort)
 			remoteWorkerWeights = append(remoteWorkerWeights, weight)
 			weightTotal += weight
-		} else {
-			fmt.Println("skipping", w)
 		}
 	}
 	return remoteWorkers, remoteWorkerWeights, weightTotal, err
