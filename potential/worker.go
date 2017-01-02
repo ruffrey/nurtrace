@@ -1,10 +1,12 @@
 package potential
 
 import (
+	"errors"
 	"fmt"
 	"io"
 	"io/ioutil"
 	"os"
+	"strconv"
 	"strings"
 
 	"github.com/pkg/sftp"
@@ -221,6 +223,29 @@ func publicKeyFile(file string) ssh.AuthMethod {
 		return nil
 	}
 	return ssh.PublicKeys(key)
+}
+
+func readWorkerfile(filename string) (remoteWorkers []string, remoteWorkerWeights []int, weightTotal int, err error) {
+	b, err := ioutil.ReadFile(filename)
+	if err != nil {
+		return
+	}
+	rw := strings.Split(string(b), "\n")
+	for _, w := range rw {
+		if w != "" {
+			parts := strings.Split(w, " ")
+			if len(parts) != 2 {
+				err = errors.New("Workfile should have thread weight followed by hostname:port")
+				return remoteWorkers, remoteWorkerWeights, weightTotal, err
+			}
+			weight, _ := strconv.Atoi(parts[0])
+			hostPort := parts[1]
+			remoteWorkers = append(remoteWorkers, hostPort)
+			remoteWorkerWeights = append(remoteWorkerWeights, weight)
+			weightTotal += weight
+		}
+	}
+	return remoteWorkers, remoteWorkerWeights, weightTotal, err
 }
 
 // RunWorker is what gets run when this is a remote worker

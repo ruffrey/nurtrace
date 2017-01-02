@@ -3,14 +3,12 @@ package potential
 import (
 	"encoding/gob"
 	"fmt"
-	"io/ioutil"
 	"log"
 	"math"
 	"math/rand"
 	"os"
 	"runtime"
 	"strconv"
-	"strings"
 	"sync"
 	"time"
 )
@@ -160,6 +158,7 @@ func Train(settings *TrainingSettings, originalNetwork *Network, isRemoteWorkerW
 	var remoteWorkers []string
 	var remoteWorkerWeights []int
 	var remoteWorkerTotalWeights int
+	var err error
 	// The next three are used to synchronize 1) merging of thread networks onto original,
 	// and 2) cloning of original network. Otherwise things get quickly out of sync, and
 	// race conditions cause nil pointer reference issues when network is overwritten with
@@ -169,23 +168,9 @@ func Train(settings *TrainingSettings, originalNetwork *Network, isRemoteWorkerW
 	chNetworkSyncCallback := make(chan bool, 1) // blocking channel waiting for response of net merge
 
 	if settings.Workerfile != "" {
-		b, err := ioutil.ReadFile(settings.Workerfile)
+		remoteWorkers, remoteWorkerWeights, remoteWorkerTotalWeights, err = readWorkerfile(settings.Workerfile)
 		if err != nil {
 			panic(err)
-		}
-		rw := strings.Split(string(b), "\n")
-		for _, w := range rw {
-			if w != "" {
-				parts := strings.Split(w, " ")
-				if len(parts) != 2 {
-					panic("Workfile should have thread weight followed by hostname:port")
-				}
-				weight, _ := strconv.Atoi(parts[0])
-				hostPort := parts[1]
-				remoteWorkers = append(remoteWorkers, hostPort)
-				remoteWorkerWeights = append(remoteWorkerWeights, weight)
-				remoteWorkerTotalWeights += weight
-			}
 		}
 	}
 
@@ -318,7 +303,7 @@ func Train(settings *TrainingSettings, originalNetwork *Network, isRemoteWorkerW
 			if mergeNum%settings.Threads == 0 {
 				// DO NOT prune on the one-off network that has not been merged back to main.
 				if shouldPrune {
-					originalNetwork.Prune()
+					// originalNetwork.Prune()
 				}
 				fmt.Println(isRemoteWorkerWithTag, "Progress:",
 					math.Floor(((float64(mergeNum)*float64(samplesBetweenMergingSessions))/float64(lenAllSamples))*100), "%")
