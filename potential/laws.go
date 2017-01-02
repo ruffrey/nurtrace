@@ -34,16 +34,16 @@ to zero, until it is 2, then it will become zero.
 const synapseLearnRate int8 = 1
 
 /*
-apResting comes from standard neuroscience Membrane Potential. This, and all voltages
+cellRestingVoltage comes from standard neuroscience Membrane Potential. This, and all voltages
 in the lib, conveniently fit in tiny 8 bit integers.
 */
-const apResting int8 = -70
+const cellRestingVoltage int8 = -70
 
 /*
-apThreshold represents the millivolts where an action potential will result.
+cellFireVoltageThreshold represents the millivolts where an action potential will result.
 int16 is needed for comparisons.
 */
-const apThreshold int16 = -55
+const cellFireVoltageThreshold int16 = -55
 
 /*
 synapseAPBoost is how much a synapse's ActivationHistory should be incremented extra when
@@ -87,7 +87,7 @@ By default, it assumes each new synapse has a default mv value of they synapse l
 true for randomly grown synapses) and we will grow enough to essentially fire the cell if all
 these synapses fire.
 */
-const GrowPathExpectedMinimumSynapses = int((int16(apResting) - apThreshold) / int16(synapseLearnRate))
+const GrowPathExpectedMinimumSynapses = int((int16(cellRestingVoltage) - cellFireVoltageThreshold) / int16(synapseLearnRate))
 
 /*
 ratioMaxHopsBetweenCellsDuringPathTrace is how many steps (synapses) are in between an input an output

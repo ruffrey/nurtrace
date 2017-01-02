@@ -37,7 +37,7 @@ func (network *Network) Step() (hasMore bool) {
 			fmt.Println("error: cell cannot be reset because it does not exist")
 			continue
 		}
-		cell.Voltage = apResting
+		cell.Voltage = cellRestingVoltage
 		cell.activating = false
 	}
 

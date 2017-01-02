@@ -85,7 +85,7 @@ func NewCell(network *Network) *Cell {
 		ID:               id,
 		Network:          network,
 		Immortal:         false,
-		Voltage:          apResting,
+		Voltage:          cellRestingVoltage,
 		activating:       false,
 		DendriteSynapses: make(map[SynapseID]bool),
 		AxonSynapses:     make(map[SynapseID]bool),
@@ -139,7 +139,7 @@ func (cell *Cell) ApplyVoltage(change int8, fromSynapse *Synapse) (didFire bool)
 	// possible int8 buffer overflow in the result.
 	var newPossibleVoltage int16
 	newPossibleVoltage = int16(change) + int16(cell.Voltage)
-	if newPossibleVoltage > apThreshold {
+	if newPossibleVoltage > cellFireVoltageThreshold {
 		// when a synapse firing results in firing an Action Potential, it counts toward making
 		// the synapse stronger, so we increment the ActivationHistory a second time
 		fromSynapse.ActivationHistory += synapseAPBoost
