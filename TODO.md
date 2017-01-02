@@ -1,13 +1,15 @@
 # TODO
 
 ## Priority I
-- [ ] More refined learning techniques:
-    - [ ] Fix overpruning that results in no synapses at the end of training
-    - [ ] ensure everything in learning-mechanisms.md is done
-    - [ ] larger sets of pathways are OK - more synapses between start and end
-    - [ ] more aggressive pruning and optimize learning more granularly to reduce randomness
-    - [x] if it fails, do a prune on the network copy, then GrowPathBetween, and apply it to the original (?)
-- [ ] NewNetwork should return a pointer
+- [ ] write unit tests
+  - [ ] backtrace good - tree search
+  - [ ] backtrace bad - tree search
+  - [ ] apply backtrace
+  - [ ] processBatch
+- [ ] memory seems to be leaking during training
+- [ ] backtracing has possibility of hanging due to circular circuits, possibly
+- [ ] backtraced paths, particularly the "bad" ones, are not marking very many synapses
+- [ ] recheck to make sure distributed training works
 
 ## Priority II
 - [ ] profile CPU again
@@ -26,5 +28,4 @@
 - [ ] Design distributed training architecture: desktop UI, CLI/services, server, cloud?
 - [ ] Add word-level and phrase-level neural networks
 - [ ] look for properties of types that can probably be private (lower case them)
-- [ ] distributed computing methods
-- [ ] parallelize and use [SIMD](https://github.com/bjwbell/gensimd) instructions?
+- [ ] Genericize training and data so it can be driven by a UI

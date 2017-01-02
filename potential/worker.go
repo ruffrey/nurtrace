@@ -5,6 +5,7 @@ import (
 	"io"
 	"io/ioutil"
 	"os"
+	"strconv"
 	"strings"
 
 	"github.com/pkg/sftp"
@@ -29,12 +30,16 @@ type Worker struct {
 func NewWorker(hostAndPort string) (w *Worker, err error) {
 	u := os.Getenv("USER")
 	w = &Worker{host: hostAndPort}
+	keyname := os.Getenv("KEYNAME")
+	if keyname == "" {
+		keyname = "id_rsa"
+	}
 
 	// Dial your ssh server.
 	w.conn, err = ssh.Dial("tcp", w.host, &ssh.ClientConfig{
 		User: u,
 		Auth: []ssh.AuthMethod{
-			publicKeyFile(os.Getenv("HOME") + "/.ssh/id_rsa"),
+			publicKeyFile(os.Getenv("HOME") + "/.ssh/" + keyname),
 		},
 	})
 	if err != nil {
@@ -217,6 +222,32 @@ func publicKeyFile(file string) ssh.AuthMethod {
 		return nil
 	}
 	return ssh.PublicKeys(key)
+}
+
+func readWorkerfile(filename string) (remoteWorkers []string, remoteWorkerWeights []int, weightTotal int, err error) {
+	b, err := ioutil.ReadFile(filename)
+	if err != nil {
+		return
+	}
+	rw := strings.Split(string(b), "\n")
+	for _, w := range rw {
+		if w != "" && !(string(w[0]) == "#") {
+			fmt.Println("w=", w)
+			parts := strings.Split(w, " ")
+			if len(parts) != 2 {
+				err = fmt.Errorf("Workfile should have thread weight followed by hostname:port - %s", w)
+				return remoteWorkers, remoteWorkerWeights, weightTotal, err
+			}
+			weight, _ := strconv.Atoi(parts[0])
+			hostPort := parts[1]
+			remoteWorkers = append(remoteWorkers, hostPort)
+			remoteWorkerWeights = append(remoteWorkerWeights, weight)
+			weightTotal += weight
+		} else {
+			fmt.Println("skipping", w)
+		}
+	}
+	return remoteWorkers, remoteWorkerWeights, weightTotal, err
 }
 
 // RunWorker is what gets run when this is a remote worker

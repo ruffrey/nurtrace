@@ -1,6 +1,6 @@
 # Mechanisms of learning
 
-- Start with a fully random set of cells and syanpses.
+- Start with a fully random set of cells and synapses.
 - Assign inputs and outputs to cells.
 - Forge a path of neurons/synapses from each input to its output.
     - one input firing should trigger the output to fire.
@@ -19,10 +19,10 @@
     - mark each synapse/cell on the happy path
     - traverse the network from each unexpected output back to each input cell
     - mark each synapse/cell on the bad path
-    - options:
-        - flip voltage of bad synapses
-        - degrade voltage of bad synapses toward zero
-        - set voltage of bad synapses to zero
+    - to make the network learn:
+        - add inhibitory synapses to bad path cells
+        - reinfoce good synapses
+        - when synapses hit the max voltage, add another synapse in the same direction
 - Pruning:
     - it is unclear the best way to do pruning, or if it is necessary
     - cells with no synapses get pruned
@@ -30,4 +30,4 @@
     - it means we cannot really add parts of networks together
     - pruning's purpose is *to remove noise*
     - *only prune on the main network*   
-    - perhapse only prune non-fired synapses at the end of a large training session or several training sessions 
+    - perhapse only prune non-fired synapses at the end of a large training session or several training sessions

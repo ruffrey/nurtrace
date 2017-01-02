@@ -116,15 +116,6 @@ func (cell *Cell) FireActionPotential() {
 	}
 
 	for synapseID := range cell.AxonSynapses {
-		if cell.Network.Disabled {
-			// This will likely happen when setting the network to disabled, because
-			// timeouts will still need to wait to finish then try to fire the network.
-			// While technically it should be ok to let the network fizzle out on its
-			// own in the ApplyVoltage check for network being disabled, stopping here
-			// will save some precious CPU.
-			// fmt.Println("warn: network stopped during FireActionPotential")
-			break
-		}
 		cell.Network.AddSynapseToNextStep(synapseID)
 	}
 }
@@ -176,4 +167,14 @@ func (cell *Cell) String() string {
 	}
 
 	return s
+}
+
+func (cell *Cell) addDendrite(synapseID SynapseID) {
+	cell.Network.Synapses[synapseID].ToNeuronDendrite = cell.ID
+	cell.DendriteSynapses[synapseID] = true
+}
+
+func (cell *Cell) addAxon(synapseID SynapseID) {
+	cell.Network.Synapses[synapseID].FromNeuronAxon = cell.ID
+	cell.AxonSynapses[synapseID] = true
 }

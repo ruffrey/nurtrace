@@ -139,7 +139,7 @@ func Test_NetworkSerialization(t *testing.T) {
 }
 
 func Test_ResetForTraining(t *testing.T) {
-	t.Run("resets cell props activating, voltage, wasFired", func(t *testing.T) {
+	t.Run("resets cell props activating, wasFired, but NOT voltage", func(t *testing.T) {
 		network := NewNetwork()
 
 		// pretest
@@ -159,7 +159,7 @@ func Test_ResetForTraining(t *testing.T) {
 
 		// assertions
 		assert.Equal(t, false, cell1.activating)
-		assert.Equal(t, int8(-70), cell1.Voltage)
+		assert.Equal(t, int8(100), cell1.Voltage)
 		assert.Equal(t, false, cell1.WasFired)
 	})
 

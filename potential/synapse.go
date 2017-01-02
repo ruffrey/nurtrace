@@ -61,7 +61,9 @@ func NewSynapse(network *Network) *Synapse {
 		Millivolts: mv,
 	}
 	synapse := &s
+	network.synMux.Lock()
 	network.Synapses[id] = synapse
+	network.synMux.Unlock()
 	return synapse
 }
 
@@ -81,6 +83,46 @@ func (synapse *Synapse) Activate() (didFire bool, err error) {
 	didFire = dendriteCell.ApplyVoltage(synapse.Millivolts, synapse)
 
 	return didFire, nil
+}
+
+/*
+reinforce a synapse relationship and create a new synapse of the same
+direction if so.
+*/
+func (synapse *Synapse) reinforce() (newSynapse SynapseID) {
+
+	isPositive := synapse.Millivolts >= 0
+	if isPositive {
+		newMV := synapse.Millivolts + synapseLearnRate
+		if newMV > actualSynapseMax {
+			half := actualSynapseMax / 2
+			synapse.Millivolts = half
+			// add a new synapse between those two cells
+			s := NewSynapse(synapse.Network)
+			newSynapse = s.ID
+			s.Millivolts = half
+			synapse.Network.Cells[synapse.ToNeuronDendrite].addDendrite(newSynapse)
+			synapse.Network.Cells[synapse.FromNeuronAxon].addAxon(newSynapse)
+		} else {
+			synapse.Millivolts = newMV
+		}
+		return newSynapse
+	}
+	// negative
+	newMV := synapse.Millivolts - synapseLearnRate
+	if newMV < actualSynapseMin {
+		half := actualSynapseMin / 2
+		synapse.Millivolts = half
+		// add a new synapse between those two cells
+		s := NewSynapse(synapse.Network)
+		newSynapse = s.ID
+		s.Millivolts = half
+		synapse.Network.Cells[synapse.ToNeuronDendrite].addDendrite(newSynapse)
+		synapse.Network.Cells[synapse.FromNeuronAxon].addAxon(newSynapse)
+	} else {
+		synapse.Millivolts = newMV
+	}
+	return newSynapse
 }
 
 func (synapse *Synapse) String() string {

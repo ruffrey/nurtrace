@@ -3,14 +3,12 @@ package potential
 import (
 	"encoding/gob"
 	"fmt"
-	"io/ioutil"
 	"log"
 	"math"
 	"math/rand"
 	"os"
 	"runtime"
 	"strconv"
-	"strings"
 	"sync"
 	"time"
 )
@@ -160,6 +158,7 @@ func Train(settings *TrainingSettings, originalNetwork *Network, isRemoteWorkerW
 	var remoteWorkers []string
 	var remoteWorkerWeights []int
 	var remoteWorkerTotalWeights int
+	var err error
 	// The next three are used to synchronize 1) merging of thread networks onto original,
 	// and 2) cloning of original network. Otherwise things get quickly out of sync, and
 	// race conditions cause nil pointer reference issues when network is overwritten with
@@ -169,23 +168,9 @@ func Train(settings *TrainingSettings, originalNetwork *Network, isRemoteWorkerW
 	chNetworkSyncCallback := make(chan bool, 1) // blocking channel waiting for response of net merge
 
 	if settings.Workerfile != "" {
-		b, err := ioutil.ReadFile(settings.Workerfile)
+		remoteWorkers, remoteWorkerWeights, remoteWorkerTotalWeights, err = readWorkerfile(settings.Workerfile)
 		if err != nil {
 			panic(err)
-		}
-		rw := strings.Split(string(b), "\n")
-		for _, w := range rw {
-			if w != "" {
-				parts := strings.Split(w, " ")
-				if len(parts) != 2 {
-					panic("Workfile should have thread weight followed by hostname:port")
-				}
-				weight, _ := strconv.Atoi(parts[0])
-				hostPort := parts[1]
-				remoteWorkers = append(remoteWorkers, hostPort)
-				remoteWorkerWeights = append(remoteWorkerWeights, weight)
-				remoteWorkerTotalWeights += weight
-			}
 		}
 	}
 
@@ -203,7 +188,7 @@ func Train(settings *TrainingSettings, originalNetwork *Network, isRemoteWorkerW
 	maxSampleIndex := len(settings.TrainingSamples) - 1
 	fmt.Println(isRemoteWorkerWithTag, partSize,
 		"samples per chunk,", settings.Threads, "local threads,",
-		remoteWorkerTotalWeights, "remote weights")
+		remoteWorkerTotalWeights, "remote weights (", jobChunks, "chunks )")
 	sampleCursor := 0
 	threadIteration := 0
 	for thread := 0; threadIteration < jobChunks; thread++ {
@@ -243,6 +228,7 @@ func Train(settings *TrainingSettings, originalNetwork *Network, isRemoteWorkerW
 			if isRemote {
 				w, err := NewWorker(remoteWorkers[thread])
 				if err != nil {
+					fmt.Println("error making new worker", remoteWorkers[thread])
 					panic(err)
 				}
 				defer w.conn.Close()
@@ -317,7 +303,7 @@ func Train(settings *TrainingSettings, originalNetwork *Network, isRemoteWorkerW
 			if mergeNum%settings.Threads == 0 {
 				// DO NOT prune on the one-off network that has not been merged back to main.
 				if shouldPrune {
-					originalNetwork.Prune()
+					// originalNetwork.Prune()
 				}
 				fmt.Println(isRemoteWorkerWithTag, "Progress:",
 					math.Floor(((float64(mergeNum)*float64(samplesBetweenMergingSessions))/float64(lenAllSamples))*100), "%")
@@ -335,24 +321,26 @@ processBatch fires this entire line in the neural network at once, hoping to get
 
 It will not add any synapses.
 */
-func processBatch(batch []*TrainingSample, originalNetwork *Network, vocab *Dataset) (wasSuccessful bool, diff Diff) {
+func processBatch(batch []*TrainingSample, originalNetwork *Network, data *Dataset) (wasSuccessful bool, diff Diff) {
+	firedOutputBatches := make([]*TrainingSample, 0)
+	unfiredOutputBatches := make([]*TrainingSample, 0)
+	expectedOutputCells := make(map[CellID]bool)
+	allInputCells := make(map[CellID]bool)
+	noisyOutputCells := make(map[CellID]bool)
 	network := CloneNetwork(originalNetwork)
+
 	network.ResetForTraining()
 
-	successes := 0
-
 	for _, ts := range batch {
-		// cell, ok := network.Cells[ts.InputCell]
-		// if !ok {
-		// 	fmt.Println("error: input cell missing from network", ts)
-		// }
-		// cell.FireActionPotential()
+		expectedOutputCells[ts.OutputCell] = true // need these later to know which cells should not have fired
+		allInputCells[ts.InputCell] = true
+
 		network.Cells[ts.InputCell].FireActionPotential()
 		// TODO: should we step here? or not?
 		network.Step()
 	}
 
-	// give for firings time to go through the network
+	// give firings time to travel through the network
 	for i := 0; i < GrowPathExpectedMinimumSynapses; i++ {
 		hasMore := network.Step()
 		if !hasMore {
@@ -362,11 +350,17 @@ func processBatch(batch []*TrainingSample, originalNetwork *Network, vocab *Data
 	// see how many of the cells we wanted actually fired
 	for _, ts := range batch {
 		if network.Cells[ts.OutputCell].WasFired {
-			successes++
+			firedOutputBatches = append(firedOutputBatches, ts)
+		} else {
+			unfiredOutputBatches = append(unfiredOutputBatches, ts)
 		}
 	}
-
-	wasSuccessful = successes == len(batch)
+	// which cells should not have fired
+	for _, unit := range data.KeyToItem {
+		if _, wasExpected := expectedOutputCells[unit.OutputCell]; !wasExpected && network.Cells[unit.OutputCell].WasFired {
+			noisyOutputCells[unit.OutputCell] = true
+		}
+	}
 
 	// wind down the network
 	network.Disabled = true
@@ -376,7 +370,22 @@ func processBatch(batch []*TrainingSample, originalNetwork *Network, vocab *Data
 		fmt.Println("warn: more cell firings existed after disabling network and stepping")
 	}
 
+	wasSuccessful = len(unfiredOutputBatches) == 0 && len(noisyOutputCells) == 0
+
 	if !wasSuccessful {
+		// most critical part of training, ensure we backprop and whatnot
+
+		// merge all the good synapses
+		goodSynapses := make(map[SynapseID]bool)
+		for _, ts := range firedOutputBatches {
+			gs := backwardTraceFirings(network, ts.OutputCell, ts.InputCell)
+			for synapseID := range gs {
+				goodSynapses[synapseID] = true
+			}
+		}
+		badSynapses := backwardTraceNoise(network, allInputCells, noisyOutputCells, goodSynapses)
+		applyBacktrace(network, allInputCells, goodSynapses, badSynapses)
+
 		// We failed to generate the desired effect, so do a significant growth
 		// of cells. Grow some random stuff to introduce a little noise and new
 		// things to grab onto.
@@ -384,7 +393,7 @@ func processBatch(batch []*TrainingSample, originalNetwork *Network, vocab *Data
 		network.GrowRandomSynapses(retrainRandomSynapsesToGrow)
 
 		// (re)grow paths between each expected input and output.
-		for _, ts := range batch {
+		for _, ts := range unfiredOutputBatches {
 			network.GrowPathBetween(ts.InputCell, ts.OutputCell, GrowPathExpectedMinimumSynapses)
 		}
 		diff = DiffNetworks(originalNetwork, network)

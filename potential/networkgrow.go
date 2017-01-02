@@ -14,11 +14,8 @@ It adds neurons, adds new synapses, prunes old neurons, and strengthens synapses
 fired a lot.
 */
 func (network *Network) Grow(neuronsToAdd, defaultNeuronSynapses, synapsesToAdd int) {
-	// fmt.Println("Grow session start")
 	network.GrowRandomNeurons(neuronsToAdd, defaultNeuronSynapses)
-
 	network.GrowRandomSynapses(synapsesToAdd)
-	// fmt.Println("  Grow session end, synapses=", len(network.Synapses), "cells=", len(network.Cells))
 }
 
 /*
@@ -116,7 +113,7 @@ func (network *Network) GrowPathBetween(startCell, endCell CellID, minSynapses i
 			synapse := NewSynapse(network)
 			synapsesAdded[synapse.ID] = true
 			// somewhat arbitrarily decided to set the synapses to the highest value allowed
-			synapse.Millivolts = int8(synapseMax)
+			synapse.Millivolts = synapseLearnRate
 
 			synapse.FromNeuronAxon = lastCellID
 			network.Cells[lastCellID].AxonSynapses[synapse.ID] = true
@@ -141,14 +138,10 @@ func (network *Network) GrowRandomNeurons(neuronsToAdd, defaultNeuronSynapses in
 		cell := NewCell(network)
 		addedNeurons = append(addedNeurons, cell)
 	}
-	// fmt.Println("  done")
-
-	// fmt.Println("  adding default synapses to new neurons", defaultNeuronSynapses)
 
 	// Now we add the default number of synapses to our new neurons, with random other neurons.
 	// Create the synapse, then choose a random cell from the network, then choose whether
 	// this new cell will be a sender or receiver.
-
 	for _, cell := range addedNeurons {
 		for i := 0; i < defaultNeuronSynapses; {
 			ix := network.RandomCellKey()
@@ -171,11 +164,9 @@ func (network *Network) GrowRandomNeurons(neuronsToAdd, defaultNeuronSynapses in
 				otherCell.AxonSynapses[synapse.ID] = true
 				cell.DendriteSynapses[synapse.ID] = true
 			}
-			// fmt.Println("created synapse", synapse)
 			i++
 		}
 	}
-	// fmt.Println("  GrowRandomNeurons done")
 }
 
 func chooseIfSender() bool {
