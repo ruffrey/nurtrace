@@ -2,6 +2,9 @@
 
 ## Priority I
 - [ ] the number of synapses grows hugely and hangs the network around 11%
+- [ ] always 0 bad synapses
+- [ ] sampling never yields results with new weights
+- [ ] reuse existing inhibitory synapses during backtracing and only create new one when not existing
 - [x] backtraced paths, particularly the "bad" ones, are not marking very many synapses
 - [x] recheck to make sure distributed training works
 - [ ] write unit tests
