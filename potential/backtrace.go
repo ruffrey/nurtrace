@@ -151,11 +151,14 @@ func backwardTraceNoise(network *Network, inputCells map[CellID]bool, unexpected
 }
 
 /*
-applyBacktrace adds a synapse to inhibit the any bad path that produced noise, i.e.
-it resulted in the wrong output cell firing and was not in the path to the right
-output cell.
+applyBacktrace inhibits the "bad" paths that produced noise, i.e.
+it 1) resulted in the wrong output cell firing and 2) was not in
+the path to the right output cell.
 
-It  reinforces the good path synapses, too.
+It tries to just bolser an existing synapse from a good path cell,
+but will create a new one if necessary.
+
+It reinforces the good path synapses, too.
 */
 func applyBacktrace(network *Network, inputCells map[CellID]bool, goodSynapses map[SynapseID]bool, badPathEntrySynapses map[SynapseID]bool) {
 	lenGoodSynapses := len(goodSynapses)
@@ -168,15 +171,6 @@ func applyBacktrace(network *Network, inputCells map[CellID]bool, goodSynapses m
 	}
 
 	for noisySynapseID := range badPathEntrySynapses {
-		noisySynapse := network.Synapses[noisySynapseID]
-		// This inhibitor is a new synapse that will counteract
-		// the "noisy" synapse which contributed to the wrong cell firing.
-		inhibitor := NewSynapse(network)
-		inhibitor.Millivolts = -noisySynapse.Millivolts
-		unwantedOutputCell := network.Cells[noisySynapse.ToNeuronDendrite]
-
-		unwantedOutputCell.addDendrite(inhibitor.ID)
-
 		// have a random good synapse axon cell fire the inhibitor
 		var randCellID CellID
 		if lenGoodSynapses > 0 {
@@ -184,8 +178,21 @@ func applyBacktrace(network *Network, inputCells map[CellID]bool, goodSynapses m
 		} else {
 			randCellID = randCell(inputCells)
 		}
-		network.Cells[randCellID].addAxon(inhibitor.ID)
+		addNewInhibitorCell(network, noisySynapseID, randCellID)
 	}
+}
+
+func addNewInhibitorCell(network *Network, noisySynapseID SynapseID, axon CellID) {
+	noisySynapse := network.Synapses[noisySynapseID]
+	// This inhibitor is a new synapse that will counteract
+	// the "noisy" synapse which contributed to the wrong cell firing.
+	inhibitor := NewSynapse(network)
+	inhibitor.Millivolts = -noisySynapse.Millivolts
+	unwantedOutputCell := network.Cells[noisySynapse.ToNeuronDendrite]
+
+	unwantedOutputCell.addDendrite(inhibitor.ID)
+
+	network.Cells[axon].addAxon(inhibitor.ID)
 }
 
 func randCell(cellMap map[CellID]bool) (randCellID CellID) {
