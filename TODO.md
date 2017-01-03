@@ -1,15 +1,15 @@
 # TODO
 
 ## Priority I
+- [ ] the number of synapses grows hugely and hangs the network around 11%
+- [x] backtraced paths, particularly the "bad" ones, are not marking very many synapses
+- [x] recheck to make sure distributed training works
 - [ ] write unit tests
-  - [ ] backtrace good - tree search
-  - [ ] backtrace bad - tree search
+  - [x] backtrace good - tree search
+  - [x] backtrace bad - tree search
   - [ ] apply backtrace
   - [ ] processBatch
-- [ ] memory seems to be leaking during training
 - [ ] backtracing has possibility of hanging due to circular circuits, possibly
-- [ ] backtraced paths, particularly the "bad" ones, are not marking very many synapses
-- [ ] recheck to make sure distributed training works
 
 ## Priority II
 - [ ] profile CPU again

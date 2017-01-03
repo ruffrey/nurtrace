@@ -33,7 +33,7 @@ func Test_SynapseActivateNotExist(t *testing.T) {
 
 		// base state
 		assert.Equal(t, false, cell.WasFired, "brand new cell should have WasFired==false")
-		assert.Equal(t, int8(-70), cell.Voltage, "brand new cell should have voltage==-70")
+		assert.Equal(t, cellRestingVoltage, cell.Voltage, "brand new cell should have resting voltage")
 
 		didFire, err := synapse.Activate()
 		assert.Nil(t, err, "no error when activating dendrite")
@@ -42,7 +42,7 @@ func Test_SynapseActivateNotExist(t *testing.T) {
 		assert.Equal(t, false, cell.WasFired,
 			"new cell should be fired after its dendrite synapse activates")
 
-		assert.Equal(t, int8(-69), cell.Voltage, "activated cell should have voltage applied")
+		assert.Equal(t, int8(cellRestingVoltage+1), cell.Voltage, "activated cell should have voltage applied")
 	})
 
 	t.Run("when syanpse and cell exist, activating a synapse with high millivolts fires the cell", func(t *testing.T) {
@@ -53,7 +53,7 @@ func Test_SynapseActivateNotExist(t *testing.T) {
 		cell := NewCell(network)
 
 		synapse.ToNeuronDendrite = cell.ID
-		synapse.Millivolts = 50
+		synapse.Millivolts = 100
 
 		// base state
 		assert.Equal(t, false, cell.WasFired, "brand new cell should have WasFired==false")

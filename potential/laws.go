@@ -37,13 +37,13 @@ const synapseLearnRate int8 = 1
 cellRestingVoltage comes from standard neuroscience Membrane Potential. This, and all voltages
 in the lib, conveniently fit in tiny 8 bit integers.
 */
-const cellRestingVoltage int8 = -70
+const cellRestingVoltage int8 = -10
 
 /*
 cellFireVoltageThreshold represents the millivolts where an action potential will result.
 int16 is needed for comparisons.
 */
-const cellFireVoltageThreshold int16 = -55
+const cellFireVoltageThreshold int16 = 50
 
 /*
 synapseAPBoost is how much a synapse's ActivationHistory should be incremented extra when
@@ -71,13 +71,13 @@ const defaultNeuronSynapses = 5
 retrainNeuronsToGrow is the number of neurons to add when a single session does not
 yield the expected output firing.
 */
-const retrainNeuronsToGrow = 10
+const retrainNeuronsToGrow = 5
 
 /*
 retrainRandomSynapsesToGrow is the number of synapses to add when a single session does not
 yield the expected output firing.
 */
-const retrainRandomSynapsesToGrow = 20
+const retrainRandomSynapsesToGrow = 5
 
 /*
 GrowPathExpectedMinimumSynapses represents the maximum allowed number of synapses between an input
@@ -101,6 +101,6 @@ func ratioMaxHopsBetweenCellsDuringPathTrace(network *Network) int {
 	}
 	avgSynPerCell := float64(lenSyn / lenCell)
 	// semi-hardcoded number of max hops. this was arbitrary.
-	maxHops := int(math.Max(math.Min(avgSynPerCell, 50.0), 20))
+	maxHops := int(math.Max(math.Min(avgSynPerCell, 20.0), 20))
 	return maxHops
 }
