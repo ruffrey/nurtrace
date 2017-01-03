@@ -145,7 +145,7 @@ func Test_ResetForTraining(t *testing.T) {
 		// pretest
 		cell1 := NewCell(network)
 		assert.Equal(t, false, cell1.activating)
-		assert.Equal(t, int8(-70), cell1.Voltage)
+		assert.Equal(t, int8(cellRestingVoltage), cell1.Voltage)
 		assert.Equal(t, false, cell1.WasFired)
 
 		// setup
