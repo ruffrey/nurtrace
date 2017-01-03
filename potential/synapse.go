@@ -89,11 +89,14 @@ func (synapse *Synapse) Activate() (didFire bool, err error) {
 reinforce a synapse relationship and create a new synapse of the same
 direction if so.
 */
-func (synapse *Synapse) reinforce() (newSynapse SynapseID) {
+func (synapse *Synapse) reinforce() SynapseID {
+	return reinforceByAmount(synapse, synapseLearnRate)
+}
 
+func reinforceByAmount(synapse *Synapse, mv int8) (newSynapse SynapseID) {
 	isPositive := synapse.Millivolts >= 0
 	if isPositive {
-		newMV := synapse.Millivolts + synapseLearnRate
+		newMV := synapse.Millivolts + mv
 		if newMV > actualSynapseMax {
 			half := actualSynapseMax / 2
 			synapse.Millivolts = half
@@ -109,7 +112,7 @@ func (synapse *Synapse) reinforce() (newSynapse SynapseID) {
 		return newSynapse
 	}
 	// negative
-	newMV := synapse.Millivolts - synapseLearnRate
+	newMV := synapse.Millivolts - mv
 	if newMV < actualSynapseMin {
 		half := actualSynapseMin / 2
 		synapse.Millivolts = half
