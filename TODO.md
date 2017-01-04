@@ -2,9 +2,11 @@
 
 ## Priority I
 - [ ] the number of synapses grows hugely and hangs the network around 11%
-- [ ] always 0 bad synapses
-- [ ] sampling never yields results with new weights
-- [ ] reuse existing inhibitory synapses during backtracing and only create new one when not existing
+- [x] always 0 bad synapses
+- [x] sampling never yields results with new weights
+- [x] reuse existing inhibitory synapses during backtracing and only create new one when not existing
+- [ ] never finds existing inhibitory synapses
+- [ ] huge numbers of good synapses with no bad synapses
 - [x] backtraced paths, particularly the "bad" ones, are not marking very many synapses
 - [x] recheck to make sure distributed training works
 - [ ] write unit tests
@@ -12,7 +14,7 @@
   - [x] backtrace bad - tree search
   - [ ] apply backtrace
   - [ ] processBatch
-- [ ] backtracing has possibility of hanging due to circular circuits, possibly
+- [x] backtracing has possibility of hanging due to circular circuits, possibly
 
 ## Priority II
 - [ ] profile CPU again
