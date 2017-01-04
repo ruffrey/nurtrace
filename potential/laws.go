@@ -23,6 +23,18 @@ const actualSynapseMin int8 = -127 + synapseLearnRate
 const actualSynapseMax int8 = 126 - synapseLearnRate
 
 /*
+newSynapseMinMillivolts is the bottom range of how much a new synapse will
+have for the `Millivolts` property.
+*/
+const newSynapseMinMillivolts int = -30
+
+/*
+newSynapseMaxMillivolts is the bottom range of how much a new synapse will
+have for the `Millivolts` property.
+*/
+const newSynapseMaxMillivolts int = 30
+
+/*
 synapseLearnRate is how much a synapse should get bumped when it is being reinforced.
 
 This is an absolute value because the synapse may be positive or negative, and this
@@ -31,7 +43,7 @@ value will be how much it is bumped away from zero.
 When de-reinforcing or degrading a synapse, it will get reduced at 1/2 the distance
 to zero, until it is 2, then it will become zero.
 */
-const synapseLearnRate int8 = 1
+const synapseLearnRate int8 = 2
 
 /*
 cellRestingVoltage comes from standard neuroscience Membrane Potential. This, and all voltages
@@ -71,13 +83,13 @@ const defaultNeuronSynapses = 5
 retrainNeuronsToGrow is the number of neurons to add when a single session does not
 yield the expected output firing.
 */
-const retrainNeuronsToGrow = 5
+const retrainNeuronsToGrow = 1
 
 /*
 retrainRandomSynapsesToGrow is the number of synapses to add when a single session does not
 yield the expected output firing.
 */
-const retrainRandomSynapsesToGrow = 5
+const retrainRandomSynapsesToGrow = 2
 
 /*
 GrowPathExpectedMinimumSynapses represents the maximum allowed number of synapses between an input
@@ -90,7 +102,7 @@ these synapses fire.
 const GrowPathExpectedMinimumSynapses = int((int16(cellRestingVoltage) - cellFireVoltageThreshold) / int16(synapseLearnRate))
 
 /*
-defaultNewGrownPathSynapse is the value for a new synapse that is added during
+defaultNewGrownPathSynapse is the `Millivolts` value for a new synapse that is added during
 `GrowPathBetween`. It should be enough to fire the next cell. Maybe with some wiggle room.
 
 Its value should be considered in relation to `GrowPathExpectedMinimumSynapses`,

@@ -165,7 +165,6 @@ but will create a new one if necessary.
 It reinforces the good path synapses, too.
 */
 func applyBacktrace(network *Network, inputCells map[CellID]bool, goodSynapses map[SynapseID]bool, badPathEntrySynapses map[SynapseID]bool) {
-	fmt.Println("badSynapses", len(badPathEntrySynapses), "goodSynapses", len(goodSynapses))
 	lenGoodSynapses := len(goodSynapses)
 	goodAxons := make(map[CellID]bool)                // might need these later
 	dendriteToSynapseID := make(map[CellID]SynapseID) // might need later, ok if multiple overwrite

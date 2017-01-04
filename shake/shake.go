@@ -16,7 +16,7 @@ import (
 	"github.com/pkg/profile"
 )
 
-const initialNetworkNeurons = 1000
+const initialNetworkNeurons = 100
 const defaultNeuronSynapses = 5
 
 var networkSaveFile = flag.String("save", "network.json", "Load/save location of the network")

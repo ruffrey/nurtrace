@@ -7,11 +7,6 @@ import (
 
 // Synapses that fire together wire together.
 
-// Represents how many millivolts a synapse can modify the cell's voltage which receives
-// its firings.
-const synapseMin int = -15
-const synapseMax int = 15
-
 /*
 SynapseID should be unique for all the synapses in the network.
 */
@@ -32,8 +27,10 @@ It is a one-way connection. It can either excite or inhibit the receiver.
 Cell Axon -> Cell Dendrite
 */
 type Synapse struct {
-	ID                SynapseID
-	Network           *Network `json:"-"` // skip circular reference in JSON
+	ID      SynapseID
+	Network *Network `json:"-"` // skip circular reference in JSON
+	// Represents how many millivolts a synapse can modify the cell's
+	// voltage which receives its firings.
 	Millivolts        int8
 	FromNeuronAxon    CellID
 	ToNeuronDendrite  CellID
@@ -54,7 +51,7 @@ func NewSynapse(network *Network) *Synapse {
 		}
 		// fmt.Println("warn: would have gotten dupe synapse ID")
 	}
-	mv := int8(randomIntBetween(synapseMin, synapseMax))
+	mv := int8(randomIntBetween(newSynapseMinMillivolts, newSynapseMaxMillivolts))
 	s := Synapse{
 		ID:         id,
 		Network:    network,
