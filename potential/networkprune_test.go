@@ -131,7 +131,7 @@ func Test_PruneNetwork(t *testing.T) {
 		network.Prune()
 
 		assert.Equal(t, int8(62), synapsePositive.Millivolts)
-		assert.Equal(t, int8(-63), synapseNegative.Millivolts)
+		assert.Equal(t, int8(-62), synapseNegative.Millivolts)
 	})
 	t.Run("pruning removes synapses that did not activate", func(t *testing.T) {
 		// setup

@@ -90,12 +90,13 @@ func (synapse *Synapse) reinforce() SynapseID {
 	return reinforceByAmount(synapse, synapseLearnRate)
 }
 
-func reinforceByAmount(synapse *Synapse, mv int8) (newSynapse SynapseID) {
+func reinforceByAmount(synapse *Synapse, millivolts int8) (newSynapse SynapseID) {
+	mv := int16(millivolts)
 	isPositive := synapse.Millivolts >= 0
 	if isPositive {
-		newMV := synapse.Millivolts + mv
+		newMV := int16(synapse.Millivolts) + mv
 		if newMV > actualSynapseMax {
-			half := actualSynapseMax / 2
+			half := int8(actualSynapseMax / 2)
 			synapse.Millivolts = half
 			// add a new synapse between those two cells
 			s := NewSynapse(synapse.Network)
@@ -104,14 +105,14 @@ func reinforceByAmount(synapse *Synapse, mv int8) (newSynapse SynapseID) {
 			synapse.Network.Cells[synapse.ToNeuronDendrite].addDendrite(newSynapse)
 			synapse.Network.Cells[synapse.FromNeuronAxon].addAxon(newSynapse)
 		} else {
-			synapse.Millivolts = newMV
+			synapse.Millivolts = int8(newMV)
 		}
 		return newSynapse
 	}
 	// negative
-	newMV := synapse.Millivolts - mv
+	newMV := int16(synapse.Millivolts) - mv
 	if newMV < actualSynapseMin {
-		half := actualSynapseMin / 2
+		half := int8(actualSynapseMin / 2)
 		synapse.Millivolts = half
 		// add a new synapse between those two cells
 		s := NewSynapse(synapse.Network)
@@ -120,7 +121,7 @@ func reinforceByAmount(synapse *Synapse, mv int8) (newSynapse SynapseID) {
 		synapse.Network.Cells[synapse.ToNeuronDendrite].addDendrite(newSynapse)
 		synapse.Network.Cells[synapse.FromNeuronAxon].addAxon(newSynapse)
 	} else {
-		synapse.Millivolts = newMV
+		synapse.Millivolts = int8(newMV)
 	}
 	return newSynapse
 }

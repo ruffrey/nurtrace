@@ -19,8 +19,8 @@ and training or sampling sessions should be in this file.
 // DO NOT CHANGE THESE TWO.
 // must be one outside the bounds, plus/minus the learning rate. otherwise
 // the int8 will FLIP ITS PLUS or MINUS!!
-const actualSynapseMin int8 = -127 + synapseLearnRate
-const actualSynapseMax int8 = 126 - synapseLearnRate
+const actualSynapseMin int16 = -127 + int16(synapseLearnRate)
+const actualSynapseMax int16 = 126 - int16(synapseLearnRate)
 
 /*
 newSynapseMinMillivolts is the bottom range of how much a new synapse will
