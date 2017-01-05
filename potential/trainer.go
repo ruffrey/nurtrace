@@ -386,11 +386,10 @@ func processBatch(batch []*TrainingSample, originalNetwork *Network, data *Datas
 		badSynapses := backwardTraceNoise(network, allInputCells, noisyOutputCells, goodSynapses)
 		applyBacktrace(network, allInputCells, goodSynapses, badSynapses)
 
-		// We failed to generate the desired effect, so do a significant growth
-		// of cells. Grow some random stuff to introduce a little noise and new
+		// We failed to generate the desired effect, so do a growth of cells.
+		// Grow some random stuff to introduce a little noise and new
 		// things to grab onto.
 		network.GrowRandomNeurons(retrainNeuronsToGrow, defaultNeuronSynapses)
-		network.GrowRandomSynapses(retrainRandomSynapsesToGrow)
 
 		// (re)grow paths between each expected input and output.
 		for _, ts := range unfiredOutputBatches {
