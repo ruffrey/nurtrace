@@ -174,7 +174,7 @@ func applyBacktrace(network *Network, inputCells map[CellID]bool, goodSynapses m
 		goodAxons[synapse.FromNeuronAxon] = true
 		dendriteToSynapseID[synapse.ToNeuronDendrite] = synapse.ID
 	}
-	fmt.Println("applyBacktrace\n  badSynapses", len(badPathEntrySynapses), "\n  goodSynapses", lenGoodSynapses, "\n  goodAxons", len(goodAxons), "\n  dendriteToSynapseID", len(dendriteToSynapseID))
+	// fmt.Println("applyBacktrace\n  badSynapses", len(badPathEntrySynapses), "\n  goodSynapses", lenGoodSynapses, "\n  goodAxons", len(goodAxons), "\n  dendriteToSynapseID", len(dendriteToSynapseID))
 
 	for noisySynapseID := range badPathEntrySynapses {
 		noisySynapse := network.Synapses[noisySynapseID]
@@ -228,7 +228,6 @@ func addInhibitorSynapse(network *Network, noisySynapse *Synapse, goodAxonFuture
 	unwantedOutputCell.addDendrite(inhibitor.ID)
 
 	network.Cells[goodAxonFutureInhibitor].addAxon(inhibitor.ID)
-	fmt.Println("  Inhibitor", inhibitor.ID, "for cell", goodAxonFutureInhibitor)
 }
 
 func randCell(cellMap map[CellID]bool) (randCellID CellID) {
