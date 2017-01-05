@@ -48,11 +48,10 @@ func backwardTraceFirings(network *Network, fromOutput CellID, toInput CellID) (
 				network.cellMux.Lock()
 				axon := network.Cells[synapse.FromNeuronAxon]
 				network.cellMux.Unlock()
-				isExcitatory := synapse.Millivolts > 0
-				// walk up the synapse to see if its cell was fired
-				// and if it was excitatory. We want to keep walking
-				// up the excitatory cells.
-				if axon.WasFired && isExcitatory {
+				// walk up the synapse to see if its cell was fired.
+				// We want to keep walking up the excitatory or
+				// inhibitory cells.
+				if axon.WasFired {
 					ch <- synapseID
 					walkBack(synapse.FromNeuronAxon)
 				}
@@ -175,34 +174,30 @@ func applyBacktrace(network *Network, inputCells map[CellID]bool, goodSynapses m
 		goodAxons[synapse.FromNeuronAxon] = true
 		dendriteToSynapseID[synapse.ToNeuronDendrite] = synapse.ID
 	}
-	fmt.Println("applyBacktrace\n  badSynapses", len(badPathEntrySynapses), "\n  goodSynapses", lenGoodSynapses, "\n  goodAxons", len(goodAxons), "\n  dendriteToSynapseID", dendriteToSynapseID)
+	fmt.Println("applyBacktrace\n  badSynapses", len(badPathEntrySynapses), "\n  goodSynapses", lenGoodSynapses, "\n  goodAxons", len(goodAxons), "\n  dendriteToSynapseID", len(dendriteToSynapseID))
 
 	for noisySynapseID := range badPathEntrySynapses {
 		noisySynapse := network.Synapses[noisySynapseID]
-		fmt.Println("  noisySynapse.FromNeuronAxon", noisySynapse.FromNeuronAxon)
 		// Try to see if we can reuse a synapse, before making a new one.
 		// What we need is an existing good synapse that already inhibits
 		// the cell that is the noisy synapse's dendrite.
-		synapseID, err := findSynapseInhibitingCell(network, noisySynapse.FromNeuronAxon, dendriteToSynapseID)
-		fmt.Println("  err", err)
+		synapseID, err := findSynapseInhibitingCell(network, noisySynapse.ToNeuronDendrite, dendriteToSynapseID)
 		if err == nil {
 			// found an existing synapse
 			fmt.Println("  reusing existing synapse", synapseID)
 			reinforceByAmount(network.Synapses[synapseID], -noisySynapse.Millivolts)
 			continue
 		}
-		// fmt.Println("  making new synapse")
+
 		// create a new synapse and have a random good synapse axon
 		// cell fire the inhibitor
-		var randCellID CellID
+		var goodCellToInhibitNoise CellID
 		if lenGoodSynapses > 0 {
-			randCellID = randCell(goodAxons)
-			// fmt.Println("  using good axon", randCellID)
+			goodCellToInhibitNoise = randCell(goodAxons)
 		} else {
-			randCellID = randCell(inputCells)
-			// fmt.Println("  using input cell", randCellID)
+			goodCellToInhibitNoise = randCell(inputCells)
 		}
-		addInhibitorSynapse(network, noisySynapse, randCellID)
+		addInhibitorSynapse(network, noisySynapse, goodCellToInhibitNoise)
 	}
 }
 
@@ -210,12 +205,12 @@ var errNoSynapseExistingFound = errors.New("no existing synapse") // internal on
 
 func findSynapseInhibitingCell(network *Network, cellNeedingInhibit CellID, dendriteToSynapseReverseMap map[CellID]SynapseID) (SynapseID, error) {
 	if sid, exists := dendriteToSynapseReverseMap[cellNeedingInhibit]; exists {
-		synapse := network.Synapses[sid]
-		if synapse.Millivolts >= 0 {
+		possibleSynapse := network.Synapses[sid]
+		if possibleSynapse.Millivolts >= 0 {
 			return 0, errNoSynapseExistingFound // do not want excitatory ones
 		}
 		// does this synapse fire the cell we need?
-		if synapse.ToNeuronDendrite == cellNeedingInhibit {
+		if possibleSynapse.ToNeuronDendrite == cellNeedingInhibit {
 			return sid, nil
 		}
 	}
@@ -223,16 +218,17 @@ func findSynapseInhibitingCell(network *Network, cellNeedingInhibit CellID, dend
 	return 0, errNoSynapseExistingFound
 }
 
-func addInhibitorSynapse(network *Network, noisySynapse *Synapse, axon CellID) {
+func addInhibitorSynapse(network *Network, noisySynapse *Synapse, goodAxonFutureInhibitor CellID) {
 	// This inhibitor is a new synapse that will counteract
 	// the "noisy" synapse which contributed to the wrong cell firing.
 	inhibitor := NewSynapse(network)
 	inhibitor.Millivolts = -noisySynapse.Millivolts
-	unwantedOutputCell := network.Cells[noisySynapse.FromNeuronAxon]
+	unwantedOutputCell := network.Cells[noisySynapse.ToNeuronDendrite]
 
 	unwantedOutputCell.addDendrite(inhibitor.ID)
 
-	network.Cells[axon].addAxon(inhibitor.ID)
+	network.Cells[goodAxonFutureInhibitor].addAxon(inhibitor.ID)
+	fmt.Println("  Inhibitor", inhibitor.ID, "for cell", goodAxonFutureInhibitor)
 }
 
 func randCell(cellMap map[CellID]bool) (randCellID CellID) {
