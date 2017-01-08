@@ -7,16 +7,13 @@
   - [ ] processBatch
 - [ ] the number of synapses grows hugely and hangs the network around 11%
 - [ ] never reuses existing inhibitory synapses
-- [x] never finds existing inhibitory synapses
-- [x] huge numbers of good synapses with no bad synapses
 
 ## Priority II
-- [x] profile CPU again
-- [ ] cpu.pdf profile:
-  - bleh/potential.backwardTraceFirings.func1.1 17.98s(6.46%) of 99.53s(35.76%)
+- bleh/potential.backwardTraceFirings.func1.1 17.98s(6.46%) of 99.53s(35.76%)
 - [ ] Periodically save back the threaded training to original
     - currently we lose all training on a crash
     - saving can also cause concurrent map read/writes and fail
+- [ ] faster backtracing
 
 ## Priority III
 - [ ] add logging with glog
