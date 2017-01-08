@@ -2,9 +2,9 @@
 
 ## Priority I
 - [ ] write unit tests
-  - [ ] test to ensure that adding the inhibitory cell is working
-  - [ ] apply backtrace
-  - [ ] processBatch
+  - [ ] test to ensure that adding the inhibitory cells are working
+  - [ ] apply backtrace and the various supporting it
+  - [ ] processBatch, particularly when doing backtraces
 - [ ] the number of synapses grows hugely and hangs the network around 11%
 - [ ] never reuses existing inhibitory synapses
 
