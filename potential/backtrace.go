@@ -218,7 +218,7 @@ func findSynapseInhibitingCell(network *Network, cellNeedingInhibit CellID, dend
 	return 0, errNoSynapseExistingFound
 }
 
-func addInhibitorSynapse(network *Network, noisySynapse *Synapse, goodAxonFutureInhibitor CellID) {
+func addInhibitorSynapse(network *Network, noisySynapse *Synapse, goodAxonFutureInhibitor CellID) SynapseID {
 	// This inhibitor is a new synapse that will counteract
 	// the "noisy" synapse which contributed to the wrong cell firing.
 	inhibitor := NewSynapse(network)
@@ -228,6 +228,7 @@ func addInhibitorSynapse(network *Network, noisySynapse *Synapse, goodAxonFuture
 	unwantedOutputCell.addDendrite(inhibitor.ID)
 
 	network.Cells[goodAxonFutureInhibitor].addAxon(inhibitor.ID)
+	return inhibitor.ID
 }
 
 func randCell(cellMap map[CellID]bool) (randCellID CellID) {

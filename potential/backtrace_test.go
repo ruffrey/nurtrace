@@ -124,3 +124,30 @@ func Test_applyBacktrace(t *testing.T) {
 
 	})
 }
+
+func Test_addInhibitorSynapse(t *testing.T) {
+	t.Run("adds an inhibitory synapse to the network", func(t *testing.T) {
+		network := NewNetwork()
+		noisySynapse := NewSynapse(network)
+		noisySynapse.Millivolts = 15
+		inhibitFromGoodPathCell := NewCell(network)
+		unwantedCell := NewCell(network)
+
+		noisySynapse.ToNeuronDendrite = unwantedCell.ID
+		unwantedCell.DendriteSynapses[noisySynapse.ID] = true
+
+		inhibitorSynapseID := addInhibitorSynapse(network, noisySynapse, inhibitFromGoodPathCell.ID)
+
+		inhibitor, exists := network.Synapses[inhibitorSynapseID]
+		if !exists {
+			assert.Fail(t, "inhibitor synapses was not added to the network")
+			return
+		}
+		assert.Equal(t, int8(-15), inhibitor.Millivolts,
+			"wrong millivolts for inhibitory synapse")
+		assert.Equal(t, true, inhibitFromGoodPathCell.AxonSynapses[inhibitor.ID],
+			"inhibitor synapse is not going to be fired by the good path cell")
+		assert.Equal(t, unwantedCell.ID, inhibitor.ToNeuronDendrite,
+			"inhibior synapse is not pointing at the noisy cell")
+	})
+}
