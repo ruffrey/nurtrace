@@ -12,7 +12,8 @@ It returns the synapse IDs that helped fire the intended cell, and the "bad"
 synapses which resulted in noise, and made the wrong output cells fire.
 
 To find good synapses, follow excitatory cells from the expected output to the
-input cell.
+input cell. Those excitatory cells may also have inhibitory synapses, but we
+are not going to walk up them.
 */
 func backwardTraceFirings(network *Network, fromOutput CellID, toInput CellID) (goodSynapses map[SynapseID]bool) {
 	goodSynapses = make(map[SynapseID]bool)
@@ -48,11 +49,16 @@ func backwardTraceFirings(network *Network, fromOutput CellID, toInput CellID) (
 				axon := network.Cells[synapse.FromNeuronAxon]
 				network.cellMux.Unlock()
 				// walk up the synapse to see if its cell was fired.
-				// We want to keep walking up the excitatory or
-				// inhibitory cells.
+				// We want to keep walking up the excitatory cells.
+				// We do not want to walk up inhibitory synapses,
+				// but (for now at least?) save the inhibitory synapse.
+				// TODO: necessary to save inhibitory synapse?
+				// Is this even correct?
 				if axon.WasFired {
 					ch <- synapseID
-					walkBack(synapse.FromNeuronAxon)
+					if synapse.Millivolts > 0 {
+						walkBack(synapse.FromNeuronAxon)
+					}
 				}
 			}
 			wg.Done()

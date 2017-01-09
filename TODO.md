@@ -5,18 +5,18 @@
   - [ ] test to ensure that adding the inhibitory cells are working
   - [ ] apply backtrace and the various supporting it
   - [ ] processBatch, particularly when doing backtraces
-- [x] only inhibit the beginnings of bad paths
-- [x] grow paths using fewer new synapses
-- [ ] the number of synapses grows hugely and hangs the network around 11%
+- [ ] the number of synapses grows hugely and hangs
 - [ ] never reuses existing inhibitory synapses
-- [x] along with GrowPathBetween, we should reinforce all cells along the right path
+  - [ ] unit test run input/output, add inhibitory synapse, make sure it inhibits and all expected cells fire
+- [ ] make the network deeper and let sampling or training run more steps to propagate through
 
 ## Priority II
-- bleh/potential.backwardTraceFirings.func1.1 17.98s(6.46%) of 99.53s(35.76%)
 - [ ] Periodically save back the threaded training to original
     - currently we lose all training on a crash
     - saving can also cause concurrent map read/writes and fail
 - [ ] faster backtracing
+  - bleh/potential.applyBacktrace 9.06s(4.61%) of 33.81s(17.21%)
+  - bleh/potential.backwardTraceFirings.func1.1 6.70s(3.41%) of 34.71s(17.67%)
 
 ## Priority III
 - [ ] add logging with glog
