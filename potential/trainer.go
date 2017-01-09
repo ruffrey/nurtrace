@@ -306,7 +306,8 @@ func Train(settings *TrainingSettings, originalNetwork *Network, isRemoteWorkerW
 					// originalNetwork.Prune()
 				}
 				fmt.Println(isRemoteWorkerWithTag, "Progress:",
-					math.Floor(((float64(mergeNum)*float64(samplesBetweenMergingSessions))/float64(lenAllSamples))*100), "%")
+					math.Floor(((float64(mergeNum)*float64(samplesBetweenMergingSessions))/float64(lenAllSamples))*100), "%,")
+				network.PrintTotals()
 			}
 			chNetworkSyncCallback <- true
 		case <-done:

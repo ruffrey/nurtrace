@@ -133,9 +133,12 @@ func (network *Network) Print() {
 PrintTotals lists the most basic info about the network.
 */
 func (network *Network) PrintTotals() {
+	lenCells := len(network.Cells)
+	lenSynapses := len(network.Synapses)
 	fmt.Println("Network")
-	fmt.Println(" ", len(network.Cells), "cells")
-	fmt.Println(" ", len(network.Synapses), "synapses")
+	fmt.Println(" ", lenCells, "cells")
+	fmt.Println(" ", lenSynapses, "synapses")
+	fmt.Println(" ", lenCells/lenSynapses, "avg synapses per cell")
 }
 
 /*

@@ -167,7 +167,8 @@ It reinforces the good path synapses, too.
 func applyBacktrace(network *Network, inputCells map[CellID]bool, goodSynapses map[SynapseID]bool, badPathEntrySynapses map[SynapseID]bool) {
 	cellsBeingInhibitedByGoodSynapses := make(map[CellID]SynapseID) // might need later, ok if multiple overwrite
 	goodAxons := make(map[CellID]bool)                              // might need these later
-	// reinforce all good synapses
+	// reinforce all good synapses. These are synapses that fire when one of the
+	// input cells fires.
 	for synapseID := range goodSynapses {
 		synapse := network.Synapses[synapseID]
 		synapse.reinforce()
@@ -175,15 +176,6 @@ func applyBacktrace(network *Network, inputCells map[CellID]bool, goodSynapses m
 		if synapse.Millivolts < 0 {
 			cellsBeingInhibitedByGoodSynapses[synapse.ToNeuronDendrite] = synapse.ID
 		}
-	}
-
-	// list of all the axon cells that fired synapses which are "bad path synapses"
-	allBadAxons := make(map[CellID]bool)
-	for badSynapseID := range badPathEntrySynapses {
-		network.synMux.Lock()
-		badSynapse := network.Synapses[badSynapseID]
-		network.synMux.Unlock()
-		allBadAxons[badSynapse.FromNeuronAxon] = true
 	}
 
 	// Stop on the first step that has bad axons. Inhibit all those axons
@@ -194,9 +186,23 @@ func applyBacktrace(network *Network, inputCells map[CellID]bool, goodSynapses m
 	walkedCells := make(map[CellID]bool)
 	var nextCells map[CellID]bool
 	nextCells = inputCells
+	// Later, if we need to create a new synapse, we want to make one at
+	// the same step as the bad synapse, or one step before to give the
+	// best chance for the good cell to inhibit the bad one.
+	badSynapseToStepIndex := make(map[SynapseID]int)
+	stepIndexToGoodSynapses := make(map[int]map[SynapseID]bool)
+	stepIndex := 0
 
 	for {
+		if len(nextCells) == 0 {
+			break
+		}
+
+		stepIndex++
+		stepIndexToGoodSynapses[stepIndex] = make(map[SynapseID]bool)
+
 		shouldStop := false
+
 		for cellID := range nextCells {
 			if _, already := walkedCells[cellID]; already {
 				continue
@@ -207,6 +213,7 @@ func applyBacktrace(network *Network, inputCells map[CellID]bool, goodSynapses m
 			for s := range cell.AxonSynapses {
 				// did this cell fire a bad synapse?
 				if _, firedBadSynapse := badPathEntrySynapses[s]; firedBadSynapse {
+					badSynapseToStepIndex[s] = stepIndex
 					firstPathBadSynapses[s] = true
 					shouldStop = true
 					continue
@@ -215,6 +222,7 @@ func applyBacktrace(network *Network, inputCells map[CellID]bool, goodSynapses m
 				if _, firedGoodSynapse := goodSynapses[s]; firedGoodSynapse {
 					synapse := network.Synapses[s]
 					nextCells[synapse.ToNeuronDendrite] = true
+					stepIndexToGoodSynapses[stepIndex][s] = true
 				}
 			}
 		}
@@ -225,25 +233,42 @@ func applyBacktrace(network *Network, inputCells map[CellID]bool, goodSynapses m
 		nextCells = make(map[CellID]bool)
 	}
 
-	// now that we know the bad synapses, inhibit them
+	// if len(firstPathBadSynapses) != len(badPathEntrySynapses) {
+	// 	fmt.Println("firstPathBadSynapses=", len(firstPathBadSynapses), "badPathEntrySynapses", len(badPathEntrySynapses))
+	// }
+
+	// now that we know the beginning paths to bad synapses,
+	// and they will fire regardless, we are going to inhibit each
+	// one's dendrite (the cell it fires).
+
 	for noisySynapseID := range firstPathBadSynapses {
 		noisySynapse := network.Synapses[noisySynapseID]
+		badSynapseStep := badSynapseToStepIndex[noisySynapseID]
 		// Try to see if we can reuse a good synapse, before making a new one.
 		// What we need is an existing good synapse that already inhibits
 		// the cell that is the noisy synapse's dendrite.
 		if inhibitorySynapseID, exists := cellsBeingInhibitedByGoodSynapses[noisySynapse.ToNeuronDendrite]; exists {
 			// found an existing synapse
-			fmt.Println("  reusing existing synapse", inhibitorySynapseID)
-			reinforceByAmount(network.Synapses[inhibitorySynapseID], noisySynapse.Millivolts)
-			continue
+			if stepIndexToGoodSynapses[badSynapseStep][inhibitorySynapseID] {
+				fmt.Println("  reusing existing synapse", inhibitorySynapseID)
+				reinforceByAmount(network.Synapses[inhibitorySynapseID], noisySynapse.Millivolts)
+				continue
+			}
 		}
-		// create a new synapse and have a random good synapse axon
-		// cell fire the inhibitor
+		// create a new synapse and have a random good synapse axon at the same
+		// step fire it.
 		var goodCellToInhibitNoise CellID
-		if len(goodSynapses) > 0 {
-			goodCellToInhibitNoise = randCell(goodAxons)
+		if len(stepIndexToGoodSynapses[badSynapseStep]) > 0 {
+			axonsAtStep := make(map[CellID]bool)
+			for sid := range stepIndexToGoodSynapses[badSynapseStep] {
+				s := network.Synapses[sid]
+				axonsAtStep[s.FromNeuronAxon] = true
+			}
+			goodCellToInhibitNoise = randCell(axonsAtStep)
+			fmt.Println("Using cell from current step", goodCellToInhibitNoise)
 		} else {
 			goodCellToInhibitNoise = randCell(inputCells)
+			fmt.Println("Using cell from input", goodCellToInhibitNoise)
 		}
 		addInhibitorSynapse(network, noisySynapse, goodCellToInhibitNoise)
 	}
