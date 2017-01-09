@@ -138,7 +138,7 @@ func (network *Network) PrintTotals() {
 	fmt.Println("Network")
 	fmt.Println(" ", lenCells, "cells")
 	fmt.Println(" ", lenSynapses, "synapses")
-	fmt.Println(" ", lenCells/lenSynapses, "avg synapses per cell")
+	fmt.Println(" ", lenSynapses/lenCells, "avg synapses per cell")
 }
 
 /*
