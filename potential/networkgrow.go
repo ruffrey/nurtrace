@@ -122,6 +122,17 @@ func (network *Network) GrowPathBetween(startCell, endCell CellID, minSynapses i
 			network.Cells[endCell].DendriteSynapses[synapse.ID] = true
 		}
 	}
+
+	// Reinforce the path between expected input and output.
+	// Since goodSynapses looks for cells that actually fired,
+	// it may take more than one entire itration for this next
+	// round of code to do anything. Because the new pathways
+	// generated in the block above did not necessarily fire.
+	goodSynapses := backwardTraceFirings(network, endCell, startCell)
+	for synapseID := range goodSynapses {
+		network.Synapses[synapseID].reinforce()
+	}
+
 	return synapsesToEnd, synapsesAdded
 }
 

@@ -258,18 +258,18 @@ func applyBacktrace(network *Network, inputCells map[CellID]bool, goodSynapses m
 		// create a new synapse and have a random good synapse axon at the same
 		// step fire it.
 		var goodCellToInhibitNoise CellID
-		// if len(stepIndexToGoodSynapses[badSynapseStep]) > 0 {
-		axonsAtStep := make(map[CellID]bool)
-		for sid := range stepIndexToGoodSynapses[badSynapseStep] {
-			s := network.Synapses[sid]
-			axonsAtStep[s.FromNeuronAxon] = true
+		if len(stepIndexToGoodSynapses[badSynapseStep]) > 0 {
+			axonsAtStep := make(map[CellID]bool)
+			for sid := range stepIndexToGoodSynapses[badSynapseStep] {
+				s := network.Synapses[sid]
+				axonsAtStep[s.FromNeuronAxon] = true
+			}
+			goodCellToInhibitNoise = randCell(axonsAtStep)
+			// fmt.Println("Using cell from current step", goodCellToInhibitNoise)
+		} else {
+			goodCellToInhibitNoise = randCell(inputCells)
+			// fmt.Println("Using cell from input", goodCellToInhibitNoise)
 		}
-		goodCellToInhibitNoise = randCell(axonsAtStep)
-		// fmt.Println("Using cell from current step", goodCellToInhibitNoise)
-		// } else {
-		// 	goodCellToInhibitNoise = randCell(inputCells)
-		// 	fmt.Println("Using cell from input", goodCellToInhibitNoise)
-		// }
 		addInhibitorSynapse(network, noisySynapse, goodCellToInhibitNoise)
 	}
 }

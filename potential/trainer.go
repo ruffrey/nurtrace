@@ -389,7 +389,8 @@ func processBatch(batch []*TrainingSample, originalNetwork *Network, data *Datas
 
 		// We failed to generate the desired effect, so do a growth of cells.
 		// Grow some random stuff to introduce a little noise and new
-		// things to grab onto.
+		// things to grab onto. Not sure if it is a good idea or not.
+		// Maybe instead, GrowPathBetween should add cells.
 		network.GrowRandomNeurons(retrainNeuronsToGrow, defaultNeuronSynapses)
 
 		// (re)grow paths between each expected input and output.
