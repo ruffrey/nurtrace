@@ -111,8 +111,9 @@ Its value should be considered in relation to `GrowPathExpectedMinimumSynapses`,
 const defaultNewGrownPathSynapse int8 = 15
 
 /*
-ratioMaxHopsBetweenCellsDuringPathTrace is how many steps (synapses) are in between an input an output
-cell before we forge a path up to `GrowPathExpectedMinimumSynapses` in between them.
+ratioMaxHopsBetweenCellsDuringPathTrace is how many steps (synapses) are in between an
+input an output cell before we forge a path up to `GrowPathExpectedMinimumSynapses` in
+between them.
 */
 func ratioMaxHopsBetweenCellsDuringPathTrace(network *Network) int {
 	lenSyn := len(network.Synapses)

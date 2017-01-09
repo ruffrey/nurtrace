@@ -69,9 +69,6 @@ func (network *Network) Prune() {
 	for synapseID := range synapsesToRemove {
 		network.PruneSynapse(synapseID)
 	}
-
-	// good time to reset this
-	network.maxHops = ratioMaxHopsBetweenCellsDuringPathTrace(network)
 }
 
 /*

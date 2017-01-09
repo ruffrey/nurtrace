@@ -16,8 +16,8 @@ import (
 	"github.com/pkg/profile"
 )
 
-const initialNetworkNeurons = 100
-const defaultNeuronSynapses = 5
+const initialNetworkNeurons = 200
+const defaultNeuronSynapses = 4
 
 var networkSaveFile = flag.String("save", "network.json", "Load/save location of the network")
 var vocabSaveFile = flag.String("vocab", "vocab.json", "Load/save location of the charrnn vocab")
