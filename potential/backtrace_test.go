@@ -7,7 +7,7 @@ import (
 )
 
 func Test_backwardTraceFiringsGood(t *testing.T) {
-	t.Run("returns a list of excitatory synapses between cells that fired", func(t *testing.T) {
+	t.Run("returns a list of any synapses between cells that fired", func(t *testing.T) {
 		network := NewNetwork()
 		c1 := NewCell(network)
 		c2 := NewCell(network)
@@ -49,7 +49,7 @@ func Test_backwardTraceFiringsGood(t *testing.T) {
 		c5.addDendrite(s4.ID)
 
 		goodSynapses := backwardTraceFirings(network, c5.ID, c1.ID)
-		assert.Equal(t, 2, len(goodSynapses))
+		assert.Equal(t, 4, len(goodSynapses))
 		_, exists := goodSynapses[s2.ID]
 		assert.True(t, exists)
 		_, exists = goodSynapses[s1.ID]
