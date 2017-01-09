@@ -77,7 +77,7 @@ const defaultSynapseMinFireThreshold = 8
 /*
 defaultNeuronSynapses is the number of random synapses a new neuron will get.
 */
-const defaultNeuronSynapses = 5
+const defaultNeuronSynapses = 4
 
 /*
 retrainNeuronsToGrow is the number of neurons to add when a single session does not

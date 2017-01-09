@@ -9,6 +9,7 @@
 - [ ] grow paths using fewer new synapses
 - [ ] the number of synapses grows hugely and hangs the network around 11%
 - [ ] never reuses existing inhibitory synapses
+- [ ] along with GrowPathBetween, we should reinforce all cells along the right path
 
 ## Priority II
 - bleh/potential.backwardTraceFirings.func1.1 17.98s(6.46%) of 99.53s(35.76%)
