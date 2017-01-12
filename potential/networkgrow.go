@@ -46,7 +46,6 @@ func (network *Network) GrowPathBetween(startCell, endCell CellID, minSynapses i
 	maxHops := network.maxHops
 
 	mux := sync.Mutex{}
-	var lastCellID CellID
 	hops := 0
 	var wg sync.WaitGroup
 	ch := make(chan SynapseID)
@@ -62,7 +61,6 @@ func (network *Network) GrowPathBetween(startCell, endCell CellID, minSynapses i
 	var walk func(cellID CellID)
 	walk = func(cellID CellID) {
 		mux.Lock()
-		lastCellID = cellID
 		hops++
 		totalSynapsesFound := len(synapsesToEnd)
 		if _, already := alreadyWalked[cellID]; already {
@@ -101,7 +99,7 @@ func (network *Network) GrowPathBetween(startCell, endCell CellID, minSynapses i
 		}()
 	}
 
-	// receive the connectd synapses.
+	// receive the connected synapses.
 	// channel is closed upstream when we reach the end (? how ?)
 	go func() {
 		walk(startCell)
@@ -116,20 +114,54 @@ func (network *Network) GrowPathBetween(startCell, endCell CellID, minSynapses i
 
 	needSynapses := minSynapses - len(synapsesToEnd)
 	if needSynapses > 0 {
-		// Add cells and synapases from the last cell we saw to the output.
-		// Whatever the last cell at `maxHops` from the input was, will get
-		// `needSynapses` more synapses directly to the `endCell`.
+		fmt.Println("GrowPathBetween adding end synapses ", needSynapses)
+		hasWalked := len(alreadyWalked) > 0
+		network.cellMux.Lock()
+		fullEndCell := network.Cells[endCell]
+		network.cellMux.Unlock()
+		endHasDendrites := len(fullEndCell.DendriteSynapses) > 0
+		// Two new synapse and one new cells will be added.
+		// It will connect from the input network to a new cell to the end network.
+		//
+		// input cell or walked cell  ->  new synapse 1  ->  new cell  ->  new synapse 2 ->  end cell dendrite or end cell
 		for i := 0; i < needSynapses; i++ {
-			synapse := NewSynapse(network)
-			synapsesAdded[synapse.ID] = true
-			// somewhat arbitrarily decided to set the synapses to the highest value allowed
-			synapse.Millivolts = defaultNewGrownPathSynapse
+			var startPathCell CellID
+			var endPathCell CellID
+			newInputSynapse := NewSynapse(network)
+			newOutputSynapse := NewSynapse(network)
+			newInputCell := NewCell(network)
 
-			synapse.FromNeuronAxon = lastCellID
-			network.Cells[lastCellID].AxonSynapses[synapse.ID] = true
+			// TODO: perhaps make this deeper
+			// TODO: add a method "create direct path between two cells"
+			if hasWalked {
+				// ordering of range map is random. select one.
+				for cellID := range alreadyWalked {
+					startPathCell = cellID
+					break // yes break after one
+				}
+			} else {
+				startPathCell = startCell
+			}
+			if endHasDendrites {
+				// ordering of range map is random. select one.
+				for synapseID := range fullEndCell.DendriteSynapses {
+					network.synMux.Lock()
+					endPathCell = network.Synapses[synapseID].FromNeuronAxon
+					network.synMux.Unlock()
+					break // yes break after one
+				}
+			} else {
+				endPathCell = endCell
+			}
 
-			synapse.ToNeuronDendrite = endCell
-			network.Cells[endCell].DendriteSynapses[synapse.ID] = true
+			network.cellMux.Lock()
+			network.Cells[startPathCell].addAxon(newInputSynapse.ID)
+			network.cellMux.Unlock()
+			newInputCell.addDendrite(newInputSynapse.ID)
+			newInputCell.addAxon(newOutputSynapse.ID)
+			network.cellMux.Lock()
+			network.Cells[endPathCell].addDendrite(newOutputSynapse.ID)
+			network.cellMux.Unlock()
 		}
 	}
 
