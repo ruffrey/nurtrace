@@ -156,10 +156,9 @@ func (charrnn Charrnn) PrepareData(network *potential.Network) {
 		// prevent accidentally pruning the input/output cells
 		network.Cells[dataItem.InputCell].Immortal = true
 		network.Cells[dataItem.OutputCell].Immortal = true
-
-		// Seems like a weird place to grow, but we actually need this for new cells,
-		// and to ensure minimum distance between all inputs and outputs.
-		network.GrowPathBetween(dataItem.InputCell, dataItem.OutputCell, potential.GrowPathExpectedMinimumSynapses)
+		// Right here we used to grow a path between the input and
+		// the output. But that is utterly incorrect - it created a
+		// path between, say, A and A, b and b, c and c, etc.
 	}
 	fmt.Println("charrnn data setup complete")
 }
