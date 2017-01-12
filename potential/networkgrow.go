@@ -114,7 +114,6 @@ func (network *Network) GrowPathBetween(startCell, endCell CellID, minSynapses i
 
 	needSynapses := minSynapses - len(synapsesToEnd)
 	if needSynapses > 0 {
-		fmt.Println("GrowPathBetween adding end synapses ", needSynapses)
 		hasWalked := len(alreadyWalked) > 0
 		network.cellMux.Lock()
 		fullEndCell := network.Cells[endCell]
