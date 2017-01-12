@@ -50,6 +50,7 @@ func (network *Network) GrowPathBetween(startCell, endCell CellID, minSynapses i
 	hops := 0
 	var wg sync.WaitGroup
 	ch := make(chan SynapseID)
+	alreadyWalked := make(map[CellID]bool)
 
 	// walk traverses the axons and see if any synapse leads to the end cell.
 	// hops is the layer we are on, *copied* on pass.
@@ -64,7 +65,13 @@ func (network *Network) GrowPathBetween(startCell, endCell CellID, minSynapses i
 		lastCellID = cellID
 		hops++
 		totalSynapsesFound := len(synapsesToEnd)
+		if _, already := alreadyWalked[cellID]; already {
+			mux.Unlock()
+			return
+		}
+		alreadyWalked[cellID] = true
 		mux.Unlock()
+
 		if hops >= maxHops || totalSynapsesFound >= minSynapses {
 			return
 		}
