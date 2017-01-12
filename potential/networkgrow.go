@@ -153,6 +153,8 @@ func (network *Network) GrowPathBetween(startCell, endCell CellID, minSynapses i
 				endPathCell = endCell
 			}
 
+			newInputSynapse.Millivolts = defaultNewGrownPathSynapse
+
 			network.cellMux.Lock()
 			network.Cells[startPathCell].addAxon(newInputSynapse.ID)
 			network.cellMux.Unlock()
