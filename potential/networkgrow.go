@@ -84,8 +84,11 @@ func (network *Network) GrowPathBetween(startCell, endCell CellID, minSynapses i
 				if receiverCellID == endCell {
 					ch <- axonSynapseID
 				}
-				// also walk the axons of this cell, and pipe any values downstream.
-				walk(receiverCellID)
+				// also walk the axons of this cell if the synapse is
+				// excitatory.
+				if s.Millivolts > 0 {
+					walk(receiverCellID)
+				}
 			}
 			wg.Done()
 		}()
