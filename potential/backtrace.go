@@ -264,14 +264,17 @@ func applyBacktrace(network *Network, inputCells map[CellID]bool, goodSynapses m
 		// create a new synapse and have a random good synapse axon at the same
 		// step fire it.
 		var goodCellToInhibitNoise CellID
-		if len(stepIndexToGoodSynapses[badSynapseStep]) > 0 {
-			axonsAtStep := make(map[CellID]bool)
-			for sid := range stepIndexToGoodSynapses[badSynapseStep] {
+		sstep := stepIndexToGoodSynapses[badSynapseStep]
+		if len(sstep) > 0 {
+			// Originally this loaded all axons in a list and selected one
+			// at random. That was super, super slow, on the order of many
+			// seconds (18s out of 60s). Since Go guarantees random order
+			// of map keys during a range operation, we can just select one.
+			for sid := range sstep {
 				s := network.Synapses[sid]
-				axonsAtStep[s.FromNeuronAxon] = true
+				goodCellToInhibitNoise = s.FromNeuronAxon
+				break // yes, break on first one since it was random
 			}
-			goodCellToInhibitNoise = randCell(axonsAtStep)
-			// fmt.Println("Using cell from current step", goodCellToInhibitNoise)
 		} else {
 			goodCellToInhibitNoise = randCell(inputCells)
 			// fmt.Println("Using cell from input", goodCellToInhibitNoise)
