@@ -8,3 +8,4 @@ potential.test
 *.pdf
 *.test
 stats.sh
+debug

@@ -1,0 +1,9 @@
+{
+    "configurations": [{
+        "name": "Shake Debug",
+        "mode": "debug",
+        "cwd": "${workspaceRoot}/shake",
+        "args": ["-data=less.txt"],
+        "env": {}
+    }]
+}
