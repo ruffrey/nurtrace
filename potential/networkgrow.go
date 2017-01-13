@@ -122,8 +122,6 @@ func (network *Network) GrowPathBetween(startCell, endCell CellID, minSynapses i
 		// input cell or walked cell  ->  new synapse 1  ->  new cell  ->  new synapse 2 ->  end cell dendrite or end cell
 		for i := 0; i < needSynapses; i++ {
 			var startPathCell CellID
-			newInputSynapse := NewSynapse(network)
-			newOutputSynapse := NewSynapse(network)
 			newInputCell := NewCell(network)
 
 			// TODO: perhaps make this deeper
@@ -138,20 +136,14 @@ func (network *Network) GrowPathBetween(startCell, endCell CellID, minSynapses i
 				startPathCell = startCell
 			}
 
-			newInputSynapse.Millivolts = defaultNewGrownPathSynapse
-
-			network.cellMux.Lock()
-			start := network.Cells[startPathCell]
-			end := network.Cells[endCell]
-			network.cellMux.Unlock()
-
-			start.addAxon(newInputSynapse.ID)
-			newInputCell.addDendrite(newInputSynapse.ID)
-			newInputCell.addAxon(newOutputSynapse.ID)
-			end.addDendrite(newOutputSynapse.ID)
+			newInputSynapse := network.linkCells(startPathCell, newInputCell.ID)
+			newOutputSynapse := network.linkCells(newInputCell.ID, endCell)
 
 			synapsesAdded[newInputSynapse.ID] = true
 			synapsesAdded[newOutputSynapse.ID] = true
+
+			newInputSynapse.Millivolts = defaultNewGrownPathSynapse
+			newOutputSynapse.Millivolts = defaultNewGrownPathSynapse
 		}
 	}
 

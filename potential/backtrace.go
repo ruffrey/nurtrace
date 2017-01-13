@@ -286,13 +286,9 @@ func applyBacktrace(network *Network, inputCells map[CellID]bool, goodSynapses m
 func addInhibitorSynapse(network *Network, noisySynapse *Synapse, goodAxonFutureInhibitor CellID) SynapseID {
 	// This inhibitor is a new synapse that will counteract
 	// the "noisy" synapse which contributed to the wrong cell firing.
-	inhibitor := NewSynapse(network)
+	inhibitor := network.linkCells(goodAxonFutureInhibitor, noisySynapse.ToNeuronDendrite)
 	inhibitor.Millivolts = -noisySynapse.Millivolts
-	unwantedOutputCell := network.Cells[noisySynapse.ToNeuronDendrite]
 
-	unwantedOutputCell.addDendrite(inhibitor.ID)
-
-	network.Cells[goodAxonFutureInhibitor].addAxon(inhibitor.ID)
 	return inhibitor.ID
 }
 
