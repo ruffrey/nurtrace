@@ -2,6 +2,8 @@
 
 ## Priority I
 - [ ] never reuses existing inhibitory synapses
+  - [ ] bad path backtracing should be going forward instead
+  - [ ] save the stuff we need later during bad path backtracing so it is more precise
 - [ ] the number of synapses grows hugely and hangs
 - [x] make the network deeper and let sampling or training run more steps to propagate through
 - [ ] write unit tests

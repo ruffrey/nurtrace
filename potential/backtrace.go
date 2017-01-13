@@ -40,16 +40,10 @@ func backwardTraceFirings(network *Network, fromOutput CellID, toInput CellID) (
 		wg.Add(1)
 		go func() {
 			// find all of synapses, then cells that could have fired this cell
-			network.cellMux.Lock()
-			dendrites := network.Cells[cellID].DendriteSynapses
-			network.cellMux.Unlock()
+			dendrites := network.getCell(cellID).DendriteSynapses
 			for synapseID := range dendrites {
-				network.synMux.Lock()
-				synapse := network.Synapses[synapseID]
-				network.synMux.Unlock()
-				network.cellMux.Lock()
-				axon := network.Cells[synapse.FromNeuronAxon]
-				network.cellMux.Unlock()
+				synapse := network.getSyn(synapseID)
+				axon := network.getCell(synapse.FromNeuronAxon)
 				// walk up the synapse to see if its cell was fired.
 				// We want to keep walking up the excitatory cells.
 				// We do not want to walk up inhibitory synapses,
@@ -84,11 +78,10 @@ func backwardTraceFirings(network *Network, fromOutput CellID, toInput CellID) (
 backwardTraceNoise returns the synapses whose pathways resulted in firing incorrect
 output cells.
 
-- follow the cells and synapses backward from the unexpected output cell to the
-original input cell.
-- ignore cells that didn't fire
-- ignore cells that were on the happy path
-- ignore synapses that weren't excitatory
+- step forward through the network
+- follow cells that fired  and that were on the happy path
+- upon finding a cell that fired that was not on the happy path, stop stepping
+and save that as the noisy path to be inhibited later.
 */
 func backwardTraceNoise(network *Network, inputCells map[CellID]bool, unexpectedOutputCells map[CellID]bool, goodSynapses map[SynapseID]bool) (badSynapses map[SynapseID]bool) {
 	badSynapses = make(map[SynapseID]bool)
@@ -113,24 +106,18 @@ func backwardTraceNoise(network *Network, inputCells map[CellID]bool, unexpected
 		wg.Add(1)
 		go func() {
 			// find all of synapses, then cells that could have fired this cell
-			network.cellMux.Lock()
-			dendrites := network.Cells[cellID].DendriteSynapses
-			network.cellMux.Unlock()
+			dendrites := network.getCell(cellID).DendriteSynapses
 			for synapseID := range dendrites {
 				// the synapse is already known to be on the good path
 				if _, isGood := goodSynapses[synapseID]; isGood {
 					continue
 				}
-				network.synMux.Lock()
-				synapse := network.Synapses[synapseID]
-				network.synMux.Unlock()
+				synapse := network.getSyn(synapseID)
 				notExcitatory := synapse.Millivolts < 1
 				if notExcitatory {
 					continue
 				}
-				network.cellMux.Lock()
-				axon := network.Cells[synapse.FromNeuronAxon]
-				network.cellMux.Unlock()
+				axon := network.getCell(synapse.FromNeuronAxon)
 				if !axon.WasFired {
 					continue
 				}

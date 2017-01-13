@@ -63,15 +63,33 @@ linkCells creates a new synapses and links the two referenced cells where the
 "to" cell has an axon firing the "from" cell's dendrite.
 */
 func (network *Network) linkCells(fromCellID CellID, toCellID CellID) *Synapse {
-	network.cellMux.Lock()
-	fromCell := network.Cells[fromCellID]
-	toCell := network.Cells[toCellID]
-	network.cellMux.Unlock()
+	fromCell := network.getCell(fromCellID)
+	toCell := network.getCell(toCellID)
 
 	synapse := NewSynapse(network)
 	fromCell.addAxon(synapse.ID)
 	toCell.addDendrite(synapse.ID)
 
+	return synapse
+}
+
+/*
+getCell safely returns a cell object so you don't have to use mutexes.
+*/
+func (network *Network) getCell(cellID CellID) *Cell {
+	network.cellMux.Lock()
+	cell := network.Cells[cellID]
+	network.cellMux.Unlock()
+	return cell
+}
+
+/*
+getSyn safely returns a synapse object so you don't have to use mutexes.
+*/
+func (network *Network) getSyn(synapseID SynapseID) *Synapse {
+	network.synMux.Lock()
+	synapse := network.Synapses[synapseID]
+	network.synMux.Unlock()
 	return synapse
 }
 
