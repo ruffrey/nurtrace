@@ -260,7 +260,6 @@ func copySynapseToNetwork(synapse *Synapse, newNetwork *Network) SynapseID {
 	copiedSynapse.ToNeuronDendrite = synapse.ToNeuronDendrite
 
 	// this is a good time to copy additional properties to the new synapse
-	copiedSynapse.Network = newNetwork
 	copiedSynapse.Millivolts = synapse.Millivolts
 	// we do need to keep this propety because we will want to grow/prune the synapse later
 	copiedSynapse.ActivationHistory = synapse.ActivationHistory
