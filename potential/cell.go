@@ -170,11 +170,17 @@ func (cell *Cell) String() string {
 }
 
 func (cell *Cell) addDendrite(synapseID SynapseID) {
-	cell.Network.Synapses[synapseID].ToNeuronDendrite = cell.ID
+	cell.Network.synMux.Lock()
+	synapse := cell.Network.Synapses[synapseID]
+	cell.Network.synMux.Unlock()
+	synapse.ToNeuronDendrite = cell.ID
 	cell.DendriteSynapses[synapseID] = true
 }
 
 func (cell *Cell) addAxon(synapseID SynapseID) {
-	cell.Network.Synapses[synapseID].FromNeuronAxon = cell.ID
+	cell.Network.synMux.Lock()
+	synapse := cell.Network.Synapses[synapseID]
+	cell.Network.synMux.Unlock()
+	synapse.FromNeuronAxon = cell.ID
 	cell.AxonSynapses[synapseID] = true
 }

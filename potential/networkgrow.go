@@ -125,7 +125,6 @@ func (network *Network) GrowPathBetween(startCell, endCell CellID, minSynapses i
 		// input cell or walked cell  ->  new synapse 1  ->  new cell  ->  new synapse 2 ->  end cell dendrite or end cell
 		for i := 0; i < needSynapses; i++ {
 			var startPathCell CellID
-			var endPathCell CellID
 			newInputSynapse := NewSynapse(network)
 			newOutputSynapse := NewSynapse(network)
 			newInputCell := NewCell(network)
@@ -141,28 +140,18 @@ func (network *Network) GrowPathBetween(startCell, endCell CellID, minSynapses i
 			} else {
 				startPathCell = startCell
 			}
-			if endHasDendrites {
-				// ordering of range map is random. select one.
-				for synapseID := range fullEndCell.DendriteSynapses {
-					network.synMux.Lock()
-					endPathCell = network.Synapses[synapseID].FromNeuronAxon
-					network.synMux.Unlock()
-					break // yes break after one
-				}
-			} else {
-				endPathCell = endCell
-			}
 
 			newInputSynapse.Millivolts = defaultNewGrownPathSynapse
 
 			network.cellMux.Lock()
-			network.Cells[startPathCell].addAxon(newInputSynapse.ID)
+			start := network.Cells[startPathCell]
+			end := network.Cells[endCell]
 			network.cellMux.Unlock()
+
+			start.addAxon(newInputSynapse.ID)
 			newInputCell.addDendrite(newInputSynapse.ID)
 			newInputCell.addAxon(newOutputSynapse.ID)
-			network.cellMux.Lock()
-			network.Cells[endPathCell].addDendrite(newOutputSynapse.ID)
-			network.cellMux.Unlock()
+			end.addDendrite(newOutputSynapse.ID)
 
 			synapsesAdded[newInputSynapse.ID] = true
 			synapsesAdded[newOutputSynapse.ID] = true
