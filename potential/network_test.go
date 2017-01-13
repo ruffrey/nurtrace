@@ -138,6 +138,21 @@ func Test_NetworkSerialization(t *testing.T) {
 
 }
 
+func Test_LinkCells(t *testing.T) {
+	t.Run("linkCells adds synapse fromCell fires toCell", func(t *testing.T) {
+		network := NewNetwork()
+		fromCell := NewCell(network)
+		toCell := NewCell(network)
+
+		synapse := network.linkCells(fromCell.ID, toCell.ID)
+
+		assert.Equal(t, synapse.FromNeuronAxon, fromCell.ID)
+		assert.Equal(t, synapse.ToNeuronDendrite, toCell.ID)
+		assert.Equal(t, true, fromCell.AxonSynapses[synapse.ID])
+		assert.Equal(t, true, toCell.DendriteSynapses[synapse.ID])
+	})
+}
+
 func Test_ResetForTraining(t *testing.T) {
 	t.Run("resets cell props activating, wasFired, but NOT voltage", func(t *testing.T) {
 		network := NewNetwork()

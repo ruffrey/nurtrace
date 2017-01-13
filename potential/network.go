@@ -58,6 +58,23 @@ func NewNetwork() *Network {
 	return &n
 }
 
+/*
+linkCells creates a new synapses and links the two referenced cells where the
+"to" cell has an axon firing the "from" cell's dendrite.
+*/
+func (network *Network) linkCells(fromCellID CellID, toCellID CellID) *Synapse {
+	network.cellMux.Lock()
+	fromCell := network.Cells[fromCellID]
+	toCell := network.Cells[toCellID]
+	network.cellMux.Unlock()
+
+	synapse := NewSynapse(network)
+	fromCell.addAxon(synapse.ID)
+	toCell.addDendrite(synapse.ID)
+
+	return synapse
+}
+
 func randomIntBetween(min, max int) int {
 	return rand.Intn((max+1)-min) + min
 }

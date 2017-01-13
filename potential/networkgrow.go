@@ -115,10 +115,7 @@ func (network *Network) GrowPathBetween(startCell, endCell CellID, minSynapses i
 	needSynapses := minSynapses - len(synapsesToEnd)
 	if needSynapses > 0 {
 		hasWalked := len(alreadyWalked) > 0
-		network.cellMux.Lock()
-		fullEndCell := network.Cells[endCell]
-		network.cellMux.Unlock()
-		endHasDendrites := len(fullEndCell.DendriteSynapses) > 0
+		fmt.Println("start=", startCell, "end=", endCell, "needSynapses", needSynapses, "alreadyWalked", len(alreadyWalked))
 		// Two new synapse and one new cells will be added.
 		// It will connect from the input network to a new cell to the end network.
 		//
