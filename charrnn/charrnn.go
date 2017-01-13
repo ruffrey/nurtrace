@@ -109,6 +109,8 @@ func (charrnn Charrnn) PrepareData(network *potential.Network) {
 				InputCell:  InputCell,
 				OutputCell: OutputCell,
 			}
+			network.Cells[InputCell].Tag = "in-" + Value
+			network.Cells[OutputCell].Tag = "out-" + Value
 		}
 	}
 
