@@ -56,13 +56,15 @@ func (network *Network) GrowPathBetween(startCell, endCell CellID, minSynapses i
 	// this is a fan-out kind of traversal through a tree of cells and synapses.
 	// Note: need to fully declare it before assigning it, apparently because the
 	// runtime needs this to compile a recursive function.
-	// TODO: refactor to be more elegant and use no mutexes or wait groups
-	// once i better understand goroutines and channels
 	var walk func(cellID CellID)
 	walk = func(cellID CellID) {
 		mux.Lock()
 		hops++
 		totalSynapsesFound := len(synapsesToEnd)
+		if hops >= maxHops || totalSynapsesFound >= minSynapses {
+			mux.Unlock()
+			return
+		}
 		if _, already := alreadyWalked[cellID]; already {
 			mux.Unlock()
 			return
@@ -70,9 +72,6 @@ func (network *Network) GrowPathBetween(startCell, endCell CellID, minSynapses i
 		alreadyWalked[cellID] = true
 		mux.Unlock()
 
-		if hops >= maxHops || totalSynapsesFound >= minSynapses {
-			return
-		}
 		wg.Add(1)
 		// look at the next cells in the axon chain from this one, to see
 		// if any are the endCell then send it down the channel.
@@ -115,8 +114,8 @@ func (network *Network) GrowPathBetween(startCell, endCell CellID, minSynapses i
 	needSynapses := minSynapses - len(synapsesToEnd)
 	if needSynapses > 0 {
 		hasWalked := len(alreadyWalked) > 0
-		fmt.Println("start=", startCell, "end=", endCell, "needSynapses", needSynapses, "alreadyWalked", len(alreadyWalked))
-		// Two new synapse and one new cells will be added.
+		fmt.Println("start=", startCell, "end=", endCell, "minSynapses", minSynapses, "needSynapses", needSynapses, "alreadyWalked", len(alreadyWalked))
+		// Two new synapse and one new cell will be added.
 		// It will connect from the input network to a new cell to the end network.
 		//
 		// input cell or walked cell  ->  new synapse 1  ->  new cell  ->  new synapse 2 ->  end cell dendrite or end cell
@@ -125,7 +124,6 @@ func (network *Network) GrowPathBetween(startCell, endCell CellID, minSynapses i
 			newInputCell := NewCell(network)
 
 			// TODO: perhaps make this deeper
-			// TODO: add a method "create direct path between two cells"
 			if hasWalked {
 				// ordering of range map is random. select one.
 				for cellID := range alreadyWalked {

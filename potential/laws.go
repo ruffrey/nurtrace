@@ -89,7 +89,7 @@ const retrainNeuronsToGrow = 1
 retrainRandomSynapsesToGrow is the number of synapses to add when a single session does not
 yield the expected output firing.
 */
-const retrainRandomSynapsesToGrow = 2
+const retrainRandomSynapsesToGrow = 0
 
 /*
 GrowPathExpectedMinimumSynapses represents the maximum allowed number of synapses between an input
