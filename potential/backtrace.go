@@ -5,6 +5,8 @@ import (
 	"sync"
 )
 
+// Backtracing is equivalent to backpropagation.
+
 /*
 backwardTraceFiringsGood traverses the trees backward, from output to input.
 
