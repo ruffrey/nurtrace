@@ -99,11 +99,9 @@ func reinforceByAmount(synapse *Synapse, millivolts int8) (newSynapse SynapseID)
 			half := int8(actualSynapseMax / 2)
 			synapse.Millivolts = half
 			// add a new synapse between those two cells
-			s := NewSynapse(synapse.Network)
+			s := synapse.Network.linkCells(synapse.FromNeuronAxon, synapse.ToNeuronDendrite)
 			newSynapse = s.ID
 			s.Millivolts = half
-			synapse.Network.Cells[synapse.ToNeuronDendrite].addDendrite(newSynapse)
-			synapse.Network.Cells[synapse.FromNeuronAxon].addAxon(newSynapse)
 		} else {
 			synapse.Millivolts = int8(newMV)
 		}
@@ -115,11 +113,9 @@ func reinforceByAmount(synapse *Synapse, millivolts int8) (newSynapse SynapseID)
 		half := int8(actualSynapseMin / 2)
 		synapse.Millivolts = half
 		// add a new synapse between those two cells
-		s := NewSynapse(synapse.Network)
+		s := synapse.Network.linkCells(synapse.FromNeuronAxon, synapse.ToNeuronDendrite)
 		newSynapse = s.ID
 		s.Millivolts = half
-		synapse.Network.Cells[synapse.ToNeuronDendrite].addDendrite(newSynapse)
-		synapse.Network.Cells[synapse.FromNeuronAxon].addAxon(newSynapse)
 	} else {
 		synapse.Millivolts = int8(newMV)
 	}
