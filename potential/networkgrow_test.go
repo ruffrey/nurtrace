@@ -31,14 +31,14 @@ func Test_GrowPathBetween(t *testing.T) {
 	before := func() {
 		network = NewNetwork()
 
-		// synapses are in (parens)
+		// synapses are in (parens) and all positive mv
 		//
 		//
-		//          (layer1A) - middle1 - (layer2C)
+		//          (+layer1A) - middle1 - (+layer2C)
 		//         /                               \
 		// input -                                   - output
 		//         \                               /
-		//          (layer1B) - middle2 - (layer2D)
+		//          (+layer1B) - middle2 - (+layer2D)
 
 		input = NewCell(network)
 		output = NewCell(network)
@@ -51,6 +51,12 @@ func Test_GrowPathBetween(t *testing.T) {
 		layer1B = NewSynapse(network)
 		layer2C = NewSynapse(network)
 		layer2D = NewSynapse(network)
+
+		// set synpase mv
+		layer1A.Millivolts = 10
+		layer1B.Millivolts = 10
+		layer2C.Millivolts = 10
+		layer2D.Millivolts = 10
 
 		// linking synapses
 
@@ -97,9 +103,9 @@ func Test_GrowPathBetween(t *testing.T) {
 		assert.Equal(t, 2, len(endSynapses))
 		assert.Equal(t, true, endSynapses[layer2C.ID])
 		assert.Equal(t, true, endSynapses[layer2D.ID])
-		assert.Equal(t, 2, len(addedSynapses))
-		assert.Equal(t, 4, len(network.Cells))
-		assert.Equal(t, 6, len(network.Synapses))
+		assert.Equal(t, 4, len(addedSynapses)) // two per cell
+		assert.Equal(t, 6, len(network.Cells))
+		assert.Equal(t, 8, len(network.Synapses))
 
 	})
 	t.Run("does not find synapses past the maxHops", func(t *testing.T) {
@@ -107,7 +113,6 @@ func Test_GrowPathBetween(t *testing.T) {
 		network = NewNetwork()
 
 		var lastCell *Cell
-		var lastHoppedCell *Cell
 
 		input := NewCell(network)
 		input.Tag = "input"
@@ -122,31 +127,27 @@ func Test_GrowPathBetween(t *testing.T) {
 			s := NewSynapse(network)
 			c := NewCell(network)
 
+			s.Millivolts = 100
+
 			s.FromNeuronAxon = lastCell.ID
 			lastCell.AxonSynapses[s.ID] = true
 			s.ToNeuronDendrite = c.ID
 			c.DendriteSynapses[s.ID] = true
 			c.Tag = strconv.Itoa(i)
 			lastCell = c
-			if i == 18 {
-				lastHoppedCell = c
-			}
 		}
 
 		// pre test checks
 		// these next two cells will be linked together
 		assert.Equal(t, 0, len(output.DendriteSynapses))
-		assert.Equal(t, 1, len(lastHoppedCell.AxonSynapses))
-		lastHoppedCell.Tag += " last hopped cell"
 
 		endSynapses, addedSynapses := network.GrowPathBetween(input.ID, output.ID, 10)
 
 		// test assertions
 		assert.Equal(t, 0, len(endSynapses))
-		assert.Equal(t, 10, len(addedSynapses))
-		assert.Equal(t, 35, len(network.Synapses))
+		assert.Equal(t, 20, len(addedSynapses))
+		assert.Equal(t, 45, len(network.Synapses))
 		assert.Equal(t, 10, len(output.DendriteSynapses))
-		assert.Equal(t, 11, len(lastHoppedCell.AxonSynapses))
 	})
 	t.Run("does not panic on a large network with many synapses", func(t *testing.T) {
 		network = NewNetwork()
@@ -177,6 +178,9 @@ func Test_GrowPathBetween(t *testing.T) {
 			network.GrowPathBetween(input, output, 10)
 			assert.NotEqual(t, beforeCount, len(network.Synapses))
 		}
+	})
+	t.Run("does not find negative synapses", func(t *testing.T) {
+
 	})
 }
 

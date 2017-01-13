@@ -163,6 +163,9 @@ func (network *Network) GrowPathBetween(startCell, endCell CellID, minSynapses i
 			network.cellMux.Lock()
 			network.Cells[endPathCell].addDendrite(newOutputSynapse.ID)
 			network.cellMux.Unlock()
+
+			synapsesAdded[newInputSynapse.ID] = true
+			synapsesAdded[newOutputSynapse.ID] = true
 		}
 	}
 
