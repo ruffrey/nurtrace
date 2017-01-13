@@ -49,7 +49,7 @@ func Test_backwardTraceFiringsGood(t *testing.T) {
 		c5.addDendrite(s4.ID)
 
 		goodSynapses := backwardTraceFirings(network, c5.ID, c1.ID)
-		assert.Equal(t, 4, len(goodSynapses))
+		assert.Equal(t, 3, len(goodSynapses))
 		_, exists := goodSynapses[s2.ID]
 		assert.True(t, exists)
 		_, exists = goodSynapses[s1.ID]
