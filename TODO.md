@@ -1,16 +1,13 @@
 # TODO
 
 ## Priority I
-- [ ] make the network deeper and let sampling or training run more steps to propagate through
-- [ ] faster backtracing
-  - [x] bleh/potential.applyBacktrace 9.06s(4.61%) of 33.81s(17.21%)
-  - [ ] bleh/potential.backwardTraceFirings.func1.1 7.26s(4.77%) of 33.60s(22.06%)
+- [ ] never reuses existing inhibitory synapses
+- [ ] the number of synapses grows hugely and hangs
+- [x] make the network deeper and let sampling or training run more steps to propagate through
 - [ ] write unit tests
   - [ ] test to ensure that adding the inhibitory cells are working
   - [ ] apply backtrace and the various supporting it
   - [ ] processBatch, particularly when doing backtraces
-- [ ] the number of synapses grows hugely and hangs
-- [ ] never reuses existing inhibitory synapses
   - [ ] unit test run input/output, add inhibitory synapse, make sure it inhibits and all expected cells fire
 
 ## Priority II
@@ -19,6 +16,8 @@
     - saving can also cause concurrent map read/writes and fail
 
 ## Priority III
+- [ ] faster backtracing
+  - [ ] bleh/potential.backwardTraceFirings.func1.1 7.26s(4.77%) of 33.60s(22.06%)
 - [ ] add logging with glog
 - [ ] RandomCellKey method is pretty slow at scale
 - [ ] return errors instead of logging or doing a panic
