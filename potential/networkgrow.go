@@ -184,18 +184,10 @@ func (network *Network) GrowRandomNeurons(neuronsToAdd, defaultNeuronSynapses in
 				continue
 			}
 
-			synapse := NewSynapse(network)
-
 			if chooseIfSender() {
-				synapse.FromNeuronAxon = cell.ID
-				synapse.ToNeuronDendrite = otherCell.ID
-				otherCell.DendriteSynapses[synapse.ID] = true
-				cell.AxonSynapses[synapse.ID] = true
+				network.linkCells(cell.ID, otherCell.ID)
 			} else {
-				synapse.FromNeuronAxon = otherCell.ID
-				synapse.ToNeuronDendrite = cell.ID
-				otherCell.AxonSynapses[synapse.ID] = true
-				cell.DendriteSynapses[synapse.ID] = true
+				network.linkCells(otherCell.ID, cell.ID)
 			}
 			i++
 		}
@@ -223,11 +215,7 @@ func (network *Network) GrowRandomSynapses(synapsesToAdd int) {
 			continue
 		}
 
-		synapse := NewSynapse(network)
-		synapse.ToNeuronDendrite = receiver.ID
-		synapse.FromNeuronAxon = sender.ID
-		sender.AxonSynapses[synapse.ID] = true
-		receiver.DendriteSynapses[synapse.ID] = true
+		network.linkCells(sender.ID, receiver.ID)
 		i++
 	}
 }
