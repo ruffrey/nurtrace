@@ -78,10 +78,12 @@ func backwardTraceFirings(network *Network, fromOutput CellID, toInput CellID) (
 backwardTraceNoise returns the synapses whose pathways resulted in firing incorrect
 output cells.
 
-- step forward through the network
-- follow cells that fired  and that were on the happy path
-- upon finding a cell that fired that was not on the happy path, stop stepping
-and save that as the noisy path to be inhibited later.
+- step backward through the network from the unexpected output cells
+- find cells that fired and that were on the happy path
+- upon finding a cell that fired that was on the happy path, stop stepping
+and save that as the beginning of the noisy path to be inhibited later.
+
+TODO: ^^ make this how it works. It doesn't work like this now.
 */
 func backwardTraceNoise(network *Network, inputCells map[CellID]bool, unexpectedOutputCells map[CellID]bool, goodSynapses map[SynapseID]bool) (badSynapses map[SynapseID]bool) {
 	badSynapses = make(map[SynapseID]bool)
