@@ -59,7 +59,7 @@ func NewNetwork() *Network {
 }
 
 /*
-linkCells creates a new synapses and links the two referenced cells where the
+linkCells creates a new synapse and links the two referenced cells where the
 "to" cell has an axon firing the "from" cell's dendrite.
 */
 func (network *Network) linkCells(fromCellID CellID, toCellID CellID) *Synapse {

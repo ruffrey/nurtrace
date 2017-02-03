@@ -371,12 +371,14 @@ func processBatch(batch []*TrainingSample, originalNetwork *Network, data *Datas
 		fmt.Println("warn: more cell firings existed after disabling network and stepping")
 	}
 
-	wasSuccessful = len(unfiredOutputBatches) == 0 && len(noisyOutputCells) == 0
+	firedAllExpected := len(unfiredOutputBatches) == 0
+	firedNoNoise := len(noisyOutputCells) == 0
+	wasSuccessful = firedAllExpected && firedNoNoise
 
 	if !wasSuccessful {
 		// most critical part of training, ensure we backprop and whatnot
 
-		// merge all the good synapses
+		// merge all the good synapses into a single map
 		goodSynapses := make(map[SynapseID]bool)
 		for _, ts := range firedOutputBatches {
 			gs := backwardTraceFirings(network, ts.OutputCell, ts.InputCell)
@@ -384,8 +386,16 @@ func processBatch(batch []*TrainingSample, originalNetwork *Network, data *Datas
 				goodSynapses[synapseID] = true
 			}
 		}
-		badSynapses := backwardTraceNoise(network, allInputCells, noisyOutputCells, goodSynapses)
-		applyBacktrace(network, allInputCells, goodSynapses, badSynapses)
+		if !firedNoNoise {
+			backwardTraceNoiseAndInhibit(network, allInputCells, noisyOutputCells, goodSynapses)
+		}
+
+		// reinforce all good synapses. These are synapses that fire when one of the
+		// input cells fires.
+		for synapseID := range goodSynapses {
+			synapse := network.getSyn(synapseID)
+			synapse.reinforce()
+		}
 
 		// We failed to generate the desired effect, so do a growth of cells.
 		// Grow some random stuff to introduce a little noise and new
@@ -394,9 +404,12 @@ func processBatch(batch []*TrainingSample, originalNetwork *Network, data *Datas
 		network.GrowRandomNeurons(retrainNeuronsToGrow, defaultNeuronSynapses)
 
 		// (re)grow paths between each expected input and output.
-		for _, ts := range unfiredOutputBatches {
-			network.GrowPathBetween(ts.InputCell, ts.OutputCell, GrowPathExpectedMinimumSynapses)
+		if !firedAllExpected {
+			for _, ts := range unfiredOutputBatches {
+				network.GrowPathBetween(ts.InputCell, ts.OutputCell, GrowPathExpectedMinimumSynapses)
+			}
 		}
+
 		diff = DiffNetworks(originalNetwork, network)
 	}
 

@@ -1,11 +1,13 @@
 # TODO
 
 ## Priority I
+- [ ] backtracing is a good start, but it needs to be more throught through.
+  - [ ] rewrite backtracing article
+  - [ ] reimplement or fix backtracing
+  - [ ] adding inhibitory synapses on noise should just be done during traversal so we have context
+  - [ ] in trainer.go, consider treating failed expected batches differently from noise
 - [ ] never reuses existing inhibitory synapses
-  - [ ] bad path backtracing should be going forward instead
-  - [ ] save the stuff we need later during bad path backtracing so it is more precise
 - [ ] the number of synapses grows hugely and hangs
-- [x] make the network deeper and let sampling or training run more steps to propagate through
 - [ ] write unit tests
   - [ ] test to ensure that adding the inhibitory cells are working
   - [ ] apply backtrace and the various supporting it
