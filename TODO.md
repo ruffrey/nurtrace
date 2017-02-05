@@ -3,9 +3,9 @@
 ## Priority I
 - [ ] backtracing is a good start, but it needs to be more throught through.
   - [ ] rewrite backtracing article
-  - [ ] reimplement or fix backtracing
-  - [ ] adding inhibitory synapses on noise should just be done during traversal so we have context
-  - [ ] in trainer.go, consider treating failed expected batches differently from noise
+  - [x] reimplement or fix backtracing
+  - [x] adding inhibitory synapses on noise should just be done during traversal so we have context
+  - [x] in trainer.go, consider treating failed expected batches differently from noise
 - [ ] never reuses existing inhibitory synapses
 - [ ] the number of synapses grows hugely and hangs
 - [ ] write unit tests
@@ -13,6 +13,10 @@
   - [ ] apply backtrace and the various supporting it
   - [ ] processBatch, particularly when doing backtraces
   - [ ] unit test run input/output, add inhibitory synapse, make sure it inhibits and all expected cells fire
+- [ ] Need a plan for reducing network size / preventing ballooning size:
+  - deduplication of cells or paths
+  - removal of unreachable cells
+  - removal of non-firing cells
 
 ## Priority II
 - [ ] Periodically save back the threaded training to original
@@ -27,6 +31,8 @@
 - [ ] return errors instead of logging or doing a panic
 - [ ] add methods for making and removing connections between synapses and cells on a network
     - the dual relationship assignment, which also requires mutexes, are error prone
+    - [x] adding
+    - [ ] removing
 
 ## Later - once it works
 - [ ] Design distributed training architecture: desktop UI, CLI/services, server, cloud?
