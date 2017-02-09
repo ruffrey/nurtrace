@@ -403,7 +403,8 @@ func processBatch(batch []*TrainingSample, originalNetwork *Network, data *Datas
 		// Maybe instead, GrowPathBetween should add cells.
 		network.GrowRandomNeurons(retrainNeuronsToGrow, defaultNeuronSynapses)
 
-		// (re)grow paths between each expected input and output.
+		// (re)grow paths between each expected input and output,
+		// but only when the inputs did not fire all outputs.
 		if !firedAllExpected {
 			for _, ts := range unfiredOutputBatches {
 				network.GrowPathBetween(ts.InputCell, ts.OutputCell, GrowPathExpectedMinimumSynapses)
