@@ -1,13 +1,33 @@
 # TODO
 
 ## Priority I
+- [ ] crash:
+```
+<local> local thread 2 done
+panic: runtime error: invalid memory address or nil pointer dereference
+[signal SIGSEGV: segmentation violation code=0x1 addr=0x18 pc=0x6a49b]
+
+goroutine 26 [running]:
+panic(0x213260, 0xc4200120c0)
+	/usr/local/go/src/runtime/panic.go:500 +0x1a1
+bleh/potential.copySynapseToNetwork(0xc42363c690, 0xc438fac380, 0xc4aa18827f)
+	/Users/jpx/go/src/bleh/potential/diff.go:298 +0x24b
+bleh/potential.CloneNetwork(0xc420077840, 0xc4200e00e0)
+	/Users/jpx/go/src/bleh/potential/diff.go:201 +0x2a1
+bleh/potential.Train.func1(0x0, 0xc42014d4a0, 0xc4200d5c80, 0xc420164588, 0x3b, 0xc5, 0xc420086928, 0xc4200c8f60, 0xc4200e00e0, 0xc420197020, ...)
+	/Users/jpx/go/src/bleh/potential/trainer.go:276 +0x1a3
+created by bleh/potential.Train
+	/Users/jpx/go/src/bleh/potential/trainer.go:287 +0xcab
+```
 - [ ] backtracing is a good start, but it needs to be more throught through.
   - [ ] rewrite backtracing article
   - [x] reimplement or fix backtracing
   - [x] adding inhibitory synapses on noise should just be done during traversal so we have context
   - [x] in trainer.go, consider treating failed expected batches differently from noise
 - [ ] never reuses existing inhibitory synapses
-- [ ] the number of synapses grows hugely and hangs
+- [ ] the number of synapses grows hugely and gets so slow it seems to hang
+  - perhaps due to having so many synapses that crawling or backgracing/forward tracing takes forever.
+  - or perhaps due to having too many mutex locks
 - [ ] write unit tests
   - [ ] test to ensure that adding the inhibitory cells are working
   - [ ] apply backtrace and the various supporting it
