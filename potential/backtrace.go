@@ -72,8 +72,9 @@ func backwardTraceFirings(network *Network, fromOutput CellID, toInput CellID) (
 }
 
 type badPair struct {
-	noisySynapse SynapseID
-	goodCell     CellID
+	noisyCell CellID
+	goodCell  CellID
+	voltage   int8
 }
 
 /*
@@ -119,16 +120,18 @@ func backwardTraceNoiseAndInhibit(network *Network, inputCells map[CellID]bool, 
 				// use the good synapse's dendrite cell to inhibit
 				// this bad cell.
 				synapse := network.getSyn(synapseID)
-				if _, isGood := goodSynapses[synapseID]; isGood {
+				excitatory := synapse.Millivolts > 0
+				if _, isGood := goodSynapses[synapseID]; isGood && excitatory {
 					bp := badPair{
-						goodCell:     synapse.FromNeuronAxon,
-						noisySynapse: synapseID,
+						goodCell:  synapse.FromNeuronAxon,
+						noisyCell: cellID,
+						voltage:   synapse.Millivolts,
 					}
 					ch <- bp
 					continue
 				}
-				notExcitatory := synapse.Millivolts < 1
-				if notExcitatory {
+
+				if !excitatory {
 					continue
 				}
 				axon := network.getCell(synapse.FromNeuronAxon)
@@ -157,15 +160,15 @@ func backwardTraceNoiseAndInhibit(network *Network, inputCells map[CellID]bool, 
 	// add the synapses afterward to prevent changing the network while
 	// it is still being traversed.
 	for _, bp := range badPairs {
-		addInhibitorSynapse(network, network.getSyn(bp.noisySynapse), bp.goodCell)
+		addInhibitorSynapse(network, bp.noisyCell, bp.goodCell, bp.voltage)
 	}
 }
 
-func addInhibitorSynapse(network *Network, noisySynapse *Synapse, goodAxonFutureInhibitor CellID) SynapseID {
+func addInhibitorSynapse(network *Network, noisyCell CellID, goodAxonFutureInhibitor CellID, positiveVoltage int8) SynapseID {
 	// This inhibitor is a new synapse that will counteract
 	// the "noisy" synapse which contributed to the wrong cell firing.
-	inhibitor := network.linkCells(goodAxonFutureInhibitor, noisySynapse.ToNeuronDendrite)
-	inhibitor.Millivolts = -noisySynapse.Millivolts
+	inhibitor := network.linkCells(goodAxonFutureInhibitor, noisyCell)
+	inhibitor.Millivolts = -positiveVoltage
 
 	return inhibitor.ID
 }

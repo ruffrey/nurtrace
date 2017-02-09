@@ -74,7 +74,7 @@ func Test_addInhibitorSynapse(t *testing.T) {
 		noisySynapse.ToNeuronDendrite = unwantedCell.ID
 		unwantedCell.DendriteSynapses[noisySynapse.ID] = true
 
-		inhibitorSynapseID := addInhibitorSynapse(network, noisySynapse, inhibitFromGoodPathCell.ID)
+		inhibitorSynapseID := addInhibitorSynapse(network, noisySynapse.ToNeuronDendrite, inhibitFromGoodPathCell.ID, noisySynapse.Millivolts)
 
 		inhibitor, exists := network.Synapses[inhibitorSynapseID]
 		if !exists {
