@@ -19,29 +19,22 @@ bleh/potential.Train.func1(0x0, 0xc42014d4a0, 0xc4200d5c80, 0xc420164588, 0x3b, 
 created by bleh/potential.Train
 	/Users/jpx/go/src/bleh/potential/trainer.go:287 +0xcab
 ```
-- [ ] GrowPathBetween does not seem to work
-- [ ] the number of synapses grows hugely and gets so slow it seems to hang
-  - perhaps due to having so many synapses that crawling or backgracing/forward tracing takes forever.
-  - we are adding similar or the same inhibitory cells over and over
+- [ ] we are adding similar or the same inhibitory cells over and over
 - [ ] Re-implement and add pruning cycle
   - removal of unreachable cells / no synapses
   - degrading or removal of less-firing cells
   - adding dendrites to cells that fired a lot / strong pathways
+  - do some kind of cyclical or regular firing pattern which does activations
+  and filters out unnecessary pathways.
+- [ ] ensure that adding the inhibitory synapses is working, and inhibiting the right thing.
 
 ## Priority II
-- [ ] write unit tests
-  - [ ] test to ensure that adding the inhibitory cells are working
-  - [ ] apply backtrace and the various supporting it
-  - [ ] processBatch, particularly when doing backtraces
-  - [ ] unit test run input/output, add inhibitory synapse, make sure it inhibits and all expected cells fire
 - [ ] rewrite backtracing article
 - [ ] Periodically save back the threaded training to original
     - currently we lose all training on a crash
     - saving can also cause concurrent map read/writes and fail
 
 ## Priority III
-- [ ] faster backtracing
-  - [ ] bleh/potential.backwardTraceFirings.func1.1 7.26s(4.77%) of 33.60s(22.06%)
 - [ ] add logging with glog
 - [ ] RandomCellKey method is pretty slow at scale
 - [ ] return errors instead of logging or doing a panic
