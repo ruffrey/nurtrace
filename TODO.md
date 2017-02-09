@@ -1,7 +1,7 @@
 # TODO
 
 ## Priority I
-- [ ] crash:
+- [ ] crash - getting a dendrite cell where it does not exist
 ```
 <local> local thread 2 done
 panic: runtime error: invalid memory address or nil pointer dereference
@@ -19,26 +19,22 @@ bleh/potential.Train.func1(0x0, 0xc42014d4a0, 0xc4200d5c80, 0xc420164588, 0x3b, 
 created by bleh/potential.Train
 	/Users/jpx/go/src/bleh/potential/trainer.go:287 +0xcab
 ```
-- [ ] backtracing is a good start, but it needs to be more throught through.
-  - [ ] rewrite backtracing article
-  - [x] reimplement or fix backtracing
-  - [x] adding inhibitory synapses on noise should just be done during traversal so we have context
-  - [x] in trainer.go, consider treating failed expected batches differently from noise
-- [ ] never reuses existing inhibitory synapses
+- [ ] GrowPathBetween does not seem to work
 - [ ] the number of synapses grows hugely and gets so slow it seems to hang
   - perhaps due to having so many synapses that crawling or backgracing/forward tracing takes forever.
-  - or perhaps due to having too many mutex locks
+  - we are adding similar or the same inhibitory cells over and over
+- [ ] Re-implement and add pruning cycle
+  - removal of unreachable cells / no synapses
+  - degrading or removal of less-firing cells
+  - adding dendrites to cells that fired a lot / strong pathways
+
+## Priority II
 - [ ] write unit tests
   - [ ] test to ensure that adding the inhibitory cells are working
   - [ ] apply backtrace and the various supporting it
   - [ ] processBatch, particularly when doing backtraces
   - [ ] unit test run input/output, add inhibitory synapse, make sure it inhibits and all expected cells fire
-- [ ] Need a plan for reducing network size / preventing ballooning size:
-  - deduplication of cells or paths
-  - removal of unreachable cells
-  - removal of non-firing cells
-
-## Priority II
+- [ ] rewrite backtracing article
 - [ ] Periodically save back the threaded training to original
     - currently we lose all training on a crash
     - saving can also cause concurrent map read/writes and fail

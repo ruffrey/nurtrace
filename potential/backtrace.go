@@ -169,7 +169,7 @@ func addInhibitorSynapse(network *Network, noisyCell CellID, goodAxonFutureInhib
 	// the "noisy" synapse which contributed to the wrong cell firing.
 	inhibitor := network.linkCells(goodAxonFutureInhibitor, noisyCell)
 	inhibitor.Millivolts = -positiveVoltage
-
+	// fmt.Println("added inhibitor", inhibitor)
 	return inhibitor.ID
 }
 

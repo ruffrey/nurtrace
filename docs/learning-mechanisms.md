@@ -27,7 +27,7 @@
     - pruning's purpose is *to remove noise*
     - it is unclear the best way to do pruning
     - pruning sessions should occur only on the main network while no clones are training
-    - always prune cells with no synapses that are not imortal
+    - always prune cells with no synapses that are not immortal
     - perhaps only prune non-fired synapses at the end of a large training session or several training sessions
     - During sleep in the brain, weaker and more plastic synapses are pruned, while stronger
       synapses are ignored or spared and retained. Additionally, some dendrites grow on certain
