@@ -121,7 +121,6 @@ func (network *Network) GrowPathBetween(startCell, endCell CellID, minSynapses i
 		// input cell or walked cell  ->  new synapse 1  ->  new cell  ->  new synapse 2 ->  end cell dendrite or end cell
 		for i := 0; i < needSynapses; i++ {
 			var startPathCell CellID
-			// newInputCell := NewCell(network)
 
 			if hasWalked {
 				// ordering of range map is random. select one.
@@ -130,14 +129,11 @@ func (network *Network) GrowPathBetween(startCell, endCell CellID, minSynapses i
 				startPathCell = startCell
 			}
 
-			// newInputSynapse := network.linkCells(startPathCell, newInputCell.ID)
-			newOutputSynapse := network.linkCells(startPathCell, endCell)
+			newLinkingSynapse := network.linkCells(startPathCell, endCell)
 
-			// synapsesAdded[newInputSynapse.ID] = true
-			synapsesAdded[newOutputSynapse.ID] = true
+			synapsesAdded[newLinkingSynapse.ID] = true
 
-			// newInputSynapse.Millivolts = defaultNewGrownPathSynapse
-			newOutputSynapse.Millivolts = defaultNewGrownPathSynapse
+			newLinkingSynapse.Millivolts = defaultNewGrownPathSynapse
 		}
 	}
 
