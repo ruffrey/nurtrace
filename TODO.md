@@ -1,6 +1,10 @@
 # TODO
 
 ## Priority I
+- [ ] add an addtional step in Step which decouples applying a synapse and
+    having a cell fire its action potential, so more math is done at once
+    and the cell voltage can go over the threshold without triggering the fire
+    immediately.
 - [ ] crash - getting a dendrite cell where it does not exist
 ```
 <local> local thread 2 done
@@ -20,13 +24,13 @@ created by bleh/potential.Train
 	/Users/jpx/go/src/bleh/potential/trainer.go:287 +0xcab
 ```
 - [ ] we are adding similar or the same inhibitory cells over and over
+- [ ] ensure that adding the inhibitory synapses is working, and inhibiting the right thing.
 - [ ] Re-implement and add pruning cycle
   - removal of unreachable cells / no synapses
   - degrading or removal of less-firing cells
   - adding dendrites to cells that fired a lot / strong pathways
   - do some kind of cyclical or regular firing pattern which does activations
   and filters out unnecessary pathways.
-- [ ] ensure that adding the inhibitory synapses is working, and inhibiting the right thing.
 
 ## Priority II
 - [ ] rewrite backtracing article
