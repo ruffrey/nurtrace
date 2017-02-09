@@ -170,19 +170,3 @@ func addInhibitorSynapse(network *Network, noisyCell CellID, goodAxonFutureInhib
 	// fmt.Println("added inhibitor", inhibitor)
 	return inhibitor.ID
 }
-
-func randCell(cellMap map[CellID]bool) (randCellID CellID) {
-	iterate := randomIntBetween(0, len(cellMap)-1)
-	i := 0
-	for k := range cellMap {
-		if i == iterate {
-			randCellID = CellID(k)
-			break
-		}
-		i++
-	}
-	if randCellID == CellID(0) {
-		panic("Should never get cell ID 0")
-	}
-	return randCellID
-}

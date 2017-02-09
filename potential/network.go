@@ -97,6 +97,24 @@ func randomIntBetween(min, max int) int {
 	return rand.Intn((max+1)-min) + min
 }
 
+// randCell returns a random CellID from a map where cells are the keys.
+// probably could combine with RandCellKey
+func randCellFromMap(cellMap map[CellID]bool) (randCellID CellID) {
+	iterate := randomIntBetween(0, len(cellMap)-1)
+	i := 0
+	for k := range cellMap {
+		if i == iterate {
+			randCellID = CellID(k)
+			break
+		}
+		i++
+	}
+	if randCellID == CellID(0) {
+		panic("Should never get cell ID 0")
+	}
+	return randCellID
+}
+
 /*
 Methods for random map keys below select a random integer between 0 and the map length,
 then interate into the map that many times to find the map key we want.

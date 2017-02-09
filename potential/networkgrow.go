@@ -124,7 +124,7 @@ func (network *Network) GrowPathBetween(startCell, endCell CellID, minSynapses i
 
 			if hasWalked {
 				// ordering of range map is random. select one.
-				startPathCell = randCell(alreadyWalked)
+				startPathCell = randCellFromMap(alreadyWalked)
 			} else {
 				startPathCell = startCell
 			}
