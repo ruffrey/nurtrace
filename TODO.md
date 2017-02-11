@@ -1,10 +1,11 @@
 # TODO
 
 ## Priority I
-- [ ] add an addtional step in Step which decouples applying a synapse and
+- [x] add an addtional step in Step which decouples applying a synapse and
     having a cell fire its action potential, so more math is done at once
     and the cell voltage can go over the threshold without triggering the fire
     immediately.
+- [ ] Crash due to accessing a cell's synapse list while it is being written to (diff.go:233, diff.go:306)
 - [ ] crash - getting a dendrite cell where it does not exist
 ```
 <local> local thread 2 done

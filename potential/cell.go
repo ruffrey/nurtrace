@@ -109,7 +109,7 @@ func (cell *Cell) FireActionPotential() {
 	if cell.Network.Disabled {
 		return
 	}
-	fmt.Println("Action Potential Firing\n  cell=", cell.ID, "syanpses=", len(cell.AxonSynapses))
+	// fmt.Println("Action Potential Firing\n  cell=", cell.ID, "syanpses=", len(cell.AxonSynapses))
 
 	for _, cb := range cell.OnFired {
 		go cb(cell.ID)
