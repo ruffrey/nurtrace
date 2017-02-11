@@ -114,34 +114,26 @@ func (network *Network) GrowPathBetween(startCell, endCell CellID, minSynapses i
 	needSynapses := minSynapses - len(synapsesToEnd)
 	if needSynapses > 0 {
 		hasWalked := len(alreadyWalked) > 0
-		fmt.Println("start=", startCell, "end=", endCell, "minSynapses", minSynapses, "needSynapses", needSynapses, "alreadyWalked", len(alreadyWalked))
+		fmt.Println("start=", startCell, "end=", endCell, "minSynapses", minSynapses, "needSynapses", needSynapses, "alreadyWalked", len(alreadyWalked), "maxHops", network.maxHops)
 		// Two new synapse and one new cell will be added.
 		// It will connect from the input network to a new cell to the end network.
 		//
 		// input cell or walked cell  ->  new synapse 1  ->  new cell  ->  new synapse 2 ->  end cell dendrite or end cell
 		for i := 0; i < needSynapses; i++ {
 			var startPathCell CellID
-			newInputCell := NewCell(network)
 
-			// TODO: perhaps make this deeper
 			if hasWalked {
 				// ordering of range map is random. select one.
-				for cellID := range alreadyWalked {
-					startPathCell = cellID
-					break // yes break after one
-				}
+				startPathCell = randCellFromMap(alreadyWalked)
 			} else {
 				startPathCell = startCell
 			}
 
-			newInputSynapse := network.linkCells(startPathCell, newInputCell.ID)
-			newOutputSynapse := network.linkCells(newInputCell.ID, endCell)
+			newLinkingSynapse := network.linkCells(startPathCell, endCell)
 
-			synapsesAdded[newInputSynapse.ID] = true
-			synapsesAdded[newOutputSynapse.ID] = true
+			synapsesAdded[newLinkingSynapse.ID] = true
 
-			newInputSynapse.Millivolts = defaultNewGrownPathSynapse
-			newOutputSynapse.Millivolts = defaultNewGrownPathSynapse
+			newLinkingSynapse.Millivolts = defaultNewGrownPathSynapse
 		}
 	}
 

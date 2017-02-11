@@ -55,7 +55,7 @@ const cellRestingVoltage int8 = -10
 cellFireVoltageThreshold represents the millivolts where an action potential will result.
 int16 is needed for comparisons.
 */
-const cellFireVoltageThreshold int16 = 50
+const cellFireVoltageThreshold int16 = 60
 
 /*
 synapseAPBoost is how much a synapse's ActivationHistory should be incremented extra when
@@ -80,20 +80,20 @@ defaultNeuronSynapses is the number of random synapses a new neuron will get.
 const defaultNeuronSynapses = 4
 
 /*
-retrainNeuronsToGrow is the number of neurons to add when a single session does not
-yield the expected output firing.
+retrainNeuronsToGrow is the number of neurons to add when a single sample does not yield the expected output firing.
 */
 const retrainNeuronsToGrow = 1
 
 /*
-retrainRandomSynapsesToGrow is the number of synapses to add when a single session does not
-yield the expected output firing.
+retrainRandomSynapsesToGrow is the number of synapses to add when a single
+session does not yield the expected output firing.
 */
 const retrainRandomSynapsesToGrow = 0
 
 /*
-GrowPathExpectedMinimumSynapses represents the maximum allowed number of synapses between an input
-and output cell in the network which get added when an input cell fails to fire the output cell.
+GrowPathExpectedMinimumSynapses represents the maximum allowed number of
+synapses between an input and output cell in the network which get added
+when an input cell fails to fire the output cell.
 
 By default, it assumes each new synapse has a default mv value of they synapse learn rate (not
 true for randomly grown synapses) and we will grow enough to essentially fire the cell if all

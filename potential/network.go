@@ -59,7 +59,7 @@ func NewNetwork() *Network {
 }
 
 /*
-linkCells creates a new synapses and links the two referenced cells where the
+linkCells creates a new synapse and links the two referenced cells where the
 "to" cell has an axon firing the "from" cell's dendrite.
 */
 func (network *Network) linkCells(fromCellID CellID, toCellID CellID) *Synapse {
@@ -95,6 +95,24 @@ func (network *Network) getSyn(synapseID SynapseID) *Synapse {
 
 func randomIntBetween(min, max int) int {
 	return rand.Intn((max+1)-min) + min
+}
+
+// randCell returns a random CellID from a map where cells are the keys.
+// probably could combine with RandCellKey
+func randCellFromMap(cellMap map[CellID]bool) (randCellID CellID) {
+	iterate := randomIntBetween(0, len(cellMap)-1)
+	i := 0
+	for k := range cellMap {
+		if i == iterate {
+			randCellID = CellID(k)
+			break
+		}
+		i++
+	}
+	if randCellID == CellID(0) {
+		panic("Should never get cell ID 0")
+	}
+	return randCellID
 }
 
 /*

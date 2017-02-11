@@ -24,10 +24,12 @@
         - reinfoce good synapses
         - when synapses hit the max voltage, add another synapse in the same direction
 - Pruning:
-    - it is unclear the best way to do pruning, or if it is necessary
-    - cells with no synapses get pruned
-    - Do not prune cells or synapses during a diff.
-    - it means we cannot really add parts of networks together
     - pruning's purpose is *to remove noise*
-    - *only prune on the main network*   
-    - perhapse only prune non-fired synapses at the end of a large training session or several training sessions
+    - it is unclear the best way to do pruning
+    - pruning sessions should occur only on the main network while no clones are training
+    - always prune cells with no synapses that are not immortal
+    - perhaps only prune non-fired synapses at the end of a large training session or several training sessions
+    - During sleep in the brain, weaker and more plastic synapses are pruned, while stronger
+      synapses are ignored or spared and retained. Additionally, some dendrites grow on certain
+      cells, seemingly making them more susceptable to receiving new connections.
+    - at least one study makes it seem like, during sleep, networks fire backward, and regular waves of firing occur, and somehow this leads to removal of unused synapses and/or neurons.
