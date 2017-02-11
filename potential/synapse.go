@@ -65,24 +65,6 @@ func NewSynapse(network *Network) *Synapse {
 }
 
 /*
-Activate indicates an axon has fired and this synapse should pass the message along to
-its dendrite cell.
-*/
-func (synapse *Synapse) Activate() (didFire bool, err error) {
-	didFire = false
-	synapse.ActivationHistory++
-	dendriteCell, exists := synapse.Network.Cells[synapse.ToNeuronDendrite]
-	if !exists {
-		err = fmt.Errorf("bad synapse dendrite: not on network; dendrite=%d", synapse.ToNeuronDendrite)
-		return didFire, err
-	}
-	// fmt.Println("  synapse", synapse.ID, "firing dendrite on", synapse.ToNeuronDendrite)
-	didFire = dendriteCell.ApplyVoltage(synapse.Millivolts, synapse)
-
-	return didFire, nil
-}
-
-/*
 reinforce a synapse relationship and create a new synapse of the same
 direction if so.
 */

@@ -109,7 +109,7 @@ func (cell *Cell) FireActionPotential() {
 	if cell.Network.Disabled {
 		return
 	}
-	// fmt.Println("Action Potential Firing\n  cell=", cell.ID, "syanpses=", len(cell.AxonSynapses))
+	fmt.Println("Action Potential Firing\n  cell=", cell.ID, "syanpses=", len(cell.AxonSynapses))
 
 	for _, cb := range cell.OnFired {
 		go cb(cell.ID)
@@ -118,37 +118,6 @@ func (cell *Cell) FireActionPotential() {
 	for synapseID := range cell.AxonSynapses {
 		cell.Network.AddSynapseToNextStep(synapseID)
 	}
-}
-
-/*
-ApplyVoltage changes the cell's voltage by a specified amount much.
-
-Care is taken to prevent the tiny int8 variables from overflowing.
-*/
-func (cell *Cell) ApplyVoltage(change int8, fromSynapse *Synapse) (didFire bool) {
-	didFire = false
-
-	// Block during action potential cycle or when network is disabled.
-	if cell.activating || cell.Network.Disabled {
-		// disable any more voltage applications from cells once the network has been disabled,
-		// which will let the network firings sizzle out after a refractory period.
-		return didFire
-	}
-
-	// Neither alone will be outside int8 bounds, but we need to prevent
-	// possible int8 buffer overflow in the result.
-	var newPossibleVoltage int16
-	newPossibleVoltage = int16(change) + int16(cell.Voltage)
-	if newPossibleVoltage > cellFireVoltageThreshold {
-		// when a synapse firing results in firing an Action Potential, it counts toward making
-		// the synapse stronger, so we increment the ActivationHistory a second time
-		fromSynapse.ActivationHistory += synapseAPBoost
-		cell.FireActionPotential()
-		didFire = true
-	}
-	cell.Voltage = int8(newPossibleVoltage)
-
-	return didFire
 }
 
 func (cell *Cell) String() string {
