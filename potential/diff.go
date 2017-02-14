@@ -302,8 +302,10 @@ func copySynapseToNetwork(synapse *Synapse, newNetwork *Network) SynapseID {
 	dCell := newNetwork.getCell(d)
 	aCell := newNetwork.getCell(a)
 
+	newNetwork.cellMux.Lock()
 	dCell.DendriteSynapses[copiedSynapse.ID] = true
 	aCell.AxonSynapses[copiedSynapse.ID] = true
+	newNetwork.cellMux.Unlock()
 
 	newNetwork.Synapses[copiedSynapse.ID] = copiedSynapse
 	synapse.Network.synMux.Unlock()

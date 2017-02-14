@@ -1,10 +1,7 @@
 # TODO
 
 ## Priority I
-- [ ] add an addtional step in Step which decouples applying a synapse and
-    having a cell fire its action potential, so more math is done at once
-    and the cell voltage can go over the threshold without triggering the fire
-    immediately.
+- [x] Crash due to accessing a cell's synapse list while it is being written to (diff.go:233, diff.go:306)
 - [ ] crash - getting a dendrite cell where it does not exist
 ```
 <local> local thread 2 done
@@ -23,7 +20,7 @@ bleh/potential.Train.func1(0x0, 0xc42014d4a0, 0xc4200d5c80, 0xc420164588, 0x3b, 
 created by bleh/potential.Train
 	/Users/jpx/go/src/bleh/potential/trainer.go:287 +0xcab
 ```
-- [ ] we are adding similar or the same inhibitory cells over and over
+- [x] we are adding similar or the same inhibitory cells over and over
 - [ ] ensure that adding the inhibitory synapses is working, and inhibiting the right thing.
 - [ ] Re-implement and add pruning cycle
   - removal of unreachable cells / no synapses
@@ -33,7 +30,6 @@ created by bleh/potential.Train
   and filters out unnecessary pathways.
 
 ## Priority II
-- [ ] rewrite backtracing article
 - [ ] Periodically save back the threaded training to original
     - currently we lose all training on a crash
     - saving can also cause concurrent map read/writes and fail
@@ -51,4 +47,3 @@ created by bleh/potential.Train
 - [ ] Design distributed training architecture: desktop UI, CLI/services, server, cloud?
 - [ ] Add word-level and phrase-level neural networks
 - [ ] look for properties of types that can probably be private (lower case them)
-- [ ] Genericize training and data so it can be driven by a UI

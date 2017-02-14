@@ -53,9 +53,8 @@ const cellRestingVoltage int8 = -10
 
 /*
 cellFireVoltageThreshold represents the millivolts where an action potential will result.
-int16 is needed for comparisons.
 */
-const cellFireVoltageThreshold int16 = 60
+const cellFireVoltageThreshold int = 60
 
 /*
 synapseAPBoost is how much a synapse's ActivationHistory should be incremented extra when
@@ -99,7 +98,7 @@ By default, it assumes each new synapse has a default mv value of they synapse l
 true for randomly grown synapses) and we will grow enough to essentially fire the cell if all
 these synapses fire.
 */
-const GrowPathExpectedMinimumSynapses = int((cellFireVoltageThreshold - int16(cellRestingVoltage)) / int16(synapseLearnRate))
+const GrowPathExpectedMinimumSynapses = (cellFireVoltageThreshold - int(cellRestingVoltage)) / int(synapseLearnRate)
 
 /*
 defaultNewGrownPathSynapse is the `Millivolts` value for a new synapse that is added during
