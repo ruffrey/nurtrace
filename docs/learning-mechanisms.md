@@ -33,3 +33,4 @@
       synapses are ignored or spared and retained. Additionally, some dendrites grow on certain
       cells, seemingly making them more susceptable to receiving new connections.
     - at least one study makes it seem like, during sleep, networks fire backward, and regular waves of firing occur, and somehow this leads to removal of unused synapses and/or neurons.
+    - Prune at regular intervals? Do a regular fire-and-prune result pathways cycle. When firing random stuff, maybe remove things that do, or do not, fire. The brain kind of does that. Something about the brain waves and regular (non-real-life?) firing patterns helps reduce noise and improve learning.
