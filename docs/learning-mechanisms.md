@@ -25,7 +25,6 @@
         - when synapses hit the max voltage, add another synapse in the same direction
 - Pruning:
     - pruning's purpose is *to remove noise*
-    - it is unclear the best way to do pruning
     - pruning sessions should occur only on the main network while no clones are training
     - always prune cells with no synapses that are not immortal
     - perhaps only prune non-fired synapses at the end of a large training session or several training sessions
@@ -34,3 +33,16 @@
       cells, seemingly making them more susceptable to receiving new connections.
     - at least one study makes it seem like, during sleep, networks fire backward, and regular waves of firing occur, and somehow this leads to removal of unused synapses and/or neurons.
     - Prune at regular intervals? Do a regular fire-and-prune result pathways cycle. When firing random stuff, maybe remove things that do, or do not, fire. The brain kind of does that. Something about the brain waves and regular (non-real-life?) firing patterns helps reduce noise and improve learning.
+
+## Ideas about brain wave emulation
+
+Implement all the kinds of brain waves (SWS, Theta, etc).
+
+Make a distinction between the two cycles:
+- learning (awake)
+- consolidation/pruning (sleep)
+
+The learning cycle, for now, will roughly stay the same. Data will be fed into
+the network.
+
+During sleep

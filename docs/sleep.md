@@ -53,7 +53,99 @@ or forgetting.
 the consolidation of memory, whereas memory encoding
 and retrieval take place most effectively during waking
 
+> Consolidation involves the active re-processing of ‘fresh’
+memories within the neuronal networks that were used
+for encoding them. It seems to occur most effectively
+off-line, i.e. during sleep, so that encoding and consolidation
+cannot disturb each other
 
+> Effects of a 3-hour period of sleep on
+emotional memory were even detectable 4 years later
+
+> sleep occurring 3 hours after learning
+was more effective than sleep delayed by more than
+10 hours
+
+> The most prominent field potential oscillations during SWS
+are the slow oscillations, spindles and sharp wave-ripples,
+whereas REM sleep is characterized by ponto-geniculooccipital
+(PGO) waves and theta activity. The slow oscillations
+originate in the neocortex with a peak frequency (in humans)
+of ~0.8 Hz130,164. They synchronize neuronal activity into
+down-states of widespread hyperpolarization and neuronal
+silence and subsequent up-states, which are associated with
+depolarization and strongly increased, wake-like neuronal
+firing
+
+> There is strong evidence for an active consolidating
+influence of sleep from behavioural studies,
+which indicate that sleep can lead to qualitative changes
+in memory
+
+> after sleep subjects more easily solved
+a logical calculus problem that they were unable to solve
+before sleep or after corresponding intervals of wakefulness46.
+of note, sleep facilitated the gain of insight into
+the problem only if adequate encoding of the task was
+ensured before sleep
+
+> Re-organization of memory representations
+during sleep also promotes the transformation of
+implicit into explicit knowledge
+
+> disengagement
+of memory systems is an essential characteristic of sleepdependent
+consolidation49. This idea derives mainly
+from experiments showing that declarative learning of
+words immediately after training of a procedural skill
+can block off-line improvement in that skill if the subject
+does not sleep between learning and re-testing, but not if
+the subject sleeps between learning and re-testing
+
+> pharmacological
+suppression of REM sleep by administration of antidepressant
+drugs (selective noradrenaline or serotonin
+re-uptake inhibitors) did not impair consolidation of
+procedural memory56, which is in agreement with clinical
+observations that antidepressant treatment does not
+affect memory function57. However, such substances also
+exert direct effects on synaptic plasticity and synaptic
+forms of consolidation that could compensate for a loss
+of REM sleep
+
+> there is evidence that REM sleep preferentially benefits
+the consolidation of emotional aspects of a memory
+
+> SWS-rich, early sleep
+consistently benefits the consolidation of declarative
+memories12,13,59, whereas REM-rich sleep benefits nondeclarative
+types of memory (that is, procedural and
+emotional aspects of memory)
+
+> Texture discrimination also improved
+following a short midday nap of 60–90 minutes containing
+solely SWS, but more so if the nap included
+both SWS and REM sleep
+
+>  in rats the spatio-temporal patterns of neuronal
+firing that occur in the hippocampus during exploration
+of a novel environment or simple spatial tasks are
+re-activated in the same order during subsequent sleep
+
+> neuronal re-activation of ensemble activity mostly
+occurs during SWS (it is rarely observed during REM
+sleep76,77) and during the first hours after learning (but
+see Ref. 78), and typically only in a minority of recorded
+neurons
+
+> unlike re-activations that occur
+during wakefulness, re-activations during SWS almost
+always occur in the order in which they were experienced
+
+> Re-exposure to the odour during SWS, but not
+REM sleep, enhanced the spatial memories
+
+Review the two-store model (Box 2).
 
 ## Questions and insights
 
@@ -70,3 +162,7 @@ A global downscaling of all synapses seems to occur during sleep.
 Duplicate synapses may get collapsed down to single synapses with more power to preserve the same effect with fewer synapses.
 
 Generic waves of firing across the brain might help show unnecessary pathways or do something else.
+
+There are several stages of sleep. Each is associated with different wave oscillations. Consolidation is different during different stages.
+
+SWS seems to be where declarative memory is moved to long term or consolidated. REM seems to be similar but for procedural memory.
