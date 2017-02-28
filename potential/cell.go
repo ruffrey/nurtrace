@@ -41,7 +41,7 @@ type Cell struct {
 	*/
 	Immortal   bool
 	Network    *Network `json:"-"` // skip circular reference in JSON
-	Voltage    int8     // unnecessary to recreate cell
+	Voltage    int16    // unnecessary to recreate cell
 	activating bool     // unnecessary to recreate cell
 	/*
 	  DendriteSynapses are this cell's inputs. They are IDs of synapses.

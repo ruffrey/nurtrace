@@ -103,9 +103,9 @@ func Test_GrowPathBetween(t *testing.T) {
 		assert.Equal(t, 2, len(endSynapses))
 		assert.Equal(t, true, endSynapses[layer2C.ID])
 		assert.Equal(t, true, endSynapses[layer2D.ID])
-		assert.Equal(t, 4, len(addedSynapses)) // two per cell
-		assert.Equal(t, 6, len(network.Cells))
-		assert.Equal(t, 8, len(network.Synapses))
+		assert.Equal(t, 2, len(addedSynapses))
+		assert.Equal(t, 4, len(network.Cells))
+		assert.Equal(t, 6, len(network.Synapses))
 
 	})
 	t.Run("does not find synapses past the maxHops", func(t *testing.T) {
@@ -145,8 +145,8 @@ func Test_GrowPathBetween(t *testing.T) {
 
 		// test assertions
 		assert.Equal(t, 0, len(endSynapses))
-		assert.Equal(t, 20, len(addedSynapses))
-		assert.Equal(t, 45, len(network.Synapses))
+		assert.Equal(t, 10, len(addedSynapses))
+		assert.Equal(t, 35, len(network.Synapses))
 		assert.Equal(t, 10, len(output.DendriteSynapses))
 	})
 	t.Run("does not panic on a large network with many synapses", func(t *testing.T) {

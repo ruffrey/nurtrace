@@ -14,7 +14,7 @@ type Diff struct {
 	   synapses is a map where the keys are synapse IDs, and the value is the difference between
 	   the new and old network on the `syanpse.Millivolts` property.
 	*/
-	synapseDiffs  map[SynapseID]int8
+	synapseDiffs  map[SynapseID]int16
 	synapseFires  map[SynapseID]uint
 	addedSynapses []*Synapse
 	addedCells    map[CellID]*Cell
@@ -42,13 +42,13 @@ NewDiff is a Diff factory
 */
 func NewDiff() Diff {
 	return Diff{
-		synapseDiffs: make(map[SynapseID]int8),
+		synapseDiffs: make(map[SynapseID]int16),
 		synapseFires: make(map[SynapseID]uint),
 		addedCells:   make(map[CellID]*Cell),
 	}
 }
 
-const zero int8 = 0
+const zero int16 = 0
 
 /*
 DiffNetworks produces a diff from the original network, showing the forward changes

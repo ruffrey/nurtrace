@@ -93,7 +93,7 @@ func Test_DiffNetworks(t *testing.T) {
 
 		diff := DiffNetworks(original, cloned)
 		assert.Equal(t, len(diff.synapseDiffs), 1, "Should be 1 synapse diff")
-		assert.Equal(t, diff.synapseDiffs[syn1.ID], int8(5), "Synapse diff should be NEW - OLD")
+		assert.Equal(t, diff.synapseDiffs[syn1.ID], int16(5), "Synapse diff should be NEW - OLD")
 	})
 	t.Run("diffing large unrelated networks works", func(t *testing.T) {
 		net1 := NewNetwork()
@@ -149,11 +149,11 @@ func Test_ApplyDiff(t *testing.T) {
 		diff := DiffNetworks(original, cloned)
 		assert.Equal(t, 1, len(diff.synapseDiffs))
 		assert.Equal(t, 1, len(diff.synapseFires))
-		assert.Equal(t, int8(7), diff.synapseDiffs[syn1.ID])
+		assert.Equal(t, int16(7), diff.synapseDiffs[syn1.ID])
 		assert.Equal(t, uint(42), diff.synapseFires[syn1.ID])
 		ApplyDiff(diff, original)
 
-		assert.Equal(t, int8(14), original.Synapses[syn1.ID].Millivolts,
+		assert.Equal(t, int16(14), original.Synapses[syn1.ID].Millivolts,
 			"synapse millivolts failed to apply")
 		assert.Equal(t, uint(45), original.Synapses[syn1.ID].ActivationHistory)
 	})

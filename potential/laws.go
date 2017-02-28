@@ -14,13 +14,13 @@ and training or sampling sessions should be in this file.
 */
 
 // actualSynapseMin and actualSynapseMax helps make math less intensive if there is
-// never a chance synapse addition will create an int8 overflow.
+// never a chance synapse addition will create an overflow.
 //
 // DO NOT CHANGE THESE TWO.
 // must be one outside the bounds, plus/minus the learning rate. otherwise
-// the int8 will FLIP ITS PLUS or MINUS!!
-const actualSynapseMin int16 = -127 + int16(synapseLearnRate)
-const actualSynapseMax int16 = 126 - int16(synapseLearnRate)
+// the int16 will FLIP ITS PLUS or MINUS!!
+const actualSynapseMin int16 = -32767 + int16(synapseLearnRate)
+const actualSynapseMax int16 = 32766 - int16(synapseLearnRate)
 
 /*
 newSynapseMinMillivolts is the bottom range of how much a new synapse will
@@ -43,13 +43,13 @@ value will be how much it is bumped away from zero.
 When de-reinforcing or degrading a synapse, it will get reduced at 1/2 the distance
 to zero, until it is 2, then it will become zero.
 */
-const synapseLearnRate int8 = 2
+const synapseLearnRate int16 = 2
 
 /*
 cellRestingVoltage comes from standard neuroscience Membrane Potential. This, and all voltages
 in the lib, conveniently fit in tiny 8 bit integers.
 */
-const cellRestingVoltage int8 = -10
+const cellRestingVoltage int16 = -10
 
 /*
 cellFireVoltageThreshold represents the millivolts where an action potential will result.
@@ -107,7 +107,7 @@ defaultNewGrownPathSynapse is the `Millivolts` value for a new synapse that is a
 Its value should be considered in relation to `GrowPathExpectedMinimumSynapses`,
 `cellRestingVoltage`, and `cellFireVoltageThreshold`.
 */
-const defaultNewGrownPathSynapse int8 = 15
+const defaultNewGrownPathSynapse int16 = 15
 
 /*
 ratioMaxHopsBetweenCellsDuringPathTrace is how many steps (synapses) are in between an

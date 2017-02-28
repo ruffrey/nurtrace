@@ -71,7 +71,7 @@ func (network *Network) Step() (hasMore bool) {
 		cell := network.getCell(cellID)
 		if fg.voltage < cellFireVoltageThreshold {
 			// prevent out of bounds voltage
-			cell.Voltage = int8(math.Max(float64(fg.voltage), float64(actualSynapseMin)))
+			cell.Voltage = int16(math.Max(float64(fg.voltage), float64(actualSynapseMin)))
 			continue
 		}
 

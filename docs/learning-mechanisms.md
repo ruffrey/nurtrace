@@ -43,6 +43,10 @@ Make a distinction between the two cycles:
 - consolidation/pruning (sleep)
 
 The learning cycle, for now, will roughly stay the same. Data will be fed into
-the network.
+the network. Synapses will grow and try to inhibit each other.
 
-During sleep
+The consolidation cycle will be added. It will happen at regular intervals. The
+network will get hit with the brain waves, maybe in order of what the brain does.
+That will fire the network with different patterns. Then..somehow..certain cells
+will get removed. Duplicate pathways or synapses will get consolidated into single
+stronger ones.

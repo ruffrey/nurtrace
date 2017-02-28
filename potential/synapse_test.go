@@ -103,28 +103,28 @@ func Test_SynapseReinforce(t *testing.T) {
 		cell := NewCell(network)
 
 		s1 := NewSynapse(network)
-		s1.Millivolts = 125
+		s1.Millivolts = 32765
 		cell.addAxon(s1.ID)
 		cell.addDendrite(s1.ID)
 		s1.reinforce()
-		assert.Equal(t, int8(62), s1.Millivolts)
+		assert.Equal(t, int16(16382), s1.Millivolts)
 		assert.Equal(t, 2, len(network.Synapses))
 
-		s1.Millivolts = 126
+		s1.Millivolts = 32765
 		s1.reinforce()
-		assert.Equal(t, int8(62), s1.Millivolts)
+		assert.Equal(t, int16(16382), s1.Millivolts)
 		assert.Equal(t, 3, len(network.Synapses))
 
 		s2 := NewSynapse(network)
-		s2.Millivolts = -126
+		s2.Millivolts = -32765
 		cell.addAxon(s2.ID)
 		cell.addDendrite(s2.ID)
 		s2.reinforce()
-		assert.Equal(t, int8(-62), s2.Millivolts)
+		assert.Equal(t, int16(-16382), s2.Millivolts)
 		assert.Equal(t, 5, len(network.Synapses))
-		s2.Millivolts = -127
+		s2.Millivolts = -32765
 		s2.reinforce()
-		assert.Equal(t, int8(-62), s2.Millivolts)
+		assert.Equal(t, int16(-16382), s2.Millivolts)
 		assert.Equal(t, 6, len(network.Synapses))
 	})
 }

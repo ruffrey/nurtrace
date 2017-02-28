@@ -160,12 +160,12 @@ func Test_ResetForTraining(t *testing.T) {
 		// pretest
 		cell1 := NewCell(network)
 		assert.Equal(t, false, cell1.activating)
-		assert.Equal(t, int8(cellRestingVoltage), cell1.Voltage)
+		assert.Equal(t, int16(cellRestingVoltage), cell1.Voltage)
 		assert.Equal(t, false, cell1.WasFired)
 
 		// setup
 		cell1.activating = true
-		cell1.Voltage = int8(100)
+		cell1.Voltage = int16(100)
 		cell1.WasFired = true
 
 		network.Cells[cell1.ID] = cell1
@@ -174,7 +174,7 @@ func Test_ResetForTraining(t *testing.T) {
 
 		// assertions
 		assert.Equal(t, false, cell1.activating)
-		assert.Equal(t, int8(100), cell1.Voltage)
+		assert.Equal(t, int16(100), cell1.Voltage)
 		assert.Equal(t, false, cell1.WasFired)
 	})
 

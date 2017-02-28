@@ -81,7 +81,7 @@ func Test_addInhibitorSynapse(t *testing.T) {
 			assert.Fail(t, "inhibitor synapses was not added to the network")
 			return
 		}
-		assert.Equal(t, int8(-15), inhibitor.Millivolts,
+		assert.Equal(t, int16(-15), inhibitor.Millivolts,
 			"wrong millivolts for inhibitory synapse")
 		assert.Equal(t, true, inhibitFromGoodPathCell.AxonSynapses[inhibitor.ID],
 			"inhibitor synapse is not going to be fired by the good path cell")

@@ -35,7 +35,7 @@ func (network *Network) Prune() {
 			}
 			isPositive := synapse.Millivolts >= 0
 
-			// when applying voltages, we must be careful to not overflow the int8 size
+			// when applying voltages, we must be careful to not overflow the size
 			if synapse.ActivationHistory >= defaultSynapseMinFireThreshold {
 				// it was activated enough, so we bump it away from zero.
 				// needs cleanup refactoring.
@@ -43,7 +43,7 @@ func (network *Network) Prune() {
 			} else if synapse.ActivationHistory > 0 {
 				// did not meet minimum fire threshold, so punish it by moving toward zero
 				distanceToZero := math.Abs(0 - float64(synapse.Millivolts))
-				halfDistance := int8(math.Ceil(distanceToZero / 2))
+				halfDistance := int16(math.Ceil(distanceToZero / 2))
 				if halfDistance < 3 {
 					synapse.Millivolts = 0
 				} else if isPositive {

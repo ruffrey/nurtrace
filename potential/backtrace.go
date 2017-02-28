@@ -74,7 +74,7 @@ func backwardTraceFirings(network *Network, fromOutput CellID, toInput CellID) (
 type badPair struct {
 	noisyCell CellID
 	goodCell  CellID
-	voltage   int8
+	voltage   int16
 }
 
 /*
@@ -162,7 +162,7 @@ func backwardTraceNoiseAndInhibit(network *Network, inputCells map[CellID]bool, 
 	}
 }
 
-func addInhibitorSynapse(network *Network, noisyCell CellID, goodAxonFutureInhibitor CellID, positiveVoltage int8) SynapseID {
+func addInhibitorSynapse(network *Network, noisyCell CellID, goodAxonFutureInhibitor CellID, positiveVoltage int16) SynapseID {
 	// This inhibitor is a new synapse that will counteract
 	// the "noisy" synapse which contributed to the wrong cell firing.
 	inhibitor := network.linkCells(goodAxonFutureInhibitor, noisyCell)

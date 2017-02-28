@@ -81,8 +81,8 @@ func Test_PruneNetwork(t *testing.T) {
 
 		network.Prune()
 
-		assert.Equal(t, int8(2), synapsePositive.Millivolts)
-		assert.Equal(t, int8(-2), synapseNegative.Millivolts)
+		assert.Equal(t, int16(2), synapsePositive.Millivolts)
+		assert.Equal(t, int16(-2), synapseNegative.Millivolts)
 	})
 
 	t.Run("pruning sets synapse millivolts to zero when synapse activated less than desired times and is half distance to zero is 2 or less", func(t *testing.T) {
@@ -106,15 +106,15 @@ func Test_PruneNetwork(t *testing.T) {
 
 		network.Prune()
 
-		assert.Equal(t, int8(0), synapsePositive.Millivolts)
-		assert.Equal(t, int8(0), synapseNegative.Millivolts)
+		assert.Equal(t, int16(0), synapsePositive.Millivolts)
+		assert.Equal(t, int16(0), synapseNegative.Millivolts)
 	})
-	t.Run("pruning does not bump millivolts outside int8 bounds", func(t *testing.T) {
+	t.Run("pruning does not bump millivolts outside int16 bounds", func(t *testing.T) {
 		network := NewNetwork()
 		synapsePositive := NewSynapse(network)
 		synapseNegative := NewSynapse(network)
-		synapsePositive.Millivolts = 126
-		synapseNegative.Millivolts = -127
+		synapsePositive.Millivolts = 32765
+		synapseNegative.Millivolts = -32765
 		cell := NewCell(network)
 		cell.AxonSynapses[synapsePositive.ID] = true
 		cell.AxonSynapses[synapseNegative.ID] = true
@@ -130,8 +130,8 @@ func Test_PruneNetwork(t *testing.T) {
 
 		network.Prune()
 
-		assert.Equal(t, int8(62), synapsePositive.Millivolts)
-		assert.Equal(t, int8(-62), synapseNegative.Millivolts)
+		assert.Equal(t, int16(16382), synapsePositive.Millivolts)
+		assert.Equal(t, int16(-16382), synapseNegative.Millivolts)
 	})
 	t.Run("pruning removes synapses that did not activate", func(t *testing.T) {
 		// setup

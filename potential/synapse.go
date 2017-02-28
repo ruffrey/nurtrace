@@ -31,7 +31,7 @@ type Synapse struct {
 	Network *Network `json:"-"` // skip circular reference in JSON
 	// Represents how many millivolts a synapse can modify the cell's
 	// voltage which receives its firings.
-	Millivolts        int8
+	Millivolts        int16
 	FromNeuronAxon    CellID
 	ToNeuronDendrite  CellID
 	ActivationHistory uint `json:"-"` // unnecessary to recreate synapse
@@ -51,7 +51,7 @@ func NewSynapse(network *Network) *Synapse {
 		}
 		// fmt.Println("warn: would have gotten dupe synapse ID")
 	}
-	mv := int8(randomIntBetween(newSynapseMinMillivolts, newSynapseMaxMillivolts))
+	mv := int16(randomIntBetween(newSynapseMinMillivolts, newSynapseMaxMillivolts))
 	s := Synapse{
 		ID:         id,
 		Network:    network,
@@ -72,34 +72,34 @@ func (synapse *Synapse) reinforce() SynapseID {
 	return reinforceByAmount(synapse, synapseLearnRate)
 }
 
-func reinforceByAmount(synapse *Synapse, millivolts int8) (newSynapse SynapseID) {
+func reinforceByAmount(synapse *Synapse, millivolts int16) (newSynapse SynapseID) {
 	mv := int16(millivolts)
 	isPositive := synapse.Millivolts >= 0
 	if isPositive {
 		newMV := int16(synapse.Millivolts) + mv
 		if newMV > actualSynapseMax {
-			half := int8(actualSynapseMax / 2)
+			half := actualSynapseMax / 2
 			synapse.Millivolts = half
 			// add a new synapse between those two cells
 			s := synapse.Network.linkCells(synapse.FromNeuronAxon, synapse.ToNeuronDendrite)
 			newSynapse = s.ID
 			s.Millivolts = half
 		} else {
-			synapse.Millivolts = int8(newMV)
+			synapse.Millivolts = newMV
 		}
 		return newSynapse
 	}
 	// negative
 	newMV := int16(synapse.Millivolts) - mv
 	if newMV < actualSynapseMin {
-		half := int8(actualSynapseMin / 2)
+		half := actualSynapseMin / 2
 		synapse.Millivolts = half
 		// add a new synapse between those two cells
 		s := synapse.Network.linkCells(synapse.FromNeuronAxon, synapse.ToNeuronDendrite)
 		newSynapse = s.ID
 		s.Millivolts = half
 	} else {
-		synapse.Millivolts = int8(newMV)
+		synapse.Millivolts = newMV
 	}
 	return newSynapse
 }
