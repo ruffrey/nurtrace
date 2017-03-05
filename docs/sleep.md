@@ -147,6 +147,48 @@ REM sleep, enhanced the spatial memories
 
 Review the two-store model (Box 2).
 
+## http://neuroscience.uth.tmc.edu/s1/chapter09.html
+
+Concise and informative regarding cell and synapse growth.
+
+> Figure 9.6
+Axon fasciculation. The pioneer axon (blue) serves as a
+scaffold for the outgrowth of the new axon from another
+cell (purple).
+
+> Figure 9.7
+Attractive forces produced by diffusable factors, serve
+to direct axons to their appropriate targets.
+
+> A more likely option was suggested by Sperry in his Chemoaffinity
+Hypothesis that suggests that positional information is encoded in
+the form of gradients of signaling molecules at the target which
+would be detected by complementary gradients of receptors on the axons.
+
+> The growth of developing axons depends on:
+1. Physical guidance cues such as guidepost cells and pioneer axons.
+2. Local and long-range molecules involved in attraction and repulsion
+of developing axons (the presence of which substantiates the
+chemoaffinity hypothesis of Sperry).
+3. The presence of receptors on developing axons that allow for modulation of growth by environmental factors.
+
+(important)
+> A growth cone matures into a presynaptic axon terminal.
+As an axon grows toward its target, its growth cone plays a role in
+"sensing" attractive and repulsive forces in its local environment.
+After the axon has reached its target, the terminal matures by altering
+its shape, the localization of vesicles, and the protein machinery
+necessary for regulated and constitutive, rather than solely constitutive,
+secretion. These dramatic changes allow the axon terminal to provide
+efficient synaptic transmission.
+
+Receptors become more dense when an axon terminal is nearby, to receive its
+neurotransmitters.
+
+#### 9.17 Neuronal Survival/Synapse Elimination
+
+
+
 ## Questions and insights
 
 Sleep is a period where there is no external stimulation but plenty of
@@ -166,3 +208,10 @@ Generic waves of firing across the brain might help show unnecessary pathways or
 There are several stages of sleep. Each is associated with different wave oscillations. Consolidation is different during different stages.
 
 SWS seems to be where declarative memory is moved to long term or consolidated. REM seems to be similar but for procedural memory.
+
+Axons may be more or less likely to grow based on the presence of certain receptors.
+
+Axons start in a growth stage, with a growth cone on the end, then upon reaching their target,
+matures into an efficient terminal.
+
+Chemoattraction by neurons or intracellar devices probably creates gradients of attractive and repulsive forces that guide growing axons.

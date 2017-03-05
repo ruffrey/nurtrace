@@ -1,8 +1,9 @@
 # TODO
 
 ## Priority I
-- [ ] increase synapse weights to int16
+- [x] increase synapse weights to int16
   - 5 vs 125 or 5 vs 32,000 is way more efficient and provides greater contrast
+- [ ] update laws for int16
 - [ ] Figure out how the brain consolidates and prunes during sleep
 - [ ] Re-implement and add pruning cycle
   - removal of unreachable cells / no synapses
