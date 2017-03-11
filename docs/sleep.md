@@ -143,9 +143,46 @@ during wakefulness, re-activations during SWS almost
 always occur in the order in which they were experienced
 
 > Re-exposure to the odour during SWS, but not
-REM sleep, enhanced the spatial memories
+REM sleep, enhanced the spatial memories and
+induced stronger hippocampal activation than during
+wakefulness
 
-Review the two-store model (Box 2).
+> reactivations
+during system consolidation stimulate the
+redistribution of hippocampal memories to neocortical
+storage sites
+
+two-stage model
+
+> one store allows learning at a fast rate and
+serves as an intermediate buffer that holds the
+information only temporarily; the other store learns at
+a slower rate and serves as the long-term store.
+
+> Hebbian plasticity
+Refers to the functional
+changes at synapses that
+increase the efficacy of
+synaptic transmission and
+occurs when the presynaptic
+neuron repeatedly and
+persistently stimulates the
+postsynaptic neuron.
+
+> Spike-time dependent
+plasticity
+Refers to the functional
+changes at synapses that alter
+the efficacy of synaptic
+transmission depending on the
+relative timing of pre- and
+postsynaptic firing (‘spiking’).
+The synaptic connection is
+strengthened if the presynaptic
+neuron fires shortly before the
+postsynaptic neuron, but is
+weakened if the sequence of
+firing is reversed.
 
 ## http://neuroscience.uth.tmc.edu/s1/chapter09.html
 
@@ -187,7 +224,20 @@ neurotransmitters.
 
 #### 9.17 Neuronal Survival/Synapse Elimination
 
+Synapses consolidate over time such that fewer weaker axon terminals
+grow into a single strong terminal.
 
+> It is not clear why, but it seems that more synapses are created than are eventually required for proper neuronal function.
+
+> those <synapses> that are simply redundant are removed
+
+> Cell death has been suggested to be the default pathway for all cells, and cells that escape do so by receiving appropriate trophic support.
+
+> In many cases if a synapse is not formed, or if an incorrect synapse is made, then the presynaptic neuron will eventually die.
+
+NGF = nerve growth factor
+
+> Competition for NGF occurs when multiple axons innervate a single target that has limited amounts of NGF. Innervating axons possess NGF receptors that bind, internalize, and retrogradely transport NGF. The biochemical cascade produced by NGF internalization and transport results in signals that prevent cell death.
 
 ## Questions and insights
 
@@ -215,3 +265,8 @@ Axons start in a growth stage, with a growth cone on the end, then upon reaching
 matures into an efficient terminal.
 
 Chemoattraction by neurons or intracellar devices probably creates gradients of attractive and repulsive forces that guide growing axons.
+
+Target cells give off nerve growth factor (NGF) that keeps presynaptic cells from dying. presynaptic cells compete for NGF.
+
+Spike-time dependent plasticity is not represented in the library currently. Where
+a presynaptic cells firing right before postsynaptic cells are reinforced.

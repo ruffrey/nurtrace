@@ -1,4 +1,4 @@
-# ontinuous-time recurrent neural networks
+# continuous-time recurrent neural networks
 
 It is possible this is a CTRNN implementation.
 
@@ -9,3 +9,5 @@ It is possible this is a CTRNN implementation.
 # spike-timing-dependent plasticity (STDP)
 
 A biological process that adjusts the strength of connections between neurons in the brain
+
+# liquid state machine
