@@ -61,8 +61,6 @@ A synapse is the same if it:
 
 We cannot know if a cell is the same or not, but it does not create an integrity problem,
 so that's fine. A cell is really just a collection of synapses.
-
-
 */
 func DiffNetworks(originalNetwork, newerNetwork *Network) (diff Diff) {
 	diff = NewDiff()
