@@ -1,6 +1,7 @@
 package potential
 
 import (
+	"bleh/laws"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -76,8 +77,8 @@ func Test_PruneNetwork(t *testing.T) {
 		synapseNegative.FromNeuronAxon = cell.ID
 		synapseNegative.ToNeuronDendrite = cell.ID
 
-		synapsePositive.ActivationHistory = defaultSynapseMinFireThreshold - 1
-		synapseNegative.ActivationHistory = defaultSynapseMinFireThreshold - 1
+		synapsePositive.ActivationHistory = laws.DefaultSynapseMinFireThreshold - 1
+		synapseNegative.ActivationHistory = laws.DefaultSynapseMinFireThreshold - 1
 
 		network.Prune()
 
@@ -101,8 +102,8 @@ func Test_PruneNetwork(t *testing.T) {
 		synapseNegative.FromNeuronAxon = cell.ID
 		synapseNegative.ToNeuronDendrite = cell.ID
 
-		synapsePositive.ActivationHistory = defaultSynapseMinFireThreshold - 1
-		synapseNegative.ActivationHistory = defaultSynapseMinFireThreshold - 1
+		synapsePositive.ActivationHistory = laws.DefaultSynapseMinFireThreshold - 1
+		synapseNegative.ActivationHistory = laws.DefaultSynapseMinFireThreshold - 1
 
 		network.Prune()
 
@@ -125,8 +126,8 @@ func Test_PruneNetwork(t *testing.T) {
 		synapseNegative.FromNeuronAxon = cell.ID
 		synapseNegative.ToNeuronDendrite = cell.ID
 
-		synapsePositive.ActivationHistory = defaultSynapseMinFireThreshold + 5
-		synapseNegative.ActivationHistory = defaultSynapseMinFireThreshold + 5
+		synapsePositive.ActivationHistory = laws.DefaultSynapseMinFireThreshold + 5
+		synapseNegative.ActivationHistory = laws.DefaultSynapseMinFireThreshold + 5
 
 		network.Prune()
 

@@ -1,6 +1,9 @@
 package potential
 
-import "fmt"
+import (
+	"fmt"
+	"math"
+)
 
 /*
 Diff holds the changed values in the second network since the original network was cloned.
@@ -49,6 +52,23 @@ func NewDiff() Diff {
 }
 
 const zero int16 = 0
+
+/*
+ratioMaxHopsBetweenCellsDuringPathTrace is how many steps (synapses) are in between an
+input an output cell before we forge a path up to `GrowPathExpectedMinimumSynapses` in
+between them.
+*/
+func ratioMaxHopsBetweenCellsDuringPathTrace(network *Network) int {
+	lenSyn := len(network.Synapses)
+	lenCell := len(network.Cells)
+	if lenCell == 0 {
+		return 0 // prevents divide by zero panic
+	}
+	avgSynPerCell := float64(lenSyn / lenCell)
+	// semi-hardcoded number of max hops. this was arbitrary.
+	maxHops := int(math.Max(math.Min(avgSynPerCell, 20.0), 20))
+	return maxHops
+}
 
 /*
 DiffNetworks produces a diff from the original network, showing the forward changes

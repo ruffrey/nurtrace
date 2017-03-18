@@ -1,6 +1,7 @@
 package potential
 
 import (
+	"bleh/laws"
 	"fmt"
 	"sync"
 )
@@ -13,8 +14,8 @@ Grow is a general growth that encompasses all growth methods.
 It adds neurons, adds new synapses, prunes old neurons, and strengthens synapses that have
 fired a lot.
 */
-func (network *Network) Grow(neuronsToAdd, defaultNeuronSynapses, synapsesToAdd int) {
-	network.GrowRandomNeurons(neuronsToAdd, defaultNeuronSynapses)
+func (network *Network) Grow(neuronsToAdd, synapsesPerNewNeuron, synapsesToAdd int) {
+	network.GrowRandomNeurons(neuronsToAdd, synapsesPerNewNeuron)
 	network.GrowRandomSynapses(synapsesToAdd)
 }
 
@@ -133,7 +134,7 @@ func (network *Network) GrowPathBetween(startCell, endCell CellID, minSynapses i
 
 			synapsesAdded[newLinkingSynapse.ID] = true
 
-			newLinkingSynapse.Millivolts = defaultNewGrownPathSynapse
+			newLinkingSynapse.Millivolts = laws.DefaultNewGrownPathSynapse
 		}
 	}
 
@@ -153,7 +154,7 @@ func (network *Network) GrowPathBetween(startCell, endCell CellID, minSynapses i
 /*
 GrowRandomNeurons will randomly add neurons with the default number of synapses to the network.
 */
-func (network *Network) GrowRandomNeurons(neuronsToAdd, defaultNeuronSynapses int) {
+func (network *Network) GrowRandomNeurons(neuronsToAdd, synapsesPerNeuron int) {
 	// fmt.Println("  adding neurons =", neuronsToAdd)
 	// Now - all the new neurons are added first with no synapses. If synapses were added at
 	// create time, the newer neurons would end up with far fewer connections to the following
@@ -168,7 +169,7 @@ func (network *Network) GrowRandomNeurons(neuronsToAdd, defaultNeuronSynapses in
 	// Create the synapse, then choose a random cell from the network, then choose whether
 	// this new cell will be a sender or receiver.
 	for _, cell := range addedNeurons {
-		for i := 0; i < defaultNeuronSynapses; {
+		for i := 0; i < synapsesPerNeuron; {
 			ix := network.RandomCellKey()
 			otherCell := network.Cells[ix]
 			if cell.ID == otherCell.ID {

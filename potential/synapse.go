@@ -1,6 +1,7 @@
 package potential
 
 import (
+	"bleh/laws"
 	"fmt"
 	"math/rand"
 )
@@ -51,7 +52,7 @@ func NewSynapse(network *Network) *Synapse {
 		}
 		// fmt.Println("warn: would have gotten dupe synapse ID")
 	}
-	mv := int16(randomIntBetween(newSynapseMinMillivolts, newSynapseMaxMillivolts))
+	mv := int16(randomIntBetween(laws.NewSynapseMinMillivolts, laws.NewSynapseMaxMillivolts))
 	s := Synapse{
 		ID:         id,
 		Network:    network,
@@ -69,7 +70,7 @@ reinforce a synapse relationship and create a new synapse of the same
 direction if so.
 */
 func (synapse *Synapse) reinforce() SynapseID {
-	return reinforceByAmount(synapse, synapseLearnRate)
+	return reinforceByAmount(synapse, laws.SynapseLearnRate)
 }
 
 func reinforceByAmount(synapse *Synapse, millivolts int16) (newSynapse SynapseID) {
@@ -77,8 +78,8 @@ func reinforceByAmount(synapse *Synapse, millivolts int16) (newSynapse SynapseID
 	isPositive := synapse.Millivolts >= 0
 	if isPositive {
 		newMV := int16(synapse.Millivolts) + mv
-		if newMV > actualSynapseMax {
-			half := actualSynapseMax / 2
+		if newMV > laws.ActualSynapseMax {
+			half := laws.ActualSynapseMax / 2
 			synapse.Millivolts = half
 			// add a new synapse between those two cells
 			s := synapse.Network.linkCells(synapse.FromNeuronAxon, synapse.ToNeuronDendrite)
@@ -91,8 +92,8 @@ func reinforceByAmount(synapse *Synapse, millivolts int16) (newSynapse SynapseID
 	}
 	// negative
 	newMV := int16(synapse.Millivolts) - mv
-	if newMV < actualSynapseMin {
-		half := actualSynapseMin / 2
+	if newMV < laws.ActualSynapseMin {
+		half := laws.ActualSynapseMin / 2
 		synapse.Millivolts = half
 		// add a new synapse between those two cells
 		s := synapse.Network.linkCells(synapse.FromNeuronAxon, synapse.ToNeuronDendrite)

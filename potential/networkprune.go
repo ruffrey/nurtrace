@@ -1,6 +1,7 @@
 package potential
 
 import (
+	"bleh/laws"
 	"fmt"
 	"math"
 )
@@ -36,7 +37,7 @@ func (network *Network) Prune() {
 			isPositive := synapse.Millivolts >= 0
 
 			// when applying voltages, we must be careful to not overflow the size
-			if synapse.ActivationHistory >= defaultSynapseMinFireThreshold {
+			if synapse.ActivationHistory >= laws.DefaultSynapseMinFireThreshold {
 				// it was activated enough, so we bump it away from zero.
 				// needs cleanup refactoring.
 				synapse.reinforce()

@@ -3,6 +3,7 @@ package main
 import (
 	"bleh/charrnn"
 	"bleh/potential"
+	"bleh/laws"
 	"flag"
 	"fmt"
 	"io/ioutil"
@@ -17,7 +18,6 @@ import (
 )
 
 const initialNetworkNeurons = 200
-const defaultNeuronSynapses = 4
 
 var networkSaveFile = flag.String("save", "network.json", "Load/save location of the network")
 var vocabSaveFile = flag.String("vocab", "vocab.json", "Load/save location of the charrnn vocab")
@@ -40,7 +40,7 @@ func main() {
 		network = potential.NewNetwork()
 		neuronsToAdd := initialNetworkNeurons
 		synapsesToAdd := 0
-		network.Grow(neuronsToAdd, defaultNeuronSynapses, synapsesToAdd)
+		network.Grow(neuronsToAdd, laws.DefaultNeuronSynapses, synapsesToAdd)
 		fmt.Println("Created network,", len(network.Cells), "cells",
 			len(network.Synapses), "synapses")
 	} else {

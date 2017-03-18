@@ -1,6 +1,7 @@
 package potential
 
 import (
+	"bleh/laws"
 	"io/ioutil"
 	"os"
 	"testing"
@@ -37,9 +38,8 @@ func Test_BasicNetworkFiring(t *testing.T) {
 	t.Run("does not panic during forced FireActionPotential", func(t *testing.T) {
 		network := NewNetwork()
 		neuronsToAdd := 50
-		defaultNeuronSynapses := 10
 		synapsesToAdd := 100
-		network.Grow(neuronsToAdd, defaultNeuronSynapses, synapsesToAdd)
+		network.Grow(neuronsToAdd, 10, synapsesToAdd)
 		iterations := 1000
 		for i := 1; i < iterations; i++ {
 			cellID := network.RandomCellKey()
@@ -160,7 +160,7 @@ func Test_ResetForTraining(t *testing.T) {
 		// pretest
 		cell1 := NewCell(network)
 		assert.Equal(t, false, cell1.activating)
-		assert.Equal(t, int16(cellRestingVoltage), cell1.Voltage)
+		assert.Equal(t, int16(laws.CellRestingVoltage), cell1.Voltage)
 		assert.Equal(t, false, cell1.WasFired)
 
 		// setup

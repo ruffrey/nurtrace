@@ -15,6 +15,7 @@
 - [ ] ensure that adding the inhibitory synapses is working, and inhibiting the right thing.
 
 ## Priority II
+- [ ] Pull things that change less into sub files
 - [ ] change terminology to pre- and post- synaptic neurons where it'll make it easier to follow
 - [ ] Periodically save back the threaded training to original
     - currently we lose all training on a crash

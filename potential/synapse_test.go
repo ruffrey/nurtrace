@@ -1,6 +1,7 @@
 package potential
 
 import (
+	"bleh/laws"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -26,7 +27,7 @@ func Test_SynapseReinforce(t *testing.T) {
 		synapse.Millivolts = -4
 		synapse.reinforce()
 
-		assert.Equal(t, -4-synapseLearnRate, synapse.Millivolts)
+		assert.Equal(t, -4-laws.SynapseLearnRate, synapse.Millivolts)
 	})
 	t.Run("reinforcing a positive synapse will make it more positive", func(t *testing.T) {
 		network := NewNetwork()
@@ -34,7 +35,7 @@ func Test_SynapseReinforce(t *testing.T) {
 		synapse.Millivolts = 3
 		synapse.reinforce()
 
-		assert.Equal(t, 3+synapseLearnRate, synapse.Millivolts)
+		assert.Equal(t, 3+laws.SynapseLearnRate, synapse.Millivolts)
 	})
 	t.Run("reinforcing a synapse to its limit will not overflow integer and will add new duplicate synapses", func(t *testing.T) {
 		network := NewNetwork()

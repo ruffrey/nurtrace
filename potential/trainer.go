@@ -1,6 +1,7 @@
 package potential
 
 import (
+	"bleh/laws"
 	"encoding/gob"
 	"fmt"
 	"log"
@@ -265,7 +266,7 @@ func Train(settings *TrainingSettings, originalNetwork *Network, isRemoteWorkerW
 					ApplyDiff(diff, network)
 				}
 
-				if i%samplesBetweenMergingSessions == 0 {
+				if i%laws.SamplesBetweenMergingSessions == 0 {
 					if i == 0 { // do not allow diffing/pruning before getting started!
 						continue
 					}
@@ -306,7 +307,7 @@ func Train(settings *TrainingSettings, originalNetwork *Network, isRemoteWorkerW
 					// originalNetwork.Prune()
 				}
 				fmt.Println(isRemoteWorkerWithTag, "Progress:",
-					math.Floor(((float64(mergeNum)*float64(samplesBetweenMergingSessions))/float64(lenAllSamples))*100), "%,")
+					math.Floor(((float64(mergeNum)*float64(laws.SamplesBetweenMergingSessions))/float64(lenAllSamples))*100), "%,")
 				network.PrintTotals()
 			}
 			chNetworkSyncCallback <- true
@@ -342,7 +343,7 @@ func processBatch(batch []*TrainingSample, originalNetwork *Network, data *Datas
 	}
 
 	// give firings time to travel through the network
-	for i := 0; i < GrowPathExpectedMinimumSynapses; i++ {
+	for i := 0; i < laws.GrowPathExpectedMinimumSynapses; i++ {
 		hasMore := network.Step()
 		if !hasMore {
 			break
@@ -401,13 +402,13 @@ func processBatch(batch []*TrainingSample, originalNetwork *Network, data *Datas
 		// Grow some random stuff to introduce a little noise and new
 		// things to grab onto. Not sure if it is a good idea or not.
 		// Maybe instead, GrowPathBetween should add cells.
-		network.GrowRandomNeurons(retrainNeuronsToGrow, defaultNeuronSynapses)
+		network.GrowRandomNeurons(laws.RetrainNeuronsToGrow, laws.DefaultNeuronSynapses)
 
 		// (re)grow paths between each expected input and output,
 		// but only when the inputs did not fire all outputs.
 		if !firedAllExpected {
 			for _, ts := range unfiredOutputBatches {
-				network.GrowPathBetween(ts.InputCell, ts.OutputCell, GrowPathExpectedMinimumSynapses)
+				network.GrowPathBetween(ts.InputCell, ts.OutputCell, laws.GrowPathExpectedMinimumSynapses)
 			}
 		}
 

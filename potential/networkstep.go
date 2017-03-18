@@ -1,6 +1,7 @@
 package potential
 
 import (
+	"bleh/laws"
 	"fmt"
 	"math"
 )
@@ -69,9 +70,9 @@ func (network *Network) Step() (hasMore bool) {
 	// see if any cells fired
 	for cellID, fg := range voltageTallies {
 		cell := network.getCell(cellID)
-		if fg.voltage < cellFireVoltageThreshold {
+		if fg.voltage < laws.CellFireVoltageThreshold {
 			// prevent out of bounds voltage
-			cell.Voltage = int16(math.Max(float64(fg.voltage), float64(actualSynapseMin)))
+			cell.Voltage = int16(math.Max(float64(fg.voltage), float64(laws.ActualSynapseMin)))
 			continue
 		}
 
@@ -83,7 +84,7 @@ func (network *Network) Step() (hasMore bool) {
 		// Reward the synapses that were involved in this cell firing.
 		for synapseID := range fg.synapses {
 			fromSynapse := network.getSyn(synapseID)
-			fromSynapse.ActivationHistory += synapseAPBoost
+			fromSynapse.ActivationHistory += laws.SynapseAPBoost
 		}
 	}
 
@@ -94,7 +95,7 @@ func (network *Network) Step() (hasMore bool) {
 			fmt.Println("error: cell cannot be reset because it does not exist")
 			continue
 		}
-		cell.Voltage = cellRestingVoltage
+		cell.Voltage = laws.CellRestingVoltage
 		cell.activating = false
 	}
 

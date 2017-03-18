@@ -1,6 +1,7 @@
 package potential
 
 import (
+	"bleh/laws"
 	"fmt"
 	"math/rand"
 )
@@ -85,7 +86,7 @@ func NewCell(network *Network) *Cell {
 		ID:               id,
 		Network:          network,
 		Immortal:         false,
-		Voltage:          cellRestingVoltage,
+		Voltage:          laws.CellRestingVoltage,
 		activating:       false,
 		DendriteSynapses: make(map[SynapseID]bool),
 		AxonSynapses:     make(map[SynapseID]bool),
