@@ -72,7 +72,7 @@ func dedupeSynapses(synapses dupeSynapses, network *Network) []SynapseID {
 	}
 
 	removeSynapses = synapses[keepTotal:]
-	lastKeepNewMillivolts := int(sum) % (dupeSynapsesTotal * int(max))
+	lastKeepNewMillivolts := int(sum) - ((keepTotal - 1) * int(max))
 
 	lastIndex := len(keepSynapses) - 1
 	for i, synapseID := range keepSynapses {

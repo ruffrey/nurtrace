@@ -160,7 +160,7 @@ func Test_ConsolidateSynapses(t *testing.T) {
 
 			assert.Equal(t, 6, len(network.Synapses))
 			assert.Equal(t, laws.ActualSynapseMax, network.getSyn(leftovers[0]).Millivolts)
-			assert.Equal(t, 13061, network.getSyn(leftovers[1]).Millivolts)
+			assert.Equal(t, int16(17297), network.getSyn(leftovers[1]).Millivolts)
 		})
 	})
 }
