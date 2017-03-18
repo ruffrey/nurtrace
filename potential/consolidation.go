@@ -6,6 +6,10 @@ import (
 	"strconv"
 )
 
+/*
+synapseSignature concats the pre- and post-synaptic neuron IDs in a way
+that makes it easy to check for duplicate synapses.
+*/
 func synapseSignature(synapse *Synapse) string {
 	return strconv.Itoa(int(synapse.FromNeuronAxon)) + "-" + strconv.Itoa(int(synapse.ToNeuronDendrite))
 }
@@ -36,13 +40,13 @@ func findDupeSynapses(network *Network) map[string]dupeSynapses {
 	return dupes
 }
 
-const actualSynapseMaxFloat64 = float64(laws.ActualSynapseMax)
+const _actualSynapseMaxFloat64 = float64(laws.ActualSynapseMax)
 
 /*
 dedupeSynapses receives a list of synapses that are known to have
 the same inputs and outputs, removing as many as possible
 */
-func dedupeSynapses(synapses dupeSynapses, network *Network) {
+func dedupeSynapses(synapses dupeSynapses, network *Network) []SynapseID {
 	var sum float64
 	var keepSynapses []SynapseID
 	var removeSynapses []SynapseID
@@ -52,8 +56,10 @@ func dedupeSynapses(synapses dupeSynapses, network *Network) {
 		sum += float64(network.getSyn(synapseID).Millivolts) // unlikely to overflow, but may
 	}
 
-	keepTotal := int(math.Ceil(math.Abs(sum) / actualSynapseMaxFloat64))
+	keepTotal := int(math.Ceil(math.Abs(sum) / _actualSynapseMaxFloat64))
 	isPositive := sum >= 0
+	keepSynapses = synapses[0:keepTotal]
+
 	var max int16
 	if isPositive {
 		max = laws.ActualSynapseMax
@@ -62,23 +68,25 @@ func dedupeSynapses(synapses dupeSynapses, network *Network) {
 	}
 
 	if keepTotal == dupeSynapsesTotal {
-		return
+		return keepSynapses
 	}
 
-	keepSynapses = synapses[0:keepTotal]
 	removeSynapses = synapses[keepTotal:]
-	lastKeepNewMillivolts := int16((dupeSynapsesTotal * int(max)) - (keepTotal * int(max)))
+	lastKeepNewMillivolts := int(sum) % (dupeSynapsesTotal * int(max))
 
 	lastIndex := len(keepSynapses) - 1
 	for i, synapseID := range keepSynapses {
 		isLast := lastIndex == i
+		synapse := network.getSyn(synapseID)
 		if isLast {
-			network.getSyn(synapseID).Millivolts = lastKeepNewMillivolts
+			synapse.Millivolts = int16(lastKeepNewMillivolts)
 		} else {
-			network.getSyn(synapseID).Millivolts = max
+			synapse.Millivolts = max
 		}
 	}
 	for _, synapseID := range removeSynapses {
 		network.PruneSynapse(synapseID)
 	}
+
+	return keepSynapses
 }

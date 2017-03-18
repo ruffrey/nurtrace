@@ -5,5 +5,11 @@
         "cwd": "${workspaceRoot}/shake",
         "args": ["-data=less.txt"],
         "env": {}
+    }, {
+        "name": "Potential - Tests",
+        "mode": "test",
+        "cwd": "${workspaceRoot}/potential",
+        "args": [],
+        "env": {}
     }]
 }
