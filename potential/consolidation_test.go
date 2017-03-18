@@ -145,7 +145,7 @@ func Test_ConsolidateSynapses(t *testing.T) {
 			assert.Equal(t, 5, len(network.Synapses))
 			assert.Equal(t, int16(149), network.getSyn(leftovers[0]).Millivolts)
 		})
-		t.Run("dupes overflowing int16 keeps more synapses", func(t *testing.T) {
+		t.Run("dupes overflowing +int16 keeps more synapses", func(t *testing.T) {
 			beforeEach()
 
 			s3dupe := network.linkCells(cellA.ID, cellB.ID)
@@ -161,6 +161,23 @@ func Test_ConsolidateSynapses(t *testing.T) {
 			assert.Equal(t, 6, len(network.Synapses))
 			assert.Equal(t, laws.ActualSynapseMax, network.getSyn(leftovers[0]).Millivolts)
 			assert.Equal(t, int16(17297), network.getSyn(leftovers[1]).Millivolts)
+		})
+		t.Run("dupes overflowing -int16 keeps more synapses", func(t *testing.T) {
+			beforeEach()
+
+			s3dupe := network.linkCells(cellA.ID, cellB.ID)
+
+			s1dupe.Millivolts = -20000
+			s2dupe.Millivolts = -30000
+			s3dupe.Millivolts = -61
+			assert.Equal(t, 7, len(network.Synapses))
+
+			leftovers := dedupeSynapses(dupeSynapses{s1dupe.ID, s2dupe.ID, s3dupe.ID}, network)
+			assert.Equal(t, 2, len(leftovers))
+
+			assert.Equal(t, 6, len(network.Synapses))
+			assert.Equal(t, laws.ActualSynapseMin, network.getSyn(leftovers[0]).Millivolts)
+			assert.Equal(t, int16(-17296), network.getSyn(leftovers[1]).Millivolts)
 		})
 	})
 }
