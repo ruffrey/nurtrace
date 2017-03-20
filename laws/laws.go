@@ -46,8 +46,7 @@ to zero, until it is 2, then it will become zero.
 const SynapseLearnRate int16 = 2
 
 /*
-CellRestingVoltage comes from standard neuroscience Membrane Potential. This, and all voltages
-in the lib, conveniently fit in tiny 8 bit integers.
+CellRestingVoltage is what a neuron gets reset to after it has fired.
 */
 const CellRestingVoltage int16 = -10
 

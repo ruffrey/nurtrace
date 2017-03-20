@@ -305,6 +305,10 @@ func Train(settings *TrainingSettings, originalNetwork *Network, isRemoteWorkerW
 				// DO NOT prune on the one-off network that has not been merged back to main.
 				if shouldPrune {
 					// originalNetwork.Prune()
+					dupes := findDupeSynapses(network)
+					for _, dupeGroup := range dupes {
+						dedupeSynapses(dupeGroup, network)
+					}
 				}
 				fmt.Println(isRemoteWorkerWithTag, "Progress:",
 					math.Floor(((float64(mergeNum)*float64(laws.SamplesBetweenMergingSessions))/float64(lenAllSamples))*100), "%,")

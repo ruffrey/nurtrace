@@ -5,6 +5,10 @@ This is a real neural network, modeled after real neuring firing patterns.
 It uses the concept of the Action Potential and Membrane Potential from neuroscience to
 train a neural network.
 
+## Todos and Project Management
+
+See the github issues for this project.
+
 ## Core lib architected to support:
 
 - [x] simple math resembling millivolts in neural network firings
