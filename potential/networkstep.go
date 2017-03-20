@@ -6,10 +6,12 @@ import (
 	"math"
 )
 
-// firingGroup is temporarily used to store a group of synapses that
-// fired and which cell they fired onto. It is useful so we can
-// look back and boost the synapses which resulted in the cell
-// firing due to sufficient voltage increase.
+/*
+firingGroup is temporarily used to store a group of synapses that
+fired and which cell they fired onto. It is useful so we can
+look back and boost the synapses which resulted in the cell
+firing due to sufficient voltage increase.
+*/
 type firingGroup struct {
 	synapses map[SynapseID]bool
 	voltage  int
@@ -84,7 +86,7 @@ func (network *Network) Step() (hasMore bool) {
 		// Reward the synapses that were involved in this cell firing.
 		for synapseID := range fg.synapses {
 			fromSynapse := network.getSyn(synapseID)
-			fromSynapse.ActivationHistory += laws.SynapseAPBoost
+			fromSynapse.reinforce()
 		}
 	}
 
