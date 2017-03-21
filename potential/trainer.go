@@ -305,9 +305,9 @@ func Train(settings *TrainingSettings, originalNetwork *Network, isRemoteWorkerW
 				// DO NOT prune on the one-off network that has not been merged back to main.
 				if shouldPrune {
 					// originalNetwork.Prune()
-					dupes := findDupeSynapses(network)
+					dupes := findDupeSynapses(originalNetwork)
 					for _, dupeGroup := range dupes {
-						dedupeSynapses(dupeGroup, network)
+						dedupeSynapses(dupeGroup, originalNetwork)
 					}
 				}
 				fmt.Println(isRemoteWorkerWithTag, "Progress:",
