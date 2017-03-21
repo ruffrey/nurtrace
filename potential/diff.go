@@ -191,11 +191,13 @@ func ApplyDiff(diff Diff, originalNetwork *Network) (err error) {
 
 	// Update voltages and activations on existing synapses
 	for synapseID, diffValue := range diff.synapseDiffs {
-		originalNetwork.Synapses[synapseID].Millivolts += diffValue
+		s := originalNetwork.getSyn(synapseID)
+		s.Millivolts += diffValue
 	}
 	// add the activation history
 	for synapseID, activations := range diff.synapseFires {
-		originalNetwork.Synapses[synapseID].ActivationHistory += activations
+		s := originalNetwork.getSyn(synapseID)
+		s.ActivationHistory += activations
 	}
 
 	originalNetwork.maxHops = ratioMaxHopsBetweenCellsDuringPathTrace(originalNetwork)
