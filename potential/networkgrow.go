@@ -40,6 +40,7 @@ func (network *Network) GrowPathBetween(startCell, endCell CellID, minSynapses i
 	// these are the synapses we found that are on the path from the startCell,
 	// and attach directly to an endCell at the dendrite
 	synapsesToEnd = make(map[SynapseID]bool)
+	var synapsesToEndMux sync.Mutex
 	// any new synapses we create if there are not enough in the network that attach
 	// to the end cell
 	synapsesAdded = make(map[SynapseID]bool)
@@ -61,7 +62,9 @@ func (network *Network) GrowPathBetween(startCell, endCell CellID, minSynapses i
 	walk = func(cellID CellID) {
 		mux.Lock()
 		hops++
+		synapsesToEndMux.Lock()
 		totalSynapsesFound := len(synapsesToEnd)
+		synapsesToEndMux.Unlock()
 		if hops >= maxHops || totalSynapsesFound >= minSynapses {
 			mux.Unlock()
 			return
@@ -109,10 +112,12 @@ func (network *Network) GrowPathBetween(startCell, endCell CellID, minSynapses i
 
 	for synapseToOutputCell := range ch {
 		// fmt.Println("synapseToOutputCell", synapseToOutputCell)
+		synapsesToEndMux.Lock()
 		synapsesToEnd[synapseToOutputCell] = true
+		synapsesToEndMux.Unlock()
 	}
 
-	needSynapses := minSynapses - len(synapsesToEnd)
+	needSynapses := minSynapses - len(synapsesToEnd) // out of multithreading now
 	if needSynapses > 0 {
 		hasWalked := len(alreadyWalked) > 0
 		fmt.Println("start=", startCell, "end=", endCell, "minSynapses", minSynapses, "needSynapses", needSynapses, "alreadyWalked", len(alreadyWalked), "maxHops", network.maxHops)

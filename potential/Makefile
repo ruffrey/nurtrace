@@ -5,6 +5,8 @@ preinstall:
 
 test:
 	go test -v
+test-race:
+	go test -race bleh/potential
 
 cover:
 	go test -covermode=count -coverprofile=coverage.out # count how many times statements run
