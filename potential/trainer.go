@@ -148,8 +148,8 @@ to implement better diffing that does account for removed synapses and cells. Bu
 for now this is more than adequate.
 */
 func Train(settings *TrainingSettings, originalNetwork *Network, isRemoteWorkerWithTag string) {
-	shouldPrune := isRemoteWorkerWithTag == ""
-	if shouldPrune {
+	shouldDedupe := isRemoteWorkerWithTag == ""
+	if shouldDedupe {
 		isRemoteWorkerWithTag = "<local>"
 	}
 	// The next two are used to block until all threads are done and the function may return.
@@ -281,8 +281,10 @@ func Train(settings *TrainingSettings, originalNetwork *Network, isRemoteWorkerW
 			}
 
 			fmt.Println(isRemoteWorkerWithTag, "local thread", thread, "done")
+			origNetCloneMux.Lock()
 			chNetworkSync <- network
 			<-chNetworkSyncCallback
+			origNetCloneMux.Unlock()
 			fmt.Println(isRemoteWorkerWithTag, "applied final diff on local thread", thread)
 			wg.Done()
 		}(thread)
@@ -302,9 +304,9 @@ func Train(settings *TrainingSettings, originalNetwork *Network, isRemoteWorkerW
 
 			mergeNum++
 			if mergeNum%settings.Threads == 0 {
-				// DO NOT prune on the one-off network that has not been merged back to main.
-				if shouldPrune {
-					// originalNetwork.Prune()
+				// FYI: DO NOT prune cells except on the main network. Cannot
+				// remember why, but it likely could lead to orphans.
+				if shouldDedupe {
 					dupes := findDupeSynapses(originalNetwork)
 					for _, dupeGroup := range dupes {
 						dedupeSynapses(dupeGroup, originalNetwork)
@@ -312,10 +314,16 @@ func Train(settings *TrainingSettings, originalNetwork *Network, isRemoteWorkerW
 				}
 				fmt.Println(isRemoteWorkerWithTag, "Progress:",
 					math.Floor(((float64(mergeNum)*float64(laws.SamplesBetweenMergingSessions))/float64(lenAllSamples))*100), "%,")
-				network.PrintTotals()
+				originalNetwork.PrintTotals()
 			}
 			chNetworkSyncCallback <- true
 		case <-done:
+			if shouldDedupe {
+				dupes := findDupeSynapses(originalNetwork)
+				for _, dupeGroup := range dupes {
+					dedupeSynapses(dupeGroup, originalNetwork)
+				}
+			}
 			return
 		}
 	}

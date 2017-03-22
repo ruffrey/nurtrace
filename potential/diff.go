@@ -326,7 +326,6 @@ func copySynapseToNetwork(synapse *Synapse, newNetwork *Network) SynapseID {
 
 	d := copiedSynapse.ToNeuronDendrite
 	a := copiedSynapse.FromNeuronAxon
-	// TODO: for some reason, one of these does not exist, occasionally
 	dCell := newNetwork.getCell(d)
 	aCell := newNetwork.getCell(a)
 

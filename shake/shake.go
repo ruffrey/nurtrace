@@ -2,8 +2,8 @@ package main
 
 import (
 	"bleh/charrnn"
-	"bleh/potential"
 	"bleh/laws"
+	"bleh/potential"
 	"flag"
 	"fmt"
 	"io/ioutil"

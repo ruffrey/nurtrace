@@ -2,6 +2,7 @@ package potential
 
 import (
 	"bleh/laws"
+	"fmt"
 	"math"
 	"strconv"
 )
@@ -87,6 +88,6 @@ func dedupeSynapses(synapses dupeSynapses, network *Network) []SynapseID {
 	for _, synapseID := range removeSynapses {
 		network.PruneSynapse(synapseID)
 	}
-
+	fmt.Println("removed", len(removeSynapses), "dupe synapses")
 	return keepSynapses
 }

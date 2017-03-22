@@ -177,7 +177,7 @@ func Test_ApplyDiff(t *testing.T) {
 		ApplyDiff(diff, net1)
 
 		// assertions
-		assert.Equal(t, len(net1.Synapses), (50*5)+50+(200*10)+100)
+		assert.Equal(t, (50*5)+50+(200*10)+100, len(net1.Synapses))
 		ok, report = CheckIntegrity(net1)
 		assert.True(t, ok, report)
 	})
