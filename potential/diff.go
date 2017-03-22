@@ -214,12 +214,20 @@ It involves resetting pointers.
 func CloneNetwork(originalNetwork *Network) *Network {
 	newNetwork := NewNetwork()
 
+	originalNetwork.cellMux.Lock()
 	for _, cell := range originalNetwork.Cells {
+		originalNetwork.cellMux.Unlock()
 		copyCellToNetwork(cell, newNetwork)
+		originalNetwork.cellMux.Lock()
 	}
+	originalNetwork.cellMux.Unlock()
+	originalNetwork.synMux.Lock()
 	for _, synapse := range originalNetwork.Synapses {
+		originalNetwork.synMux.Unlock()
 		copySynapseToNetwork(synapse, newNetwork)
+		originalNetwork.synMux.Lock()
 	}
+	originalNetwork.synMux.Unlock()
 
 	return newNetwork
 }
