@@ -3,11 +3,13 @@ package charrnn
 // TODO: saving/restoring from disk does not work.
 
 import (
+	"bleh/perception"
 	"bleh/potential"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"os"
+	"strings"
 )
 
 /*
@@ -17,7 +19,9 @@ It implements potential.Trainer
 */
 type Charrnn struct {
 	Chars    []string
-	Settings *potential.TrainingSettings
+	rawText  string
+	settings *potential.TrainingSettings
+	perception.Perception
 }
 
 /*
@@ -33,7 +37,7 @@ type charPerceptionUnit struct {
 /*
 SaveVocab saves the current vocabulary from the charrnn.
 */
-func (charrnn *Charrnn) SaveVocab(filename string) error {
+func (charrnn Charrnn) SaveVocab(filename string) error {
 	data := make(map[string]charPerceptionUnit)
 	for key, value := range charrnn.Settings.Data.KeyToItem {
 		data[key.(string)] = charPerceptionUnit{
@@ -55,7 +59,7 @@ the charrnn.Settings. It uses the charPerceptionUnit as an intermediary but
 casts it back into a generic `map[interface{}]potential.PerceptionUnit`, which
 the potential lib requires.
 */
-func (charrnn *Charrnn) LoadVocab(filename string) error {
+func (charrnn Charrnn) LoadVocab(filename string) error {
 	bytes, err := ioutil.ReadFile(filename)
 	if err != nil {
 		return err
@@ -79,10 +83,34 @@ func (charrnn *Charrnn) LoadVocab(filename string) error {
 	return nil
 }
 
-/*
-PrepareData is from potential.Trainer.
+// SetRawData sets the rawText prop
+func (charrnn Charrnn) SetRawData(bytes []byte) {
+	text := string(bytes)
+	charrnn.rawText = text
+	charrnn.Chars = strings.Split(text, "")
+}
 
-Looking at each character, build up a map of string: PerceptionUnit pairs.
+// SeedAndSample writes the output sample to stdout at the moment
+func (charrnn Charrnn) SeedAndSample(seed string, network *potential.Network) {
+	fmt.Println("Sampling characters with seed text: ", seed)
+	seedChars := strings.Split(seed, "")
+	// keys are type interface{} and need to be copied into a new array of that
+	// type. they cannot be downcast. https://golang.org/doc/faq#convert_slice_of_interface
+	// (might want to add this as a helper to charrnn)
+	var seedKeys []interface{}
+	for _, stringKeyChar := range seedChars {
+		seedKeys = append(seedKeys, stringKeyChar)
+	}
+	out := potential.Sample(seedKeys, charrnn.Settings.Data, network, 1000, "START", "END")
+	fmt.Println("---")
+	for _, s := range out {
+		fmt.Print(s)
+	}
+	fmt.Println("\n---")
+}
+
+/*
+PrepareData looks at each character, builds up a map of string: PerceptionUnit pairs.
 */
 func (charrnn Charrnn) PrepareData(network *potential.Network) {
 	if charrnn.Settings.Data.KeyToItem == nil { // may have been preloaded
@@ -162,5 +190,58 @@ func (charrnn Charrnn) PrepareData(network *potential.Network) {
 		// the output. But that is utterly incorrect - it created a
 		// path between, say, A and A, b and b, c and c, etc.
 	}
+
+	// Setup the training data samples
+	//
+	// One batch will be one line, with pairs being start-<line text>-end
+	lines := strings.Split(charrnn.rawText, "\n")
+	startCellID := charrnn.Settings.Data.KeyToItem["START"].InputCell
+	endCellID := charrnn.Settings.Data.KeyToItem["END"].InputCell
+	for _, line := range lines {
+		var s []*potential.TrainingSample
+		chars := strings.Split(line, "")
+
+		if len(chars) == 0 {
+			continue
+		}
+		// first char is START indicator token
+		ts1 := potential.TrainingSample{
+			InputCell:  startCellID,
+			OutputCell: charrnn.Settings.Data.KeyToItem[chars[0]].InputCell,
+		}
+		if ts1.InputCell == 0 {
+			fmt.Println(ts1)
+			panic("nope")
+		}
+		s = append(s, &ts1)
+
+		// start at 1 because we need to look behind
+		for i := 1; i < len(chars); i++ {
+			ts := potential.TrainingSample{
+				InputCell:  charrnn.Settings.Data.KeyToItem[chars[i-1]].InputCell,
+				OutputCell: charrnn.Settings.Data.KeyToItem[chars[i]].InputCell,
+			}
+			if ts.InputCell == 0 {
+				fmt.Println("training sample has input cell where ID input cell is zero")
+				fmt.Println(i, chars[i], chars[i-1], ts)
+				panic(i)
+			}
+			s = append(s, &ts)
+		}
+		// last char is END indicator token
+		ts2 := potential.TrainingSample{
+			InputCell:  charrnn.Settings.Data.KeyToItem[chars[len(chars)-1]].InputCell,
+			OutputCell: endCellID,
+		}
+		if ts2.InputCell == 0 {
+			fmt.Println(ts2)
+			fmt.Println("training sample END has input cell where ID input cell is zero")
+			panic("nope")
+		}
+		s = append(s, &ts2)
+
+		charrnn.Settings.TrainingSamples = append(charrnn.Settings.TrainingSamples, s)
+	}
+
 	fmt.Println("charrnn data setup complete")
 }
