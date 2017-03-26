@@ -1,6 +1,8 @@
 package perception
 
-import "bleh/potential"
+import (
+	"bleh/potential"
+)
 
 /*
 Perception describes a real world set of data that is mapped to neurons.
@@ -8,10 +10,9 @@ Perception describes a real world set of data that is mapped to neurons.
 
 */
 type Perception interface {
-	GetSettings() *potential.TrainingSettings
 	SetRawData(rawData []byte)
-	SaveVocab(filename string) error
-	LoadVocab(filename string) error
-	PrepareData(network *potential.Network)
-	SeedAndSample(seed string, network *potential.Network)
+	SaveVocab(settings *potential.TrainingSettings, filename string) error
+	LoadVocab(settings *potential.TrainingSettings, filename string) error
+	PrepareData(settings *potential.TrainingSettings, network *potential.Network)
+	SeedAndSample(settings *potential.TrainingSettings, seed string, network *potential.Network)
 }

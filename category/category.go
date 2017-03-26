@@ -1,12 +1,19 @@
 package main
 
 import (
+	"bleh/perception"
 	"bleh/potential"
 	"encoding/json"
 	"flag"
 	"fmt"
 	"io/ioutil"
 )
+
+// CategoryModel is a model that goes from discrete data to a named category
+type CategoryModel struct {
+	categories []categoryPerceptionUnit
+	perception.Perception
+}
 
 type categoryPerceptionUnit struct {
 	RGB        []uint8

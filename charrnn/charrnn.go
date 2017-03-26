@@ -3,7 +3,6 @@ package charrnn
 // TODO: saving/restoring from disk does not work.
 
 import (
-	"bleh/perception"
 	"bleh/potential"
 	"encoding/json"
 	"fmt"
@@ -16,12 +15,14 @@ import (
 Charrnn is the collection of training stuff to operate upon
 
 It implements potential.Trainer
+
+Implements Perception
 */
 type Charrnn struct {
-	Chars    []string
-	rawText  string
-	settings *potential.TrainingSettings
-	perception.Perception
+	Chars   []string
+	rawText string
+	// settings *potential.TrainingSettings
+	// perception.Perception
 }
 
 /*
@@ -37,9 +38,9 @@ type charPerceptionUnit struct {
 /*
 SaveVocab saves the current vocabulary from the charrnn.
 */
-func (charrnn Charrnn) SaveVocab(filename string) error {
+func (charrnn *Charrnn) SaveVocab(settings *potential.TrainingSettings, filename string) error {
 	data := make(map[string]charPerceptionUnit)
-	for key, value := range charrnn.Settings.Data.KeyToItem {
+	for key, value := range settings.Data.KeyToItem {
 		data[key.(string)] = charPerceptionUnit{
 			Value:      value.Value.(string),
 			InputCell:  value.InputCell,
@@ -55,11 +56,11 @@ func (charrnn Charrnn) SaveVocab(filename string) error {
 
 /*
 LoadVocab loads the known vocabulary and mappings to cells and puts it in
-the charrnn.Settings. It uses the charPerceptionUnit as an intermediary but
+the settings. It uses the charPerceptionUnit as an intermediary but
 casts it back into a generic `map[interface{}]potential.PerceptionUnit`, which
 the potential lib requires.
 */
-func (charrnn Charrnn) LoadVocab(filename string) error {
+func (charrnn *Charrnn) LoadVocab(settings *potential.TrainingSettings, filename string) error {
 	bytes, err := ioutil.ReadFile(filename)
 	if err != nil {
 		return err
@@ -69,11 +70,11 @@ func (charrnn Charrnn) LoadVocab(filename string) error {
 	if err != nil {
 		return err
 	}
-	if charrnn.Settings.Data.KeyToItem == nil {
-		charrnn.Settings.Data.KeyToItem = make(map[interface{}]potential.PerceptionUnit)
+	if settings.Data.KeyToItem == nil {
+		settings.Data.KeyToItem = make(map[interface{}]potential.PerceptionUnit)
 	}
 	for key, value := range data {
-		charrnn.Settings.Data.KeyToItem[key] = potential.PerceptionUnit{
+		settings.Data.KeyToItem[key] = potential.PerceptionUnit{
 			Value:      value.Value,
 			InputCell:  value.InputCell,
 			OutputCell: value.OutputCell,
@@ -84,44 +85,25 @@ func (charrnn Charrnn) LoadVocab(filename string) error {
 }
 
 // SetRawData sets the rawText prop
-func (charrnn Charrnn) SetRawData(bytes []byte) {
+func (charrnn *Charrnn) SetRawData(bytes []byte) {
 	text := string(bytes)
 	charrnn.rawText = text
 	charrnn.Chars = strings.Split(text, "")
 }
 
-// SeedAndSample writes the output sample to stdout at the moment
-func (charrnn Charrnn) SeedAndSample(seed string, network *potential.Network) {
-	fmt.Println("Sampling characters with seed text: ", seed)
-	seedChars := strings.Split(seed, "")
-	// keys are type interface{} and need to be copied into a new array of that
-	// type. they cannot be downcast. https://golang.org/doc/faq#convert_slice_of_interface
-	// (might want to add this as a helper to charrnn)
-	var seedKeys []interface{}
-	for _, stringKeyChar := range seedChars {
-		seedKeys = append(seedKeys, stringKeyChar)
-	}
-	out := potential.Sample(seedKeys, charrnn.Settings.Data, network, 1000, "START", "END")
-	fmt.Println("---")
-	for _, s := range out {
-		fmt.Print(s)
-	}
-	fmt.Println("\n---")
-}
-
 /*
 PrepareData looks at each character, builds up a map of string: PerceptionUnit pairs.
 */
-func (charrnn Charrnn) PrepareData(network *potential.Network) {
-	if charrnn.Settings.Data.KeyToItem == nil { // may have been preloaded
-		charrnn.Settings.Data.KeyToItem = make(map[interface{}]potential.PerceptionUnit)
+func (charrnn *Charrnn) PrepareData(settings *potential.TrainingSettings, network *potential.Network) {
+	if settings.Data.KeyToItem == nil { // may have been preloaded
+		settings.Data.KeyToItem = make(map[interface{}]potential.PerceptionUnit)
 	}
 
 	// From the characters, ensure the vocabulary is all setup.
 	// Nothing will change in the model if this all characters already have corresponding
 	// cells, i.e. this is not the first time training the network.
 	for _, Value := range charrnn.Chars {
-		if _, exists := charrnn.Settings.Data.KeyToItem[Value]; !exists {
+		if _, exists := settings.Data.KeyToItem[Value]; !exists {
 			InputCell := network.RandomCellKey()
 			// ensure the input and output cells are not the same!
 			var OutputCell potential.CellID
@@ -132,7 +114,7 @@ func (charrnn Charrnn) PrepareData(network *potential.Network) {
 				}
 			}
 
-			charrnn.Settings.Data.KeyToItem[Value] = potential.PerceptionUnit{
+			settings.Data.KeyToItem[Value] = potential.PerceptionUnit{
 				Value:      Value,
 				InputCell:  InputCell,
 				OutputCell: OutputCell,
@@ -145,7 +127,7 @@ func (charrnn Charrnn) PrepareData(network *potential.Network) {
 	// Again, if this is the first time training the network, we must setup start
 	// and end indicators.
 
-	if _, exists := charrnn.Settings.Data.KeyToItem["START"]; !exists {
+	if _, exists := settings.Data.KeyToItem["START"]; !exists {
 		start := potential.PerceptionUnit{
 			Value:     "START",
 			InputCell: network.RandomCellKey(),
@@ -172,17 +154,17 @@ func (charrnn Charrnn) PrepareData(network *potential.Network) {
 		network.Cells[end.InputCell].Tag = "in-END"
 		network.Cells[end.OutputCell].Tag = "out-END"
 
-		charrnn.Settings.Data.KeyToItem["START"] = start
-		charrnn.Settings.Data.KeyToItem["END"] = end
+		settings.Data.KeyToItem["START"] = start
+		settings.Data.KeyToItem["END"] = end
 	}
 
 	// Reverse the map and grow paths where needed
-	charrnn.Settings.Data.CellToKey = make(map[potential.CellID]interface{})
+	settings.Data.CellToKey = make(map[potential.CellID]interface{})
 
-	for key, dataItem := range charrnn.Settings.Data.KeyToItem {
+	for key, dataItem := range settings.Data.KeyToItem {
 		// reverse the map
-		charrnn.Settings.Data.CellToKey[dataItem.InputCell] = key
-		charrnn.Settings.Data.CellToKey[dataItem.OutputCell] = key
+		settings.Data.CellToKey[dataItem.InputCell] = key
+		settings.Data.CellToKey[dataItem.OutputCell] = key
 		// prevent accidentally pruning the input/output cells
 		network.Cells[dataItem.InputCell].Immortal = true
 		network.Cells[dataItem.OutputCell].Immortal = true
@@ -195,8 +177,8 @@ func (charrnn Charrnn) PrepareData(network *potential.Network) {
 	//
 	// One batch will be one line, with pairs being start-<line text>-end
 	lines := strings.Split(charrnn.rawText, "\n")
-	startCellID := charrnn.Settings.Data.KeyToItem["START"].InputCell
-	endCellID := charrnn.Settings.Data.KeyToItem["END"].InputCell
+	startCellID := settings.Data.KeyToItem["START"].InputCell
+	endCellID := settings.Data.KeyToItem["END"].InputCell
 	for _, line := range lines {
 		var s []*potential.TrainingSample
 		chars := strings.Split(line, "")
@@ -207,7 +189,7 @@ func (charrnn Charrnn) PrepareData(network *potential.Network) {
 		// first char is START indicator token
 		ts1 := potential.TrainingSample{
 			InputCell:  startCellID,
-			OutputCell: charrnn.Settings.Data.KeyToItem[chars[0]].InputCell,
+			OutputCell: settings.Data.KeyToItem[chars[0]].InputCell,
 		}
 		if ts1.InputCell == 0 {
 			fmt.Println(ts1)
@@ -218,8 +200,8 @@ func (charrnn Charrnn) PrepareData(network *potential.Network) {
 		// start at 1 because we need to look behind
 		for i := 1; i < len(chars); i++ {
 			ts := potential.TrainingSample{
-				InputCell:  charrnn.Settings.Data.KeyToItem[chars[i-1]].InputCell,
-				OutputCell: charrnn.Settings.Data.KeyToItem[chars[i]].InputCell,
+				InputCell:  settings.Data.KeyToItem[chars[i-1]].InputCell,
+				OutputCell: settings.Data.KeyToItem[chars[i]].InputCell,
 			}
 			if ts.InputCell == 0 {
 				fmt.Println("training sample has input cell where ID input cell is zero")
@@ -230,7 +212,7 @@ func (charrnn Charrnn) PrepareData(network *potential.Network) {
 		}
 		// last char is END indicator token
 		ts2 := potential.TrainingSample{
-			InputCell:  charrnn.Settings.Data.KeyToItem[chars[len(chars)-1]].InputCell,
+			InputCell:  settings.Data.KeyToItem[chars[len(chars)-1]].InputCell,
 			OutputCell: endCellID,
 		}
 		if ts2.InputCell == 0 {
@@ -240,8 +222,27 @@ func (charrnn Charrnn) PrepareData(network *potential.Network) {
 		}
 		s = append(s, &ts2)
 
-		charrnn.Settings.TrainingSamples = append(charrnn.Settings.TrainingSamples, s)
+		settings.TrainingSamples = append(settings.TrainingSamples, s)
 	}
 
 	fmt.Println("charrnn data setup complete")
+}
+
+// SeedAndSample writes the output sample to stdout at the moment
+func (charrnn *Charrnn) SeedAndSample(settings *potential.TrainingSettings, seed string, network *potential.Network) {
+	fmt.Println("Sampling characters with seed text: ", seed)
+	seedChars := strings.Split(seed, "")
+	// keys are type interface{} and need to be copied into a new array of that
+	// type. they cannot be downcast. https://golang.org/doc/faq#convert_slice_of_interface
+	// (might want to add this as a helper to charrnn)
+	var seedKeys []interface{}
+	for _, stringKeyChar := range seedChars {
+		seedKeys = append(seedKeys, stringKeyChar)
+	}
+	out := potential.Sample(seedKeys, settings.Data, network, 1000, "START", "END")
+	fmt.Println("---")
+	for _, s := range out {
+		fmt.Print(s)
+	}
+	fmt.Println("\n---")
 }
