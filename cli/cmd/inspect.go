@@ -1,9 +1,10 @@
-package main
+package cmd
 
 import (
-	"github.com/ruffrey/nurtrace/potential"
 	"flag"
 	"fmt"
+
+	"github.com/ruffrey/nurtrace/potential"
 )
 
 var network = flag.String("n", "", "network filepath - required - Get basic total info about a network.")
@@ -13,7 +14,8 @@ var diff = flag.String("d", "",
 	"diff - Pass a second network filepath to calculate the diff using n as the original and d as the forked network.")
 var integrity = flag.String("i", "", "integrity - Check network integrity. (-i=ok) or (-i=report)")
 
-func main() {
+// Inspect gives information about a network or requested components of the network.
+func Inspect() {
 	flag.Parse()
 	var net *potential.Network
 	var err error
