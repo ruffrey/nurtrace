@@ -1,7 +1,7 @@
 package potential
 
 import (
-	"bleh/laws"
+	"github.com/ruffrey/nurtrace/laws"
 	"testing"
 
 	"github.com/stretchr/testify/assert"

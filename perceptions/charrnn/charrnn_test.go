@@ -1,7 +1,7 @@
 package charrnn
 
 import (
-	"bleh/potential"
+	"github.com/ruffrey/nurtrace/potential"
 	"io/ioutil"
 	"strings"
 	"testing"

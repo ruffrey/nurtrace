@@ -1,10 +1,6 @@
 package main
 
 import (
-	"bleh/charrnn"
-	"bleh/laws"
-	"bleh/perception"
-	"bleh/potential"
 	"flag"
 	"fmt"
 	"io/ioutil"
@@ -13,6 +9,11 @@ import (
 	"strconv"
 	"syscall"
 	"time"
+
+	"github.com/ruffrey/nurtrace/laws"
+	"github.com/ruffrey/nurtrace/perception"
+	"github.com/ruffrey/nurtrace/perceptions/charrnn"
+	"github.com/ruffrey/nurtrace/potential"
 
 	"github.com/pkg/profile"
 )
@@ -28,8 +29,6 @@ var doProfile = flag.String("profile", "", "Pass `cpu` or `mem` to do profiling"
 var initialNetworkNeurons = flag.Int("startsize", 200, "Start size of network when creating a new one")
 
 func main() {
-	// doTrace()
-
 	// Figure out how they want to run this program.
 	flag.Parse()
 

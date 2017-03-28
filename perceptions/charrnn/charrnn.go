@@ -3,7 +3,7 @@ package charrnn
 // TODO: saving/restoring from disk does not work.
 
 import (
-	"bleh/potential"
+	"github.com/ruffrey/nurtrace/potential"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"

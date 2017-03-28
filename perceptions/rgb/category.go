@@ -1,8 +1,8 @@
 package main
 
 import (
-	"bleh/perception"
-	"bleh/potential"
+	"github.com/ruffrey/nurtrace/perception"
+	"github.com/ruffrey/nurtrace/potential"
 	"encoding/json"
 	"flag"
 	"fmt"

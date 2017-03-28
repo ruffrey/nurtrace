@@ -1,7 +1,7 @@
 package perception
 
 import (
-	"bleh/potential"
+	"github.com/ruffrey/nurtrace/potential"
 )
 
 /*
