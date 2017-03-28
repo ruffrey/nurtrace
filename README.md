@@ -1,4 +1,6 @@
-# Name Pending
+# Name Pending (codename nurtrace)
+
+v0.12.0
 
 This is a real neural network, modeled after real neuring firing patterns.
 
