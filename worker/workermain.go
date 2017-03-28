@@ -1,7 +1,7 @@
 package main
 
 import (
-	"bleh/potential"
+	"github.com/ruffrey/nurtrace/potential"
 	"fmt"
 	"os"
 )
