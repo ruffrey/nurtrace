@@ -2,6 +2,7 @@ package main
 
 import (
 	"errors"
+	"fmt"
 	"os"
 
 	cmd "github.com/ruffrey/nurtrace/cli/cmd"
@@ -17,10 +18,12 @@ func main() {
 	app := cli.NewApp()
 	app.EnableBashCompletion = true
 
+	app.Copyright = "Symbolic Logic (c) 2017"
+
 	app.Commands = []cli.Command{
 		{
 			Name:  "merge",
-			Usage: "merge a neural network onto another one",
+			Usage: "Merge a neural network onto another one",
 			Flags: []cli.Flag{
 				cli.StringFlag{
 					Name:  "from, f",
@@ -34,11 +37,11 @@ func main() {
 					Name:  "output, o",
 					Usage: "File to write the new network into",
 				},
-				cli.BoolTFlag{
+				cli.BoolFlag{
 					Name:  "diff",
 					Usage: "Only show the diff between networks",
 				},
-				cli.BoolTFlag{
+				cli.BoolFlag{
 					Name:  "stdout",
 					Usage: "Write result network to stdout (instead of a file)",
 				},
@@ -54,8 +57,8 @@ func main() {
 			},
 			Action: func(c *cli.Context) (err error) {
 				flagOutput := c.String("output")
-				flagDiff := c.BoolT("diff")
-				flagStdout := c.BoolT("stdout")
+				flagDiff := c.Bool("diff")
+				flagStdout := c.Bool("stdout")
 
 				network, diff, err := cmd.Merge(c.String("to"), c.String("from"))
 				if err != nil {
@@ -74,6 +77,40 @@ func main() {
 				err = network.SaveToFile(flagOutput)
 
 				return err
+			},
+		},
+		{
+			Name:      "inspect",
+			Usage:     "Get information about cells and synapses in a network. Prints the network in human readable format by default.",
+			ArgsUsage: "[network]",
+			Flags: []cli.Flag{
+				cli.BoolFlag{
+					Name:  "integrity, i",
+					Usage: "Check and report integrity for the network",
+				},
+				cli.BoolFlag{
+					Name:  "totals, t",
+					Usage: "Only print the totals about the network, instead of the entire network.",
+				},
+				cli.IntFlag{
+					Name:  "cell, c",
+					Usage: "Print info about a specific cell",
+				},
+				cli.IntFlag{
+					Name:  "synapse, s",
+					Usage: "Print info about a specific synapse",
+				},
+			},
+			Before: func(c *cli.Context) error {
+				if c.Args().First() == "" {
+					return errors.New("Missing network filename")
+				}
+				return nil
+			},
+			Action: func(c *cli.Context) (err error) {
+				net := c.Args().First()
+				fmt.Println("Reading network from", net)
+				return cmd.Inspect(net, c.Bool("integrity"), c.Bool("totals"), c.Int("cell"), c.Int("synapse"))
 			},
 		},
 	}

@@ -1,12 +1,13 @@
-package main
+package cmd
 
 import (
-	"github.com/ruffrey/nurtrace/potential"
 	"flag"
 	"fmt"
 	"io/ioutil"
 	"os"
 	"strconv"
+
+	"github.com/ruffrey/nurtrace/potential"
 
 	"github.com/awalterschulze/gographviz"
 )
