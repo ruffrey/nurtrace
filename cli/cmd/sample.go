@@ -1,7 +1,7 @@
 package cmd
 
 import (
-	"errors"
+	"flag"
 	"fmt"
 	"io/ioutil"
 	"os"
@@ -17,12 +17,23 @@ import (
 	"github.com/ruffrey/nurtrace/potential"
 )
 
-// Train performs training of a new or existing network and saves it to disk.
-func Train(perceptionModel, networkInputFile, networkSaveFile, vocabSaveFile, testDataFile, doProfile string, initialNetworkNeurons int) (err error) {
+const percepModList = "charrnn, category"
+
+var perceptionModel = flag.String("model", "", "Perception model type: "+percepModList)
+var networkSaveFile = flag.String("save", "network.json", "Load/save location of the network file")
+var vocabSaveFile = flag.String("vocab", "vocab.json", "Load/save location of the vocab mapping file")
+var testDataFile = flag.String("data", "", "File location of the training data.")
+var seed = flag.String("seed", "", "Seed the neural network with this data then sample it.")
+var doProfile = flag.String("profile", "", "Pass `cpu` or `mem` to do profiling")
+var initialNetworkNeurons = flag.Int("startsize", 200, "Start size of network when creating a new one")
+
+// Sample seeds a network and listens for results
+func Sample() {
 	// Figure out how they want to run this program.
+	flag.Parse()
 
 	var t perception.Perception
-	switch perceptionModel {
+	switch *perceptionModel {
 	case "category":
 		// t = category.Category.New()
 	case "charrnn":
@@ -30,16 +41,19 @@ func Train(perceptionModel, networkInputFile, networkSaveFile, vocabSaveFile, te
 		t = &m
 		break
 	default:
-		return errors.New("Perception model valid choices are: charrnn, category")
+		fmt.Println("Perception -model flag valid choices are:", percepModList)
+		flag.PrintDefaults()
+		return
 	}
 	settings := potential.NewTrainingSettings()
 	// start by initializing the network from disk or whatever
 	var network *potential.Network
-	network, err = potential.LoadNetworkFromFile(networkSaveFile)
+	var err error
+	network, err = potential.LoadNetworkFromFile(*networkSaveFile)
 	if err != nil {
 		fmt.Println("Unable to load network from file; creating new one.", err)
 		network = potential.NewNetwork()
-		neuronsToAdd := initialNetworkNeurons
+		neuronsToAdd := *initialNetworkNeurons
 		synapsesToAdd := 0
 		network.Grow(neuronsToAdd, laws.DefaultNeuronSynapses, synapsesToAdd)
 		fmt.Println("Created network,", len(network.Cells), "cells",
@@ -49,24 +63,31 @@ func Train(perceptionModel, networkInputFile, networkSaveFile, vocabSaveFile, te
 		network.PrintTotals()
 	}
 
-	fmt.Println("Reading test data file", testDataFile)
-	bytes, err := ioutil.ReadFile(testDataFile)
+	fmt.Println("Reading test data file", *testDataFile)
+	bytes, err := ioutil.ReadFile(*testDataFile)
 	if err != nil {
-		fmt.Println("Unable to read test data file", testDataFile)
-		return err
+		fmt.Println("Unable to read test data file", *testDataFile)
+		panic(err)
 	}
 
 	// t.Settings.Workerfile = "Workerfile"
 	t.SetRawData(bytes)
-	err = t.LoadVocab(settings, vocabSaveFile)
+	err = t.LoadVocab(settings, *vocabSaveFile)
 	t.PrepareData(settings, network)
 
-	fmt.Println("Loaded training data for", testDataFile, "- samples=", len(settings.TrainingSamples))
+	fmt.Println("Loaded training text for", *testDataFile, "samples=", len(settings.TrainingSamples))
+
+	// Sample, then stop.
+	if len(*seed) > 0 {
+		t.PrepareData(settings, network) // make sure all data is setup
+		t.SeedAndSample(settings, *seed, network)
+		return
+	}
 
 	// only profile during training
-	if doProfile == "mem" {
+	if *doProfile == "mem" {
 		defer profile.Start(profile.MemProfile).Stop()
-	} else if doProfile == "cpu" {
+	} else if *doProfile == "cpu" {
 		defer profile.Start(profile.CPUProfile).Stop()
 	}
 
@@ -76,7 +97,7 @@ func Train(perceptionModel, networkInputFile, networkSaveFile, vocabSaveFile, te
 	go func() {
 		<-c
 		now := strconv.FormatInt(time.Now().UTC().UnixNano(), 10)
-		err = t.SaveVocab(settings, vocabSaveFile)
+		err = t.SaveVocab(settings, *vocabSaveFile)
 		if err != nil {
 			fmt.Println("Failed saving vocab")
 			fmt.Println(err)
@@ -95,20 +116,19 @@ func Train(perceptionModel, networkInputFile, networkSaveFile, vocabSaveFile, te
 	// Training is over
 
 	// Ensure we save the vocab
-	err = t.SaveVocab(settings, vocabSaveFile)
+	err = t.SaveVocab(settings, *vocabSaveFile)
 	if err != nil {
 		fmt.Println("Failed saving vocab")
 		fmt.Println(err)
 	}
 	// Save the network
-	err = network.SaveToFile(networkSaveFile)
+	err = network.SaveToFile(*networkSaveFile)
 	if err != nil {
 		fmt.Println("Failed saving network")
 		fmt.Println(err)
+		return
 	}
 
 	network.PrintTotals()
 	fmt.Println("Done.")
-
-	return nil
 }

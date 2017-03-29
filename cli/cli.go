@@ -153,6 +153,92 @@ func main() {
 				return cmd.Export(outFormat, basename, outFile)
 			},
 		},
+		{
+			Name:        "train",
+			Usage:       "Train a neural network to percept and predict",
+			Description: "Will create the network first, if it does not exist.",
+			ArgsUsage:   "",
+			Flags: []cli.Flag{
+				cli.StringFlag{
+					Name:  "network, n",
+					Usage: "Network input file",
+				},
+				cli.StringFlag{
+					Name:  "output, o",
+					Usage: "Optional network output file if you want it different than --network",
+				},
+				cli.StringFlag{
+					Name:  "model, m",
+					Usage: "Which perception model to use? charrnn, category",
+				},
+				cli.StringFlag{
+					Name:  "vocab, v",
+					Usage: "File for loading or saving the vocab",
+				},
+				cli.StringFlag{
+					Name:  "data, d",
+					Usage: "Training data file",
+				},
+				cli.StringFlag{
+					Name:  "profile, p",
+					Usage: "Optionally train with either 'cpu' or 'mem' profiling enabled, for detecting performance issues and leaks",
+				},
+				cli.IntFlag{
+					Name:  "size, s",
+					Usage: "Optionally specify the initial network size when creating it",
+				},
+				cli.IntFlag{
+					Name:  "iterations, i",
+					Usage: "Optionally specify the number of times to train on the dataset.",
+				},
+			},
+			Before: func(c *cli.Context) error {
+				// validations
+				required := []string{"model", "network", "data", "vocab"}
+				for _, field := range required {
+					if c.String(field) == "" {
+						return errors.New("Missing required argument " + field)
+					}
+				}
+				return nil
+			},
+			Action: func(c *cli.Context) (err error) {
+				// collect arguments and provide defaults
+				perceptionModel := c.String("model")
+				networkInputFile := c.String("network")
+				networkSaveFile := c.String("output")
+				if networkSaveFile == "" {
+					networkSaveFile = networkInputFile
+				}
+				vocabSaveFile := c.String("vocab")
+				testDataFile := c.String("data")
+				doProfile := c.String("profile")
+				initialNetworkNeurons := c.Int("size")
+				if initialNetworkNeurons == 0 {
+					initialNetworkNeurons = 200
+				}
+				iterations := c.Int("iterations")
+				if iterations == 0 {
+					iterations = 1
+				}
+
+				// run it
+
+				if iterations == 1 {
+					return cmd.Train(perceptionModel, networkInputFile, networkSaveFile, vocabSaveFile, testDataFile, doProfile, initialNetworkNeurons)
+				}
+
+				for i := 0; i < iterations; i++ {
+					err = cmd.Train(perceptionModel, networkInputFile, networkSaveFile, vocabSaveFile, testDataFile, doProfile, initialNetworkNeurons)
+					if err != nil {
+						fmt.Println("Failed on iteration", i+1)
+						return err
+					}
+				}
+
+				return err
+			},
+		},
 	}
 
 	app.Run(os.Args)
