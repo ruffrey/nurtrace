@@ -16,14 +16,20 @@ func main() {
 	}
 
 	app := cli.NewApp()
-	app.EnableBashCompletion = true
-
+	app.Name = "nt"
+	app.Usage = "Nurtrace - generic neural network library"
+	app.UsageText = "nt [global options] command [options]"
+	app.HelpName = "nt"
+	app.Version = "0.12.0"
 	app.Copyright = "Symbolic Logic (c) 2017"
+
+	app.EnableBashCompletion = true
 
 	app.Commands = []cli.Command{
 		{
-			Name:  "merge",
-			Usage: "Merge a neural network onto another one",
+			Name:      "merge",
+			Usage:     "Merge a neural network onto another one",
+			ArgsUsage: "--from=net1.json --to=net2.json",
 			Flags: []cli.Flag{
 				cli.StringFlag{
 					Name:  "from, f",
@@ -82,7 +88,7 @@ func main() {
 		{
 			Name:      "inspect",
 			Usage:     "Get information about cells and synapses in a network. Prints the network in human readable format by default.",
-			ArgsUsage: "[network]",
+			ArgsUsage: "[network file]",
 			Flags: []cli.Flag{
 				cli.BoolFlag{
 					Name:  "integrity, i",
