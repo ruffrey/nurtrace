@@ -4,6 +4,8 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"path/filepath"
+	"strings"
 
 	cmd "github.com/ruffrey/nurtrace/cli/cmd"
 	cli "gopkg.in/urfave/cli.v1"
@@ -117,6 +119,38 @@ func main() {
 				net := c.Args().First()
 				fmt.Println("Reading network from", net)
 				return cmd.Inspect(net, c.Bool("integrity"), c.Bool("totals"), c.Int("cell"), c.Int("synapse"))
+			},
+		},
+		{
+			Name:        "export",
+			Usage:       "Output a network to a different file format",
+			Description: "Valid formats: dot, json, default",
+			ArgsUsage:   "[network file] [format]",
+			Flags: []cli.Flag{
+				cli.StringFlag{
+					Name:  "output, o",
+					Usage: "Optional output file",
+				},
+			},
+			Before: func(c *cli.Context) error {
+				if c.Args().First() == "" {
+					return errors.New("Missing network filename")
+				}
+				return nil
+			},
+			Action: func(c *cli.Context) (err error) {
+				basename := c.Args().First()
+				outFormat := c.Args().Get(1)
+				outFormatName := outFormat
+				if outFormatName == "default" {
+					outFormatName = "nur"
+				}
+				outFile := c.String("output")
+				if outFile == "" {
+					outFile = strings.TrimSuffix(basename, filepath.Ext(basename)) + "." + outFormatName
+				}
+
+				return cmd.Export(outFormat, basename, outFile)
 			},
 		},
 	}

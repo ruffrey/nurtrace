@@ -1,6 +1,8 @@
 package potential
 
 import (
+	"bytes"
+	"compress/gzip"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -197,23 +199,51 @@ func (network *Network) PrintTotals() {
 /*
 ToJSON gives a json representation of the neural network.
 */
-func (network *Network) ToJSON() (string, error) {
+func (network *Network) ToJSON() ([]byte, error) {
 	bytes, err := json.Marshal(network)
 	if err != nil {
-		return "", err
+		return []byte{}, err
 	}
-	return string(bytes), nil
+	return bytes, nil
 }
 
 /*
-SaveToFile outputs the network to a file
+SaveToFile outputs the network to a file as gzipped JSON
 */
 func (network *Network) SaveToFile(filepath string) (err error) {
 	contents, err := network.ToJSON()
 	if err != nil {
 		return err
 	}
-	err = ioutil.WriteFile(filepath, []byte(contents), os.ModePerm)
+	var buf bytes.Buffer
+	gzipper, err := gzip.NewWriterLevel(&buf, gzip.BestCompression)
+	if err != nil {
+		return err
+	}
+	gzipper.Name = filepath
+	gzipper.Comment = "nurtrace gz JSON"
+	_, err = gzipper.Write(contents)
+	if err != nil {
+		return err
+	}
+	err = gzipper.Close()
+	if err != nil {
+		return err
+	}
+
+	err = ioutil.WriteFile(filepath, buf.Bytes(), os.ModePerm)
+	return err
+}
+
+/*
+SaveToFileReadable outputs the network to a file as gzipped JSON
+*/
+func (network *Network) SaveToFileReadable(filepath string) (err error) {
+	bytes, err := json.MarshalIndent(network, "", "  ")
+	if err != nil {
+		return err
+	}
+	err = ioutil.WriteFile(filepath, bytes, os.ModePerm)
 	return err
 }
 
@@ -222,14 +252,42 @@ LoadNetworkFromFile reads a saved network from disk and creates a new network fr
 */
 func LoadNetworkFromFile(filepath string) (*Network, error) {
 	network := NewNetwork()
-	bytes, err := ioutil.ReadFile(filepath)
+	file, err := os.Open(filepath)
 	if err != nil {
 		return network, err
 	}
-	err = json.Unmarshal(bytes, network)
+	defer file.Close()
+
+	// try to unzip it, but it's ok if that fails, it might be regular json
+	var gunzipppedBytes []byte
+	gzReader, err := gzip.NewReader(file)
+	if err == nil {
+		defer gzReader.Close()
+		gunzipppedBytes, err = ioutil.ReadAll(gzReader)
+		if err != nil {
+			return network, err
+		}
+	}
+
+	var jsonBytes []byte
+	if len(gunzipppedBytes) > 0 {
+		jsonBytes = gunzipppedBytes
+	} else {
+		err = file.Close()
+		if err != nil {
+			return network, err
+		}
+		jsonBytes, err = ioutil.ReadFile(filepath)
+		if err != nil {
+			return network, err
+		}
+	}
+
+	err = json.Unmarshal(jsonBytes, network)
 	if err != nil {
 		return network, err
 	}
+
 	for _, synapse := range network.Synapses {
 		synapse.Network = network
 	}
