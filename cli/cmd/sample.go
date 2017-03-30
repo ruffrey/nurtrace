@@ -36,7 +36,7 @@ func Sample(perceptionModel, networkSaveFile, vocabSaveFile string, seed []byte)
 		return err
 	}
 
-	// t.PrepareData(settings, network) // make sure all data is setup
+	t.PrepareData(settings, network) // make sure all data is setup
 	t.SeedAndSample(settings, seed, network)
 
 	return nil

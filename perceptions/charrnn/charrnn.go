@@ -226,7 +226,6 @@ func (charrnn *Charrnn) PrepareData(settings *potential.TrainingSettings, networ
 		settings.TrainingSamples = append(settings.TrainingSamples, s)
 	}
 
-	fmt.Println("charrnn data setup complete")
 }
 
 // SeedAndSample writes the output sample to stdout at the moment
@@ -241,6 +240,6 @@ func (charrnn *Charrnn) SeedAndSample(settings *potential.TrainingSettings, seed
 	}
 	out := potential.Sample(seedKeys, settings.Data, network, 1000, "START", "END")
 	for _, s := range out {
-		fmt.Print(s)
+		fmt.Print(s.(string))
 	}
 }

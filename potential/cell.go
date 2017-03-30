@@ -1,9 +1,10 @@
 package potential
 
 import (
-	"github.com/ruffrey/nurtrace/laws"
 	"fmt"
 	"math/rand"
+
+	"github.com/ruffrey/nurtrace/laws"
 )
 
 /*
@@ -113,7 +114,7 @@ func (cell *Cell) FireActionPotential() {
 	// fmt.Println("Action Potential Firing\n  cell=", cell.ID, "syanpses=", len(cell.AxonSynapses))
 
 	for _, cb := range cell.OnFired {
-		go cb(cell.ID)
+		cb(cell.ID)
 	}
 
 	for synapseID := range cell.AxonSynapses {
