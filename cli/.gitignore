@@ -1,3 +1,8 @@
 *.json
 nt
 *.gob
+*.dot
+visualize
+*.gephi
+*.png
+*.nur

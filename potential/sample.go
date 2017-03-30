@@ -1,6 +1,8 @@
 package potential
 
-import "time"
+import (
+	"time"
+)
 
 /*
 Sample activates the network with the seed data and replies with
@@ -8,7 +10,7 @@ the network's answer.
 
 `start` and `end` will indicate the beginning and end of when to sample data.
 */
-func Sample(seedKeys []interface{}, data *Dataset, network *Network, maxInterations int, start interface{}, end interface{}) []interface{} {
+func Sample(seedKeys []interface{}, data *Dataset, network *Network, maxResultLen int, start interface{}, end interface{}) []interface{} {
 	network.Disabled = false
 	network.ResetForTraining()
 	var out []interface{}
@@ -16,20 +18,18 @@ func Sample(seedKeys []interface{}, data *Dataset, network *Network, maxInterati
 	maxTimeout := time.Second * 1 // do not let samples run longer than this
 
 	// add a callback to each output cell that sends the result back
-	go func() {
-		for _, v := range data.KeyToItem {
-			network.Cells[v.OutputCell].OnFired = append(
-				network.Cells[v.OutputCell].OnFired,
-				func(cell CellID) {
-					s := data.CellToKey[cell]
-					if s == start {
-						return
-					}
-					outConduit <- s
-				},
-			)
-		}
-	}()
+	for _, v := range data.KeyToItem {
+		network.Cells[v.OutputCell].OnFired = append(
+			network.Cells[v.OutputCell].OnFired,
+			func(cell CellID) {
+				s := data.CellToKey[cell]
+				if s == start {
+					return
+				}
+				outConduit <- s
+			},
+		)
+	}
 
 	// wait for the output to come through the network
 	done := make(chan bool)
@@ -43,7 +43,7 @@ func Sample(seedKeys []interface{}, data *Dataset, network *Network, maxInterati
 				}
 				// fmt.Print(s)
 				out = append(out, s)
-				if len(out) >= maxInterations {
+				if len(out) >= maxResultLen {
 					done <- true
 					break
 				}
@@ -60,8 +60,26 @@ func Sample(seedKeys []interface{}, data *Dataset, network *Network, maxInterati
 	network.Step()
 	for _, perceptionUnit := range seedKeys {
 		network.Cells[data.KeyToItem[perceptionUnit].InputCell].FireActionPotential()
-		network.Step()
 	}
+
+	go func() {
+		// convert to bool for use in randCellFromMap
+		randCellList := make(map[CellID]bool)
+		for cellID := range data.CellToKey {
+			randCellList[cellID] = true
+		}
+		for i := 0; i < 10000; i++ {
+			r := randCellFromMap(randCellList)
+			network.getCell(r).FireActionPotential()
+		}
+		for {
+			hasMore := network.Step()
+			if !hasMore {
+				return
+			}
+		}
+
+	}()
 
 	<-done
 

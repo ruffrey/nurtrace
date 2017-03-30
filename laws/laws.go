@@ -53,7 +53,7 @@ const CellRestingVoltage int16 = -10
 /*
 CellFireVoltageThreshold represents the millivolts where an action potential will result.
 */
-const CellFireVoltageThreshold int = 60
+const CellFireVoltageThreshold int = 40
 
 /*
 SynapseAPBoost is how much a synapse's ActivationHistory should be incremented extra when
