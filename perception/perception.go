@@ -14,5 +14,5 @@ type Perception interface {
 	SaveVocab(settings *potential.TrainingSettings, filename string) error
 	LoadVocab(settings *potential.TrainingSettings, filename string) error
 	PrepareData(settings *potential.TrainingSettings, network *potential.Network)
-	SeedAndSample(settings *potential.TrainingSettings, seed string, network *potential.Network)
+	SeedAndSample(settings *potential.TrainingSettings, seed []byte, network *potential.Network)
 }

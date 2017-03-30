@@ -169,7 +169,7 @@ func ApplyDiff(diff Diff, originalNetwork *Network) (err error) {
 		// there was always a "correct" but invalid ID reference.
 		newSynapseID := copySynapseToNetwork(synapse, originalNetwork)
 		if newSynapseID != synapse.ID {
-			fmt.Println("synapse ID did change", synapse.ID, "to", newSynapseID)
+			fmt.Println("synapse ID changed from ", synapse.ID, "to", newSynapseID)
 
 			// old axon connection removed from cell if cell is new
 			if _, isNewCell := diff.addedCells[synapse.FromNeuronAxon]; isNewCell {

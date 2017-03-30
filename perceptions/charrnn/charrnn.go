@@ -3,12 +3,13 @@ package charrnn
 // TODO: saving/restoring from disk does not work.
 
 import (
-	"github.com/ruffrey/nurtrace/potential"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"os"
 	"strings"
+
+	"github.com/ruffrey/nurtrace/potential"
 )
 
 /*
@@ -229,9 +230,8 @@ func (charrnn *Charrnn) PrepareData(settings *potential.TrainingSettings, networ
 }
 
 // SeedAndSample writes the output sample to stdout at the moment
-func (charrnn *Charrnn) SeedAndSample(settings *potential.TrainingSettings, seed string, network *potential.Network) {
-	fmt.Println("Sampling characters with seed text: ", seed)
-	seedChars := strings.Split(seed, "")
+func (charrnn *Charrnn) SeedAndSample(settings *potential.TrainingSettings, seed []byte, network *potential.Network) {
+	seedChars := strings.Split(string(seed), "")
 	// keys are type interface{} and need to be copied into a new array of that
 	// type. they cannot be downcast. https://golang.org/doc/faq#convert_slice_of_interface
 	// (might want to add this as a helper to charrnn)
@@ -240,9 +240,7 @@ func (charrnn *Charrnn) SeedAndSample(settings *potential.TrainingSettings, seed
 		seedKeys = append(seedKeys, stringKeyChar)
 	}
 	out := potential.Sample(seedKeys, settings.Data, network, 1000, "START", "END")
-	fmt.Println("---")
 	for _, s := range out {
 		fmt.Print(s)
 	}
-	fmt.Println("\n---")
 }

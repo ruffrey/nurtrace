@@ -3,6 +3,7 @@ package main
 import (
 	"errors"
 	"fmt"
+	"io/ioutil"
 	"os"
 	"path/filepath"
 	"strings"
@@ -161,7 +162,7 @@ func main() {
 			Flags: []cli.Flag{
 				cli.StringFlag{
 					Name:  "network, n",
-					Usage: "Network input file",
+					Usage: "Network input/output save file",
 				},
 				cli.StringFlag{
 					Name:  "output, o",
@@ -173,7 +174,7 @@ func main() {
 				},
 				cli.StringFlag{
 					Name:  "vocab, v",
-					Usage: "File for loading or saving the vocab",
+					Usage: "File for loading and saving the vocab",
 				},
 				cli.StringFlag{
 					Name:  "data, d",
@@ -229,7 +230,9 @@ func main() {
 				}
 
 				for i := 0; i < iterations; i++ {
+					fmt.Println("------ Start Iteration", i+1, "------")
 					err = cmd.Train(perceptionModel, networkInputFile, networkSaveFile, vocabSaveFile, testDataFile, doProfile, initialNetworkNeurons)
+					fmt.Println("------ End Iteration", i+1, "------")
 					if err != nil {
 						fmt.Println("Failed on iteration", i+1)
 						return err
@@ -237,6 +240,60 @@ func main() {
 				}
 
 				return err
+			},
+		},
+		{
+			Name:      "sample",
+			Usage:     "Activate a network to produce a sample (prediction)",
+			ArgsUsage: "[network file]",
+			Flags: []cli.Flag{
+				cli.StringFlag{
+					Name:  "model, m",
+					Usage: "Which perception model to use? charrnn, category",
+				},
+				cli.StringFlag{
+					Name:  "vocab, v",
+					Usage: "File for loading or saving the vocab",
+				},
+				cli.StringFlag{
+					Name:  "seed, s",
+					Usage: "Seed the network with data before sampling (text only), to activate network for prediction",
+				},
+				cli.StringFlag{
+					Name:  "seed-file, f",
+					Usage: "Read raw seed data from a file, to activate network for prediction",
+				},
+			},
+			Before: func(c *cli.Context) error {
+				if c.Args().First() == "" {
+					return errors.New("Missing network filename")
+				}
+				// validations
+				required := []string{"model", "vocab"}
+				for _, field := range required {
+					if c.String(field) == "" {
+						return errors.New("Missing required argument " + field)
+					}
+				}
+				if c.String("seed") == "" && c.String("seed-file") == "" {
+					return errors.New("Either --seed or --seed-file is required")
+				}
+				return nil
+			},
+			Action: func(c *cli.Context) (err error) {
+				networkSaveFile := c.Args().First()
+				perceptionModel := c.String("model")
+				vocabSaveFile := c.String("vocab")
+				seed := []byte(c.String("seed"))
+				seedFile := c.String("seed-file")
+				if seedFile != "" {
+					seed, err = ioutil.ReadFile(seedFile)
+					if err != nil {
+						return err
+					}
+				}
+
+				return cmd.Sample(perceptionModel, networkSaveFile, vocabSaveFile, seed)
 			},
 		},
 	}
