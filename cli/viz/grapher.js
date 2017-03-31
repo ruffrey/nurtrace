@@ -2,6 +2,9 @@ const sigma = require('sigma');
 global.sigma = sigma;
 require('./forceAtlas2/worker');
 require('./forceAtlas2/supervisor');
+require('sigma/plugins/sigma.plugins.animate/sigma.plugins.animate.js');
+require('sigma/plugins/sigma.layout.noverlap/sigma.layout.noverlap.js');
+
 const gunzip = require('zlib').gunzipSync
 const fs = require('fs');
 const rawText = gunzip(fs.readFileSync("../net.nur"));
@@ -10,7 +13,6 @@ const g = {
     nodes: [],
     edges: []
 };
-console.log({ nw })
 const N = Object.keys(nw.Cells).length;
 Object.keys(nw.Cells).forEach((cellId, i) => {
     const cell = nw.Cells[cellId];
@@ -18,7 +20,10 @@ Object.keys(nw.Cells).forEach((cellId, i) => {
         id: cell.ID,
         label: cell.Tag || cell.ID,
         size: Object.keys(cell.AxonSynapses).length + Object.keys(cell.DendriteSynapses).length,
-        color: '#' + (Math.floor(Math.random() * 16777215).toString(16) + '000000').substr(0, 6),
+        color: cell.Tag
+            ? '#0b268a'
+            // : '#' + (Math.floor(Math.random() * 16777215).toString(16) + '000000').substr(0, 6),
+            : '#cccccc',
         x: 100 * Math.cos(2 * i * Math.PI / N),
         y: 100 * Math.sin(2 * i * Math.PI / N),
     });
@@ -31,7 +36,7 @@ Object.keys(nw.Synapses).forEach(synapseId => {
         target: synapse.ToNeuronDendrite
     });
 });
-console.log({ g });
+
 // let i,
 //     s,
 //     o,
@@ -77,15 +82,26 @@ console.log({ g });
 //         });
 //     }
 // }
-s = new sigma({
+
+var s = new sigma({
     graph: g,
     container: 'graph-container',
     settings: {
-        drawEdges: true
+        drawEdges: true,
+
+        minNodeSize: 4,
+        maxNodeSize: 2,
+        minEdgeSize: 1,
+        maxEdgeSize: 1
     }
 });
+
 // Start the ForceAtlas2 algorithm:
 s.startForceAtlas2({
     worker: false,
     barnesHutOptimize: false
 });
+
+setTimeout(() => {
+    s.stopForceAtlas2();
+}, 6000);
