@@ -13,19 +13,48 @@ const g = {
     nodes: [],
     edges: []
 };
+const green = '#22d64b';
+const blue = '#0b268a';
 const N = Object.keys(nw.Cells).length;
+let layerInput = 0;
+let layerMiddle = 0;
+let layerOutput = 0;
+const isInput = tag => tag && tag.substring(0, 3) === 'in-';
+const isMiddle = tag => !tag;
+
 Object.keys(nw.Cells).forEach((cellId, i) => {
     const cell = nw.Cells[cellId];
+
+    let x;
+    let y;
+
+    if (isInput(cell.Tag)) {
+        layerInput++;
+        x = layerInput;
+        y = 200;
+    } else if (isMiddle(cell.Tag)) {
+        layerMiddle++;
+        x = layerMiddle;
+        y = 100;
+    } else {
+        layerOutput++;
+        x = layerOutput;
+        y = 0;
+    }
+
+    // x = 100 * Math.cos(2 * i * Math.PI / N); // random location
+    // y = 100 * Math.sin(2 * i * Math.PI / N); // random location
+
     g.nodes.push({
         id: cell.ID,
         label: cell.Tag || cell.ID,
         size: Object.keys(cell.AxonSynapses).length + Object.keys(cell.DendriteSynapses).length,
         color: cell.Tag
-            ? '#0b268a'
+            ? isInput(cell.Tag) ? blue : green
             // : '#' + (Math.floor(Math.random() * 16777215).toString(16) + '000000').substr(0, 6),
             : '#cccccc',
-        x: 100 * Math.cos(2 * i * Math.PI / N),
-        y: 100 * Math.sin(2 * i * Math.PI / N),
+        x,
+        y
     });
 });
 Object.keys(nw.Synapses).forEach(synapseId => {
@@ -89,19 +118,30 @@ var s = new sigma({
     settings: {
         drawEdges: true,
 
-        minNodeSize: 4,
-        maxNodeSize: 2,
+        minNodeSize: 2,
+        maxNodeSize: 10,
         minEdgeSize: 1,
-        maxEdgeSize: 1
+        maxEdgeSize: 10,
     }
 });
 
 // Start the ForceAtlas2 algorithm:
 s.startForceAtlas2({
     worker: false,
-    barnesHutOptimize: false
+    // linLogMode: false,
+    outboundAttractionDistribution: true,
+    adjustSizes: true,
+    // edgeWeightInfluence: 0,
+    // scalingRatio: 1,
+    // strongGravityMode: false,
+    // gravity: 1,
+    // slowDown: 1,
+    // barnesHutOptimize: false,
+    // barnesHutTheta: 0.5,
+    // startingIterations: 1,
+    // iterationsPerRender: 1
 });
 
-setTimeout(() => {
-    s.stopForceAtlas2();
-}, 6000);
+// setTimeout(() => {
+   // s.stopForceAtlas2();
+// }, 10000);
