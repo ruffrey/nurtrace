@@ -11,13 +11,16 @@ const g = {
     edges: []
 };
 console.log({ nw })
-Object.keys(nw.Cells).forEach(cellId => {
+const N = Object.keys(nw.Cells).length;
+Object.keys(nw.Cells).forEach((cellId, i) => {
     const cell = nw.Cells[cellId];
     g.nodes.push({
         id: cell.ID,
         label: cell.Tag || cell.ID,
         size: Object.keys(cell.AxonSynapses).length + Object.keys(cell.DendriteSynapses).length,
-        color: '#' + (Math.floor(Math.random() * 16777215).toString(16) + '000000').substr(0, 6)
+        color: '#' + (Math.floor(Math.random() * 16777215).toString(16) + '000000').substr(0, 6),
+        x: 100 * Math.cos(2 * i * Math.PI / N),
+        y: 100 * Math.sin(2 * i * Math.PI / N),
     });
 });
 Object.keys(nw.Synapses).forEach(synapseId => {
@@ -29,7 +32,7 @@ Object.keys(nw.Synapses).forEach(synapseId => {
     });
 });
 console.log({ g });
-// const i,
+// let i,
 //     s,
 //     o,
 //     N = 1000,
