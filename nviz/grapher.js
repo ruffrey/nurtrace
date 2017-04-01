@@ -42,7 +42,7 @@ const N = Object.keys(nw.Cells).length;
 let layerInput = 0;
 let layerMiddle = 0;
 let layerOutput = 0;
-let fanout = 1;
+let fanout = 10;
 const isInput = tag => tag && tag.substring(0, 3) === 'in-';
 const isMiddle = tag => !tag;
 
