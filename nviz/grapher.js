@@ -42,6 +42,7 @@ const N = Object.keys(nw.Cells).length;
 let layerInput = 0;
 let layerMiddle = 0;
 let layerOutput = 0;
+let fanout = 1;
 const isInput = tag => tag && tag.substring(0, 3) === 'in-';
 const isMiddle = tag => !tag;
 
@@ -52,21 +53,23 @@ Object.keys(nw.Cells).forEach((cellId, i) => {
   let y;
 
   if (isInput(cell.Tag)) {
-    layerInput++;
+    layerInput += fanout;
     x = layerInput;
     y = 200;
   } else if (isMiddle(cell.Tag)) {
-    layerMiddle++;
+    layerMiddle += fanout;
     x = layerMiddle;
     y = 100;
   } else {
-    layerOutput++;
+    layerOutput += fanout;
     x = layerOutput;
     y = 0;
   }
+  fanout = -fanout;
 
     // x = 100 * Math.cos(2 * i * Math.PI / N); // random location
     // y = 100 * Math.sin(2 * i * Math.PI / N); // random location
+            // : '#' + (Math.floor(Math.random() * 16777215).toString(16) + '000000').substr(0, 6),
 
   g.nodes.push({
     id: cell.ID,
@@ -74,9 +77,7 @@ Object.keys(nw.Cells).forEach((cellId, i) => {
     size: Object.keys(cell.AxonSynapses).length + Object.keys(cell.DendriteSynapses).length,
     color: cell.Tag ?
             isInput(cell.Tag) ? blue : green
-            // : '#' + (Math.floor(Math.random() * 16777215).toString(16) + '000000').substr(0, 6),
-            :
-            '#cccccc',
+            : '#cccccc',
     x,
     y,
   });
@@ -89,52 +90,6 @@ Object.keys(nw.Synapses).forEach((synapseId) => {
     target: synapse.ToNeuronDendrite,
   });
 });
-
-// let i,
-//     s,
-//     o,
-//     N = 1000,
-//     E = 5000,
-//     C = 5,
-//     d = 0.5,
-//     cs = [];
-// // Generate the graph:
-// for (i = 0; i < C; i++)
-//     cs.push({
-//         id: i,
-//         nodes: [],
-//         color: '#' + (
-//             Math.floor(Math.random() * 16777215).toString(16) + '000000'
-//         ).substr(0, 6)
-//     });
-// for (i = 0; i < N; i++) {
-//     o = cs[(Math.random() * C) | 0];
-//     g.nodes.push({
-//         id: 'n' + i,
-//         label: 'Node' + i,
-//         x: 100 * Math.cos(2 * i * Math.PI / N),
-//         y: 100 * Math.sin(2 * i * Math.PI / N),
-//         size: Math.random(),
-//         color: o.color
-//     });
-//     o.nodes.push('n' + i);
-// }
-// for (i = 0; i < E; i++) {
-//     if (Math.random() < 1 - d)
-//         g.edges.push({
-//             id: 'e' + i,
-//             source: 'n' + ((Math.random() * N) | 0),
-//             target: 'n' + ((Math.random() * N) | 0)
-//         });
-//     else {
-//         o = cs[(Math.random() * C) | 0]
-//         g.edges.push({
-//             id: 'e' + i,
-//             source: o.nodes[(Math.random() * o.nodes.length) | 0],
-//             target: o.nodes[(Math.random() * o.nodes.length) | 0]
-//         });
-//     }
-// }
 
 const s = new sigma({
   graph: g,
