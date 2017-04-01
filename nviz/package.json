@@ -6,7 +6,7 @@
   "private": true,
   "scripts": {
     "start": "electron .",
-    "build-mac": "electron-packager . nviz --build-version=1.0.0 --overwrite --icon=icons/nviz.icns --app-copyright='Jeff Parrish (c) 2017' --platform=darwin --arch=x64 --out=build"
+    "build-mac": "electron-packager . nviz --build-version=1.0.0 --overwrite --osx-sign --icon=icons/nviz.icns --app-copyright='Jeff Parrish (c) 2017' --platform=darwin --arch=x64 --out=build"
   },
   "repository": "https://github.com/ruffrey/nurtrace",
   "keywords": [],
@@ -14,7 +14,10 @@
   "license": "UNLICENSED",
   "devDependencies": {
     "electron": "~1.6.2",
-    "electron-packager": "^8.6.0"
+    "electron-packager": "^8.6.0",
+    "eslint": "^3.19.0",
+    "eslint-config-airbnb-base": "^11.1.2",
+    "eslint-plugin-import": "^2.2.0"
   },
   "dependencies": {
     "sigma": "^1.2.0"
