@@ -5,6 +5,7 @@ require('./forceAtlas2/worker');
 require('./forceAtlas2/supervisor');
 require('sigma/plugins/sigma.plugins.animate/sigma.plugins.animate.js');
 require('sigma/plugins/sigma.layout.noverlap/sigma.layout.noverlap.js');
+require('sigma/src/renderers/canvas/sigma.canvas.edges.curvedArrow.js');
 
 const gunzip = require('zlib').gunzipSync;
 const fs = require('fs');
@@ -88,12 +89,16 @@ Object.keys(nw.Synapses).forEach((synapseId) => {
     id: synapse.ID,
     source: synapse.FromNeuronAxon,
     target: synapse.ToNeuronDendrite,
+    type: 'curvedArrow',
   });
 });
 
 const s = new sigma({
   graph: g,
-  container: 'graph-container',
+  renderer: {
+    container: 'graph-container',
+    type: 'canvas',
+  },
   settings: {
     drawEdges: true,
 
