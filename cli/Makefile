@@ -1,5 +1,4 @@
 preinstall:
-	# go get github.com/awalterschulze/gographviz
 	go get gopkg.in/urfave/cli.v1
 
 build:

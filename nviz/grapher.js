@@ -1,4 +1,5 @@
 const sigma = require('sigma');
+const electron = require('electron').remote;
 global.sigma = sigma;
 require('./forceAtlas2/worker');
 require('./forceAtlas2/supervisor');
@@ -7,14 +8,36 @@ require('sigma/plugins/sigma.layout.noverlap/sigma.layout.noverlap.js');
 
 const gunzip = require('zlib').gunzipSync
 const fs = require('fs');
-const rawText = gunzip(fs.readFileSync("../net.nur"));
+
+let NETWORK_FILE = process.env.NETWORK_FILE;
+
+while (!NETWORK_FILE) {
+    NETWORK_FILE = electron.dialog.showOpenDialog({
+        properties: ['openFile'],
+        filters: [{
+                name: 'Compressed Network',
+                extensions: ['nur']
+            },
+            {
+                name: 'JSON Network',
+                extensions: ['json']
+            },
+            {
+                name: 'All Files',
+                extensions: ['*']
+            }
+        ]
+    })[0];
+}
+
+const rawText = gunzip(fs.readFileSync(NETWORK_FILE));
 const nw = JSON.parse(rawText.toString('utf8'));
 const g = {
     nodes: [],
     edges: []
 };
-const green = '#22d64b';
-const blue = '#0b268a';
+const green = '#00FF2D';
+const blue = '#0775FF';
 const N = Object.keys(nw.Cells).length;
 let layerInput = 0;
 let layerMiddle = 0;
@@ -49,10 +72,11 @@ Object.keys(nw.Cells).forEach((cellId, i) => {
         id: cell.ID,
         label: cell.Tag || cell.ID,
         size: Object.keys(cell.AxonSynapses).length + Object.keys(cell.DendriteSynapses).length,
-        color: cell.Tag
-            ? isInput(cell.Tag) ? blue : green
+        color: cell.Tag ?
+            isInput(cell.Tag) ? blue : green
             // : '#' + (Math.floor(Math.random() * 16777215).toString(16) + '000000').substr(0, 6),
-            : '#cccccc',
+            :
+            '#cccccc',
         x,
         y
     });
@@ -143,5 +167,5 @@ s.startForceAtlas2({
 });
 
 // setTimeout(() => {
-   // s.stopForceAtlas2();
+// s.stopForceAtlas2();
 // }, 10000);

@@ -265,21 +265,6 @@ func main() {
 			},
 		},
 		{
-			Name:      "viz",
-			Usage:     "Visualize a network",
-			ArgsUsage: "[network file]",
-			Before: func(c *cli.Context) error {
-				if c.Args().First() == "" {
-					return errors.New("Missing network filename")
-				}
-				return nil
-			},
-			Action: func(c *cli.Context) (err error) {
-				networkFile := c.Args().First()
-				return cmd.Viz(networkFile)
-			},
-		},
-		{
 			Name:        "export",
 			Usage:       "Output a network to a different file format",
 			Description: "Valid formats: dot, json, default",
