@@ -4,6 +4,7 @@ import (
 	"errors"
 
 	"github.com/ruffrey/nurtrace/perception"
+	"github.com/ruffrey/nurtrace/perceptions/charcat"
 	"github.com/ruffrey/nurtrace/perceptions/charrnn"
 	"github.com/ruffrey/nurtrace/potential"
 )
@@ -15,7 +16,9 @@ func Sample(perceptionModel, networkSaveFile, vocabSaveFile string, seed []byte)
 	var t perception.Perception
 	switch perceptionModel {
 	case "category":
-		// t = category.Category.New()
+		m := charcat.Charcatnn{}
+		t = &m
+		break
 	case "charrnn":
 		m := charrnn.Charrnn{}
 		t = &m

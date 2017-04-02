@@ -27,6 +27,7 @@ func Train(perceptionModel, networkInputFile, networkSaveFile, vocabSaveFile, te
 	case "category":
 		m := charcat.Charcatnn{}
 		t = &m
+		break
 	case "charrnn":
 		m := charrnn.Charrnn{}
 		t = &m
