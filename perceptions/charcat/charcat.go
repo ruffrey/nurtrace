@@ -227,6 +227,7 @@ func (charcat *Charcatnn) PrepareData(settings *potential.TrainingSettings, netw
 					Value:     inputChar,
 					InputCell: charCellID,
 				}
+				fmt.Println("added input", settings.Data.KeyToItem[inputChar])
 			} else {
 				charCellID = settings.Data.KeyToItem[inputChar].InputCell
 			}
@@ -238,7 +239,6 @@ func (charcat *Charcatnn) PrepareData(settings *potential.TrainingSettings, netw
 				OutputCell: categoryCellID,
 			}
 			fmt.Println(ts.InputCell, ts.OutputCell)
-			fmt.Println("  input=", network.Cells[ts.InputCell].Tag, "output=", network.Cells[ts.OutputCell].Tag)
 			samples = append(samples, &ts)
 		}
 		settings.TrainingSamples = append(settings.TrainingSamples, samples)
@@ -269,7 +269,7 @@ func (charcat *Charcatnn) SeedAndSample(settings *potential.TrainingSettings, se
 	for _, stringKeyChar := range seedHexCodeChars {
 		seedKeys = append(seedKeys, stringKeyChar)
 	}
-	out := potential.Sample(seedKeys, settings.Data, network, 1000, "START", "END")
+	out := potential.Sample(seedKeys, settings.Data, network, 1, nil, nil)
 	for _, s := range out {
 		fmt.Print(s.(string))
 	}

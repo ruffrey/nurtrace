@@ -1620,15 +1620,6 @@
     "InputText": "B0E0E6"
   },
   {
-    "CategoryName": "RoyalBlue",
-    "RGB": [
-      65,
-      105,
-      225
-    ],
-    "InputText": "4.17E+04"
-  },
-  {
     "CategoryName": "RoyalBlue1",
     "RGB": [
       72,
@@ -2565,15 +2556,6 @@
     "InputText": "97694F"
   },
   {
-    "CategoryName": "Dark Wood",
-    "RGB": [
-      133,
-      94,
-      66
-    ],
-    "InputText": "8.55E+44"
-  },
-  {
     "CategoryName": "Light Wood",
     "RGB": [
       133,
@@ -3204,15 +3186,6 @@
     "InputText": "8E2323"
   },
   {
-    "CategoryName": "Forest Green, Khaki, Medium Aquamarine",
-    "RGB": [
-      35,
-      142,
-      35
-    ],
-    "InputText": "2.38E+25"
-  },
-  {
     "CategoryName": "Medium Forest Green",
     "RGB": [
       219,
@@ -3247,15 +3220,6 @@
       143
     ],
     "InputText": "8FBC8F"
-  },
-  {
-    "CategoryName": "Sea Green",
-    "RGB": [
-      35,
-      142,
-      104
-    ],
-    "InputText": "2.38E+70"
   },
   {
     "CategoryName": "Spring Green",
