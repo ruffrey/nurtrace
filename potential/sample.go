@@ -19,6 +19,9 @@ func Sample(seedKeys []interface{}, data *Dataset, network *Network, maxResultLe
 
 	// add a callback to each output cell that sends the result back
 	for _, v := range data.KeyToItem {
+		if v.OutputCell == 0 {
+			continue
+		}
 		network.Cells[v.OutputCell].OnFired = append(
 			network.Cells[v.OutputCell].OnFired,
 			func(cell CellID) {
