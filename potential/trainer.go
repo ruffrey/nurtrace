@@ -380,6 +380,11 @@ func processBatch(batch []*TrainingSample, originalNetwork *Network, data *Datas
 	}
 	// which cells should not have fired
 	for _, unit := range data.KeyToItem {
+		// For model designs where the inputs and outputs are not the
+		// same data type, the output cell will not always be defined.
+		if unit.OutputCell == 0 {
+			continue
+		}
 		if _, wasExpected := expectedOutputCells[unit.OutputCell]; !wasExpected && network.Cells[unit.OutputCell].WasFired {
 			noisyOutputCells[unit.OutputCell] = true
 		}
