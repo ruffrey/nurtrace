@@ -13,6 +13,7 @@ import (
 	"github.com/pkg/profile"
 	"github.com/ruffrey/nurtrace/laws"
 	"github.com/ruffrey/nurtrace/perception"
+	"github.com/ruffrey/nurtrace/perceptions/charcat"
 	"github.com/ruffrey/nurtrace/perceptions/charrnn"
 	"github.com/ruffrey/nurtrace/potential"
 )
@@ -24,7 +25,8 @@ func Train(perceptionModel, networkInputFile, networkSaveFile, vocabSaveFile, te
 	var t perception.Perception
 	switch perceptionModel {
 	case "category":
-		t = charcat.Charcat{}
+		m := charcat.Charcatnn{}
+		t = &m
 	case "charrnn":
 		m := charrnn.Charrnn{}
 		t = &m
