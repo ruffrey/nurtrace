@@ -1,7 +1,6 @@
 package potential
 
 import (
-	"github.com/ruffrey/nurtrace/laws"
 	"encoding/gob"
 	"fmt"
 	"log"
@@ -12,6 +11,8 @@ import (
 	"strconv"
 	"sync"
 	"time"
+
+	"github.com/ruffrey/nurtrace/laws"
 )
 
 /*
@@ -19,7 +20,7 @@ TrainingSettings are
 */
 type TrainingSettings struct {
 	// Data is the set of data structures that map the lowest units of the network onto input
-	// and output cells.
+	// and (or?) output cells.
 	Data *Dataset
 	// TrainingSamples is a list cell parings to fire for training. The cells must be
 	// immortal and input or output cells.
@@ -110,6 +111,14 @@ type TrainingSample struct {
 
 /*
 PerceptionUnit is the smallest and core unit of a Dataset.
+
+TODO: Evaulate whether it still makes sense to have a separate InputCell
+and OutputCell.
+This might map onto the use case of generating text char->text char, but it
+does not seem to fit the use case of generating other kinds of data, especially
+when the input data is not the same kind of data as the output.
+It may be that, due to refactoring over time, we don't even need separate InputCell
+and OutputCell props for charrnn.
 */
 type PerceptionUnit struct {
 	Value      interface{}

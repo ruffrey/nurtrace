@@ -1,7 +1,5 @@
 package charrnn
 
-// TODO: saving/restoring from disk does not work.
-
 import (
 	"encoding/json"
 	"fmt"
@@ -13,11 +11,8 @@ import (
 )
 
 /*
-Charrnn is the collection of training stuff to operate upon
-
-It implements potential.Trainer
-
-Implements Perception
+Charrnn represents a character neural network, which predicts strings of characters
+after receiving strings of characters.
 */
 type Charrnn struct {
 	Chars   []string

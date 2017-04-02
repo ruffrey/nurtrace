@@ -24,7 +24,7 @@ func Train(perceptionModel, networkInputFile, networkSaveFile, vocabSaveFile, te
 	var t perception.Perception
 	switch perceptionModel {
 	case "category":
-		// t = category.Category.New()
+		t = charcat.Charcat{}
 	case "charrnn":
 		m := charrnn.Charrnn{}
 		t = &m
