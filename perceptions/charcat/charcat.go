@@ -44,7 +44,7 @@ type Charcatnn struct {
 
 type charcatTrainingData struct {
 	CategoryName string // `dark gray`
-	InputChars   string // `1e1e1e`
+	InputText    string // `1e1e1e`
 }
 
 /*
@@ -156,14 +156,19 @@ func (charcat *Charcatnn) SetRawData(bytes []byte) {
 	charcat.structuredTrainingCases = charcatVocabList
 }
 
+const maxTries = 50
+
 func addNewVocabMapping(tag string, network *potential.Network) (cellID potential.CellID) {
-	for {
+	for i := 0; i < maxTries; i++ {
 		tryCell := network.RandomCellKey()
 		isUnused := network.Cells[tryCell].Tag == ""
 		if isUnused {
 			cellID = tryCell
 			break
 		}
+	}
+	if cellID == 0 {
+		panic(errors.New("Failed assigning vocab for " + tag + " - likely need a larger network"))
 	}
 
 	network.Cells[cellID].Tag = tag
@@ -190,28 +195,31 @@ func (charcat *Charcatnn) PrepareData(settings *potential.TrainingSettings, netw
 
 	// Make sure all training cases have their components
 	// represented by cells in the network
-	var samples []*potential.TrainingSample
 
 	for _, tc := range charcat.structuredTrainingCases {
 		// map the output category to a cell.
 		// also make it available to the input chars below, so it
 		// can be used to setup training cases.
 		var categoryCellID potential.CellID
-		if _, exists := settings.Data.KeyToItem[tc.CategoryName]; !exists {
+		categoryPU, categoryExists := settings.Data.KeyToItem[tc.CategoryName]
+		if !categoryExists {
 			categoryCellID = addNewVocabMapping(tc.CategoryName, network)
+			fmt.Println("adding cat", tc.CategoryName, categoryCellID)
 			settings.Data.KeyToItem[tc.CategoryName] = potential.PerceptionUnit{
 				Value:      tc.CategoryName,
 				OutputCell: categoryCellID,
 			}
 
 		} else {
-			categoryCellID = settings.Data.KeyToItem[tc.CategoryName].OutputCell
+			fmt.Println("cat exists", categoryPU)
+			categoryCellID = categoryPU.OutputCell
 		}
 
 		// Map each character of the input to a cell for vocab purposes.
 		// Then setup training data.
-		inputCharsGroup := strings.Split(tc.InputChars, "")
+		inputCharsGroup := strings.Split(tc.InputText, "")
 		var charCellID potential.CellID
+		var samples []*potential.TrainingSample
 		for _, inputChar := range inputCharsGroup {
 			if _, charVocabExists := settings.Data.KeyToItem[inputChar]; !charVocabExists {
 				charCellID = addNewVocabMapping(inputChar, network)
@@ -229,11 +237,12 @@ func (charcat *Charcatnn) PrepareData(settings *potential.TrainingSettings, netw
 				InputCell:  charCellID,
 				OutputCell: categoryCellID,
 			}
+			fmt.Println("Adding sample=\n  input=", network.Cells[ts.InputCell].Tag, "output=", network.Cells[ts.OutputCell].Tag)
 			samples = append(samples, &ts)
 		}
+		settings.TrainingSamples = append(settings.TrainingSamples, samples)
 
 	}
-	settings.TrainingSamples = append(settings.TrainingSamples, samples)
 
 	// Reverse the mappings we made above
 	settings.Data.CellToKey = make(map[potential.CellID]interface{})

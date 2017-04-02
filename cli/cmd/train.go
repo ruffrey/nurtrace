@@ -39,7 +39,8 @@ func Train(perceptionModel, networkInputFile, networkSaveFile, vocabSaveFile, te
 	var network *potential.Network
 	network, err = potential.LoadNetworkFromFile(networkSaveFile)
 	if err != nil {
-		fmt.Println("Unable to load network from file; creating new one.", err)
+		fmt.Println(err)
+		fmt.Println("Unable to load network from file; creating new one.")
 		network = potential.NewNetwork()
 		neuronsToAdd := initialNetworkNeurons
 		synapsesToAdd := 0
@@ -59,8 +60,11 @@ func Train(perceptionModel, networkInputFile, networkSaveFile, vocabSaveFile, te
 	}
 
 	// t.Settings.Workerfile = "Workerfile"
+	fmt.Println("Setting raw data")
 	t.SetRawData(bytes)
+	fmt.Println("Attempting to load or create vocab")
 	err = t.LoadVocab(settings, vocabSaveFile)
+	fmt.Println("Preparing data")
 	t.PrepareData(settings, network)
 
 	fmt.Println("Loaded training data for", testDataFile, "- samples=", len(settings.TrainingSamples))
