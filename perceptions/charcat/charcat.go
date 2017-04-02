@@ -76,13 +76,13 @@ func (charcat *Charcatnn) SaveVocab(settings *potential.TrainingSettings, filena
 	for key, genericPercepUnit := range settings.Data.KeyToItem {
 		sKey := key.(string)
 		var percepUnit charcatPerceptionUnit
-		if genericPercepUnit.InputCell != 0 {
+		if genericPercepUnit.OutputCell != 0 {
 			percepUnit.CategoryName = sKey
-			percepUnit.CellID = genericPercepUnit.InputCell
+			percepUnit.CellID = genericPercepUnit.OutputCell
 
 		} else {
 			percepUnit.InputChar = sKey
-			percepUnit.CellID = genericPercepUnit.OutputCell
+			percepUnit.CellID = genericPercepUnit.InputCell
 		}
 
 		if percepUnit.CategoryName == "" && percepUnit.InputChar == "" {
@@ -211,7 +211,7 @@ func (charcat *Charcatnn) PrepareData(settings *potential.TrainingSettings, netw
 			}
 
 		} else {
-			fmt.Println("cat exists", categoryPU)
+			fmt.Println("cat exists", categoryPU.Value, categoryPU.OutputCell, categoryPU.InputCell)
 			categoryCellID = categoryPU.OutputCell
 		}
 
@@ -222,7 +222,7 @@ func (charcat *Charcatnn) PrepareData(settings *potential.TrainingSettings, netw
 		var samples []*potential.TrainingSample
 		for _, inputChar := range inputCharsGroup {
 			if _, charVocabExists := settings.Data.KeyToItem[inputChar]; !charVocabExists {
-				charCellID = addNewVocabMapping(inputChar, network)
+				charCellID = addNewVocabMapping("in-"+inputChar, network)
 				settings.Data.KeyToItem[inputChar] = potential.PerceptionUnit{
 					Value:     inputChar,
 					InputCell: charCellID,
@@ -237,7 +237,8 @@ func (charcat *Charcatnn) PrepareData(settings *potential.TrainingSettings, netw
 				InputCell:  charCellID,
 				OutputCell: categoryCellID,
 			}
-			fmt.Println("Adding sample=\n  input=", network.Cells[ts.InputCell].Tag, "output=", network.Cells[ts.OutputCell].Tag)
+			fmt.Println(ts.InputCell, ts.OutputCell)
+			fmt.Println("  input=", network.Cells[ts.InputCell].Tag, "output=", network.Cells[ts.OutputCell].Tag)
 			samples = append(samples, &ts)
 		}
 		settings.TrainingSamples = append(settings.TrainingSamples, samples)

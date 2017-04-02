@@ -1,9 +1,10 @@
 package potential
 
 import (
-	"github.com/ruffrey/nurtrace/laws"
 	"fmt"
 	"sync"
+
+	"github.com/ruffrey/nurtrace/laws"
 )
 
 // All methods on a network that relate to growing are here.
@@ -120,7 +121,7 @@ func (network *Network) GrowPathBetween(startCell, endCell CellID, minSynapses i
 	needSynapses := minSynapses - len(synapsesToEnd) // out of multithreading now
 	if needSynapses > 0 {
 		hasWalked := len(alreadyWalked) > 0
-		fmt.Println("start=", startCell, "end=", endCell, "minSynapses", minSynapses, "needSynapses", needSynapses, "alreadyWalked", len(alreadyWalked), "maxHops", network.maxHops)
+		// fmt.Println("start=", startCell, "end=", endCell, "minSynapses", minSynapses, "needSynapses", needSynapses, "alreadyWalked", len(alreadyWalked), "maxHops", network.maxHops)
 		// Two new synapse and one new cell will be added.
 		// It will connect from the input network to a new cell to the end network.
 		//
