@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <style>
+        html, body {
+            background-color: rgb(245, 245, 245);
+        }
+        #graph-container {
+            top: 33px;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            position: absolute;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="container">
+        <button onclick="window.stop()">Stop</button>
+        <button onclick="window.start()">Start</button>
+        <div id="graph-container"></div>
+    </div>
+    <script>
+        require('./grapher')
+    </script>
+</body>
+
+</html>

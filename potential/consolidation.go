@@ -1,10 +1,10 @@
 package potential
 
 import (
-	"github.com/ruffrey/nurtrace/laws"
-	"fmt"
 	"math"
 	"strconv"
+
+	"github.com/ruffrey/nurtrace/laws"
 )
 
 /*
@@ -88,6 +88,6 @@ func dedupeSynapses(synapses dupeSynapses, network *Network) []SynapseID {
 	for _, synapseID := range removeSynapses {
 		network.PruneSynapse(synapseID)
 	}
-	fmt.Println("removed", len(removeSynapses), "dupe synapses")
+	// fmt.Println("removed", len(removeSynapses), "dupe synapses")
 	return keepSynapses
 }

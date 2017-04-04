@@ -19,6 +19,9 @@ func Sample(seedKeys []interface{}, data *Dataset, network *Network, maxResultLe
 
 	// add a callback to each output cell that sends the result back
 	for _, v := range data.KeyToItem {
+		if v.OutputCell == 0 {
+			continue
+		}
 		network.Cells[v.OutputCell].OnFired = append(
 			network.Cells[v.OutputCell].OnFired,
 			func(cell CellID) {
@@ -56,8 +59,11 @@ func Sample(seedKeys []interface{}, data *Dataset, network *Network, maxResultLe
 	}()
 
 	// fire one cell per step, in order.
-	network.Cells[data.KeyToItem[start].InputCell].FireActionPotential()
-	network.Step()
+	if start != nil {
+		network.Cells[data.KeyToItem[start].InputCell].FireActionPotential()
+		network.Step()
+	}
+
 	for _, perceptionUnit := range seedKeys {
 		network.Cells[data.KeyToItem[perceptionUnit].InputCell].FireActionPotential()
 	}
@@ -86,7 +92,9 @@ func Sample(seedKeys []interface{}, data *Dataset, network *Network, maxResultLe
 	// reset all the output cell callbacks
 	network.Disabled = true
 	for _, v := range data.KeyToItem {
-		network.Cells[v.OutputCell].OnFired = make([]func(CellID), 0)
+		if v.OutputCell != 0 {
+			network.Cells[v.OutputCell].OnFired = make([]func(CellID), 0)
+		}
 	}
 
 	return out

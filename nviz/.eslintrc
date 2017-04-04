@@ -1,0 +1,12 @@
+{
+  "root": true,
+  "extends": "airbnb-base",
+  "rules": {
+    "no-plusplus": ["off"],
+    "no-param-reassign": ["off"],
+    "global-require": ["off"]
+  },
+  "env": {
+    "browser": true
+  }
+}
