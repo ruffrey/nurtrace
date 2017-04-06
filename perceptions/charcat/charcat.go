@@ -76,6 +76,7 @@ func (charcat *Charcatnn) SaveVocab(settings *potential.TrainingSettings, filena
 	for key, genericPercepUnit := range settings.Data.KeyToItem {
 		sKey := key.(string)
 		var percepUnit charcatPerceptionUnit
+		// fmt.Println("Preparing save perceptionUnit", key, genericPercepUnit)
 		if genericPercepUnit.OutputCell != 0 {
 			percepUnit.CategoryName = sKey
 			percepUnit.CellID = genericPercepUnit.OutputCell
@@ -204,14 +205,14 @@ func (charcat *Charcatnn) PrepareData(settings *potential.TrainingSettings, netw
 		categoryPU, categoryExists := settings.Data.KeyToItem[tc.CategoryName]
 		if !categoryExists {
 			categoryCellID = addNewVocabMapping(tc.CategoryName, network)
-			fmt.Println("adding cat", tc.CategoryName, categoryCellID)
+			// fmt.Println("adding cat", tc.CategoryName, categoryCellID)
 			settings.Data.KeyToItem[tc.CategoryName] = potential.PerceptionUnit{
 				Value:      tc.CategoryName,
 				OutputCell: categoryCellID,
 			}
 
 		} else {
-			fmt.Println("cat exists", categoryPU.Value, categoryPU.OutputCell, categoryPU.InputCell)
+			// fmt.Println("cat exists", categoryPU.Value, categoryPU.OutputCell, categoryPU.InputCell)
 			categoryCellID = categoryPU.OutputCell
 		}
 
@@ -227,7 +228,7 @@ func (charcat *Charcatnn) PrepareData(settings *potential.TrainingSettings, netw
 					Value:     inputChar,
 					InputCell: charCellID,
 				}
-				fmt.Println("added input", settings.Data.KeyToItem[inputChar])
+				// fmt.Println("added input", settings.Data.KeyToItem[inputChar])
 			} else {
 				charCellID = settings.Data.KeyToItem[inputChar].InputCell
 			}
@@ -238,7 +239,7 @@ func (charcat *Charcatnn) PrepareData(settings *potential.TrainingSettings, netw
 				InputCell:  charCellID,
 				OutputCell: categoryCellID,
 			}
-			fmt.Println(ts.InputCell, ts.OutputCell)
+
 			samples = append(samples, &ts)
 		}
 		settings.TrainingSamples = append(settings.TrainingSamples, samples)
