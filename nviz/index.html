@@ -17,30 +17,33 @@
             right: 0;
             position: absolute;
         }
-        nav {
+        #nav {
             background: #dddddd;
-            padding: 3px;
-            height: 30px;
+            padding: 7px;
+        }
+        span {
+            font-size: 13px;
         }
     </style>
 </head>
 
 <body>
     <div id="container">
-        <nav>
-            <button onclick="window.hideAll()">Hide All</button>
+        <div id="nav">
+            <button onclick="window.hideAll()">Hide All (faster)</button>
             <button onclick="window.clearPathSelection()">Show All</button>
             <button onclick="window.stop()">Stop</button>
             <button onclick="window.start()">Start</button>
             <span>Trace depth (clickk node to trace):</span>
             <input type="number" min="0" max="1000" value="3"
-                id="depth" />
+                id="depth" onchange="changeDepthIfSelectedPath()" />
             <select id="direction">
                 <option value="both">Trace upstream and downstream</option>
                 <option value="fwd">Upstream only</option>
                 <option value="back">Downstream only</option>
             </select>
-        </nav>
+            <span id="lastNodeDisplay"></span>
+        </div>
 
         <div id="graph-container"></div>
     </div>

@@ -41,7 +41,7 @@ const g = {
 const green = '#00FF2D';
 // const blue = '#0775FF';
 const red = '#A62A2A';
-const lightGrey = '#cccccc';
+const lightGrey = '#aaaaaa';
 const darkGrey = '#444444';
 const black = '#000000';
 const white = '#ffffff';
@@ -144,6 +144,21 @@ const s = new Sigma({
     maxEdgeSize: 10,
   },
 });
+window.s = s;
+
+let lastSelectedPathNode;
+const clearLastNode = () => {
+  lastSelectedPathNode = null;
+  document.getElementById('lastNodeDisplay').innerHTML = '';
+};
+const setLastNode = (cellId) => {
+  lastSelectedPathNode = cellId;
+  let tag = '';
+  if (nw.Cells[cellId].Tag) {
+    tag += ` (${nw.Cells[cellId].Tag})`;
+  }
+  document.getElementById('lastNodeDisplay').innerHTML = cellId + tag;
+};
 
 function selectPath(e) {
   console.log('select path', e);
@@ -155,8 +170,11 @@ function selectPath(e) {
   const shouldSearchForward = directionValue === 'both' || directionValue === 'fwd';
   const shouldSearchBackward = directionValue === 'both' || directionValue === 'back';
 
-    // Walk up and down just to see all connections
-    // from this cell's perspective.
+  if (e) {
+    setLastNode(e.data.node.id);
+  }
+  // Walk up and down just to see all connections
+  // from this cell's perspective.
   const walk = (nodeId, depth) => {
     if (alreadyWalked[nodeId]) {
       return;
@@ -171,7 +189,7 @@ function selectPath(e) {
     if (shouldSearchForward) {
       Object.keys(cell.AxonSynapses).forEach((synapseId) => {
         const synapse = nw.Synapses[synapseId];
-                // console.log(synapseId, synapse.ToNeuronDendrite);
+        // console.log(synapseId, synapse.ToNeuronDendrite);
         walkNext.push(synapse.ToNeuronDendrite);
       });
     }
@@ -185,10 +203,10 @@ function selectPath(e) {
 
     walkNext.forEach(n => walk(n, depth));
   };
-  walk(e.data.node.id, 0);
+  walk(lastSelectedPathNode, 0);
 
-    // only show nodes that were walked
-  e.data.renderer.graph.nodes().forEach((n) => {
+  // only show nodes that were walked
+  s.graph.nodes().forEach((n) => {
     if (alreadyWalked[n.id]) {
       n.hidden = false;
     } else {
@@ -196,7 +214,7 @@ function selectPath(e) {
     }
   });
   s.refresh();
-  console.log('done walking path', e.data.node.id, ',',
+  console.log('done walking path', lastSelectedPathNode, ',',
         Object.keys(alreadyWalked).length, '/', g.nodes.length, 'cells');
 }
 s.bind('clickNode', selectPath);
@@ -221,11 +239,19 @@ window.start = () => {
 
 // window.start();
 
+window.changeDepthIfSelectedPath = () => {
+  if (!lastSelectedPathNode) {
+    return;
+  }
+  selectPath();
+};
+
 window.stop = () => {
   s.stopForceAtlas2();
 };
 
 window.clearPathSelection = () => {
+  clearLastNode();
   s.graph.nodes().forEach((n) => {
     n.hidden = false;
   });
