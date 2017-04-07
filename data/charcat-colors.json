@@ -1,6 +1,6 @@
 [
   {
-    "CategoryName": "Grey",
+    "CategoryName": "grey",
     "RGB": [
       84,
       84,
@@ -9,7 +9,7 @@
     "InputText": "545454"
   },
   {
-    "CategoryName": "Grey, Silver",
+    "CategoryName": "grey",
     "RGB": [
       192,
       192,
@@ -27,7 +27,7 @@
     "InputText": "BEBEBE"
   },
   {
-    "CategoryName": "LightGray",
+    "CategoryName": "grey",
     "RGB": [
       211,
       211,
@@ -36,7 +36,7 @@
     "InputText": "D3D3D3"
   },
   {
-    "CategoryName": "LightSlateGrey",
+    "CategoryName": "grey",
     "RGB": [
       119,
       136,
@@ -45,7 +45,7 @@
     "InputText": "778899"
   },
   {
-    "CategoryName": "SlateGray",
+    "CategoryName": "grey",
     "RGB": [
       112,
       128,
@@ -54,7 +54,7 @@
     "InputText": "708090"
   },
   {
-    "CategoryName": "SlateGray1",
+    "CategoryName": "blue",
     "RGB": [
       198,
       226,
@@ -63,7 +63,7 @@
     "InputText": "C6E2FF"
   },
   {
-    "CategoryName": "SlateGray2",
+    "CategoryName": "blue",
     "RGB": [
       185,
       211,
@@ -72,7 +72,7 @@
     "InputText": "B9D3EE"
   },
   {
-    "CategoryName": "SlateGray3",
+    "CategoryName": "blue",
     "RGB": [
       159,
       182,
@@ -81,7 +81,7 @@
     "InputText": "9FB6CD"
   },
   {
-    "CategoryName": "SlateGray4",
+    "CategoryName": "blue",
     "RGB": [
       108,
       123,
@@ -96,46 +96,37 @@
       0,
       0
     ],
-    "InputText": "0"
+    "InputText": "000000"
   },
   {
     "CategoryName": "grey",
-    "RGB": [
-      0,
-      0,
-      0
-    ],
-    "InputText": "0"
-  },
-  {
-    "CategoryName": "grey1",
     "RGB": [
       3,
       3,
       3
     ],
-    "InputText": "30303"
+    "InputText": "303030"
   },
   {
-    "CategoryName": "grey2",
+    "CategoryName": "grey",
     "RGB": [
       5,
       5,
       5
     ],
-    "InputText": "50505"
+    "InputText": "505050"
   },
   {
-    "CategoryName": "grey3",
+    "CategoryName": "grey",
     "RGB": [
       8,
       8,
       8
     ],
-    "InputText": "80808"
+    "InputText": "808080"
   },
   {
-    "CategoryName": "grey4",
+    "CategoryName": "black",
     "RGB": [
       10,
       10,
@@ -144,7 +135,7 @@
     "InputText": "0A0A0A"
   },
   {
-    "CategoryName": "grey5",
+    "CategoryName": "black",
     "RGB": [
       13,
       13,
@@ -153,7 +144,7 @@
     "InputText": "0D0D0D"
   },
   {
-    "CategoryName": "grey6",
+    "CategoryName": "black",
     "RGB": [
       15,
       15,
@@ -162,7 +153,7 @@
     "InputText": "0F0F0F"
   },
   {
-    "CategoryName": "grey7",
+    "CategoryName": "black",
     "RGB": [
       18,
       18,
@@ -171,7 +162,7 @@
     "InputText": "121212"
   },
   {
-    "CategoryName": "grey8",
+    "CategoryName": "black",
     "RGB": [
       20,
       20,
@@ -180,7 +171,7 @@
     "InputText": "141414"
   },
   {
-    "CategoryName": "grey9",
+    "CategoryName": "black",
     "RGB": [
       23,
       23,
@@ -189,7 +180,7 @@
     "InputText": "171717"
   },
   {
-    "CategoryName": "grey10",
+    "CategoryName": "black",
     "RGB": [
       26,
       26,
@@ -198,7 +189,7 @@
     "InputText": "1A1A1A"
   },
   {
-    "CategoryName": "grey11",
+    "CategoryName": "black",
     "RGB": [
       28,
       28,
@@ -207,7 +198,7 @@
     "InputText": "1C1C1C"
   },
   {
-    "CategoryName": "grey12",
+    "CategoryName": "black",
     "RGB": [
       31,
       31,
@@ -216,7 +207,7 @@
     "InputText": "1F1F1F"
   },
   {
-    "CategoryName": "grey13",
+    "CategoryName": "black",
     "RGB": [
       33,
       33,
@@ -225,7 +216,7 @@
     "InputText": "212121"
   },
   {
-    "CategoryName": "grey",
+    "CategoryName": "black",
     "RGB": [
       34,
       34,
@@ -234,7 +225,7 @@
     "InputText": "222222"
   },
   {
-    "CategoryName": "grey14",
+    "CategoryName": "black",
     "RGB": [
       36,
       36,
@@ -243,7 +234,7 @@
     "InputText": "242424"
   },
   {
-    "CategoryName": "grey15",
+    "CategoryName": "black",
     "RGB": [
       38,
       38,
@@ -252,7 +243,7 @@
     "InputText": "262626"
   },
   {
-    "CategoryName": "grey16",
+    "CategoryName": "black",
     "RGB": [
       41,
       41,
@@ -261,7 +252,7 @@
     "InputText": "292929"
   },
   {
-    "CategoryName": "grey17",
+    "CategoryName": "black",
     "RGB": [
       43,
       43,
@@ -270,7 +261,7 @@
     "InputText": "2B2B2B"
   },
   {
-    "CategoryName": "grey18",
+    "CategoryName": "black",
     "RGB": [
       46,
       46,
@@ -279,7 +270,7 @@
     "InputText": "2E2E2E"
   },
   {
-    "CategoryName": "grey19",
+    "CategoryName": "black",
     "RGB": [
       48,
       48,
@@ -288,7 +279,7 @@
     "InputText": "303030"
   },
   {
-    "CategoryName": "grey20",
+    "CategoryName": "black",
     "RGB": [
       51,
       51,
@@ -297,7 +288,7 @@
     "InputText": "333333"
   },
   {
-    "CategoryName": "grey21",
+    "CategoryName": "black",
     "RGB": [
       54,
       54,
@@ -306,7 +297,7 @@
     "InputText": "363636"
   },
   {
-    "CategoryName": "grey22",
+    "CategoryName": "black",
     "RGB": [
       56,
       56,
@@ -315,7 +306,7 @@
     "InputText": "383838"
   },
   {
-    "CategoryName": "grey23",
+    "CategoryName": "black",
     "RGB": [
       59,
       59,
@@ -324,7 +315,7 @@
     "InputText": "3B3B3B"
   },
   {
-    "CategoryName": "grey24",
+    "CategoryName": "black",
     "RGB": [
       61,
       61,
@@ -333,7 +324,7 @@
     "InputText": "3D3D3D"
   },
   {
-    "CategoryName": "grey25",
+    "CategoryName": "black",
     "RGB": [
       64,
       64,
@@ -342,7 +333,7 @@
     "InputText": "404040"
   },
   {
-    "CategoryName": "grey26",
+    "CategoryName": "black",
     "RGB": [
       66,
       66,
@@ -351,7 +342,7 @@
     "InputText": "424242"
   },
   {
-    "CategoryName": "grey27",
+    "CategoryName": "black",
     "RGB": [
       69,
       69,
@@ -360,16 +351,16 @@
     "InputText": "454545"
   },
   {
-    "CategoryName": "grey28",
+    "CategoryName": "black",
     "RGB": [
       71,
       71,
       71
     ],
-    "InputText": "474747"
+    "InputText": "grey"
   },
   {
-    "CategoryName": "grey29",
+    "CategoryName": "grey",
     "RGB": [
       74,
       74,
@@ -378,7 +369,7 @@
     "InputText": "4A4A4A"
   },
   {
-    "CategoryName": "grey30",
+    "CategoryName": "grey",
     "RGB": [
       77,
       77,
@@ -387,7 +378,7 @@
     "InputText": "4D4D4D"
   },
   {
-    "CategoryName": "grey31",
+    "CategoryName": "grey",
     "RGB": [
       79,
       79,
@@ -396,7 +387,7 @@
     "InputText": "4F4F4F"
   },
   {
-    "CategoryName": "grey32",
+    "CategoryName": "grey",
     "RGB": [
       82,
       82,
@@ -405,7 +396,7 @@
     "InputText": "525252"
   },
   {
-    "CategoryName": "grey33",
+    "CategoryName": "grey",
     "RGB": [
       84,
       84,
@@ -423,7 +414,7 @@
     "InputText": "555555"
   },
   {
-    "CategoryName": "grey34",
+    "CategoryName": "grey",
     "RGB": [
       87,
       87,
@@ -432,7 +423,7 @@
     "InputText": "575757"
   },
   {
-    "CategoryName": "grey35",
+    "CategoryName": "black",
     "RGB": [
       89,
       89,
@@ -441,7 +432,7 @@
     "InputText": "595959"
   },
   {
-    "CategoryName": "grey36",
+    "CategoryName": "black",
     "RGB": [
       92,
       92,
@@ -450,7 +441,7 @@
     "InputText": "5C5C5C"
   },
   {
-    "CategoryName": "grey37",
+    "CategoryName": "grey",
     "RGB": [
       94,
       94,
@@ -459,7 +450,7 @@
     "InputText": "5E5E5E"
   },
   {
-    "CategoryName": "grey38",
+    "CategoryName": "grey",
     "RGB": [
       97,
       97,
@@ -468,7 +459,7 @@
     "InputText": "616161"
   },
   {
-    "CategoryName": "grey39",
+    "CategoryName": "grey",
     "RGB": [
       99,
       99,
@@ -477,7 +468,7 @@
     "InputText": "636363"
   },
   {
-    "CategoryName": "grey40",
+    "CategoryName": "grey",
     "RGB": [
       102,
       102,
@@ -486,7 +477,7 @@
     "InputText": "666666"
   },
   {
-    "CategoryName": "grey41, DimGrey",
+    "CategoryName": "grey",
     "RGB": [
       105,
       105,
@@ -495,7 +486,7 @@
     "InputText": "696969"
   },
   {
-    "CategoryName": "grey42",
+    "CategoryName": "grey",
     "RGB": [
       107,
       107,
@@ -504,7 +495,7 @@
     "InputText": "6B6B6B"
   },
   {
-    "CategoryName": "grey43",
+    "CategoryName": "grey",
     "RGB": [
       110,
       110,
@@ -513,7 +504,7 @@
     "InputText": "6E6E6E"
   },
   {
-    "CategoryName": "grey44",
+    "CategoryName": "grey",
     "RGB": [
       112,
       112,
@@ -522,7 +513,7 @@
     "InputText": "707070"
   },
   {
-    "CategoryName": "grey45",
+    "CategoryName": "grey",
     "RGB": [
       115,
       115,
@@ -531,7 +522,7 @@
     "InputText": "737373"
   },
   {
-    "CategoryName": "grey46",
+    "CategoryName": "grey",
     "RGB": [
       117,
       117,
@@ -549,7 +540,7 @@
     "InputText": "777777"
   },
   {
-    "CategoryName": "grey47",
+    "CategoryName": "grey",
     "RGB": [
       120,
       120,
@@ -558,7 +549,7 @@
     "InputText": "787878"
   },
   {
-    "CategoryName": "grey48",
+    "CategoryName": "grey",
     "RGB": [
       122,
       122,
@@ -567,7 +558,7 @@
     "InputText": "7A7A7A"
   },
   {
-    "CategoryName": "grey49",
+    "CategoryName": "grey",
     "RGB": [
       125,
       125,
@@ -576,7 +567,7 @@
     "InputText": "7D7D7D"
   },
   {
-    "CategoryName": "grey50",
+    "CategoryName": "grey",
     "RGB": [
       127,
       127,
@@ -585,7 +576,7 @@
     "InputText": "7F7F7F"
   },
   {
-    "CategoryName": "grey51",
+    "CategoryName": "grey",
     "RGB": [
       130,
       130,
@@ -594,7 +585,7 @@
     "InputText": "828282"
   },
   {
-    "CategoryName": "grey52",
+    "CategoryName": "grey",
     "RGB": [
       133,
       133,
@@ -603,7 +594,7 @@
     "InputText": "858585"
   },
   {
-    "CategoryName": "grey53",
+    "CategoryName": "grey",
     "RGB": [
       135,
       135,
@@ -621,7 +612,7 @@
     "InputText": "888888"
   },
   {
-    "CategoryName": "grey54",
+    "CategoryName": "grey",
     "RGB": [
       138,
       138,
@@ -630,7 +621,7 @@
     "InputText": "8A8A8A"
   },
   {
-    "CategoryName": "grey55",
+    "CategoryName": "grey",
     "RGB": [
       140,
       140,
@@ -639,7 +630,7 @@
     "InputText": "8C8C8C"
   },
   {
-    "CategoryName": "grey56",
+    "CategoryName": "grey",
     "RGB": [
       143,
       143,
@@ -648,7 +639,7 @@
     "InputText": "8F8F8F"
   },
   {
-    "CategoryName": "grey57",
+    "CategoryName": "grey",
     "RGB": [
       145,
       145,
@@ -657,7 +648,7 @@
     "InputText": "919191"
   },
   {
-    "CategoryName": "grey58",
+    "CategoryName": "grey",
     "RGB": [
       148,
       148,
@@ -666,7 +657,7 @@
     "InputText": "949494"
   },
   {
-    "CategoryName": "grey59",
+    "CategoryName": "grey",
     "RGB": [
       150,
       150,
@@ -675,7 +666,7 @@
     "InputText": "969696"
   },
   {
-    "CategoryName": "grey60",
+    "CategoryName": "grey",
     "RGB": [
       153,
       153,
@@ -684,7 +675,7 @@
     "InputText": "999999"
   },
   {
-    "CategoryName": "grey61",
+    "CategoryName": "grey",
     "RGB": [
       156,
       156,
@@ -693,7 +684,7 @@
     "InputText": "9C9C9C"
   },
   {
-    "CategoryName": "grey62",
+    "CategoryName": "grey",
     "RGB": [
       158,
       158,
@@ -702,7 +693,7 @@
     "InputText": "9E9E9E"
   },
   {
-    "CategoryName": "grey63",
+    "CategoryName": "grey",
     "RGB": [
       161,
       161,
@@ -711,7 +702,7 @@
     "InputText": "A1A1A1"
   },
   {
-    "CategoryName": "grey64",
+    "CategoryName": "grey",
     "RGB": [
       163,
       163,
@@ -720,7 +711,7 @@
     "InputText": "A3A3A3"
   },
   {
-    "CategoryName": "grey65",
+    "CategoryName": "grey",
     "RGB": [
       166,
       166,
@@ -729,7 +720,7 @@
     "InputText": "A6A6A6"
   },
   {
-    "CategoryName": "grey66",
+    "CategoryName": "grey",
     "RGB": [
       168,
       168,
@@ -738,7 +729,7 @@
     "InputText": "A8A8A8"
   },
   {
-    "CategoryName": "grey67",
+    "CategoryName": "grey",
     "RGB": [
       171,
       171,
@@ -747,7 +738,7 @@
     "InputText": "ABABAB"
   },
   {
-    "CategoryName": "grey68",
+    "CategoryName": "grey",
     "RGB": [
       173,
       173,
@@ -756,7 +747,7 @@
     "InputText": "ADADAD"
   },
   {
-    "CategoryName": "grey69",
+    "CategoryName": "grey",
     "RGB": [
       176,
       176,
@@ -765,7 +756,7 @@
     "InputText": "B0B0B0"
   },
   {
-    "CategoryName": "grey70",
+    "CategoryName": "grey",
     "RGB": [
       179,
       179,
@@ -774,7 +765,7 @@
     "InputText": "B3B3B3"
   },
   {
-    "CategoryName": "grey71",
+    "CategoryName": "grey",
     "RGB": [
       181,
       181,
@@ -783,7 +774,7 @@
     "InputText": "B5B5B5"
   },
   {
-    "CategoryName": "grey72",
+    "CategoryName": "grey",
     "RGB": [
       184,
       184,
@@ -801,7 +792,7 @@
     "InputText": "BBBBBB"
   },
   {
-    "CategoryName": "grey73",
+    "CategoryName": "grey",
     "RGB": [
       186,
       186,
@@ -810,7 +801,7 @@
     "InputText": "BABABA"
   },
   {
-    "CategoryName": "grey74",
+    "CategoryName": "grey",
     "RGB": [
       189,
       189,
@@ -819,7 +810,7 @@
     "InputText": "BDBDBD"
   },
   {
-    "CategoryName": "grey75",
+    "CategoryName": "grey",
     "RGB": [
       191,
       191,
@@ -828,7 +819,7 @@
     "InputText": "BFBFBF"
   },
   {
-    "CategoryName": "grey76",
+    "CategoryName": "grey",
     "RGB": [
       194,
       194,
@@ -837,7 +828,7 @@
     "InputText": "C2C2C2"
   },
   {
-    "CategoryName": "grey77",
+    "CategoryName": "grey",
     "RGB": [
       196,
       196,
@@ -846,7 +837,7 @@
     "InputText": "C4C4C4"
   },
   {
-    "CategoryName": "grey78",
+    "CategoryName": "grey",
     "RGB": [
       199,
       199,
@@ -855,7 +846,7 @@
     "InputText": "C7C7C7"
   },
   {
-    "CategoryName": "grey79",
+    "CategoryName": "grey",
     "RGB": [
       201,
       201,
@@ -864,7 +855,7 @@
     "InputText": "C9C9C9"
   },
   {
-    "CategoryName": "grey80",
+    "CategoryName": "grey",
     "RGB": [
       204,
       204,
@@ -873,7 +864,7 @@
     "InputText": "CCCCCC"
   },
   {
-    "CategoryName": "grey81",
+    "CategoryName": "grey",
     "RGB": [
       207,
       207,
@@ -882,7 +873,7 @@
     "InputText": "CFCFCF"
   },
   {
-    "CategoryName": "grey82",
+    "CategoryName": "grey",
     "RGB": [
       209,
       209,
@@ -891,7 +882,7 @@
     "InputText": "D1D1D1"
   },
   {
-    "CategoryName": "grey83",
+    "CategoryName": "grey",
     "RGB": [
       212,
       212,
@@ -900,7 +891,7 @@
     "InputText": "D4D4D4"
   },
   {
-    "CategoryName": "grey84",
+    "CategoryName": "white",
     "RGB": [
       214,
       214,
@@ -909,7 +900,7 @@
     "InputText": "D6D6D6"
   },
   {
-    "CategoryName": "grey85",
+    "CategoryName": "white",
     "RGB": [
       217,
       217,
@@ -918,7 +909,7 @@
     "InputText": "D9D9D9"
   },
   {
-    "CategoryName": "grey86",
+    "CategoryName": "white",
     "RGB": [
       219,
       219,
@@ -927,7 +918,7 @@
     "InputText": "DBDBDB"
   },
   {
-    "CategoryName": "grey87",
+    "CategoryName": "white",
     "RGB": [
       222,
       222,
@@ -936,7 +927,7 @@
     "InputText": "DEDEDE"
   },
   {
-    "CategoryName": "grey",
+    "CategoryName": "white",
     "RGB": [
       221,
       221,
@@ -945,7 +936,7 @@
     "InputText": "DDDDDD"
   },
   {
-    "CategoryName": "grey88",
+    "CategoryName": "white",
     "RGB": [
       224,
       224,
@@ -954,7 +945,7 @@
     "InputText": "E0E0E0"
   },
   {
-    "CategoryName": "grey89",
+    "CategoryName": "white",
     "RGB": [
       227,
       227,
@@ -963,7 +954,7 @@
     "InputText": "E3E3E3"
   },
   {
-    "CategoryName": "grey90",
+    "CategoryName": "white",
     "RGB": [
       229,
       229,
@@ -972,7 +963,7 @@
     "InputText": "E5E5E5"
   },
   {
-    "CategoryName": "grey91",
+    "CategoryName": "white",
     "RGB": [
       232,
       232,
@@ -981,7 +972,7 @@
     "InputText": "E8E8E8"
   },
   {
-    "CategoryName": "grey92",
+    "CategoryName": "white",
     "RGB": [
       235,
       235,
@@ -990,7 +981,7 @@
     "InputText": "EBEBEB"
   },
   {
-    "CategoryName": "grey93",
+    "CategoryName": "white",
     "RGB": [
       237,
       237,
@@ -999,7 +990,7 @@
     "InputText": "EDEDED"
   },
   {
-    "CategoryName": "darkgrey",
+    "CategoryName": "white",
     "RGB": [
       238,
       238,
@@ -1008,7 +999,7 @@
     "InputText": "EEEEEE"
   },
   {
-    "CategoryName": "grey94",
+    "CategoryName": "white",
     "RGB": [
       240,
       240,
@@ -1017,7 +1008,7 @@
     "InputText": "F0F0F0"
   },
   {
-    "CategoryName": "grey95",
+    "CategoryName": "white",
     "RGB": [
       242,
       242,
@@ -1026,7 +1017,7 @@
     "InputText": "F2F2F2"
   },
   {
-    "CategoryName": "grey96",
+    "CategoryName": "white",
     "RGB": [
       245,
       245,
@@ -1035,7 +1026,7 @@
     "InputText": "F5F5F5"
   },
   {
-    "CategoryName": "grey97",
+    "CategoryName": "white",
     "RGB": [
       247,
       247,
@@ -1044,7 +1035,7 @@
     "InputText": "F7F7F7"
   },
   {
-    "CategoryName": "grey98",
+    "CategoryName": "white",
     "RGB": [
       250,
       250,
@@ -1053,7 +1044,7 @@
     "InputText": "FAFAFA"
   },
   {
-    "CategoryName": "grey99",
+    "CategoryName": "white",
     "RGB": [
       252,
       252,
@@ -1062,7 +1053,7 @@
     "InputText": "FCFCFC"
   },
   {
-    "CategoryName": "grey100, White",
+    "CategoryName": "white",
     "RGB": [
       255,
       255,
@@ -1071,7 +1062,7 @@
     "InputText": "FFFFFF"
   },
   {
-    "CategoryName": "Dark Slate Grey",
+    "CategoryName": "green",
     "RGB": [
       47,
       79,
@@ -1080,7 +1071,7 @@
     "InputText": "2F4F4F"
   },
   {
-    "CategoryName": "Dim Grey",
+    "CategoryName": "grey",
     "RGB": [
       84,
       84,
@@ -1089,7 +1080,7 @@
     "InputText": "545454"
   },
   {
-    "CategoryName": "Very Light Grey",
+    "CategoryName": "grey",
     "RGB": [
       205,
       205,
@@ -1098,7 +1089,7 @@
     "InputText": "CDCDCD"
   },
   {
-    "CategoryName": "Free Speech Grey",
+    "CategoryName": "grey",
     "RGB": [
       99,
       86,
@@ -1107,7 +1098,7 @@
     "InputText": "635688"
   },
   {
-    "CategoryName": "AliceBlue",
+    "CategoryName": "white",
     "RGB": [
       240,
       248,
@@ -1116,7 +1107,7 @@
     "InputText": "F0F8FF"
   },
   {
-    "CategoryName": "BlueViolet",
+    "CategoryName": "blue",
     "RGB": [
       138,
       43,
@@ -1125,7 +1116,7 @@
     "InputText": "8A2BE2"
   },
   {
-    "CategoryName": "Cadet Blue",
+    "CategoryName": "blue",
     "RGB": [
       95,
       159,
@@ -1134,7 +1125,7 @@
     "InputText": "5F9F9F"
   },
   {
-    "CategoryName": "CadetBlue",
+    "CategoryName": "blue",
     "RGB": [
       95,
       158,
@@ -1143,7 +1134,7 @@
     "InputText": "5F9EA0"
   },
   {
-    "CategoryName": "CadetBlue",
+    "CategoryName": "blue",
     "RGB": [
       95,
       158,
@@ -1152,7 +1143,7 @@
     "InputText": "5F9EA0"
   },
   {
-    "CategoryName": "CadetBlue1",
+    "CategoryName": "blue",
     "RGB": [
       152,
       245,
@@ -1161,7 +1152,7 @@
     "InputText": "98F5FF"
   },
   {
-    "CategoryName": "CadetBlue2",
+    "CategoryName": "blue",
     "RGB": [
       142,
       229,
@@ -1170,7 +1161,7 @@
     "InputText": "8EE5EE"
   },
   {
-    "CategoryName": "CadetBlue3",
+    "CategoryName": "blue",
     "RGB": [
       122,
       197,
@@ -1179,7 +1170,7 @@
     "InputText": "7AC5CD"
   },
   {
-    "CategoryName": "CadetBlue4",
+    "CategoryName": "blue",
     "RGB": [
       83,
       134,
@@ -1188,7 +1179,7 @@
     "InputText": "53868B"
   },
   {
-    "CategoryName": "Corn Flower Blue",
+    "CategoryName": "blue",
     "RGB": [
       66,
       66,
@@ -1197,7 +1188,7 @@
     "InputText": "42426F"
   },
   {
-    "CategoryName": "CornflowerBlue",
+    "CategoryName": "blue",
     "RGB": [
       100,
       149,
@@ -1206,7 +1197,7 @@
     "InputText": "6495ED"
   },
   {
-    "CategoryName": "DarkSlateBlue",
+    "CategoryName": "blue",
     "RGB": [
       72,
       61,
@@ -1215,7 +1206,7 @@
     "InputText": "483D8B"
   },
   {
-    "CategoryName": "DarkTurquoise",
+    "CategoryName": "blue",
     "RGB": [
       0,
       206,
@@ -1224,7 +1215,7 @@
     "InputText": "00CED1"
   },
   {
-    "CategoryName": "DeepSkyBlue",
+    "CategoryName": "blue",
     "RGB": [
       0,
       191,
@@ -1233,7 +1224,7 @@
     "InputText": "00BFFF"
   },
   {
-    "CategoryName": "DeepSkyBlue1",
+    "CategoryName": "blue",
     "RGB": [
       0,
       191,
@@ -1242,7 +1233,7 @@
     "InputText": "00BFFF"
   },
   {
-    "CategoryName": "DeepSkyBlue2",
+    "CategoryName": "blue",
     "RGB": [
       0,
       178,
@@ -1251,7 +1242,7 @@
     "InputText": "00B2EE"
   },
   {
-    "CategoryName": "DeepSkyBlue3",
+    "CategoryName": "blue",
     "RGB": [
       0,
       154,
@@ -1260,7 +1251,7 @@
     "InputText": "009ACD"
   },
   {
-    "CategoryName": "DeepSkyBlue4",
+    "CategoryName": "blue",
     "RGB": [
       0,
       104,
@@ -1269,7 +1260,7 @@
     "InputText": "00688B"
   },
   {
-    "CategoryName": "DodgerBlue",
+    "CategoryName": "blue",
     "RGB": [
       30,
       144,
@@ -1278,7 +1269,7 @@
     "InputText": "1E90FF"
   },
   {
-    "CategoryName": "DodgerBlue1",
+    "CategoryName": "blue",
     "RGB": [
       30,
       144,
@@ -1287,7 +1278,7 @@
     "InputText": "1E90FF"
   },
   {
-    "CategoryName": "DodgerBlue2",
+    "CategoryName": "blue",
     "RGB": [
       28,
       134,
@@ -1296,7 +1287,7 @@
     "InputText": "1C86EE"
   },
   {
-    "CategoryName": "DodgerBlue3",
+    "CategoryName": "blue",
     "RGB": [
       24,
       116,
@@ -1305,7 +1296,7 @@
     "InputText": "1874CD"
   },
   {
-    "CategoryName": "DodgerBlue4",
+    "CategoryName": "blue",
     "RGB": [
       16,
       78,
@@ -1314,7 +1305,7 @@
     "InputText": "104E8B"
   },
   {
-    "CategoryName": "LightBlue",
+    "CategoryName": "blue",
     "RGB": [
       173,
       216,
@@ -1323,7 +1314,7 @@
     "InputText": "ADD8E6"
   },
   {
-    "CategoryName": "LightBlue1",
+    "CategoryName": "blue",
     "RGB": [
       191,
       239,
@@ -1332,7 +1323,7 @@
     "InputText": "BFEFFF"
   },
   {
-    "CategoryName": "LightBlue2",
+    "CategoryName": "blue",
     "RGB": [
       178,
       223,
@@ -1341,7 +1332,7 @@
     "InputText": "B2DFEE"
   },
   {
-    "CategoryName": "LightBlue3",
+    "CategoryName": "blue",
     "RGB": [
       154,
       192,
@@ -1350,7 +1341,7 @@
     "InputText": "9AC0CD"
   },
   {
-    "CategoryName": "LightBlue4",
+    "CategoryName": "blue",
     "RGB": [
       104,
       131,
@@ -1359,7 +1350,7 @@
     "InputText": "68838B"
   },
   {
-    "CategoryName": "LightCyan",
+    "CategoryName": "blue",
     "RGB": [
       224,
       255,
@@ -1368,7 +1359,7 @@
     "InputText": "E0FFFF"
   },
   {
-    "CategoryName": "LightCyan1",
+    "CategoryName": "blue",
     "RGB": [
       224,
       255,
@@ -1377,7 +1368,7 @@
     "InputText": "E0FFFF"
   },
   {
-    "CategoryName": "LightCyan2",
+    "CategoryName": "blue",
     "RGB": [
       209,
       238,
@@ -1386,7 +1377,7 @@
     "InputText": "D1EEEE"
   },
   {
-    "CategoryName": "LightCyan3",
+    "CategoryName": "blue",
     "RGB": [
       180,
       205,
@@ -1395,7 +1386,7 @@
     "InputText": "B4CDCD"
   },
   {
-    "CategoryName": "LightCyan4",
+    "CategoryName": "blue",
     "RGB": [
       122,
       139,
@@ -1404,7 +1395,7 @@
     "InputText": "7A8B8B"
   },
   {
-    "CategoryName": "LightSkyBlue",
+    "CategoryName": "blue",
     "RGB": [
       135,
       206,
@@ -1413,7 +1404,7 @@
     "InputText": "87CEFA"
   },
   {
-    "CategoryName": "LightSkyBlue1",
+    "CategoryName": "blue",
     "RGB": [
       176,
       226,
@@ -1422,7 +1413,7 @@
     "InputText": "B0E2FF"
   },
   {
-    "CategoryName": "LightSkyBlue2",
+    "CategoryName": "blue",
     "RGB": [
       164,
       211,
@@ -1431,7 +1422,7 @@
     "InputText": "A4D3EE"
   },
   {
-    "CategoryName": "LightSkyBlue3",
+    "CategoryName": "blue",
     "RGB": [
       141,
       182,
@@ -1440,7 +1431,7 @@
     "InputText": "8DB6CD"
   },
   {
-    "CategoryName": "LightSkyBlue4",
+    "CategoryName": "blue",
     "RGB": [
       96,
       123,
@@ -1449,7 +1440,7 @@
     "InputText": "607B8B"
   },
   {
-    "CategoryName": "LightSlateBlue",
+    "CategoryName": "blue",
     "RGB": [
       132,
       112,
@@ -1467,7 +1458,7 @@
     "InputText": "99CCFF"
   },
   {
-    "CategoryName": "LightSteelBlue",
+    "CategoryName": "blue",
     "RGB": [
       176,
       196,
@@ -1476,7 +1467,7 @@
     "InputText": "B0C4DE"
   },
   {
-    "CategoryName": "LightSteelBlue1",
+    "CategoryName": "blue",
     "RGB": [
       202,
       225,
@@ -1485,7 +1476,7 @@
     "InputText": "CAE1FF"
   },
   {
-    "CategoryName": "LightSteelBlue2",
+    "CategoryName": "blue",
     "RGB": [
       188,
       210,
@@ -1494,7 +1485,7 @@
     "InputText": "BCD2EE"
   },
   {
-    "CategoryName": "LightSteelBlue3",
+    "CategoryName": "blue",
     "RGB": [
       162,
       181,
@@ -1503,7 +1494,7 @@
     "InputText": "A2B5CD"
   },
   {
-    "CategoryName": "LightSteelBlue4",
+    "CategoryName": "blue",
     "RGB": [
       110,
       123,
@@ -1512,7 +1503,7 @@
     "InputText": "6E7B8B"
   },
   {
-    "CategoryName": "Aquamarine",
+    "CategoryName": "blue",
     "RGB": [
       112,
       219,
@@ -1521,7 +1512,7 @@
     "InputText": "70DB93"
   },
   {
-    "CategoryName": "MediumBlue",
+    "CategoryName": "blue",
     "RGB": [
       0,
       0,
@@ -1530,7 +1521,7 @@
     "InputText": "0000CD"
   },
   {
-    "CategoryName": "MediumSlateBlue",
+    "CategoryName": "blue",
     "RGB": [
       123,
       104,
@@ -1539,7 +1530,7 @@
     "InputText": "7B68EE"
   },
   {
-    "CategoryName": "MediumTurquoise",
+    "CategoryName": "green",
     "RGB": [
       72,
       209,
@@ -1548,7 +1539,7 @@
     "InputText": "48D1CC"
   },
   {
-    "CategoryName": "MidnightBlue",
+    "CategoryName": "blue",
     "RGB": [
       25,
       25,
@@ -1557,16 +1548,7 @@
     "InputText": "191970"
   },
   {
-    "CategoryName": "NavyBlue",
-    "RGB": [
-      0,
-      0,
-      128
-    ],
-    "InputText": "80"
-  },
-  {
-    "CategoryName": "PaleTurquoise",
+    "CategoryName": "blue",
     "RGB": [
       175,
       238,
@@ -1575,7 +1557,7 @@
     "InputText": "AFEEEE"
   },
   {
-    "CategoryName": "PaleTurquoise1",
+    "CategoryName": "blue",
     "RGB": [
       187,
       255,
@@ -1584,7 +1566,7 @@
     "InputText": "BBFFFF"
   },
   {
-    "CategoryName": "PaleTurquoise2",
+    "CategoryName": "blue",
     "RGB": [
       174,
       238,
@@ -1593,7 +1575,7 @@
     "InputText": "AEEEEE"
   },
   {
-    "CategoryName": "PaleTurquoise3",
+    "CategoryName": "blue",
     "RGB": [
       150,
       205,
@@ -1602,7 +1584,7 @@
     "InputText": "96CDCD"
   },
   {
-    "CategoryName": "PaleTurquoise4",
+    "CategoryName": "blue",
     "RGB": [
       102,
       139,
@@ -1611,7 +1593,7 @@
     "InputText": "668B8B"
   },
   {
-    "CategoryName": "PowderBlue",
+    "CategoryName": "blue",
     "RGB": [
       176,
       224,
@@ -1620,7 +1602,7 @@
     "InputText": "B0E0E6"
   },
   {
-    "CategoryName": "RoyalBlue1",
+    "CategoryName": "blue",
     "RGB": [
       72,
       118,
@@ -1629,7 +1611,7 @@
     "InputText": "4876FF"
   },
   {
-    "CategoryName": "RoyalBlue2",
+    "CategoryName": "blue",
     "RGB": [
       67,
       110,
@@ -1638,7 +1620,7 @@
     "InputText": "436EEE"
   },
   {
-    "CategoryName": "RoyalBlue3",
+    "CategoryName": "blue",
     "RGB": [
       58,
       95,
@@ -1647,7 +1629,7 @@
     "InputText": "3A5FCD"
   },
   {
-    "CategoryName": "RoyalBlue4",
+    "CategoryName": "blue",
     "RGB": [
       39,
       64,
@@ -1656,7 +1638,7 @@
     "InputText": "27408B"
   },
   {
-    "CategoryName": "RoyalBlue5",
+    "CategoryName": "blue",
     "RGB": [
       0,
       34,
@@ -1665,7 +1647,7 @@
     "InputText": "2266"
   },
   {
-    "CategoryName": "SkyBlue",
+    "CategoryName": "blue",
     "RGB": [
       135,
       206,
@@ -1674,7 +1656,7 @@
     "InputText": "87CEEB"
   },
   {
-    "CategoryName": "SkyBlue1",
+    "CategoryName": "blue",
     "RGB": [
       135,
       206,
@@ -1683,7 +1665,7 @@
     "InputText": "87CEFF"
   },
   {
-    "CategoryName": "SkyBlue2",
+    "CategoryName": "blue",
     "RGB": [
       126,
       192,
@@ -1692,7 +1674,7 @@
     "InputText": "7EC0EE"
   },
   {
-    "CategoryName": "SkyBlue3",
+    "CategoryName": "blue",
     "RGB": [
       108,
       166,
@@ -1701,7 +1683,7 @@
     "InputText": "6CA6CD"
   },
   {
-    "CategoryName": "SkyBlue4",
+    "CategoryName": "blue",
     "RGB": [
       74,
       112,
@@ -1710,7 +1692,7 @@
     "InputText": "4A708B"
   },
   {
-    "CategoryName": "SlateBlue",
+    "CategoryName": "blue",
     "RGB": [
       106,
       90,
@@ -1719,7 +1701,7 @@
     "InputText": "6A5ACD"
   },
   {
-    "CategoryName": "SlateBlue1",
+    "CategoryName": "blue",
     "RGB": [
       131,
       111,
@@ -1728,7 +1710,7 @@
     "InputText": "836FFF"
   },
   {
-    "CategoryName": "SlateBlue2",
+    "CategoryName": "blue",
     "RGB": [
       122,
       103,
@@ -1737,7 +1719,7 @@
     "InputText": "7A67EE"
   },
   {
-    "CategoryName": "SlateBlue3",
+    "CategoryName": "blue",
     "RGB": [
       105,
       89,
@@ -1746,7 +1728,7 @@
     "InputText": "6959CD"
   },
   {
-    "CategoryName": "SlateBlue4",
+    "CategoryName": "blue",
     "RGB": [
       71,
       60,
@@ -1755,7 +1737,7 @@
     "InputText": "473C8B"
   },
   {
-    "CategoryName": "SteelBlue",
+    "CategoryName": "blue",
     "RGB": [
       70,
       130,
@@ -1764,7 +1746,7 @@
     "InputText": "4682B4"
   },
   {
-    "CategoryName": "SteelBlue1",
+    "CategoryName": "blue",
     "RGB": [
       99,
       184,
@@ -1773,7 +1755,7 @@
     "InputText": "63B8FF"
   },
   {
-    "CategoryName": "SteelBlue2",
+    "CategoryName": "blue",
     "RGB": [
       92,
       172,
@@ -1782,7 +1764,7 @@
     "InputText": "5CACEE"
   },
   {
-    "CategoryName": "SteelBlue3",
+    "CategoryName": "blue",
     "RGB": [
       79,
       148,
@@ -1791,7 +1773,7 @@
     "InputText": "4F94CD"
   },
   {
-    "CategoryName": "SteelBlue4",
+    "CategoryName": "blue",
     "RGB": [
       54,
       100,
@@ -1800,7 +1782,7 @@
     "InputText": "36648B"
   },
   {
-    "CategoryName": "blueish",
+    "CategoryName": "blue",
     "RGB": [
       51,
       102,
@@ -1809,7 +1791,7 @@
     "InputText": "336699"
   },
   {
-    "CategoryName": "blueish",
+    "CategoryName": "blue",
     "RGB": [
       51,
       153,
@@ -1818,7 +1800,7 @@
     "InputText": "3399CC"
   },
   {
-    "CategoryName": "bluelike",
+    "CategoryName": "blue",
     "RGB": [
       102,
       153,
@@ -1827,7 +1809,7 @@
     "InputText": "6699CC"
   },
   {
-    "CategoryName": "aquamarine",
+    "CategoryName": "green",
     "RGB": [
       127,
       255,
@@ -1836,7 +1818,7 @@
     "InputText": "7FFFD4"
   },
   {
-    "CategoryName": "aquamarine1",
+    "CategoryName": "green",
     "RGB": [
       127,
       255,
@@ -1845,7 +1827,7 @@
     "InputText": "7FFFD4"
   },
   {
-    "CategoryName": "aquamarine2",
+    "CategoryName": "green",
     "RGB": [
       118,
       238,
@@ -1854,7 +1836,7 @@
     "InputText": "76EEC6"
   },
   {
-    "CategoryName": "aquamarine3, MediumAquamarine",
+    "CategoryName": "green",
     "RGB": [
       102,
       205,
@@ -1863,7 +1845,7 @@
     "InputText": "66CDAA"
   },
   {
-    "CategoryName": "aquamarine4",
+    "CategoryName": "green",
     "RGB": [
       69,
       139,
@@ -1872,7 +1854,7 @@
     "InputText": "458B74"
   },
   {
-    "CategoryName": "azure",
+    "CategoryName": "white",
     "RGB": [
       240,
       255,
@@ -1881,7 +1863,7 @@
     "InputText": "F0FFFF"
   },
   {
-    "CategoryName": "azure1",
+    "CategoryName": "white",
     "RGB": [
       240,
       255,
@@ -1890,7 +1872,7 @@
     "InputText": "F0FFFF"
   },
   {
-    "CategoryName": "azure2",
+    "CategoryName": "white",
     "RGB": [
       224,
       238,
@@ -1899,7 +1881,7 @@
     "InputText": "E0EEEE"
   },
   {
-    "CategoryName": "azure3",
+    "CategoryName": "grey",
     "RGB": [
       193,
       205,
@@ -1908,7 +1890,7 @@
     "InputText": "C1CDCD"
   },
   {
-    "CategoryName": "azure4",
+    "CategoryName": "grey",
     "RGB": [
       131,
       139,
@@ -1926,7 +1908,7 @@
     "InputText": "0000FF"
   },
   {
-    "CategoryName": "blue1",
+    "CategoryName": "blue",
     "RGB": [
       0,
       0,
@@ -1935,7 +1917,7 @@
     "InputText": "0000FF"
   },
   {
-    "CategoryName": "blue2",
+    "CategoryName": "blue",
     "RGB": [
       0,
       0,
@@ -1944,7 +1926,7 @@
     "InputText": "0000EE"
   },
   {
-    "CategoryName": "blue3",
+    "CategoryName": "blue",
     "RGB": [
       0,
       0,
@@ -1953,7 +1935,7 @@
     "InputText": "0000CD"
   },
   {
-    "CategoryName": "blue4",
+    "CategoryName": "blue",
     "RGB": [
       0,
       0,
@@ -1962,16 +1944,7 @@
     "InputText": "00008B"
   },
   {
-    "CategoryName": "aqua",
-    "RGB": [
-      0,
-      255,
-      255
-    ],
-    "InputText": "00FFFF"
-  },
-  {
-    "CategoryName": "True Iris Blue",
+    "CategoryName": "green",
     "RGB": [
       3,
       180,
@@ -1980,7 +1953,7 @@
     "InputText": "03B4CC"
   },
   {
-    "CategoryName": "cyan",
+    "CategoryName": "green",
     "RGB": [
       0,
       255,
@@ -1989,7 +1962,7 @@
     "InputText": "00FFFF"
   },
   {
-    "CategoryName": "cyan1",
+    "CategoryName": "green",
     "RGB": [
       0,
       255,
@@ -1998,7 +1971,7 @@
     "InputText": "00FFFF"
   },
   {
-    "CategoryName": "cyan2",
+    "CategoryName": "green",
     "RGB": [
       0,
       238,
@@ -2007,7 +1980,7 @@
     "InputText": "00EEEE"
   },
   {
-    "CategoryName": "cyan3",
+    "CategoryName": "green",
     "RGB": [
       0,
       205,
@@ -2016,7 +1989,7 @@
     "InputText": "00CDCD"
   },
   {
-    "CategoryName": "cyan4",
+    "CategoryName": "green",
     "RGB": [
       0,
       139,
@@ -2025,25 +1998,16 @@
     "InputText": "008B8B"
   },
   {
-    "CategoryName": "navy",
-    "RGB": [
-      0,
-      0,
-      128
-    ],
-    "InputText": "80"
-  },
-  {
-    "CategoryName": "teal",
+    "CategoryName": "grey",
     "RGB": [
       0,
       128,
       128
     ],
-    "InputText": "8080"
+    "InputText": "808080"
   },
   {
-    "CategoryName": "turquoise",
+    "CategoryName": "green",
     "RGB": [
       64,
       224,
@@ -2052,7 +2016,7 @@
     "InputText": "40E0D0"
   },
   {
-    "CategoryName": "turquoise1",
+    "CategoryName": "green",
     "RGB": [
       0,
       245,
@@ -2061,7 +2025,7 @@
     "InputText": "00F5FF"
   },
   {
-    "CategoryName": "turquoise2",
+    "CategoryName": "green",
     "RGB": [
       0,
       229,
@@ -2070,7 +2034,7 @@
     "InputText": "00E5EE"
   },
   {
-    "CategoryName": "turquoise3",
+    "CategoryName": "green",
     "RGB": [
       0,
       197,
@@ -2079,7 +2043,7 @@
     "InputText": "00C5CD"
   },
   {
-    "CategoryName": "turquoise4",
+    "CategoryName": "green",
     "RGB": [
       0,
       134,
@@ -2088,7 +2052,7 @@
     "InputText": "00868B"
   },
   {
-    "CategoryName": "DarkSlateGray",
+    "CategoryName": "green",
     "RGB": [
       47,
       79,
@@ -2097,7 +2061,7 @@
     "InputText": "2F4F4F"
   },
   {
-    "CategoryName": "DarkSlateGray1",
+    "CategoryName": "green",
     "RGB": [
       151,
       255,
@@ -2106,7 +2070,7 @@
     "InputText": "97FFFF"
   },
   {
-    "CategoryName": "DarkSlateGray2",
+    "CategoryName": "green",
     "RGB": [
       141,
       238,
@@ -2115,7 +2079,7 @@
     "InputText": "8DEEEE"
   },
   {
-    "CategoryName": "DarkSlateGray3",
+    "CategoryName": "green",
     "RGB": [
       121,
       205,
@@ -2124,7 +2088,7 @@
     "InputText": "79CDCD"
   },
   {
-    "CategoryName": "DarkSlateGray4",
+    "CategoryName": "green",
     "RGB": [
       82,
       139,
@@ -2133,7 +2097,7 @@
     "InputText": "528B8B"
   },
   {
-    "CategoryName": "Dark Slate Blue",
+    "CategoryName": "blue",
     "RGB": [
       36,
       24,
@@ -2142,7 +2106,7 @@
     "InputText": "241882"
   },
   {
-    "CategoryName": "Dark Turquoise",
+    "CategoryName": "blue",
     "RGB": [
       112,
       147,
@@ -2151,7 +2115,7 @@
     "InputText": "7093DB"
   },
   {
-    "CategoryName": "Medium Slate Blue",
+    "CategoryName": "blue",
     "RGB": [
       127,
       0,
@@ -2160,7 +2124,7 @@
     "InputText": "7F00FF"
   },
   {
-    "CategoryName": "Medium Turquoise",
+    "CategoryName": "blue",
     "RGB": [
       112,
       219,
@@ -2169,7 +2133,7 @@
     "InputText": "70DBDB"
   },
   {
-    "CategoryName": "Midnight Blue",
+    "CategoryName": "blue",
     "RGB": [
       47,
       47,
@@ -2178,7 +2142,7 @@
     "InputText": "2F2F4F"
   },
   {
-    "CategoryName": "Navy Blue",
+    "CategoryName": "blue",
     "RGB": [
       35,
       35,
@@ -2187,7 +2151,7 @@
     "InputText": "23238E"
   },
   {
-    "CategoryName": "Neon Blue",
+    "CategoryName": "blue",
     "RGB": [
       77,
       77,
@@ -2196,7 +2160,7 @@
     "InputText": "4D4DFF"
   },
   {
-    "CategoryName": "New Midnight Blue",
+    "CategoryName": "blue",
     "RGB": [
       0,
       0,
@@ -2205,7 +2169,7 @@
     "InputText": "00009C"
   },
   {
-    "CategoryName": "Rich Blue",
+    "CategoryName": "blue",
     "RGB": [
       89,
       89,
@@ -2214,7 +2178,7 @@
     "InputText": "5959AB"
   },
   {
-    "CategoryName": "Sky Blue",
+    "CategoryName": "blue",
     "RGB": [
       50,
       153,
@@ -2223,7 +2187,7 @@
     "InputText": "3299CC"
   },
   {
-    "CategoryName": "Slate Blue",
+    "CategoryName": "blue",
     "RGB": [
       0,
       127,
@@ -2232,7 +2196,7 @@
     "InputText": "007FFF"
   },
   {
-    "CategoryName": "Summer Sky",
+    "CategoryName": "blue",
     "RGB": [
       56,
       176,
@@ -2241,7 +2205,7 @@
     "InputText": "38B0DE"
   },
   {
-    "CategoryName": "Iris Blue",
+    "CategoryName": "blue",
     "RGB": [
       3,
       180,
@@ -2250,7 +2214,7 @@
     "InputText": "03B4C8"
   },
   {
-    "CategoryName": "Free Speech Blue",
+    "CategoryName": "blue",
     "RGB": [
       65,
       86,
@@ -2259,7 +2223,7 @@
     "InputText": "4156C5"
   },
   {
-    "CategoryName": "RosyBrown",
+    "CategoryName": "brown",
     "RGB": [
       188,
       143,
@@ -2268,7 +2232,7 @@
     "InputText": "BC8F8F"
   },
   {
-    "CategoryName": "RosyBrown1",
+    "CategoryName": "brown",
     "RGB": [
       255,
       193,
@@ -2277,7 +2241,7 @@
     "InputText": "FFC1C1"
   },
   {
-    "CategoryName": "RosyBrown2",
+    "CategoryName": "brown",
     "RGB": [
       238,
       180,
@@ -2286,7 +2250,7 @@
     "InputText": "EEB4B4"
   },
   {
-    "CategoryName": "RosyBrown3",
+    "CategoryName": "brown",
     "RGB": [
       205,
       155,
@@ -2295,7 +2259,7 @@
     "InputText": "CD9B9B"
   },
   {
-    "CategoryName": "RosyBrown4",
+    "CategoryName": "brown",
     "RGB": [
       139,
       105,
@@ -2304,7 +2268,7 @@
     "InputText": "8B6969"
   },
   {
-    "CategoryName": "SaddleBrown",
+    "CategoryName": "brown",
     "RGB": [
       139,
       69,
@@ -2313,7 +2277,7 @@
     "InputText": "8B4513"
   },
   {
-    "CategoryName": "SandyBrown",
+    "CategoryName": "brown",
     "RGB": [
       244,
       164,
@@ -2322,7 +2286,7 @@
     "InputText": "F4A460"
   },
   {
-    "CategoryName": "beige",
+    "CategoryName": "brown",
     "RGB": [
       245,
       245,
@@ -2349,7 +2313,7 @@
     "InputText": "A62A2A"
   },
   {
-    "CategoryName": "brown1",
+    "CategoryName": "brown",
     "RGB": [
       255,
       64,
@@ -2358,7 +2322,7 @@
     "InputText": "FF4040"
   },
   {
-    "CategoryName": "brown2",
+    "CategoryName": "brown",
     "RGB": [
       238,
       59,
@@ -2367,7 +2331,7 @@
     "InputText": "EE3B3B"
   },
   {
-    "CategoryName": "brown3",
+    "CategoryName": "brown",
     "RGB": [
       205,
       51,
@@ -2376,7 +2340,7 @@
     "InputText": "CD3333"
   },
   {
-    "CategoryName": "brown4",
+    "CategoryName": "brown",
     "RGB": [
       139,
       35,
@@ -2385,7 +2349,7 @@
     "InputText": "8B2323"
   },
   {
-    "CategoryName": "dark brown",
+    "CategoryName": "brown",
     "RGB": [
       92,
       64,
@@ -2394,7 +2358,7 @@
     "InputText": "5C4033"
   },
   {
-    "CategoryName": "burlywood",
+    "CategoryName": "brown",
     "RGB": [
       222,
       184,
@@ -2403,7 +2367,7 @@
     "InputText": "DEB887"
   },
   {
-    "CategoryName": "burlywood1",
+    "CategoryName": "brown",
     "RGB": [
       255,
       211,
@@ -2412,7 +2376,7 @@
     "InputText": "FFD39B"
   },
   {
-    "CategoryName": "burlywood2",
+    "CategoryName": "brown",
     "RGB": [
       238,
       197,
@@ -2421,7 +2385,7 @@
     "InputText": "EEC591"
   },
   {
-    "CategoryName": "burlywood3",
+    "CategoryName": "brown",
     "RGB": [
       205,
       170,
@@ -2430,7 +2394,7 @@
     "InputText": "CDAA7D"
   },
   {
-    "CategoryName": "burlywood4",
+    "CategoryName": "brown",
     "RGB": [
       139,
       115,
@@ -2439,7 +2403,7 @@
     "InputText": "8B7355"
   },
   {
-    "CategoryName": "baker's chocolate",
+    "CategoryName": "brown",
     "RGB": [
       92,
       51,
@@ -2448,7 +2412,7 @@
     "InputText": "5C3317"
   },
   {
-    "CategoryName": "chocolate",
+    "CategoryName": "brown",
     "RGB": [
       210,
       105,
@@ -2457,7 +2421,7 @@
     "InputText": "D2691E"
   },
   {
-    "CategoryName": "chocolate1",
+    "CategoryName": "orange",
     "RGB": [
       255,
       127,
@@ -2466,7 +2430,7 @@
     "InputText": "FF7F24"
   },
   {
-    "CategoryName": "chocolate2",
+    "CategoryName": "orange",
     "RGB": [
       238,
       118,
@@ -2475,7 +2439,7 @@
     "InputText": "EE7621"
   },
   {
-    "CategoryName": "chocolate3",
+    "CategoryName": "orange",
     "RGB": [
       205,
       102,
@@ -2484,7 +2448,7 @@
     "InputText": "CD661D"
   },
   {
-    "CategoryName": "chocolate4",
+    "CategoryName": "red",
     "RGB": [
       139,
       69,
@@ -2493,7 +2457,7 @@
     "InputText": "8B4513"
   },
   {
-    "CategoryName": "peru",
+    "CategoryName": "brown",
     "RGB": [
       205,
       133,
@@ -2502,7 +2466,7 @@
     "InputText": "CD853F"
   },
   {
-    "CategoryName": "tan",
+    "CategoryName": "brown",
     "RGB": [
       210,
       180,
@@ -2511,7 +2475,7 @@
     "InputText": "D2B48C"
   },
   {
-    "CategoryName": "tan1",
+    "CategoryName": "brown",
     "RGB": [
       255,
       165,
@@ -2520,7 +2484,7 @@
     "InputText": "FFA54F"
   },
   {
-    "CategoryName": "tan2",
+    "CategoryName": "brown",
     "RGB": [
       238,
       154,
@@ -2529,7 +2493,7 @@
     "InputText": "EE9A49"
   },
   {
-    "CategoryName": "tan3",
+    "CategoryName": "brown",
     "RGB": [
       205,
       133,
@@ -2538,7 +2502,7 @@
     "InputText": "CD853F"
   },
   {
-    "CategoryName": "tan4",
+    "CategoryName": "brown",
     "RGB": [
       139,
       90,
@@ -2547,7 +2511,7 @@
     "InputText": "8B5A2B"
   },
   {
-    "CategoryName": "Dark Tan",
+    "CategoryName": "brown",
     "RGB": [
       151,
       105,
@@ -2556,7 +2520,7 @@
     "InputText": "97694F"
   },
   {
-    "CategoryName": "Light Wood",
+    "CategoryName": "brown",
     "RGB": [
       133,
       99,
@@ -2565,7 +2529,7 @@
     "InputText": "856363"
   },
   {
-    "CategoryName": "Medium Wood",
+    "CategoryName": "brown",
     "RGB": [
       166,
       128,
@@ -2574,7 +2538,7 @@
     "InputText": "A68064"
   },
   {
-    "CategoryName": "New Tan",
+    "CategoryName": "brown",
     "RGB": [
       235,
       199,
@@ -2583,7 +2547,7 @@
     "InputText": "EBC79E"
   },
   {
-    "CategoryName": "Semi-Sweet Chocolate",
+    "CategoryName": "brown",
     "RGB": [
       107,
       66,
@@ -2592,7 +2556,7 @@
     "InputText": "6B4226"
   },
   {
-    "CategoryName": "Sienna",
+    "CategoryName": "brown",
     "RGB": [
       142,
       107,
@@ -2601,7 +2565,7 @@
     "InputText": "8E6B23"
   },
   {
-    "CategoryName": "Tan",
+    "CategoryName": "brown",
     "RGB": [
       219,
       147,
@@ -2610,7 +2574,7 @@
     "InputText": "DB9370"
   },
   {
-    "CategoryName": "Very Dark Brown",
+    "CategoryName": "brown",
     "RGB": [
       92,
       64,
@@ -2619,7 +2583,7 @@
     "InputText": "5C4033"
   },
   {
-    "CategoryName": "Dark Green",
+    "CategoryName": "red",
     "RGB": [
       47,
       79,
@@ -2628,16 +2592,7 @@
     "InputText": "2F4F2F"
   },
   {
-    "CategoryName": "DarkGreen",
-    "RGB": [
-      0,
-      100,
-      0
-    ],
-    "InputText": "6400"
-  },
-  {
-    "CategoryName": "dark green copper",
+    "CategoryName": "green",
     "RGB": [
       74,
       118,
@@ -2646,7 +2601,7 @@
     "InputText": "4A766E"
   },
   {
-    "CategoryName": "DarkKhaki",
+    "CategoryName": "brown",
     "RGB": [
       189,
       183,
@@ -2655,7 +2610,7 @@
     "InputText": "BDB76B"
   },
   {
-    "CategoryName": "DarkOliveGreen",
+    "CategoryName": "red",
     "RGB": [
       85,
       107,
@@ -2664,7 +2619,7 @@
     "InputText": "556B2F"
   },
   {
-    "CategoryName": "DarkOliveGreen1",
+    "CategoryName": "yellow",
     "RGB": [
       202,
       255,
@@ -2673,7 +2628,7 @@
     "InputText": "CAFF70"
   },
   {
-    "CategoryName": "DarkOliveGreen2",
+    "CategoryName": "yellow",
     "RGB": [
       188,
       238,
@@ -2682,7 +2637,7 @@
     "InputText": "BCEE68"
   },
   {
-    "CategoryName": "DarkOliveGreen3",
+    "CategoryName": "green",
     "RGB": [
       162,
       205,
@@ -2691,7 +2646,7 @@
     "InputText": "A2CD5A"
   },
   {
-    "CategoryName": "DarkOliveGreen4",
+    "CategoryName": "brown",
     "RGB": [
       110,
       139,
@@ -2700,7 +2655,7 @@
     "InputText": "6E8B3D"
   },
   {
-    "CategoryName": "olive",
+    "CategoryName": "brown",
     "RGB": [
       128,
       128,
@@ -2709,7 +2664,7 @@
     "InputText": "808000"
   },
   {
-    "CategoryName": "DarkSeaGreen",
+    "CategoryName": "brown",
     "RGB": [
       143,
       188,
@@ -2718,7 +2673,7 @@
     "InputText": "8FBC8F"
   },
   {
-    "CategoryName": "DarkSeaGreen1",
+    "CategoryName": "brown",
     "RGB": [
       193,
       255,
@@ -2727,7 +2682,7 @@
     "InputText": "C1FFC1"
   },
   {
-    "CategoryName": "DarkSeaGreen2",
+    "CategoryName": "brown",
     "RGB": [
       180,
       238,
@@ -2736,7 +2691,7 @@
     "InputText": "B4EEB4"
   },
   {
-    "CategoryName": "DarkSeaGreen3",
+    "CategoryName": "brown",
     "RGB": [
       155,
       205,
@@ -2745,7 +2700,7 @@
     "InputText": "9BCD9B"
   },
   {
-    "CategoryName": "DarkSeaGreen4",
+    "CategoryName": "green",
     "RGB": [
       105,
       139,
@@ -2754,7 +2709,7 @@
     "InputText": "698B69"
   },
   {
-    "CategoryName": "ForestGreen",
+    "CategoryName": "green",
     "RGB": [
       34,
       139,
@@ -2763,7 +2718,7 @@
     "InputText": "228B22"
   },
   {
-    "CategoryName": "GreenYellow",
+    "CategoryName": "green",
     "RGB": [
       173,
       255,
@@ -2772,7 +2727,7 @@
     "InputText": "ADFF2F"
   },
   {
-    "CategoryName": "LawnGreen",
+    "CategoryName": "green",
     "RGB": [
       124,
       252,
@@ -2781,7 +2736,7 @@
     "InputText": "7CFC00"
   },
   {
-    "CategoryName": "LightSeaGreen",
+    "CategoryName": "green",
     "RGB": [
       32,
       178,
@@ -2790,7 +2745,7 @@
     "InputText": "20B2AA"
   },
   {
-    "CategoryName": "LimeGreen",
+    "CategoryName": "green",
     "RGB": [
       50,
       205,
@@ -2799,7 +2754,7 @@
     "InputText": "32CD32"
   },
   {
-    "CategoryName": "MediumSeaGreen",
+    "CategoryName": "green",
     "RGB": [
       60,
       179,
@@ -2808,7 +2763,7 @@
     "InputText": "3CB371"
   },
   {
-    "CategoryName": "MediumSpringGreen",
+    "CategoryName": "green",
     "RGB": [
       0,
       250,
@@ -2817,7 +2772,7 @@
     "InputText": "00FA9A"
   },
   {
-    "CategoryName": "MintCream",
+    "CategoryName": "white",
     "RGB": [
       245,
       255,
@@ -2826,7 +2781,7 @@
     "InputText": "F5FFFA"
   },
   {
-    "CategoryName": "OliveDrab",
+    "CategoryName": "green",
     "RGB": [
       107,
       142,
@@ -2835,7 +2790,7 @@
     "InputText": "6B8E23"
   },
   {
-    "CategoryName": "OliveDrab1",
+    "CategoryName": "green",
     "RGB": [
       192,
       255,
@@ -2844,7 +2799,7 @@
     "InputText": "C0FF3E"
   },
   {
-    "CategoryName": "OliveDrab2",
+    "CategoryName": "green",
     "RGB": [
       179,
       238,
@@ -2853,7 +2808,7 @@
     "InputText": "B3EE3A"
   },
   {
-    "CategoryName": "OliveDrab3",
+    "CategoryName": "green",
     "RGB": [
       154,
       205,
@@ -2862,7 +2817,7 @@
     "InputText": "9ACD32"
   },
   {
-    "CategoryName": "OliveDrab4",
+    "CategoryName": "green",
     "RGB": [
       105,
       139,
@@ -2871,7 +2826,7 @@
     "InputText": "698B22"
   },
   {
-    "CategoryName": "PaleGreen",
+    "CategoryName": "green",
     "RGB": [
       152,
       251,
@@ -2880,7 +2835,7 @@
     "InputText": "98FB98"
   },
   {
-    "CategoryName": "PaleGreen1",
+    "CategoryName": "green",
     "RGB": [
       154,
       255,
@@ -2889,7 +2844,7 @@
     "InputText": "9AFF9A"
   },
   {
-    "CategoryName": "PaleGreen2",
+    "CategoryName": "green",
     "RGB": [
       144,
       238,
@@ -2898,7 +2853,7 @@
     "InputText": "90EE90"
   },
   {
-    "CategoryName": "PaleGreen3",
+    "CategoryName": "green",
     "RGB": [
       124,
       205,
@@ -2907,7 +2862,7 @@
     "InputText": "7CCD7C"
   },
   {
-    "CategoryName": "PaleGreen4",
+    "CategoryName": "green",
     "RGB": [
       84,
       139,
@@ -2916,7 +2871,7 @@
     "InputText": "548B54"
   },
   {
-    "CategoryName": "SeaGreen, SeaGreen4",
+    "CategoryName": "green",
     "RGB": [
       46,
       139,
@@ -2925,7 +2880,7 @@
     "InputText": "2E8B57"
   },
   {
-    "CategoryName": "SeaGreen1",
+    "CategoryName": "green",
     "RGB": [
       84,
       255,
@@ -2934,7 +2889,7 @@
     "InputText": "54FF9F"
   },
   {
-    "CategoryName": "SeaGreen2",
+    "CategoryName": "green",
     "RGB": [
       78,
       238,
@@ -2943,7 +2898,7 @@
     "InputText": "4EEE94"
   },
   {
-    "CategoryName": "SeaGreen3",
+    "CategoryName": "green",
     "RGB": [
       67,
       205,
@@ -2952,7 +2907,7 @@
     "InputText": "43CD80"
   },
   {
-    "CategoryName": "SpringGreen",
+    "CategoryName": "green",
     "RGB": [
       0,
       255,
@@ -2961,7 +2916,7 @@
     "InputText": "00FF7F"
   },
   {
-    "CategoryName": "SpringGreen1",
+    "CategoryName": "green",
     "RGB": [
       0,
       255,
@@ -2970,7 +2925,7 @@
     "InputText": "00FF7F"
   },
   {
-    "CategoryName": "SpringGreen2",
+    "CategoryName": "green",
     "RGB": [
       0,
       238,
@@ -2979,7 +2934,7 @@
     "InputText": "00EE76"
   },
   {
-    "CategoryName": "SpringGreen3",
+    "CategoryName": "green",
     "RGB": [
       0,
       205,
@@ -2988,7 +2943,7 @@
     "InputText": "00CD66"
   },
   {
-    "CategoryName": "SpringGreen4",
+    "CategoryName": "green",
     "RGB": [
       0,
       139,
@@ -2997,7 +2952,7 @@
     "InputText": "008B45"
   },
   {
-    "CategoryName": "YellowGreen",
+    "CategoryName": "green",
     "RGB": [
       154,
       205,
@@ -3006,7 +2961,7 @@
     "InputText": "9ACD32"
   },
   {
-    "CategoryName": "chartreuse",
+    "CategoryName": "green",
     "RGB": [
       127,
       255,
@@ -3015,7 +2970,7 @@
     "InputText": "7FFF00"
   },
   {
-    "CategoryName": "chartreuse1",
+    "CategoryName": "green",
     "RGB": [
       127,
       255,
@@ -3024,7 +2979,7 @@
     "InputText": "7FFF00"
   },
   {
-    "CategoryName": "chartreuse2",
+    "CategoryName": "green",
     "RGB": [
       118,
       238,
@@ -3033,7 +2988,7 @@
     "InputText": "76EE00"
   },
   {
-    "CategoryName": "chartreuse3",
+    "CategoryName": "green",
     "RGB": [
       102,
       205,
@@ -3042,7 +2997,7 @@
     "InputText": "66CD00"
   },
   {
-    "CategoryName": "chartreuse4",
+    "CategoryName": "green",
     "RGB": [
       69,
       139,
@@ -3069,7 +3024,7 @@
     "InputText": "8000"
   },
   {
-    "CategoryName": "lime",
+    "CategoryName": "green",
     "RGB": [
       0,
       255,
@@ -3078,7 +3033,7 @@
     "InputText": "00FF00"
   },
   {
-    "CategoryName": "green1",
+    "CategoryName": "green",
     "RGB": [
       0,
       255,
@@ -3087,7 +3042,7 @@
     "InputText": "00FF00"
   },
   {
-    "CategoryName": "green2",
+    "CategoryName": "green",
     "RGB": [
       0,
       238,
@@ -3096,7 +3051,7 @@
     "InputText": "00EE00"
   },
   {
-    "CategoryName": "green3",
+    "CategoryName": "green",
     "RGB": [
       0,
       205,
@@ -3105,7 +3060,7 @@
     "InputText": "00CD00"
   },
   {
-    "CategoryName": "green4",
+    "CategoryName": "green",
     "RGB": [
       0,
       139,
@@ -3114,7 +3069,7 @@
     "InputText": "008B00"
   },
   {
-    "CategoryName": "khaki",
+    "CategoryName": "brown",
     "RGB": [
       240,
       230,
@@ -3123,7 +3078,7 @@
     "InputText": "F0E68C"
   },
   {
-    "CategoryName": "khaki1",
+    "CategoryName": "brown",
     "RGB": [
       255,
       246,
@@ -3132,7 +3087,7 @@
     "InputText": "FFF68F"
   },
   {
-    "CategoryName": "khaki2",
+    "CategoryName": "brown",
     "RGB": [
       238,
       230,
@@ -3141,7 +3096,7 @@
     "InputText": "EEE685"
   },
   {
-    "CategoryName": "khaki3",
+    "CategoryName": "brown",
     "RGB": [
       205,
       198,
@@ -3150,7 +3105,7 @@
     "InputText": "CDC673"
   },
   {
-    "CategoryName": "khaki4",
+    "CategoryName": "brown",
     "RGB": [
       139,
       134,
@@ -3159,7 +3114,7 @@
     "InputText": "8B864E"
   },
   {
-    "CategoryName": "Dark Olive Green",
+    "CategoryName": "brown",
     "RGB": [
       79,
       79,
@@ -3168,7 +3123,7 @@
     "InputText": "4F4F2F"
   },
   {
-    "CategoryName": "Green Yellow [sic]",
+    "CategoryName": "brown",
     "RGB": [
       209,
       146,
@@ -3177,7 +3132,7 @@
     "InputText": "D19275"
   },
   {
-    "CategoryName": "Hunter Green [sic]",
+    "CategoryName": "red",
     "RGB": [
       142,
       35,
@@ -3186,7 +3141,7 @@
     "InputText": "8E2323"
   },
   {
-    "CategoryName": "Medium Forest Green",
+    "CategoryName": "brown",
     "RGB": [
       219,
       219,
@@ -3195,16 +3150,7 @@
     "InputText": "DBDB70"
   },
   {
-    "CategoryName": "Medium Sea Green",
-    "RGB": [
-      66,
-      111,
-      66
-    ],
-    "InputText": "426F42"
-  },
-  {
-    "CategoryName": "Medium Spring Green",
+    "CategoryName": "red",
     "RGB": [
       127,
       255,
@@ -3213,7 +3159,7 @@
     "InputText": "7FFF00"
   },
   {
-    "CategoryName": "Pale Green",
+    "CategoryName": "red",
     "RGB": [
       143,
       188,
@@ -3222,7 +3168,7 @@
     "InputText": "8FBC8F"
   },
   {
-    "CategoryName": "Spring Green",
+    "CategoryName": "red",
     "RGB": [
       0,
       255,
@@ -3231,7 +3177,7 @@
     "InputText": "00FF7F"
   },
   {
-    "CategoryName": "Free Speech Green",
+    "CategoryName": "red",
     "RGB": [
       9,
       249,
@@ -3240,7 +3186,7 @@
     "InputText": "09F911"
   },
   {
-    "CategoryName": "Free Speech Aquamarine",
+    "CategoryName": "red",
     "RGB": [
       2,
       157,
@@ -3249,7 +3195,7 @@
     "InputText": "029D74"
   },
   {
-    "CategoryName": "DarkOrange",
+    "CategoryName": "orange",
     "RGB": [
       255,
       140,
@@ -3258,7 +3204,7 @@
     "InputText": "FF8C00"
   },
   {
-    "CategoryName": "DarkOrange1",
+    "CategoryName": "orange",
     "RGB": [
       255,
       127,
@@ -3267,7 +3213,7 @@
     "InputText": "FF7F00"
   },
   {
-    "CategoryName": "DarkOrange2",
+    "CategoryName": "orange",
     "RGB": [
       238,
       118,
@@ -3276,7 +3222,7 @@
     "InputText": "EE7600"
   },
   {
-    "CategoryName": "DarkOrange3",
+    "CategoryName": "orange",
     "RGB": [
       205,
       102,
@@ -3285,7 +3231,7 @@
     "InputText": "CD6600"
   },
   {
-    "CategoryName": "DarkOrange4",
+    "CategoryName": "orange",
     "RGB": [
       139,
       69,
@@ -3294,7 +3240,7 @@
     "InputText": "8B4500"
   },
   {
-    "CategoryName": "DarkSalmon",
+    "CategoryName": "pink",
     "RGB": [
       233,
       150,
@@ -3303,7 +3249,7 @@
     "InputText": "E9967A"
   },
   {
-    "CategoryName": "LightCoral",
+    "CategoryName": "pink",
     "RGB": [
       240,
       128,
@@ -3312,7 +3258,7 @@
     "InputText": "F08080"
   },
   {
-    "CategoryName": "LightSalmon",
+    "CategoryName": "pink",
     "RGB": [
       255,
       160,
@@ -3321,34 +3267,7 @@
     "InputText": "FFA07A"
   },
   {
-    "CategoryName": "LightSalmon1",
-    "RGB": [
-      255,
-      160,
-      122
-    ],
-    "InputText": "FFA07A"
-  },
-  {
-    "CategoryName": "LightSalmon2",
-    "RGB": [
-      238,
-      149,
-      114
-    ],
-    "InputText": "EE9572"
-  },
-  {
-    "CategoryName": "LightSalmon3",
-    "RGB": [
-      205,
-      129,
-      98
-    ],
-    "InputText": "CD8162"
-  },
-  {
-    "CategoryName": "LightSalmon4",
+    "CategoryName": "brown",
     "RGB": [
       139,
       87,
@@ -3357,7 +3276,7 @@
     "InputText": "8B5742"
   },
   {
-    "CategoryName": "PeachPuff",
+    "CategoryName": "brown",
     "RGB": [
       255,
       218,
@@ -3366,7 +3285,7 @@
     "InputText": "FFDAB9"
   },
   {
-    "CategoryName": "PeachPuff1",
+    "CategoryName": "brown",
     "RGB": [
       255,
       218,
@@ -3375,7 +3294,7 @@
     "InputText": "FFDAB9"
   },
   {
-    "CategoryName": "PeachPuff2",
+    "CategoryName": "brown",
     "RGB": [
       238,
       203,
@@ -3384,7 +3303,7 @@
     "InputText": "EECBAD"
   },
   {
-    "CategoryName": "PeachPuff3",
+    "CategoryName": "brown",
     "RGB": [
       205,
       175,
@@ -3393,7 +3312,7 @@
     "InputText": "CDAF95"
   },
   {
-    "CategoryName": "PeachPuff4",
+    "CategoryName": "brown",
     "RGB": [
       139,
       119,
@@ -3402,7 +3321,7 @@
     "InputText": "8B7765"
   },
   {
-    "CategoryName": "bisque",
+    "CategoryName": "orange",
     "RGB": [
       255,
       228,
@@ -3411,7 +3330,7 @@
     "InputText": "FFE4C4"
   },
   {
-    "CategoryName": "bisque1",
+    "CategoryName": "orange",
     "RGB": [
       255,
       228,
@@ -3420,7 +3339,7 @@
     "InputText": "FFE4C4"
   },
   {
-    "CategoryName": "bisque2",
+    "CategoryName": "orange",
     "RGB": [
       238,
       213,
@@ -3429,7 +3348,7 @@
     "InputText": "EED5B7"
   },
   {
-    "CategoryName": "bisque3",
+    "CategoryName": "orange",
     "RGB": [
       205,
       183,
@@ -3438,7 +3357,7 @@
     "InputText": "CDB79E"
   },
   {
-    "CategoryName": "bisque4",
+    "CategoryName": "grey",
     "RGB": [
       139,
       125,
@@ -3447,7 +3366,7 @@
     "InputText": "8B7D6B"
   },
   {
-    "CategoryName": "coral",
+    "CategoryName": "orange",
     "RGB": [
       255,
       127,
@@ -3456,7 +3375,7 @@
     "InputText": "FF7F00"
   },
   {
-    "CategoryName": "coral",
+    "CategoryName": "orange",
     "RGB": [
       255,
       127,
@@ -3465,7 +3384,7 @@
     "InputText": "FF7F50"
   },
   {
-    "CategoryName": "coral1",
+    "CategoryName": "orange",
     "RGB": [
       255,
       114,
@@ -3474,7 +3393,7 @@
     "InputText": "FF7256"
   },
   {
-    "CategoryName": "coral2",
+    "CategoryName": "orange",
     "RGB": [
       238,
       106,
@@ -3483,7 +3402,7 @@
     "InputText": "EE6A50"
   },
   {
-    "CategoryName": "coral3",
+    "CategoryName": "orange",
     "RGB": [
       205,
       91,
@@ -3492,7 +3411,7 @@
     "InputText": "CD5B45"
   },
   {
-    "CategoryName": "coral4",
+    "CategoryName": "orange",
     "RGB": [
       139,
       62,
@@ -3501,7 +3420,7 @@
     "InputText": "8B3E2F"
   },
   {
-    "CategoryName": "honeydew",
+    "CategoryName": "white",
     "RGB": [
       240,
       255,
@@ -3510,16 +3429,7 @@
     "InputText": "F0FFF0"
   },
   {
-    "CategoryName": "honeydew1",
-    "RGB": [
-      240,
-      255,
-      240
-    ],
-    "InputText": "F0FFF0"
-  },
-  {
-    "CategoryName": "honeydew2",
+    "CategoryName": "white",
     "RGB": [
       224,
       238,
@@ -3534,16 +3444,16 @@
       205,
       193
     ],
-    "InputText": "C1CDC1"
+    "InputText": "white"
   },
   {
-    "CategoryName": "honeydew4",
+    "CategoryName": "red",
     "RGB": [
       131,
       139,
       131
     ],
-    "InputText": "838B83"
+    "InputText": "green"
   },
   {
     "CategoryName": "orange",
@@ -3555,7 +3465,7 @@
     "InputText": "FFA500"
   },
   {
-    "CategoryName": "orange1",
+    "CategoryName": "orange",
     "RGB": [
       255,
       165,
@@ -3564,7 +3474,7 @@
     "InputText": "FFA500"
   },
   {
-    "CategoryName": "orange2",
+    "CategoryName": "orange",
     "RGB": [
       238,
       154,
@@ -3573,7 +3483,7 @@
     "InputText": "EE9A00"
   },
   {
-    "CategoryName": "orange3",
+    "CategoryName": "orange",
     "RGB": [
       205,
       133,
@@ -3582,7 +3492,7 @@
     "InputText": "CD8500"
   },
   {
-    "CategoryName": "orange4",
+    "CategoryName": "orange",
     "RGB": [
       139,
       90,
@@ -3591,7 +3501,7 @@
     "InputText": "8B5A00"
   },
   {
-    "CategoryName": "salmon",
+    "CategoryName": "orange",
     "RGB": [
       250,
       128,
@@ -3600,7 +3510,7 @@
     "InputText": "FA8072"
   },
   {
-    "CategoryName": "salmon1",
+    "CategoryName": "orange",
     "RGB": [
       255,
       140,
@@ -3609,7 +3519,7 @@
     "InputText": "FF8C69"
   },
   {
-    "CategoryName": "salmon2",
+    "CategoryName": "orange",
     "RGB": [
       238,
       130,
@@ -3618,7 +3528,7 @@
     "InputText": "EE8262"
   },
   {
-    "CategoryName": "salmon3",
+    "CategoryName": "orange",
     "RGB": [
       205,
       112,
@@ -3627,7 +3537,7 @@
     "InputText": "CD7054"
   },
   {
-    "CategoryName": "salmon4",
+    "CategoryName": "orange",
     "RGB": [
       139,
       76,
@@ -3636,7 +3546,7 @@
     "InputText": "8B4C39"
   },
   {
-    "CategoryName": "sienna",
+    "CategoryName": "orange",
     "RGB": [
       160,
       82,
@@ -3645,7 +3555,7 @@
     "InputText": "A0522D"
   },
   {
-    "CategoryName": "sienna1",
+    "CategoryName": "orange",
     "RGB": [
       255,
       130,
@@ -3654,7 +3564,7 @@
     "InputText": "FF8247"
   },
   {
-    "CategoryName": "sienna2",
+    "CategoryName": "orange",
     "RGB": [
       238,
       121,
@@ -3663,7 +3573,7 @@
     "InputText": "EE7942"
   },
   {
-    "CategoryName": "sienna3",
+    "CategoryName": "orange",
     "RGB": [
       205,
       104,
@@ -3672,7 +3582,7 @@
     "InputText": "CD6839"
   },
   {
-    "CategoryName": "sienna4",
+    "CategoryName": "orange",
     "RGB": [
       139,
       71,
@@ -3681,7 +3591,7 @@
     "InputText": "8B4726"
   },
   {
-    "CategoryName": "Mandarian Orange",
+    "CategoryName": "orange",
     "RGB": [
       142,
       35,
@@ -3690,7 +3600,7 @@
     "InputText": "8E2323"
   },
   {
-    "CategoryName": "Orange",
+    "CategoryName": "orange",
     "RGB": [
       255,
       127,
@@ -3699,7 +3609,7 @@
     "InputText": "FF7F00"
   },
   {
-    "CategoryName": "Orange Red",
+    "CategoryName": "orange",
     "RGB": [
       255,
       36,
@@ -3708,7 +3618,7 @@
     "InputText": "FF2400"
   },
   {
-    "CategoryName": "DeepPink",
+    "CategoryName": "pink",
     "RGB": [
       255,
       20,
@@ -3717,7 +3627,7 @@
     "InputText": "FF1493"
   },
   {
-    "CategoryName": "DeepPink1",
+    "CategoryName": "pink",
     "RGB": [
       255,
       20,
@@ -3726,7 +3636,7 @@
     "InputText": "FF1493"
   },
   {
-    "CategoryName": "DeepPink2",
+    "CategoryName": "pink",
     "RGB": [
       238,
       18,
@@ -3735,7 +3645,7 @@
     "InputText": "EE1289"
   },
   {
-    "CategoryName": "DeepPink3",
+    "CategoryName": "pink",
     "RGB": [
       205,
       16,
@@ -3744,7 +3654,7 @@
     "InputText": "CD1076"
   },
   {
-    "CategoryName": "DeepPink4",
+    "CategoryName": "pink",
     "RGB": [
       139,
       10,
@@ -3753,7 +3663,7 @@
     "InputText": "8B0A50"
   },
   {
-    "CategoryName": "HotPink",
+    "CategoryName": "pink",
     "RGB": [
       255,
       105,
@@ -3762,7 +3672,7 @@
     "InputText": "FF69B4"
   },
   {
-    "CategoryName": "HotPink1",
+    "CategoryName": "pink",
     "RGB": [
       255,
       110,
@@ -3771,7 +3681,7 @@
     "InputText": "FF6EB4"
   },
   {
-    "CategoryName": "HotPink2",
+    "CategoryName": "pink",
     "RGB": [
       238,
       106,
@@ -3780,7 +3690,7 @@
     "InputText": "EE6AA7"
   },
   {
-    "CategoryName": "HotPink3",
+    "CategoryName": "pink",
     "RGB": [
       205,
       96,
@@ -3789,7 +3699,7 @@
     "InputText": "CD6090"
   },
   {
-    "CategoryName": "HotPink4",
+    "CategoryName": "pink",
     "RGB": [
       139,
       58,
@@ -3798,7 +3708,7 @@
     "InputText": "8B3A62"
   },
   {
-    "CategoryName": "IndianRed",
+    "CategoryName": "pink",
     "RGB": [
       205,
       92,
@@ -3807,7 +3717,7 @@
     "InputText": "CD5C5C"
   },
   {
-    "CategoryName": "IndianRed1",
+    "CategoryName": "pink",
     "RGB": [
       255,
       106,
@@ -3816,7 +3726,7 @@
     "InputText": "FF6A6A"
   },
   {
-    "CategoryName": "IndianRed2",
+    "CategoryName": "pink",
     "RGB": [
       238,
       99,
@@ -3825,7 +3735,7 @@
     "InputText": "EE6363"
   },
   {
-    "CategoryName": "IndianRed3",
+    "CategoryName": "pink",
     "RGB": [
       205,
       85,
@@ -3834,7 +3744,7 @@
     "InputText": "CD5555"
   },
   {
-    "CategoryName": "IndianRed4",
+    "CategoryName": "pink",
     "RGB": [
       139,
       58,
@@ -3843,7 +3753,7 @@
     "InputText": "8B3A3A"
   },
   {
-    "CategoryName": "LightPink",
+    "CategoryName": "pink",
     "RGB": [
       255,
       182,
@@ -3852,7 +3762,7 @@
     "InputText": "FFB6C1"
   },
   {
-    "CategoryName": "LightPink1",
+    "CategoryName": "pink",
     "RGB": [
       255,
       174,
@@ -3861,7 +3771,7 @@
     "InputText": "FFAEB9"
   },
   {
-    "CategoryName": "LightPink2",
+    "CategoryName": "pink",
     "RGB": [
       238,
       162,
@@ -3870,7 +3780,7 @@
     "InputText": "EEA2AD"
   },
   {
-    "CategoryName": "LightPink3",
+    "CategoryName": "pink",
     "RGB": [
       205,
       140,
@@ -3879,7 +3789,7 @@
     "InputText": "CD8C95"
   },
   {
-    "CategoryName": "LightPink4",
+    "CategoryName": "pink",
     "RGB": [
       139,
       95,
@@ -3888,7 +3798,7 @@
     "InputText": "8B5F65"
   },
   {
-    "CategoryName": "MediumVioletRed",
+    "CategoryName": "pink",
     "RGB": [
       199,
       21,
@@ -3897,7 +3807,7 @@
     "InputText": "C71585"
   },
   {
-    "CategoryName": "MistyRose",
+    "CategoryName": "pink",
     "RGB": [
       255,
       228,
@@ -3906,16 +3816,7 @@
     "InputText": "FFE4E1"
   },
   {
-    "CategoryName": "MistyRose1",
-    "RGB": [
-      255,
-      228,
-      225
-    ],
-    "InputText": "FFE4E1"
-  },
-  {
-    "CategoryName": "MistyRose2",
+    "CategoryName": "pink",
     "RGB": [
       238,
       213,
@@ -3924,7 +3825,7 @@
     "InputText": "EED5D2"
   },
   {
-    "CategoryName": "MistyRose3",
+    "CategoryName": "pink",
     "RGB": [
       205,
       183,
@@ -3933,7 +3834,7 @@
     "InputText": "CDB7B5"
   },
   {
-    "CategoryName": "MistyRose4",
+    "CategoryName": "grey",
     "RGB": [
       139,
       125,
@@ -3942,7 +3843,7 @@
     "InputText": "8B7D7B"
   },
   {
-    "CategoryName": "OrangeRed",
+    "CategoryName": "orange",
     "RGB": [
       255,
       69,
@@ -3951,7 +3852,7 @@
     "InputText": "FF4500"
   },
   {
-    "CategoryName": "OrangeRed1",
+    "CategoryName": "orange",
     "RGB": [
       255,
       69,
@@ -3960,7 +3861,7 @@
     "InputText": "FF4500"
   },
   {
-    "CategoryName": "OrangeRed2",
+    "CategoryName": "orange",
     "RGB": [
       238,
       64,
@@ -3969,7 +3870,7 @@
     "InputText": "EE4000"
   },
   {
-    "CategoryName": "OrangeRed3",
+    "CategoryName": "orange",
     "RGB": [
       205,
       55,
@@ -3978,7 +3879,7 @@
     "InputText": "CD3700"
   },
   {
-    "CategoryName": "OrangeRed4",
+    "CategoryName": "orange",
     "RGB": [
       139,
       37,
@@ -3987,7 +3888,7 @@
     "InputText": "8B2500"
   },
   {
-    "CategoryName": "PaleVioletRed",
+    "CategoryName": "red",
     "RGB": [
       219,
       112,
@@ -3996,7 +3897,7 @@
     "InputText": "DB7093"
   },
   {
-    "CategoryName": "PaleVioletRed1",
+    "CategoryName": "red",
     "RGB": [
       255,
       130,
@@ -4005,7 +3906,7 @@
     "InputText": "FF82AB"
   },
   {
-    "CategoryName": "PaleVioletRed2",
+    "CategoryName": "red",
     "RGB": [
       238,
       121,
@@ -4014,7 +3915,7 @@
     "InputText": "EE799F"
   },
   {
-    "CategoryName": "PaleVioletRed3",
+    "CategoryName": "red",
     "RGB": [
       205,
       104,
@@ -4023,7 +3924,7 @@
     "InputText": "CD6889"
   },
   {
-    "CategoryName": "PaleVioletRed4",
+    "CategoryName": "red",
     "RGB": [
       139,
       71,
@@ -4032,7 +3933,7 @@
     "InputText": "8B475D"
   },
   {
-    "CategoryName": "VioletRed",
+    "CategoryName": "red",
     "RGB": [
       208,
       32,
@@ -4041,7 +3942,7 @@
     "InputText": "D02090"
   },
   {
-    "CategoryName": "VioletRed1",
+    "CategoryName": "red",
     "RGB": [
       255,
       62,
@@ -4050,7 +3951,7 @@
     "InputText": "FF3E96"
   },
   {
-    "CategoryName": "VioletRed2",
+    "CategoryName": "red",
     "RGB": [
       238,
       58,
@@ -4059,7 +3960,7 @@
     "InputText": "EE3A8C"
   },
   {
-    "CategoryName": "VioletRed3",
+    "CategoryName": "red",
     "RGB": [
       205,
       50,
@@ -4068,7 +3969,7 @@
     "InputText": "CD3278"
   },
   {
-    "CategoryName": "VioletRed4",
+    "CategoryName": "red",
     "RGB": [
       139,
       34,
@@ -4077,7 +3978,7 @@
     "InputText": "8B2252"
   },
   {
-    "CategoryName": "firebrick",
+    "CategoryName": "red",
     "RGB": [
       178,
       34,
@@ -4086,7 +3987,7 @@
     "InputText": "B22222"
   },
   {
-    "CategoryName": "firebrick1",
+    "CategoryName": "red",
     "RGB": [
       255,
       48,
@@ -4095,7 +3996,7 @@
     "InputText": "FF3030"
   },
   {
-    "CategoryName": "firebrick2",
+    "CategoryName": "red",
     "RGB": [
       238,
       44,
@@ -4104,7 +4005,7 @@
     "InputText": "EE2C2C"
   },
   {
-    "CategoryName": "firebrick3",
+    "CategoryName": "red",
     "RGB": [
       205,
       38,
@@ -4113,7 +4014,7 @@
     "InputText": "CD2626"
   },
   {
-    "CategoryName": "firebrick4",
+    "CategoryName": "red",
     "RGB": [
       139,
       26,
@@ -4131,7 +4032,7 @@
     "InputText": "FFC0CB"
   },
   {
-    "CategoryName": "pink1",
+    "CategoryName": "pink",
     "RGB": [
       255,
       181,
@@ -4140,7 +4041,7 @@
     "InputText": "FFB5C5"
   },
   {
-    "CategoryName": "pink2",
+    "CategoryName": "pink",
     "RGB": [
       238,
       169,
@@ -4149,7 +4050,7 @@
     "InputText": "EEA9B8"
   },
   {
-    "CategoryName": "pink3",
+    "CategoryName": "pink",
     "RGB": [
       205,
       145,
@@ -4158,7 +4059,7 @@
     "InputText": "CD919E"
   },
   {
-    "CategoryName": "pink4",
+    "CategoryName": "pink",
     "RGB": [
       139,
       99,
@@ -4167,7 +4068,7 @@
     "InputText": "8B636C"
   },
   {
-    "CategoryName": "Flesh",
+    "CategoryName": "pink",
     "RGB": [
       245,
       204,
@@ -4176,16 +4077,7 @@
     "InputText": "F5CCB0"
   },
   {
-    "CategoryName": "Feldspar",
-    "RGB": [
-      209,
-      146,
-      117
-    ],
-    "InputText": "D19275"
-  },
-  {
-    "CategoryName": "redish",
+    "CategoryName": "red",
     "RGB": [
       204,
       51,
@@ -4203,7 +4095,7 @@
     "InputText": "FF0000"
   },
   {
-    "CategoryName": "red1",
+    "CategoryName": "red",
     "RGB": [
       255,
       0,
@@ -4212,7 +4104,7 @@
     "InputText": "FF0000"
   },
   {
-    "CategoryName": "red2",
+    "CategoryName": "red",
     "RGB": [
       238,
       0,
@@ -4221,7 +4113,7 @@
     "InputText": "EE0000"
   },
   {
-    "CategoryName": "red3",
+    "CategoryName": "red",
     "RGB": [
       205,
       0,
@@ -4230,7 +4122,7 @@
     "InputText": "CD0000"
   },
   {
-    "CategoryName": "red4",
+    "CategoryName": "red",
     "RGB": [
       139,
       0,
@@ -4239,7 +4131,7 @@
     "InputText": "8B0000"
   },
   {
-    "CategoryName": "tomato",
+    "CategoryName": "red",
     "RGB": [
       255,
       99,
@@ -4248,7 +4140,7 @@
     "InputText": "FF6347"
   },
   {
-    "CategoryName": "tomato1",
+    "CategoryName": "red",
     "RGB": [
       255,
       99,
@@ -4257,7 +4149,7 @@
     "InputText": "FF6347"
   },
   {
-    "CategoryName": "tomato2",
+    "CategoryName": "red",
     "RGB": [
       238,
       92,
@@ -4266,7 +4158,7 @@
     "InputText": "EE5C42"
   },
   {
-    "CategoryName": "tomato3",
+    "CategoryName": "red",
     "RGB": [
       205,
       79,
@@ -4275,7 +4167,7 @@
     "InputText": "CD4F39"
   },
   {
-    "CategoryName": "tomato4",
+    "CategoryName": "red",
     "RGB": [
       139,
       54,
@@ -4284,7 +4176,7 @@
     "InputText": "8B3626"
   },
   {
-    "CategoryName": "Dusty Rose",
+    "CategoryName": "red",
     "RGB": [
       133,
       99,
@@ -4293,7 +4185,7 @@
     "InputText": "856363"
   },
   {
-    "CategoryName": "Firebrick",
+    "CategoryName": "red",
     "RGB": [
       142,
       35,
@@ -4302,7 +4194,7 @@
     "InputText": "8E2323"
   },
   {
-    "CategoryName": "Indian Red",
+    "CategoryName": "red",
     "RGB": [
       245,
       204,
@@ -4311,7 +4203,7 @@
     "InputText": "F5CCB0"
   },
   {
-    "CategoryName": "Pink",
+    "CategoryName": "pink",
     "RGB": [
       188,
       143,
@@ -4320,7 +4212,7 @@
     "InputText": "BC8F8F"
   },
   {
-    "CategoryName": "Salmon",
+    "CategoryName": "purple",
     "RGB": [
       111,
       66,
@@ -4329,7 +4221,7 @@
     "InputText": "6F4242"
   },
   {
-    "CategoryName": "Scarlet",
+    "CategoryName": "red",
     "RGB": [
       140,
       23,
@@ -4338,7 +4230,7 @@
     "InputText": "8C1717"
   },
   {
-    "CategoryName": "Spicy Pink",
+    "CategoryName": "pink",
     "RGB": [
       255,
       28,
@@ -4347,7 +4239,7 @@
     "InputText": "FF1CAE"
   },
   {
-    "CategoryName": "Free Speech Magenta",
+    "CategoryName": "pink",
     "RGB": [
       227,
       91,
@@ -4356,7 +4248,7 @@
     "InputText": "E35BD8"
   },
   {
-    "CategoryName": "Free Speech Red",
+    "CategoryName": "purple",
     "RGB": [
       192,
       0,
@@ -4365,7 +4257,7 @@
     "InputText": "C00000"
   },
   {
-    "CategoryName": "DarkOrchid",
+    "CategoryName": "purple",
     "RGB": [
       153,
       50,
@@ -4374,7 +4266,7 @@
     "InputText": "9932CC"
   },
   {
-    "CategoryName": "DarkOrchid1",
+    "CategoryName": "purple",
     "RGB": [
       191,
       62,
@@ -4383,7 +4275,7 @@
     "InputText": "BF3EFF"
   },
   {
-    "CategoryName": "DarkOrchid2",
+    "CategoryName": "purple",
     "RGB": [
       178,
       58,
@@ -4392,7 +4284,7 @@
     "InputText": "B23AEE"
   },
   {
-    "CategoryName": "DarkOrchid3",
+    "CategoryName": "purple",
     "RGB": [
       154,
       50,
@@ -4401,7 +4293,7 @@
     "InputText": "9A32CD"
   },
   {
-    "CategoryName": "DarkOrchid4",
+    "CategoryName": "purple",
     "RGB": [
       104,
       34,
@@ -4410,7 +4302,7 @@
     "InputText": "68228B"
   },
   {
-    "CategoryName": "DarkViolet",
+    "CategoryName": "purple",
     "RGB": [
       148,
       0,
@@ -4419,7 +4311,7 @@
     "InputText": "9400D3"
   },
   {
-    "CategoryName": "LavenderBlush",
+    "CategoryName": "white",
     "RGB": [
       255,
       240,
@@ -4428,16 +4320,7 @@
     "InputText": "FFF0F5"
   },
   {
-    "CategoryName": "LavenderBlush1",
-    "RGB": [
-      255,
-      240,
-      245
-    ],
-    "InputText": "FFF0F5"
-  },
-  {
-    "CategoryName": "LavenderBlush2",
+    "CategoryName": "white",
     "RGB": [
       238,
       224,
@@ -4446,7 +4329,7 @@
     "InputText": "EEE0E5"
   },
   {
-    "CategoryName": "LavenderBlush3",
+    "CategoryName": "grey",
     "RGB": [
       205,
       193,
@@ -4455,7 +4338,7 @@
     "InputText": "CDC1C5"
   },
   {
-    "CategoryName": "LavenderBlush4",
+    "CategoryName": "grey",
     "RGB": [
       139,
       131,
@@ -4464,7 +4347,7 @@
     "InputText": "8B8386"
   },
   {
-    "CategoryName": "MediumOrchid",
+    "CategoryName": "purple",
     "RGB": [
       186,
       85,
@@ -4473,7 +4356,7 @@
     "InputText": "BA55D3"
   },
   {
-    "CategoryName": "MediumOrchid1",
+    "CategoryName": "purple",
     "RGB": [
       224,
       102,
@@ -4482,7 +4365,7 @@
     "InputText": "E066FF"
   },
   {
-    "CategoryName": "MediumOrchid2",
+    "CategoryName": "purple",
     "RGB": [
       209,
       95,
@@ -4491,7 +4374,7 @@
     "InputText": "D15FEE"
   },
   {
-    "CategoryName": "MediumOrchid3",
+    "CategoryName": "purple",
     "RGB": [
       180,
       82,
@@ -4500,7 +4383,7 @@
     "InputText": "B452CD"
   },
   {
-    "CategoryName": "MediumOrchid4",
+    "CategoryName": "purple",
     "RGB": [
       122,
       55,
@@ -4509,7 +4392,7 @@
     "InputText": "7A378B"
   },
   {
-    "CategoryName": "MediumPurple",
+    "CategoryName": "purple",
     "RGB": [
       147,
       112,
@@ -4518,7 +4401,7 @@
     "InputText": "9370DB"
   },
   {
-    "CategoryName": "Medium Orchid",
+    "CategoryName": "purple",
     "RGB": [
       147,
       112,
@@ -4527,7 +4410,7 @@
     "InputText": "9370DB"
   },
   {
-    "CategoryName": "MediumPurple1",
+    "CategoryName": "purple",
     "RGB": [
       171,
       130,
@@ -4536,7 +4419,7 @@
     "InputText": "AB82FF"
   },
   {
-    "CategoryName": "Dark Orchid",
+    "CategoryName": "purple",
     "RGB": [
       153,
       50,
@@ -4545,7 +4428,7 @@
     "InputText": "9932CD"
   },
   {
-    "CategoryName": "MediumPurple2",
+    "CategoryName": "purple",
     "RGB": [
       159,
       121,
@@ -4554,7 +4437,7 @@
     "InputText": "9F79EE"
   },
   {
-    "CategoryName": "MediumPurple3",
+    "CategoryName": "purple",
     "RGB": [
       137,
       104,
@@ -4563,7 +4446,7 @@
     "InputText": "8968CD"
   },
   {
-    "CategoryName": "MediumPurple4",
+    "CategoryName": "purple",
     "RGB": [
       93,
       71,
@@ -4572,7 +4455,7 @@
     "InputText": "5D478B"
   },
   {
-    "CategoryName": "lavender",
+    "CategoryName": "purple",
     "RGB": [
       230,
       230,
@@ -4581,7 +4464,7 @@
     "InputText": "E6E6FA"
   },
   {
-    "CategoryName": "magenta",
+    "CategoryName": "pink",
     "RGB": [
       255,
       0,
@@ -4590,7 +4473,7 @@
     "InputText": "FF00FF"
   },
   {
-    "CategoryName": "fuchsia",
+    "CategoryName": "pink",
     "RGB": [
       255,
       0,
@@ -4599,7 +4482,7 @@
     "InputText": "FF00FF"
   },
   {
-    "CategoryName": "magenta1",
+    "CategoryName": "pink",
     "RGB": [
       255,
       0,
@@ -4608,7 +4491,7 @@
     "InputText": "FF00FF"
   },
   {
-    "CategoryName": "magenta2",
+    "CategoryName": "pink",
     "RGB": [
       238,
       0,
@@ -4617,7 +4500,7 @@
     "InputText": "EE00EE"
   },
   {
-    "CategoryName": "magenta3",
+    "CategoryName": "pink",
     "RGB": [
       205,
       0,
@@ -4626,7 +4509,7 @@
     "InputText": "CD00CD"
   },
   {
-    "CategoryName": "magenta4",
+    "CategoryName": "pink",
     "RGB": [
       139,
       0,
@@ -4635,7 +4518,7 @@
     "InputText": "8B008B"
   },
   {
-    "CategoryName": "maroon",
+    "CategoryName": "red",
     "RGB": [
       176,
       48,
@@ -4644,7 +4527,7 @@
     "InputText": "B03060"
   },
   {
-    "CategoryName": "maroon1",
+    "CategoryName": "pink",
     "RGB": [
       255,
       52,
@@ -4653,7 +4536,7 @@
     "InputText": "FF34B3"
   },
   {
-    "CategoryName": "maroon2",
+    "CategoryName": "pink",
     "RGB": [
       238,
       48,
@@ -4662,7 +4545,7 @@
     "InputText": "EE30A7"
   },
   {
-    "CategoryName": "maroon3",
+    "CategoryName": "pink",
     "RGB": [
       205,
       41,
@@ -4671,7 +4554,7 @@
     "InputText": "CD2990"
   },
   {
-    "CategoryName": "maroon4",
+    "CategoryName": "pink",
     "RGB": [
       139,
       28,
@@ -4680,7 +4563,7 @@
     "InputText": "8B1C62"
   },
   {
-    "CategoryName": "orchid",
+    "CategoryName": "pink",
     "RGB": [
       218,
       112,
@@ -4689,7 +4572,7 @@
     "InputText": "DA70D6"
   },
   {
-    "CategoryName": "Orchid",
+    "CategoryName": "pink",
     "RGB": [
       219,
       112,
@@ -4698,7 +4581,7 @@
     "InputText": "DB70DB"
   },
   {
-    "CategoryName": "orchid1",
+    "CategoryName": "pink",
     "RGB": [
       255,
       131,
@@ -4707,7 +4590,7 @@
     "InputText": "FF83FA"
   },
   {
-    "CategoryName": "orchid2",
+    "CategoryName": "pink",
     "RGB": [
       238,
       122,
@@ -4716,7 +4599,7 @@
     "InputText": "EE7AE9"
   },
   {
-    "CategoryName": "orchid3",
+    "CategoryName": "pink",
     "RGB": [
       205,
       105,
@@ -4725,7 +4608,7 @@
     "InputText": "CD69C9"
   },
   {
-    "CategoryName": "orchid4",
+    "CategoryName": "pink",
     "RGB": [
       139,
       71,
@@ -4734,7 +4617,7 @@
     "InputText": "8B4789"
   },
   {
-    "CategoryName": "plum",
+    "CategoryName": "purple",
     "RGB": [
       221,
       160,
@@ -4743,7 +4626,7 @@
     "InputText": "DDA0DD"
   },
   {
-    "CategoryName": "plum1",
+    "CategoryName": "purple",
     "RGB": [
       255,
       187,
@@ -4752,7 +4635,7 @@
     "InputText": "FFBBFF"
   },
   {
-    "CategoryName": "plum2",
+    "CategoryName": "purple",
     "RGB": [
       238,
       174,
@@ -4761,7 +4644,7 @@
     "InputText": "EEAEEE"
   },
   {
-    "CategoryName": "plum3",
+    "CategoryName": "purple",
     "RGB": [
       205,
       150,
@@ -4770,7 +4653,7 @@
     "InputText": "CD96CD"
   },
   {
-    "CategoryName": "plum4",
+    "CategoryName": "purple",
     "RGB": [
       139,
       102,
@@ -4779,7 +4662,7 @@
     "InputText": "8B668B"
   },
   {
-    "CategoryName": "purpley",
+    "CategoryName": "purple",
     "RGB": [
       153,
       102,
@@ -4806,7 +4689,7 @@
     "InputText": "800080"
   },
   {
-    "CategoryName": "purple1",
+    "CategoryName": "purple",
     "RGB": [
       155,
       48,
@@ -4815,7 +4698,7 @@
     "InputText": "9B30FF"
   },
   {
-    "CategoryName": "purple2",
+    "CategoryName": "purple",
     "RGB": [
       145,
       44,
@@ -4824,7 +4707,7 @@
     "InputText": "912CEE"
   },
   {
-    "CategoryName": "purple3",
+    "CategoryName": "purple",
     "RGB": [
       125,
       38,
@@ -4833,7 +4716,7 @@
     "InputText": "7D26CD"
   },
   {
-    "CategoryName": "purple4",
+    "CategoryName": "purple",
     "RGB": [
       85,
       26,
@@ -4842,7 +4725,7 @@
     "InputText": "551A8B"
   },
   {
-    "CategoryName": "thistle",
+    "CategoryName": "grey",
     "RGB": [
       216,
       191,
@@ -4851,7 +4734,7 @@
     "InputText": "D8BFD8"
   },
   {
-    "CategoryName": "thistle1",
+    "CategoryName": "grey",
     "RGB": [
       255,
       225,
@@ -4860,7 +4743,7 @@
     "InputText": "FFE1FF"
   },
   {
-    "CategoryName": "thistle2",
+    "CategoryName": "grey",
     "RGB": [
       238,
       210,
@@ -4869,7 +4752,7 @@
     "InputText": "EED2EE"
   },
   {
-    "CategoryName": "thistle3",
+    "CategoryName": "grey",
     "RGB": [
       205,
       181,
@@ -4878,7 +4761,7 @@
     "InputText": "CDB5CD"
   },
   {
-    "CategoryName": "thistle4",
+    "CategoryName": "grey",
     "RGB": [
       139,
       123,
@@ -4887,7 +4770,7 @@
     "InputText": "8B7B8B"
   },
   {
-    "CategoryName": "violet",
+    "CategoryName": "purple",
     "RGB": [
       238,
       130,
@@ -4896,7 +4779,7 @@
     "InputText": "EE82EE"
   },
   {
-    "CategoryName": "violet blue",
+    "CategoryName": "purple",
     "RGB": [
       159,
       95,
@@ -4905,7 +4788,7 @@
     "InputText": "9F5F9F"
   },
   {
-    "CategoryName": "Dark Purple",
+    "CategoryName": "purple",
     "RGB": [
       135,
       31,
@@ -4914,7 +4797,7 @@
     "InputText": "871F78"
   },
   {
-    "CategoryName": "Maroon",
+    "CategoryName": "red",
     "RGB": [
       128,
       0,
@@ -4923,7 +4806,7 @@
     "InputText": "800000"
   },
   {
-    "CategoryName": "Medium Violet Red",
+    "CategoryName": "red",
     "RGB": [
       219,
       112,
@@ -4932,7 +4815,7 @@
     "InputText": "DB7093"
   },
   {
-    "CategoryName": "Neon Pink",
+    "CategoryName": "pink",
     "RGB": [
       255,
       110,
@@ -4941,7 +4824,7 @@
     "InputText": "FF6EC7"
   },
   {
-    "CategoryName": "Plum",
+    "CategoryName": "purple",
     "RGB": [
       234,
       173,
@@ -4950,7 +4833,7 @@
     "InputText": "EAADEA"
   },
   {
-    "CategoryName": "Thistle",
+    "CategoryName": "purple",
     "RGB": [
       216,
       191,
@@ -4959,7 +4842,7 @@
     "InputText": "D8BFD8"
   },
   {
-    "CategoryName": "Turquoise",
+    "CategoryName": "red",
     "RGB": [
       173,
       234,
@@ -4968,7 +4851,7 @@
     "InputText": "ADEAEA"
   },
   {
-    "CategoryName": "Violet",
+    "CategoryName": "purple",
     "RGB": [
       79,
       47,
@@ -4977,7 +4860,7 @@
     "InputText": "4F2F4F"
   },
   {
-    "CategoryName": "Violet Red",
+    "CategoryName": "red",
     "RGB": [
       204,
       50,
@@ -4986,7 +4869,7 @@
     "InputText": "CC3299"
   },
   {
-    "CategoryName": "AntiqueWhite",
+    "CategoryName": "white",
     "RGB": [
       250,
       235,
@@ -4995,7 +4878,7 @@
     "InputText": "FAEBD7"
   },
   {
-    "CategoryName": "AntiqueWhite1",
+    "CategoryName": "white",
     "RGB": [
       255,
       239,
@@ -5004,7 +4887,7 @@
     "InputText": "FFEFDB"
   },
   {
-    "CategoryName": "AntiqueWhite2",
+    "CategoryName": "white",
     "RGB": [
       238,
       223,
@@ -5013,7 +4896,7 @@
     "InputText": "EEDFCC"
   },
   {
-    "CategoryName": "AntiqueWhite3",
+    "CategoryName": "white",
     "RGB": [
       205,
       192,
@@ -5022,7 +4905,7 @@
     "InputText": "CDC0B0"
   },
   {
-    "CategoryName": "AntiqueWhite4",
+    "CategoryName": "white",
     "RGB": [
       139,
       131,
@@ -5031,7 +4914,7 @@
     "InputText": "8B8378"
   },
   {
-    "CategoryName": "FloralWhite",
+    "CategoryName": "white",
     "RGB": [
       255,
       250,
@@ -5040,7 +4923,7 @@
     "InputText": "FFFAF0"
   },
   {
-    "CategoryName": "GhostWhite",
+    "CategoryName": "white",
     "RGB": [
       248,
       248,
@@ -5049,7 +4932,7 @@
     "InputText": "F8F8FF"
   },
   {
-    "CategoryName": "NavajoWhite",
+    "CategoryName": "white",
     "RGB": [
       255,
       222,
@@ -5058,7 +4941,7 @@
     "InputText": "FFDEAD"
   },
   {
-    "CategoryName": "NavajoWhite1",
+    "CategoryName": "white",
     "RGB": [
       255,
       222,
@@ -5067,7 +4950,7 @@
     "InputText": "FFDEAD"
   },
   {
-    "CategoryName": "NavajoWhite2",
+    "CategoryName": "white",
     "RGB": [
       238,
       207,
@@ -5076,7 +4959,7 @@
     "InputText": "EECFA1"
   },
   {
-    "CategoryName": "NavajoWhite3",
+    "CategoryName": "white",
     "RGB": [
       205,
       179,
@@ -5085,7 +4968,7 @@
     "InputText": "CDB38B"
   },
   {
-    "CategoryName": "NavajoWhite4",
+    "CategoryName": "white",
     "RGB": [
       139,
       121,
@@ -5094,7 +4977,7 @@
     "InputText": "8B795E"
   },
   {
-    "CategoryName": "OldLace",
+    "CategoryName": "white",
     "RGB": [
       253,
       245,
@@ -5103,7 +4986,7 @@
     "InputText": "FDF5E6"
   },
   {
-    "CategoryName": "WhiteSmoke",
+    "CategoryName": "white",
     "RGB": [
       245,
       245,
@@ -5112,7 +4995,7 @@
     "InputText": "F5F5F5"
   },
   {
-    "CategoryName": "gainsboro",
+    "CategoryName": "white",
     "RGB": [
       220,
       220,
@@ -5121,7 +5004,7 @@
     "InputText": "DCDCDC"
   },
   {
-    "CategoryName": "ivory",
+    "CategoryName": "white",
     "RGB": [
       255,
       255,
@@ -5130,7 +5013,7 @@
     "InputText": "FFFFF0"
   },
   {
-    "CategoryName": "ivory1",
+    "CategoryName": "white",
     "RGB": [
       255,
       255,
@@ -5139,7 +5022,7 @@
     "InputText": "FFFFF0"
   },
   {
-    "CategoryName": "ivory2",
+    "CategoryName": "white",
     "RGB": [
       238,
       238,
@@ -5148,7 +5031,7 @@
     "InputText": "EEEEE0"
   },
   {
-    "CategoryName": "ivory3",
+    "CategoryName": "white",
     "RGB": [
       205,
       205,
@@ -5157,7 +5040,7 @@
     "InputText": "CDCDC1"
   },
   {
-    "CategoryName": "ivory4",
+    "CategoryName": "white",
     "RGB": [
       139,
       139,
@@ -5166,7 +5049,7 @@
     "InputText": "8B8B83"
   },
   {
-    "CategoryName": "linen",
+    "CategoryName": "white",
     "RGB": [
       250,
       240,
@@ -5175,7 +5058,7 @@
     "InputText": "FAF0E6"
   },
   {
-    "CategoryName": "seashell",
+    "CategoryName": "white",
     "RGB": [
       255,
       245,
@@ -5184,7 +5067,7 @@
     "InputText": "FFF5EE"
   },
   {
-    "CategoryName": "seashell1",
+    "CategoryName": "white",
     "RGB": [
       255,
       245,
@@ -5193,7 +5076,7 @@
     "InputText": "FFF5EE"
   },
   {
-    "CategoryName": "seashell2",
+    "CategoryName": "white",
     "RGB": [
       238,
       229,
@@ -5202,7 +5085,7 @@
     "InputText": "EEE5DE"
   },
   {
-    "CategoryName": "seashell3",
+    "CategoryName": "white",
     "RGB": [
       205,
       197,
@@ -5211,7 +5094,7 @@
     "InputText": "CDC5BF"
   },
   {
-    "CategoryName": "seashell4",
+    "CategoryName": "white",
     "RGB": [
       139,
       134,
@@ -5220,7 +5103,7 @@
     "InputText": "8B8682"
   },
   {
-    "CategoryName": "snow",
+    "CategoryName": "white",
     "RGB": [
       255,
       250,
@@ -5229,7 +5112,7 @@
     "InputText": "FFFAFA"
   },
   {
-    "CategoryName": "snow1",
+    "CategoryName": "white",
     "RGB": [
       255,
       250,
@@ -5238,7 +5121,7 @@
     "InputText": "FFFAFA"
   },
   {
-    "CategoryName": "snow2",
+    "CategoryName": "white",
     "RGB": [
       238,
       233,
@@ -5247,7 +5130,7 @@
     "InputText": "EEE9E9"
   },
   {
-    "CategoryName": "snow3",
+    "CategoryName": "white",
     "RGB": [
       205,
       201,
@@ -5256,7 +5139,7 @@
     "InputText": "CDC9C9"
   },
   {
-    "CategoryName": "snow4",
+    "CategoryName": "white",
     "RGB": [
       139,
       137,
@@ -5265,7 +5148,7 @@
     "InputText": "8B8989"
   },
   {
-    "CategoryName": "wheat",
+    "CategoryName": "brown",
     "RGB": [
       245,
       222,
@@ -5274,7 +5157,7 @@
     "InputText": "F5DEB3"
   },
   {
-    "CategoryName": "wheat1",
+    "CategoryName": "brown",
     "RGB": [
       255,
       231,
@@ -5283,7 +5166,7 @@
     "InputText": "FFE7BA"
   },
   {
-    "CategoryName": "wheat2",
+    "CategoryName": "brown",
     "RGB": [
       238,
       216,
@@ -5292,7 +5175,7 @@
     "InputText": "EED8AE"
   },
   {
-    "CategoryName": "wheat3",
+    "CategoryName": "brown",
     "RGB": [
       205,
       186,
@@ -5301,7 +5184,7 @@
     "InputText": "CDBA96"
   },
   {
-    "CategoryName": "wheat4",
+    "CategoryName": "brown",
     "RGB": [
       139,
       126,
@@ -5319,7 +5202,7 @@
     "InputText": "FFFFFF"
   },
   {
-    "CategoryName": "Quartz",
+    "CategoryName": "blue",
     "RGB": [
       217,
       217,
@@ -5328,7 +5211,7 @@
     "InputText": "D9D9F3"
   },
   {
-    "CategoryName": "Wheat",
+    "CategoryName": "brown",
     "RGB": [
       216,
       216,
@@ -5337,7 +5220,7 @@
     "InputText": "D8D8BF"
   },
   {
-    "CategoryName": "BlanchedAlmond",
+    "CategoryName": "brown",
     "RGB": [
       255,
       235,
@@ -5346,7 +5229,7 @@
     "InputText": "FFEBCD"
   },
   {
-    "CategoryName": "DarkGoldenrod",
+    "CategoryName": "yellow",
     "RGB": [
       184,
       134,
@@ -5355,7 +5238,7 @@
     "InputText": "B8860B"
   },
   {
-    "CategoryName": "DarkGoldenrod1",
+    "CategoryName": "yellow",
     "RGB": [
       255,
       185,
@@ -5364,7 +5247,7 @@
     "InputText": "FFB90F"
   },
   {
-    "CategoryName": "DarkGoldenrod2",
+    "CategoryName": "yellow",
     "RGB": [
       238,
       173,
@@ -5373,7 +5256,7 @@
     "InputText": "EEAD0E"
   },
   {
-    "CategoryName": "DarkGoldenrod3",
+    "CategoryName": "yellow",
     "RGB": [
       205,
       149,
@@ -5382,7 +5265,7 @@
     "InputText": "CD950C"
   },
   {
-    "CategoryName": "DarkGoldenrod4",
+    "CategoryName": "yellow",
     "RGB": [
       139,
       101,
@@ -5391,7 +5274,7 @@
     "InputText": "8B6508"
   },
   {
-    "CategoryName": "LemonChiffon",
+    "CategoryName": "yellow",
     "RGB": [
       255,
       250,
@@ -5400,7 +5283,7 @@
     "InputText": "FFFACD"
   },
   {
-    "CategoryName": "LemonChiffon1",
+    "CategoryName": "yellow",
     "RGB": [
       255,
       250,
@@ -5409,7 +5292,7 @@
     "InputText": "FFFACD"
   },
   {
-    "CategoryName": "LemonChiffon2",
+    "CategoryName": "yellow",
     "RGB": [
       238,
       233,
@@ -5418,7 +5301,7 @@
     "InputText": "EEE9BF"
   },
   {
-    "CategoryName": "LemonChiffon3",
+    "CategoryName": "yellow",
     "RGB": [
       205,
       201,
@@ -5427,7 +5310,7 @@
     "InputText": "CDC9A5"
   },
   {
-    "CategoryName": "LemonChiffon4",
+    "CategoryName": "yellow",
     "RGB": [
       139,
       137,
@@ -5436,7 +5319,7 @@
     "InputText": "8B8970"
   },
   {
-    "CategoryName": "LightGoldenrod",
+    "CategoryName": "yellow",
     "RGB": [
       238,
       221,
@@ -5445,7 +5328,7 @@
     "InputText": "EEDD82"
   },
   {
-    "CategoryName": "LightGoldenrod1",
+    "CategoryName": "yellow",
     "RGB": [
       255,
       236,
@@ -5454,7 +5337,7 @@
     "InputText": "FFEC8B"
   },
   {
-    "CategoryName": "LightGoldenrod2",
+    "CategoryName": "yellow",
     "RGB": [
       238,
       220,
@@ -5463,7 +5346,7 @@
     "InputText": "EEDC82"
   },
   {
-    "CategoryName": "LightGoldenrod3",
+    "CategoryName": "yellow",
     "RGB": [
       205,
       190,
@@ -5472,7 +5355,7 @@
     "InputText": "CDBE70"
   },
   {
-    "CategoryName": "LightGoldenrod4",
+    "CategoryName": "yellow",
     "RGB": [
       139,
       129,
@@ -5481,7 +5364,7 @@
     "InputText": "8B814C"
   },
   {
-    "CategoryName": "LightGoldenrodYellow",
+    "CategoryName": "yellow",
     "RGB": [
       250,
       250,
@@ -5490,7 +5373,7 @@
     "InputText": "FAFAD2"
   },
   {
-    "CategoryName": "LightYellow",
+    "CategoryName": "yellow",
     "RGB": [
       255,
       255,
@@ -5499,7 +5382,7 @@
     "InputText": "FFFFE0"
   },
   {
-    "CategoryName": "LightYellow1",
+    "CategoryName": "yellow",
     "RGB": [
       255,
       255,
@@ -5508,7 +5391,7 @@
     "InputText": "FFFFE0"
   },
   {
-    "CategoryName": "LightYellow2",
+    "CategoryName": "yellow",
     "RGB": [
       238,
       238,
@@ -5517,7 +5400,7 @@
     "InputText": "EEEED1"
   },
   {
-    "CategoryName": "LightYellow3",
+    "CategoryName": "yellow",
     "RGB": [
       205,
       205,
@@ -5526,7 +5409,7 @@
     "InputText": "CDCDB4"
   },
   {
-    "CategoryName": "LightYellow4",
+    "CategoryName": "yellow",
     "RGB": [
       139,
       139,
@@ -5535,7 +5418,7 @@
     "InputText": "8B8B7A"
   },
   {
-    "CategoryName": "PaleGoldenrod",
+    "CategoryName": "yellow",
     "RGB": [
       238,
       232,
@@ -5544,7 +5427,7 @@
     "InputText": "EEE8AA"
   },
   {
-    "CategoryName": "PapayaWhip",
+    "CategoryName": "yellow",
     "RGB": [
       255,
       239,
@@ -5553,7 +5436,7 @@
     "InputText": "FFEFD5"
   },
   {
-    "CategoryName": "cornsilk",
+    "CategoryName": "yellow",
     "RGB": [
       255,
       248,
@@ -5562,7 +5445,7 @@
     "InputText": "FFF8DC"
   },
   {
-    "CategoryName": "cornsilk1",
+    "CategoryName": "yellow",
     "RGB": [
       255,
       248,
@@ -5571,7 +5454,7 @@
     "InputText": "FFF8DC"
   },
   {
-    "CategoryName": "cornsilk2",
+    "CategoryName": "yellow",
     "RGB": [
       238,
       232,
@@ -5580,7 +5463,7 @@
     "InputText": "EEE8CD"
   },
   {
-    "CategoryName": "cornsilk3",
+    "CategoryName": "yellow",
     "RGB": [
       205,
       200,
@@ -5589,7 +5472,7 @@
     "InputText": "CDC8B1"
   },
   {
-    "CategoryName": "cornsilk4",
+    "CategoryName": "yellow",
     "RGB": [
       139,
       136,
@@ -5598,7 +5481,7 @@
     "InputText": "8B8878"
   },
   {
-    "CategoryName": "goldenrod",
+    "CategoryName": "yellow",
     "RGB": [
       218,
       165,
@@ -5607,7 +5490,7 @@
     "InputText": "DAA520"
   },
   {
-    "CategoryName": "goldenrod1",
+    "CategoryName": "yellow",
     "RGB": [
       255,
       193,
@@ -5616,7 +5499,7 @@
     "InputText": "FFC125"
   },
   {
-    "CategoryName": "goldenrod2",
+    "CategoryName": "yellow",
     "RGB": [
       238,
       180,
@@ -5625,7 +5508,7 @@
     "InputText": "EEB422"
   },
   {
-    "CategoryName": "goldenrod3",
+    "CategoryName": "yellow",
     "RGB": [
       205,
       155,
@@ -5634,7 +5517,7 @@
     "InputText": "CD9B1D"
   },
   {
-    "CategoryName": "goldenrod4",
+    "CategoryName": "yellow",
     "RGB": [
       139,
       105,
@@ -5643,7 +5526,7 @@
     "InputText": "8B6914"
   },
   {
-    "CategoryName": "moccasin",
+    "CategoryName": "yellow",
     "RGB": [
       255,
       228,
@@ -5661,7 +5544,7 @@
     "InputText": "FFFF00"
   },
   {
-    "CategoryName": "yellow1",
+    "CategoryName": "yellow",
     "RGB": [
       255,
       255,
@@ -5670,7 +5553,7 @@
     "InputText": "FFFF00"
   },
   {
-    "CategoryName": "yellow2",
+    "CategoryName": "yellow",
     "RGB": [
       238,
       238,
@@ -5679,7 +5562,7 @@
     "InputText": "EEEE00"
   },
   {
-    "CategoryName": "yellow3",
+    "CategoryName": "yellow",
     "RGB": [
       205,
       205,
@@ -5688,7 +5571,7 @@
     "InputText": "CDCD00"
   },
   {
-    "CategoryName": "yellow4",
+    "CategoryName": "yellow",
     "RGB": [
       139,
       139,
@@ -5697,7 +5580,7 @@
     "InputText": "8B8B00"
   },
   {
-    "CategoryName": "gold",
+    "CategoryName": "yellow",
     "RGB": [
       255,
       215,
@@ -5706,7 +5589,7 @@
     "InputText": "FFD700"
   },
   {
-    "CategoryName": "gold1",
+    "CategoryName": "yellow",
     "RGB": [
       255,
       215,
@@ -5715,7 +5598,7 @@
     "InputText": "FFD700"
   },
   {
-    "CategoryName": "gold2",
+    "CategoryName": "yellow",
     "RGB": [
       238,
       201,
@@ -5724,7 +5607,7 @@
     "InputText": "EEC900"
   },
   {
-    "CategoryName": "gold3",
+    "CategoryName": "yellow",
     "RGB": [
       205,
       173,
@@ -5733,7 +5616,7 @@
     "InputText": "CDAD00"
   },
   {
-    "CategoryName": "gold4",
+    "CategoryName": "yellow",
     "RGB": [
       139,
       117,
@@ -5742,7 +5625,7 @@
     "InputText": "8B7500"
   },
   {
-    "CategoryName": "Goldenrod",
+    "CategoryName": "yellow",
     "RGB": [
       219,
       219,
@@ -5751,7 +5634,7 @@
     "InputText": "DBDB70"
   },
   {
-    "CategoryName": "Medium Goldenrod",
+    "CategoryName": "yellow",
     "RGB": [
       234,
       234,
@@ -5760,7 +5643,7 @@
     "InputText": "EAEAAE"
   },
   {
-    "CategoryName": "Yellow Green",
+    "CategoryName": "yellow",
     "RGB": [
       153,
       204,

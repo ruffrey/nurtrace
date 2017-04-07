@@ -89,12 +89,12 @@ func (charcat *Charcatnn) SaveVocab(settings *potential.TrainingSettings, filena
 		if percepUnit.CategoryName == "" && percepUnit.InputChar == "" {
 			fmt.Println(percepUnit)
 			fmt.Println(sKey, genericPercepUnit)
-			return errors.New("Bad perception unit in Data.KeyToItem: unable to map between cell and category or input character")
+			// return errors.New("Bad perception unit in Data.KeyToItem: unable to map between cell and category or input character")
 		}
 		if percepUnit.CellID == 0 {
 			fmt.Println(percepUnit)
 			fmt.Println(sKey, genericPercepUnit)
-			return errors.New("Bad perception unit in Data.KeyToItem: cell is 0 - probably was not matched to a category name or input character")
+			// return errors.New("Bad perception unit in Data.KeyToItem: cell is 0 - probably was not matched to a category name or input character")
 		}
 		data = append(data, percepUnit)
 	}
@@ -205,7 +205,7 @@ func (charcat *Charcatnn) PrepareData(settings *potential.TrainingSettings, netw
 		categoryPU, categoryExists := settings.Data.KeyToItem[tc.CategoryName]
 		if !categoryExists {
 			categoryCellID = addNewVocabMapping(tc.CategoryName, network)
-			// fmt.Println("adding cat", tc.CategoryName, categoryCellID)
+			fmt.Println("adding cat", tc)
 			settings.Data.KeyToItem[tc.CategoryName] = potential.PerceptionUnit{
 				Value:      tc.CategoryName,
 				OutputCell: categoryCellID,
