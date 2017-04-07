@@ -3438,24 +3438,6 @@
     "InputText": "E0EEE0"
   },
   {
-    "CategoryName": "honeydew3",
-    "RGB": [
-      193,
-      205,
-      193
-    ],
-    "InputText": "white"
-  },
-  {
-    "CategoryName": "red",
-    "RGB": [
-      131,
-      139,
-      131
-    ],
-    "InputText": "green"
-  },
-  {
     "CategoryName": "orange",
     "RGB": [
       255,
