@@ -1,6 +1,7 @@
-const sigma = require('sigma');
-const electron = require('electron').remote;
-global.sigma = sigma;
+const Sigma = require('sigma');
+const electron = require('electron').remote; // eslint-disable-line
+
+global.sigma = Sigma;
 require('./forceAtlas2/worker');
 require('./forceAtlas2/supervisor');
 require('sigma/plugins/sigma.plugins.animate/sigma.plugins.animate.js');
@@ -38,13 +39,20 @@ const g = {
   edges: [],
 };
 const green = '#00FF2D';
-const blue = '#0775FF';
+// const blue = '#0775FF';
 const red = '#A62A2A';
-const grey = '#666666';
+const lightGrey = '#cccccc';
+const darkGrey = '#444444';
 const black = '#000000';
 const white = '#ffffff';
 
-const N = Object.keys(nw.Cells).length;
+const colorInhibitorySynapse = red;
+const colorExcitatorysynapse = green;
+const colorInputCell = white;
+const colorMiddleCell = lightGrey;
+const colorOutputCell = darkGrey;
+
+
 let layerInput = 0;
 let layerMiddle = 0;
 let layerMiddleDepth = 1;
@@ -53,11 +61,13 @@ let fanout = 10;
 const isInput = tag => tag && tag.substring(0, 3) === 'in-';
 const isMiddle = tag => !tag;
 
-Object.keys(nw.Cells).forEach((cellId, i) => {
+Object.keys(nw.Cells).forEach((cellId) => {
   const cell = nw.Cells[cellId];
 
   let x;
   let y;
+  let color;
+
   if (isInput(cell.Tag)) {
     layerInput = -layerInput + fanout;
     x = layerInput;
@@ -65,8 +75,8 @@ Object.keys(nw.Cells).forEach((cellId, i) => {
   } else if (isMiddle(cell.Tag)) {
     layerMiddle = -layerMiddle + fanout;
     if (layerMiddle > 400) {
-        layerMiddleDepth += (2 * fanout);
-        layerMiddle = 0;
+      layerMiddleDepth += (2 * fanout);
+      layerMiddle = 0;
     }
     x = layerMiddle;
     y = layerMiddleDepth;
@@ -80,30 +90,46 @@ Object.keys(nw.Cells).forEach((cellId, i) => {
     // x = 100 * Math.cos(2 * i * Math.PI / N); // random location
     // y = 100 * Math.sin(2 * i * Math.PI / N); // random location
             // : '#' + (Math.floor(Math.random() * 16777215).toString(16) + '000000').substr(0, 6),
+  if (cell.Tag) {
+    if (isInput(cell.Tag)) {
+      color = colorInputCell;
+    } else {
+      color = colorOutputCell;
+    }
+  } else {
+    color = colorMiddleCell;
+  }
 
   g.nodes.push({
     id: cell.ID,
     label: cell.Tag || cell.ID,
     size: Object.keys(cell.AxonSynapses).length + Object.keys(cell.DendriteSynapses).length,
-    color: cell.Tag ?
-            isInput(cell.Tag) ? blue : black
-            : white,
+    color,
     x,
     y,
   });
 });
 Object.keys(nw.Synapses).forEach((synapseId) => {
   const synapse = nw.Synapses[synapseId];
+  let color;
+  if (synapse.Millivolts > 0) {
+    color = colorExcitatorysynapse;
+  } else if (synapse.Millivolts < 0) {
+    color = colorInhibitorySynapse;
+  } else {
+    color = black;
+  }
+
   g.edges.push({
     id: synapse.ID,
     source: synapse.FromNeuronAxon,
     target: synapse.ToNeuronDendrite,
     // type: 'curvedArrow',
-    color: synapse.Millivolts > 0 ? green : red,
+    color,
   });
 });
 
-const s = new sigma({
+const s = new Sigma({
   graph: g,
   renderer: {
     container: 'graph-container',
@@ -119,6 +145,61 @@ const s = new sigma({
   },
 });
 
+function selectPath(e) {
+  console.log('select path', e);
+  window.stop();
+
+  const maxDepth = parseInt(document.getElementById('depth').value, 10);
+  const alreadyWalked = {};
+  const directionValue = document.getElementById('direction').value;
+  const shouldSearchForward = directionValue === 'both' || directionValue === 'fwd';
+  const shouldSearchBackward = directionValue === 'both' || directionValue === 'back';
+
+    // Walk up and down just to see all connections
+    // from this cell's perspective.
+  const walk = (nodeId, depth) => {
+    if (alreadyWalked[nodeId]) {
+      return;
+    }
+    depth++;
+    if (depth > maxDepth) {
+      return;
+    }
+    const cell = nw.Cells[nodeId];
+    const walkNext = [];
+    alreadyWalked[nodeId] = true;
+    if (shouldSearchForward) {
+      Object.keys(cell.AxonSynapses).forEach((synapseId) => {
+        const synapse = nw.Synapses[synapseId];
+                // console.log(synapseId, synapse.ToNeuronDendrite);
+        walkNext.push(synapse.ToNeuronDendrite);
+      });
+    }
+    if (shouldSearchBackward) {
+      Object.keys(cell.DendriteSynapses).forEach((synapseId) => {
+        const synapse = nw.Synapses[synapseId];
+                // console.log(synapseId, synapse.FromNeuronAxon);
+        walkNext.push(synapse.FromNeuronAxon);
+      });
+    }
+
+    walkNext.forEach(n => walk(n, depth));
+  };
+  walk(e.data.node.id, 0);
+
+    // only show nodes that were walked
+  e.data.renderer.graph.nodes().forEach((n) => {
+    if (alreadyWalked[n.id]) {
+      n.hidden = false;
+    } else {
+      n.hidden = true;
+    }
+  });
+  s.refresh();
+  console.log('done walking path', e.data.node.id, ',',
+        Object.keys(alreadyWalked).length, '/', g.nodes.length, 'cells');
+}
+s.bind('clickNode', selectPath);
 
 window.start = () => {
   s.startForceAtlas2({
@@ -138,8 +219,22 @@ window.start = () => {
   });
 };
 
-window.start();
+// window.start();
 
 window.stop = () => {
   s.stopForceAtlas2();
+};
+
+window.clearPathSelection = () => {
+  s.graph.nodes().forEach((n) => {
+    n.hidden = false;
+  });
+  s.refresh();
+};
+
+window.hideAll = () => {
+  s.graph.nodes().forEach((n) => {
+    n.hidden = true;
+  });
+  s.refresh();
 };

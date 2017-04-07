@@ -5,7 +5,10 @@
     <meta charset="UTF-8">
     <style>
         html, body {
-            background-color: rgb(245, 245, 245);
+            /*background-color: rgb(245, 245, 245);*/
+            background-color: black;
+            margin: 0;
+            font-family: sans-serif;
         }
         #graph-container {
             top: 33px;
@@ -14,13 +17,31 @@
             right: 0;
             position: absolute;
         }
+        nav {
+            background: #dddddd;
+            padding: 3px;
+            height: 30px;
+        }
     </style>
 </head>
 
 <body>
     <div id="container">
-        <button onclick="window.stop()">Stop</button>
-        <button onclick="window.start()">Start</button>
+        <nav>
+            <button onclick="window.hideAll()">Hide All</button>
+            <button onclick="window.clearPathSelection()">Show All</button>
+            <button onclick="window.stop()">Stop</button>
+            <button onclick="window.start()">Start</button>
+            <span>Trace depth (clickk node to trace):</span>
+            <input type="number" min="0" max="1000" value="3"
+                id="depth" />
+            <select id="direction">
+                <option value="both">Trace upstream and downstream</option>
+                <option value="fwd">Upstream only</option>
+                <option value="back">Downstream only</option>
+            </select>
+        </nav>
+
         <div id="graph-container"></div>
     </div>
     <script>
