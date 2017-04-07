@@ -39,6 +39,11 @@ const g = {
 };
 const green = '#00FF2D';
 const blue = '#0775FF';
+const red = '#A62A2A';
+const grey = '#666666';
+const black = '#000000';
+const white = '#ffffff';
+
 const N = Object.keys(nw.Cells).length;
 let layerInput = 0;
 let layerMiddle = 0;
@@ -56,10 +61,10 @@ Object.keys(nw.Cells).forEach((cellId, i) => {
   if (isInput(cell.Tag)) {
     layerInput = -layerInput + fanout;
     x = layerInput;
-    y = 200;
+    y = 1200;
   } else if (isMiddle(cell.Tag)) {
     layerMiddle = -layerMiddle + fanout;
-    if (layerMiddle > 500) {
+    if (layerMiddle > 400) {
         layerMiddleDepth += (2 * fanout);
         layerMiddle = 0;
     }
@@ -81,8 +86,8 @@ Object.keys(nw.Cells).forEach((cellId, i) => {
     label: cell.Tag || cell.ID,
     size: Object.keys(cell.AxonSynapses).length + Object.keys(cell.DendriteSynapses).length,
     color: cell.Tag ?
-            isInput(cell.Tag) ? blue : green
-            : '#cccccc',
+            isInput(cell.Tag) ? blue : black
+            : white,
     x,
     y,
   });
@@ -94,6 +99,7 @@ Object.keys(nw.Synapses).forEach((synapseId) => {
     source: synapse.FromNeuronAxon,
     target: synapse.ToNeuronDendrite,
     // type: 'curvedArrow',
+    color: synapse.Millivolts > 0 ? green : red,
   });
 });
 
