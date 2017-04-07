@@ -222,18 +222,18 @@ s.bind('clickNode', selectPath);
 window.start = () => {
   s.startForceAtlas2({
     worker: false,
-        // linLogMode: false,
+    linLogMode: true, // maybe?
     outboundAttractionDistribution: true,
     adjustSizes: true,
         // edgeWeightInfluence: 0,
         // scalingRatio: 1,
         // strongGravityMode: false,
-        // gravity: 1,
+    gravity: 10,
         // slowDown: 1,
         // barnesHutOptimize: false,
         // barnesHutTheta: 0.5,
         // startingIterations: 1,
-        // iterationsPerRender: 1
+    iterationsPerRender: 10,
   });
 };
 

@@ -34,10 +34,10 @@
             <button onclick="window.clearPathSelection()">Show All</button>
             <button onclick="window.stop()">Stop</button>
             <button onclick="window.start()">Start</button>
-            <span>Trace depth (clickk node to trace):</span>
+            <span>Trace depth (click node to trace):</span>
             <input type="number" min="0" max="1000" value="3"
                 id="depth" onchange="changeDepthIfSelectedPath()" />
-            <select id="direction">
+            <select id="direction" onchange="changeDepthIfSelectedPath()">
                 <option value="both">Trace upstream and downstream</option>
                 <option value="fwd">Upstream only</option>
                 <option value="back">Downstream only</option>
