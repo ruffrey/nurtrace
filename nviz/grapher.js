@@ -1,3 +1,7 @@
+// Terminology:
+// node === cell
+// edge === synapse
+
 const Sigma = require('sigma');
 const electron = require('electron').remote; // eslint-disable-line
 
@@ -57,10 +61,11 @@ let layerInput = 0;
 let layerMiddle = 0;
 let layerMiddleDepth = 1;
 let layerOutput = 0;
-let fanout = 10;
+let fanout = 10; // flips neg/pos to do middle out layout of cells
 const isInput = tag => tag && tag.substring(0, 3) === 'in-';
 const isMiddle = tag => !tag;
 
+// Setup Cells / Nodes
 Object.keys(nw.Cells).forEach((cellId) => {
   const cell = nw.Cells[cellId];
 
@@ -87,9 +92,6 @@ Object.keys(nw.Cells).forEach((cellId) => {
   }
   fanout = -fanout;
 
-    // x = 100 * Math.cos(2 * i * Math.PI / N); // random location
-    // y = 100 * Math.sin(2 * i * Math.PI / N); // random location
-            // : '#' + (Math.floor(Math.random() * 16777215).toString(16) + '000000').substr(0, 6),
   if (cell.Tag) {
     if (isInput(cell.Tag)) {
       color = colorInputCell;
@@ -103,12 +105,14 @@ Object.keys(nw.Cells).forEach((cellId) => {
   g.nodes.push({
     id: cell.ID,
     label: cell.Tag || cell.ID,
-    size: Object.keys(cell.AxonSynapses).length + Object.keys(cell.DendriteSynapses).length,
+    size: Object.keys(cell.AxonSynapses).length /* + Object.keys(cell.DendriteSynapses).length*/,
     color,
     x,
     y,
   });
 });
+
+// Setup Edges / Nodes
 Object.keys(nw.Synapses).forEach((synapseId) => {
   const synapse = nw.Synapses[synapseId];
   let color;
@@ -125,27 +129,31 @@ Object.keys(nw.Synapses).forEach((synapseId) => {
     source: synapse.FromNeuronAxon,
     target: synapse.ToNeuronDendrite,
     // type: 'curvedArrow',
+    size: synapse.Millivolts,
     color,
   });
 });
 
+// Create graph with some settings
 const s = new Sigma({
   graph: g,
   renderer: {
-    container: 'graph-container',
+    container: 'graph-container', // div id
     type: 'canvas',
   },
   settings: {
     drawEdges: true,
 
     minNodeSize: 2,
-    maxNodeSize: 10,
+    maxNodeSize: 20,
     minEdgeSize: 1,
-    maxEdgeSize: 10,
+    maxEdgeSize: 20,
   },
 });
 window.s = s;
 
+// lastSelectedPathNode tracks if pathways for a certain cell are the only
+// things being displayed.
 let lastSelectedPathNode;
 const clearLastNode = () => {
   lastSelectedPathNode = null;
