@@ -29,13 +29,13 @@ The desired goal is for there to be a path, or series of paths, from startCell t
 2. At each layer, we check to see if any of the start axons are connected to the
 end dendrites.
 3. We count the connected synapses as we go.
-4. Upon reaching minSynapses, or maxHops, or nowhere, we stop.
+4. Upon reaching minSynapses, or maxDepth, or nowhere, we stop.
 	- if reached minSynapses, just really stop and return 0 synapses added
-	- if reached maxHops, continue.
+	- if reached maxDepth, continue.
 5. We need to add enough synapses to reach minSynapses, such that these are the minimum
 number of synapses that connect from startCell's tree to endCell.
 
-After `maxHops`, if there are not minSynapses, we create synapses at that layer.
+After `maxDepth`, if there are not minSynapses, we create synapses at that layer.
 */
 func (network *Network) GrowPathBetween(startCell, endCell CellID, minSynapses int) (synapsesToEnd map[SynapseID]bool, synapsesAdded map[SynapseID]bool) {
 	// these are the synapses we found that are on the path from the startCell,
@@ -46,10 +46,9 @@ func (network *Network) GrowPathBetween(startCell, endCell CellID, minSynapses i
 	// to the end cell
 	synapsesAdded = make(map[SynapseID]bool)
 
-	maxHops := network.maxHops
+	const maxDepth = laws.MaxDepthFromInputToOutput
 
 	mux := sync.Mutex{}
-	hops := 0
 	var wg sync.WaitGroup
 	ch := make(chan SynapseID)
 	alreadyWalked := make(map[CellID]bool)
@@ -59,14 +58,13 @@ func (network *Network) GrowPathBetween(startCell, endCell CellID, minSynapses i
 	// this is a fan-out kind of traversal through a tree of cells and synapses.
 	// Note: need to fully declare it before assigning it, apparently because the
 	// runtime needs this to compile a recursive function.
-	var walk func(cellID CellID)
-	walk = func(cellID CellID) {
+	var walk func(CellID, uint8)
+	walk = func(cellID CellID, currentDepth uint8) {
 		mux.Lock()
-		hops++
 		synapsesToEndMux.Lock()
 		totalSynapsesFound := len(synapsesToEnd)
 		synapsesToEndMux.Unlock()
-		if hops >= maxHops || totalSynapsesFound >= minSynapses {
+		if totalSynapsesFound >= minSynapses {
 			mux.Unlock()
 			return
 		}
@@ -96,7 +94,7 @@ func (network *Network) GrowPathBetween(startCell, endCell CellID, minSynapses i
 				// also walk the axons of this cell if the synapse is
 				// excitatory.
 				if s.Millivolts > 0 {
-					walk(receiverCellID)
+					walk(receiverCellID, currentDepth+1)
 				}
 			}
 			wg.Done()
@@ -106,7 +104,7 @@ func (network *Network) GrowPathBetween(startCell, endCell CellID, minSynapses i
 	// receive the connected synapses.
 	// channel is closed upstream when we reach the end (? how ?)
 	go func() {
-		walk(startCell)
+		walk(startCell, 0)
 		wg.Wait()
 		close(ch)
 	}()

@@ -106,3 +106,13 @@ Its value should be considered in relation to `GrowPathExpectedMinimumSynapses`,
 `CellRestingVoltage`, and `CellFireVoltageThreshold`.
 */
 const DefaultNewGrownPathSynapse int16 = 15
+
+/*
+MaxDepthFromInputToOutput is how far the path between an input cell and its
+expected output cell we are willing to tolerate. If it is closer, OK. If it
+is longer, we will forge a path that is this-number-of-cells deep.
+
+Depth creates the opportunity for complexity and stateful decisions in the
+network.
+*/
+const MaxDepthFromInputToOutput uint8 = 20

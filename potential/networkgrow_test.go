@@ -108,7 +108,7 @@ func Test_GrowPathBetween(t *testing.T) {
 		assert.Equal(t, 6, len(network.Synapses))
 
 	})
-	t.Run("does not find synapses past the maxHops", func(t *testing.T) {
+	t.Run("does not find synapses past the maxDepth", func(t *testing.T) {
 		before()
 		network = NewNetwork()
 
