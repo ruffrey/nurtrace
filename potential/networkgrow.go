@@ -1,7 +1,6 @@
 package potential
 
 import (
-	"fmt"
 	"sync"
 
 	"github.com/ruffrey/nurtrace/laws"
@@ -47,24 +46,31 @@ func (network *Network) GrowPathBetween(startCell, endCell CellID, minSynapses i
 	synapsesAdded = make(map[SynapseID]bool)
 
 	const maxDepth = laws.MaxDepthFromInputToOutput
+	var depthReached uint8
 
 	mux := sync.Mutex{}
 	var wg sync.WaitGroup
 	ch := make(chan SynapseID)
 	alreadyWalked := make(map[CellID]bool)
+	lastDepth := make(map[CellID]bool)
 
 	// walk traverses the axons and see if any synapse leads to the end cell.
 	// hops is the layer we are on, *copied* on pass.
 	// this is a fan-out kind of traversal through a tree of cells and synapses.
 	// Note: need to fully declare it before assigning it, apparently because the
 	// runtime needs this to compile a recursive function.
-	var walk func(CellID, uint8)
+	var walk func(cellID CellID, currentDepth uint8)
 	walk = func(cellID CellID, currentDepth uint8) {
 		mux.Lock()
 		synapsesToEndMux.Lock()
+		if currentDepth > depthReached {
+			depthReached = currentDepth
+			lastDepth = make(map[CellID]bool)
+		}
+		lastDepth[cellID] = true
 		totalSynapsesFound := len(synapsesToEnd)
 		synapsesToEndMux.Unlock()
-		if totalSynapsesFound >= minSynapses {
+		if currentDepth > maxDepth || totalSynapsesFound >= minSynapses {
 			mux.Unlock()
 			return
 		}
@@ -79,21 +85,17 @@ func (network *Network) GrowPathBetween(startCell, endCell CellID, minSynapses i
 		// look at the next cells in the axon chain from this one, to see
 		// if any are the endCell then send it down the channel.
 		go func() {
-			for axonSynapseID := range network.Cells[cellID].AxonSynapses {
-				s, exists := network.Synapses[axonSynapseID]
-				if !exists {
-					fmt.Println("warn: cannot grow path because synapse axon does not exist",
-						axonSynapseID, "from cell=", cellID, network.Cells[cellID].Tag)
-					continue
-				}
+			axonSynapses := network.getCell(cellID).AxonSynapses
+			for axonSynapseID := range axonSynapses {
+				s := network.getSyn(axonSynapseID)
 				receiverCellID := s.ToNeuronDendrite
 
-				if receiverCellID == endCell {
-					ch <- axonSynapseID
-				}
-				// also walk the axons of this cell if the synapse is
-				// excitatory.
+				// It only counts if it is excitatory.
+				// We also walk the axons of this cell.
 				if s.Millivolts > 0 {
+					if receiverCellID == endCell {
+						ch <- axonSynapseID
+					}
 					walk(receiverCellID, currentDepth+1)
 				}
 			}
@@ -102,7 +104,7 @@ func (network *Network) GrowPathBetween(startCell, endCell CellID, minSynapses i
 	}
 
 	// receive the connected synapses.
-	// channel is closed upstream when we reach the end (? how ?)
+	// channel is closed upstream when we reach the end
 	go func() {
 		walk(startCell, 0)
 		wg.Wait()
@@ -116,30 +118,23 @@ func (network *Network) GrowPathBetween(startCell, endCell CellID, minSynapses i
 		synapsesToEndMux.Unlock()
 	}
 
-	needSynapses := minSynapses - len(synapsesToEnd) // out of multithreading now
+	needSynapses := minSynapses - len(synapsesToEnd) // out of multithreading now; no mutex
 	if needSynapses > 0 {
-		hasWalked := len(alreadyWalked) > 0
-		// fmt.Println("start=", startCell, "end=", endCell, "minSynapses", minSynapses, "needSynapses", needSynapses, "alreadyWalked", len(alreadyWalked), "maxHops", network.maxHops)
-		// Two new synapse and one new cell will be added.
-		// It will connect from the input network to a new cell to the end network.
-		//
-		// input cell or walked cell  ->  new synapse 1  ->  new cell  ->  new synapse 2 ->  end cell dendrite or end cell
-		for i := 0; i < needSynapses; i++ {
-			var startPathCell CellID
+		lastCell := randCellFromMap(lastDepth)
+		for i := 0; i < needSynapses-1; i++ {
+			newCell := NewCell(network)
 
-			if hasWalked {
-				// ordering of range map is random. select one.
-				startPathCell = randCellFromMap(alreadyWalked)
-			} else {
-				startPathCell = startCell
-			}
-
-			newLinkingSynapse := network.linkCells(startPathCell, endCell)
+			newLinkingSynapse := network.linkCells(lastCell, newCell.ID)
 
 			synapsesAdded[newLinkingSynapse.ID] = true
 
-			newLinkingSynapse.Millivolts = laws.DefaultNewGrownPathSynapse
+			newLinkingSynapse.Millivolts = int16(laws.CellFireVoltageThreshold)
+			lastCell = newCell.ID
 		}
+
+		newLinkingSynapse := network.linkCells(lastCell, endCell)
+		synapsesAdded[newLinkingSynapse.ID] = true
+		newLinkingSynapse.Millivolts = int16(laws.CellFireVoltageThreshold)
 	}
 
 	// Reinforce the path between expected input and output.

@@ -147,7 +147,7 @@ const s = new Sigma({
     minNodeSize: 2,
     maxNodeSize: 20,
     minEdgeSize: 1,
-    maxEdgeSize: 20,
+    maxEdgeSize: 10,
   },
 });
 window.s = s;
@@ -231,12 +231,12 @@ window.start = () => {
   s.startForceAtlas2({
     worker: false,
     linLogMode: true, // maybe?
-    outboundAttractionDistribution: true,
+    outboundAttractionDistribution: false,
     adjustSizes: true,
-        // edgeWeightInfluence: 0,
+    edgeWeightInfluence: 2,
         // scalingRatio: 1,
-        // strongGravityMode: false,
-    gravity: 10,
+    // strongGravityMode: true,
+    gravity: -1,
         // slowDown: 1,
         // barnesHutOptimize: false,
         // barnesHutTheta: 0.5,
