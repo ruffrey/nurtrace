@@ -48,7 +48,7 @@ const red = '#A62A2A';
 const lightGrey = '#aaaaaa';
 const darkGrey = '#444444';
 const black = '#000000';
-const white = '#ffffff';
+const white = '#e0e0e0';
 
 const colorInhibitorySynapse = red;
 const colorExcitatorysynapse = green;

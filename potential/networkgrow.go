@@ -122,14 +122,14 @@ func (network *Network) GrowPathBetween(startCell, endCell CellID, minSynapses i
 	if needSynapses > 0 {
 		lastCell := randCellFromMap(lastDepth)
 		for i := 0; i < needSynapses-1; i++ {
-			newCell := NewCell(network)
+			intermediary := network.RandomCellKey()
 
-			newLinkingSynapse := network.linkCells(lastCell, newCell.ID)
+			newLinkingSynapse := network.linkCells(lastCell, intermediary)
 
 			synapsesAdded[newLinkingSynapse.ID] = true
 
 			newLinkingSynapse.Millivolts = int16(laws.CellFireVoltageThreshold)
-			lastCell = newCell.ID
+			lastCell = intermediary
 		}
 
 		newLinkingSynapse := network.linkCells(lastCell, endCell)
