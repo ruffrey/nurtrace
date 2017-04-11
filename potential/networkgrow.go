@@ -121,8 +121,15 @@ func (network *Network) GrowPathBetween(startCell, endCell CellID, minSynapses i
 	needSynapses := minSynapses - len(synapsesToEnd) // out of multithreading now; no mutex
 	if needSynapses > 0 {
 		lastCell := randCellFromMap(lastDepth)
+		alt := true
 		for i := 0; i < needSynapses-1; i++ {
-			intermediary := network.RandomCellKey()
+			var intermediary CellID
+			if alt {
+				intermediary = randCellFromMap(alreadyWalked)
+			} else {
+				intermediary = network.RandomCellKey()
+			}
+			alt = !alt
 
 			newLinkingSynapse := network.linkCells(lastCell, intermediary)
 

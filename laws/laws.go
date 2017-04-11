@@ -96,7 +96,7 @@ By default, it assumes each new synapse has a default mv value of they synapse l
 true for randomly grown synapses) and we will grow enough to essentially fire the cell if all
 these synapses fire.
 */
-const GrowPathExpectedMinimumSynapses = (CellFireVoltageThreshold - int(CellRestingVoltage)) / int(SynapseLearnRate)
+const GrowPathExpectedMinimumSynapses = 2
 
 /*
 MaxDepthFromInputToOutput is how far the path between an input cell and its
