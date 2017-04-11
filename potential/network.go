@@ -34,10 +34,6 @@ type Network struct {
 
 	// private
 
-	// maxHops is frequently recalculated and is the maximum distance in synapses between
-	// input and output cells
-	maxHops int
-
 	// nextSynapsesToActivate will fire their axon cell on the next step. always true
 	nextSynapsesToActivate map[SynapseID]bool
 
@@ -55,7 +51,6 @@ func NewNetwork() *Network {
 		Cells:    make(map[CellID]*Cell),
 		nextSynapsesToActivate: make(map[SynapseID]bool),
 		resetCellsOnNextStep:   make(map[CellID]bool),
-		maxHops:                20,
 	}
 	return &n
 }

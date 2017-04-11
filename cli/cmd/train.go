@@ -60,7 +60,7 @@ func Train(perceptionModel, networkInputFile, networkSaveFile, vocabSaveFile, te
 		return err
 	}
 
-	// t.Settings.Workerfile = "Workerfile"
+	settings.Workerfile = "Workerfile"
 	fmt.Println("Setting raw data")
 	t.SetRawData(bytes)
 	fmt.Println("Attempting to load or create vocab")

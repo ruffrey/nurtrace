@@ -53,7 +53,7 @@ const CellRestingVoltage int16 = -10
 /*
 CellFireVoltageThreshold represents the millivolts where an action potential will result.
 */
-const CellFireVoltageThreshold int = 40
+const CellFireVoltageThreshold int = 100
 
 /*
 SynapseAPBoost is how much a synapse's ActivationHistory should be incremented extra when
@@ -99,10 +99,11 @@ these synapses fire.
 const GrowPathExpectedMinimumSynapses = (CellFireVoltageThreshold - int(CellRestingVoltage)) / int(SynapseLearnRate)
 
 /*
-DefaultNewGrownPathSynapse is the `Millivolts` value for a new synapse that is added during
-`GrowPathBetween`. It should be enough to fire the next cell. Maybe with some wiggle room.
+MaxDepthFromInputToOutput is how far the path between an input cell and its
+expected output cell we are willing to tolerate. If it is closer, OK. If it
+is longer, we will forge a path that is this-number-of-cells deep.
 
-Its value should be considered in relation to `GrowPathExpectedMinimumSynapses`,
-`CellRestingVoltage`, and `CellFireVoltageThreshold`.
+Depth creates the opportunity for complexity and stateful decisions in the
+network.
 */
-const DefaultNewGrownPathSynapse int16 = 15
+const MaxDepthFromInputToOutput uint8 = 20
