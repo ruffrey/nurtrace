@@ -1,0 +1,42 @@
+[
+    {
+        "CategoryName": "zero",
+        "InputText": "0"
+    },
+    {
+        "CategoryName": "one",
+        "InputText": "1"
+    },
+    {
+        "CategoryName": "two",
+        "InputText": "2"
+    },
+    {
+        "CategoryName": "three",
+        "InputText": "3"
+    },
+    {
+        "CategoryName": "four",
+        "InputText": "4"
+    },
+    {
+        "CategoryName": "five",
+        "InputText": "5"
+    },
+    {
+        "CategoryName": "six",
+        "InputText": "6"
+    },
+    {
+        "CategoryName": "seven",
+        "InputText": "7"
+    },
+    {
+        "CategoryName": "eight",
+        "InputText": "8"
+    },
+    {
+        "CategoryName": "nine",
+        "InputText": "9"
+    }
+]
