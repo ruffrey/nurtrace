@@ -17,8 +17,8 @@ type firingGroup struct {
 	voltage  int
 }
 
-func newFiringGroup(forCell *Cell) firingGroup {
-	return firingGroup{
+func newFiringGroup(forCell *Cell) *firingGroup {
+	return &firingGroup{
 		synapses: make(map[SynapseID]bool),
 		voltage:  int(forCell.Voltage),
 	}
@@ -43,7 +43,7 @@ func (network *Network) Step() (hasMore bool) {
 	}
 
 	nextCellResets := make(map[CellID]bool) // these cells got fired
-	voltageTallies := make(map[CellID]firingGroup)
+	voltageTallies := make(map[CellID]*firingGroup)
 
 	// tally up all the synapse voltage results they will have on the cells
 	for synapseID := range network.nextSynapsesToActivate {
