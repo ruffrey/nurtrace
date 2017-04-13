@@ -6,9 +6,11 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 
 	cmd "github.com/ruffrey/nurtrace/cli/cmd"
+	"github.com/ruffrey/nurtrace/potential"
 	cli "gopkg.in/urfave/cli.v1"
 )
 
@@ -243,6 +245,10 @@ func main() {
 					Name:  "totals, t",
 					Usage: "Only print the totals about the network, instead of the entire network.",
 				},
+				cli.BoolFlag{
+					Name:  "tags, g",
+					Usage: "Print all cells that have a Tag property",
+				},
 				cli.IntFlag{
 					Name:  "cell, c",
 					Usage: "Print info about a specific cell",
@@ -261,7 +267,113 @@ func main() {
 			Action: func(c *cli.Context) (err error) {
 				net := c.Args().First()
 				fmt.Println("Reading network from", net)
-				return cmd.Inspect(net, c.Bool("integrity"), c.Bool("totals"), c.Int("cell"), c.Int("synapse"))
+				return cmd.Inspect(net, c.Bool("integrity"), c.Bool("totals"), c.Bool("tags"), c.Int("cell"), c.Int("synapse"))
+			},
+		},
+		{
+			Name:      "fire",
+			Usage:     "Fire a cell and print the firing pattern",
+			ArgsUsage: "[network file] [cell ID]",
+			Flags: []cli.Flag{
+				cli.IntFlag{
+					Name:  "n",
+					Usage: "Number of times to fire",
+				},
+			},
+			Before: func(c *cli.Context) error {
+				if c.Args().First() == "" {
+					return errors.New("Missing network filename")
+				}
+				if c.Args().Get(1) == "" {
+					return errors.New("Missing cell to fire")
+				}
+				return nil
+			},
+			Action: func(c *cli.Context) (err error) {
+				net := c.Args().First()
+				cellString := c.Args().Get(1)
+				n := c.Int("n")
+				var cell potential.CellID
+				if n == 0 {
+					n = 1
+				}
+				network, err := potential.LoadNetworkFromFile(net)
+				if err != nil {
+					return err
+				}
+				cellInt, err := strconv.Atoi(cellString)
+				if err != nil {
+					return err
+				}
+				cell = potential.CellID(cellInt)
+
+				return cmd.FireCell(network, cell, n)
+			},
+		},
+		{
+			Name:      "diff-firings",
+			Usage:     "Print the difference between the firing pattern of two cell groups. Random cells chosen otherwise ",
+			ArgsUsage: "[network file] [cell1 IDs] [cell2 IDs]",
+			Flags: []cli.Flag{
+				cli.IntFlag{
+					Name:  "i",
+					Usage: "Number of random cells per group",
+				},
+			},
+			Before: func(c *cli.Context) error {
+				if c.Args().First() == "" {
+					return errors.New("Missing network filename")
+				}
+				return nil
+			},
+			Action: func(c *cli.Context) (err error) {
+				net := c.Args().First()
+				cell1String := c.Args().Get(1)
+				cell2String := c.Args().Get(2)
+				r := c.Int("i")
+				var cell1 []potential.CellID
+				var cell2 []potential.CellID
+				if r == 0 {
+					r = 4
+				}
+
+				network, err := potential.LoadNetworkFromFile(net)
+				if err != nil {
+					return err
+				}
+
+				if cell1String == "" {
+					for i := 0; i < r; i++ {
+						cell1 = append(cell1, network.RandomCellKey())
+					}
+				} else {
+					cellInts := strings.Split(cell1String, ",")
+					for i := 0; i < len(cellInts); i++ {
+						cellInt, err := strconv.Atoi(cellInts[i])
+						if err != nil {
+							return err
+						}
+						cell1 = append(cell1, potential.CellID(cellInt))
+					}
+
+				}
+				if cell2String == "" {
+					for i := 0; i < r; i++ {
+						cell2 = append(cell2, network.RandomCellKey())
+					}
+				} else {
+					cellInts := strings.Split(cell2String, ",")
+					for i := 0; i < len(cellInts); i++ {
+						cellInt, err := strconv.Atoi(cellInts[i])
+						if err != nil {
+							return err
+						}
+						cell2 = append(cell2, potential.CellID(cellInt))
+					}
+
+				}
+
+				return cmd.CompareFiringPatterns(network, cell1, cell2)
 			},
 		},
 		{

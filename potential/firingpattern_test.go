@@ -9,7 +9,7 @@ import (
 )
 
 func Test_FiringPattern(t *testing.T) {
-	t.Run("fireNetworkUntilDone fires the seed cells and returns the fired ones", func(t *testing.T) {
+	t.Run("FireNetworkUntilDone fires the seed cells and returns the fired ones", func(t *testing.T) {
 		network := NewNetwork()
 		a := NewCell(network)
 		a.Tag = "a"
@@ -32,7 +32,7 @@ func Test_FiringPattern(t *testing.T) {
 
 		// never fires d
 
-		result := fireNetworkUntilDone(network, []CellID{a.ID})
+		result := FireNetworkUntilDone(network, []CellID{a.ID})
 		fmt.Println(a.activating, b.activating, c.activating)
 		assert.Equal(t, 3, len(result), "wrong number of cells fired")
 		assert.Equal(t, false, result[d.ID], "should not have fired this cell")

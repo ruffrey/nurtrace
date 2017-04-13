@@ -2,19 +2,14 @@ package cmd
 
 import (
 	"errors"
-	"flag"
 	"fmt"
 	"strconv"
 
 	"github.com/ruffrey/nurtrace/potential"
 )
 
-var synapse = flag.Uint("s", 0, "synapse ID - Pass a synapse ID to get info about it.")
-var cell = flag.Uint("c", 0, "cell ID - Pass a cell ID to get info about it.")
-var integrity = flag.String("i", "", "integrity - Check network integrity. (-i=ok) or (-i=report)")
-
 // Inspect prints information about a network or requested components of the network.
-func Inspect(filename string, integrity bool, totals bool, cell int, synapse int) (err error) {
+func Inspect(filename string, integrity bool, totals bool, allTags bool, cell int, synapse int) (err error) {
 	net, err := potential.LoadNetworkFromFile(filename)
 	if err != nil {
 		return err
@@ -32,6 +27,15 @@ func Inspect(filename string, integrity bool, totals bool, cell int, synapse int
 
 	if totals {
 		net.PrintTotals()
+		return nil
+	}
+
+	if allTags {
+		for _, c := range net.Cells {
+			if c.Tag != "" {
+				fmt.Println(c.Tag, c.ID)
+			}
+		}
 		return nil
 	}
 
