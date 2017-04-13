@@ -107,3 +107,11 @@ Depth creates the opportunity for complexity and stateful decisions in the
 network.
 */
 const MaxDepthFromInputToOutput uint8 = 20
+
+/*
+MaxPostFireSteps is how long to keep firing the network while we collect
+the pattern. A network will get seeded with some initial cells to fire,
+then it will keep firing (stepping) while we record what gets fired.
+If it doesn't fizzle out on its own, it will stop at MaxPostFireSteps.
+*/
+const MaxPostFireSteps uint8 = 100

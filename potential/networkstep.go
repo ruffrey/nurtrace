@@ -1,9 +1,10 @@
 package potential
 
 import (
-	"github.com/ruffrey/nurtrace/laws"
 	"fmt"
 	"math"
+
+	"github.com/ruffrey/nurtrace/laws"
 )
 
 /*
