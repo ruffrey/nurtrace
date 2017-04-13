@@ -359,6 +359,7 @@ func processBatch(batch []*TrainingSample, originalNetwork *Network, data *Datas
 		allInputCells[ts.InputCell] = true
 
 		network.Cells[ts.InputCell].FireActionPotential()
+		network.resetCellsOnNextStep[ts.InputCell] = true
 		// TODO: should we step here? or not?
 		network.Step()
 	}

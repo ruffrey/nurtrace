@@ -60,12 +60,16 @@ func Sample(seedKeys []interface{}, data *Dataset, network *Network, maxResultLe
 
 	// fire one cell per step, in order.
 	if start != nil {
-		network.Cells[data.KeyToItem[start].InputCell].FireActionPotential()
+		ic := data.KeyToItem[start].InputCell
+		network.Cells[ic].FireActionPotential()
+		network.resetCellsOnNextStep[ic] = true
 		network.Step()
 	}
 
 	for _, perceptionUnit := range seedKeys {
-		network.Cells[data.KeyToItem[perceptionUnit].InputCell].FireActionPotential()
+		ic := data.KeyToItem[perceptionUnit].InputCell
+		network.Cells[ic].FireActionPotential()
+		network.resetCellsOnNextStep[ic] = true
 	}
 
 	go func() {
@@ -77,6 +81,7 @@ func Sample(seedKeys []interface{}, data *Dataset, network *Network, maxResultLe
 		for i := 0; i < 10000; i++ {
 			r := randCellFromMap(randCellList)
 			network.getCell(r).FireActionPotential()
+			network.resetCellsOnNextStep[r] = true
 		}
 		for {
 			hasMore := network.Step()
