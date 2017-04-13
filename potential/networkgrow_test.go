@@ -97,7 +97,7 @@ func Test_GrowPathBetween(t *testing.T) {
 		assert.Equal(t, 4, len(network.Cells))
 		assert.Equal(t, 4, len(network.Synapses))
 	})
-	t.Run("adds synapses when the number of connections is below the minimum", func(t *testing.T) {
+	t.Run("adds synapses and cells when the number of connections is below the minimum", func(t *testing.T) {
 		before()
 
 		endSynapses, addedSynapses := network.GrowPathBetween(input.ID, output.ID, 4)
@@ -106,7 +106,7 @@ func Test_GrowPathBetween(t *testing.T) {
 		assert.Equal(t, true, endSynapses[layer2C.ID])
 		assert.Equal(t, true, endSynapses[layer2D.ID])
 		assert.Equal(t, 2, len(addedSynapses))
-		assert.Equal(t, 5, len(network.Cells))
+		assert.Equal(t, 4, len(network.Cells))
 		assert.Equal(t, 6, len(network.Synapses))
 
 	})
