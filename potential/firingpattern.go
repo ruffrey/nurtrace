@@ -73,9 +73,9 @@ func DiffFiringPatterns(fp1, fp2 FiringPattern) *FiringPatternDiff {
 			diff.Unshared[cellID] = true
 		}
 	}
-	for cellID := range fp1 {
+	for cellID := range fp2 {
 		// already been through the shared ones
-		if !fp2[cellID] {
+		if !fp1[cellID] {
 			diff.Unshared[cellID] = true
 		}
 	}

@@ -319,6 +319,10 @@ func main() {
 					Name:  "i",
 					Usage: "Number of random cells per group",
 				},
+				cli.IntFlag{
+					Name:  "n",
+					Usage: "Number of times to fire",
+				},
 			},
 			Before: func(c *cli.Context) error {
 				if c.Args().First() == "" {
@@ -331,10 +335,14 @@ func main() {
 				cell1String := c.Args().Get(1)
 				cell2String := c.Args().Get(2)
 				r := c.Int("i")
+				n := c.Int("n")
 				var cell1 []potential.CellID
 				var cell2 []potential.CellID
 				if r == 0 {
 					r = 4
+				}
+				if n == 0 {
+					n = 1
 				}
 
 				network, err := potential.LoadNetworkFromFile(net)
@@ -373,7 +381,7 @@ func main() {
 
 				}
 
-				return cmd.CompareFiringPatterns(network, cell1, cell2)
+				return cmd.CompareFiringPatterns(network, cell1, cell2, n)
 			},
 		},
 		{
