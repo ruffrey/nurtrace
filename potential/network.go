@@ -6,9 +6,12 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"math"
 	"math/rand"
 	"os"
 	"sync"
+
+	"github.com/ruffrey/nurtrace/laws"
 )
 
 /*
@@ -240,6 +243,16 @@ func (network *Network) SaveToFileReadable(filepath string) (err error) {
 	}
 	err = ioutil.WriteFile(filepath, bytes, os.ModePerm)
 	return err
+}
+
+/*
+FireNoise chooses `NoiseRatio` random cells and fires them.
+*/
+func (network *Network) FireNoise() {
+	totalFires := int(math.Ceil(float64(len(network.Cells)) * laws.NoiseRatio))
+	for i := 0; i < totalFires; i++ {
+		network.getCell(network.RandomCellKey()).FireActionPotential()
+	}
 }
 
 /*

@@ -1,10 +1,6 @@
 package potential
 
 import (
-	"fmt"
-	"math"
-	"strings"
-
 	"github.com/ruffrey/nurtrace/laws"
 )
 
@@ -93,109 +89,6 @@ func DiffFiringPatterns(fp1, fp2 FiringPattern) *FiringPatternDiff {
 }
 
 /*
-Vocabulary holds the input and output values as well as some training samples.
-*/
-type Vocabulary struct {
-	Net     *Network
-	Inputs  map[InputValue]*VocabUnit
-	Outputs map[OutputValue]*OutputCollection
-	samples map[InputValue]OutputValue
-}
-
-/*
-addTrainingData takes a group of units, such as a group of
-pixels, or a word, and breaks it into its smaller parts. Then it finds those
-corresponding smaller parts in the VocabUnit collection. It adds training
-samples for
-*/
-func (vocab *Vocabulary) addTrainingData(unitGroups []interface{}, expected string) {
-	for ix, inputGroup := range unitGroups {
-		groupParts := strings.Split(fmt.Sprint(inputGroup), "")
-
-		// make sure there is an input for this character
-		for _, char := range groupParts {
-			_, exists := vocab.Inputs[InputValue(char)]
-			if !exists {
-				vu := NewVocabUnit(char)
-				vu.InitRandomInputs(vocab.Net)
-				vocab.Inputs[InputValue(char)] = vu
-			}
-		}
-
-		firstHasNoPreceedingPredictor := ix == 0
-		if firstHasNoPreceedingPredictor {
-			continue
-		}
-		// preceeding group predicts this one
-	}
-}
-
-// InputValue is a unique string for the input
-type InputValue string
-
-/*
-A VocabUnit is a group of cells that represent a user-defined value.
-
-VocabUnit is similar to the previous PerceptionUnit, when cells
-were single input and output. Here, a group of cells are the input.
-*/
-type VocabUnit struct {
-	Value      InputValue
-	InputCells map[CellID]bool
-}
-
-/*
-NewVocabUnit is a factory for VocabUnit
-*/
-func NewVocabUnit(value string) *VocabUnit {
-	return &VocabUnit{
-		Value:      InputValue(value),
-		InputCells: make(map[CellID]bool),
-	}
-}
-
-// OutputValue is a unique string for an output, useful for identifying it.
-type OutputValue string
-
-/*
-OutputCollection is a firing pattern that represents an output value. It is
-a collection of cells, which can change. These cells represent a value.
-*/
-type OutputCollection struct {
-	Value       OutputValue
-	FirePattern FiringPattern
-}
-
-/*
-NewOutputCollection is a factory for OutputCollection
-*/
-func NewOutputCollection(value string) *OutputCollection {
-	return &OutputCollection{
-		Value: OutputValue(value),
-	}
-}
-
-/*
-InitRandomInputs chooses some input cells for the vocab unit.
-*/
-func (vu *VocabUnit) InitRandomInputs(network *Network) {
-	for i := 0; i < laws.InitialCellCountPerVocabUnit; i++ {
-		vu.InputCells[network.RandomCellKey()] = true
-	}
-}
-
-/*
-ExpandExistingInputs grows out from the vocab unit's existing InputCells
-so it has more uniqueness.
-*/
-func (vu *VocabUnit) ExpandExistingInputs(network *Network) {
-	for i := 0; i < laws.NewCellDifferentiationCount; i++ {
-		preCell := randCellFromMap(vu.InputCells)
-		network.GrowPathBetween(preCell, NewCell(network).ID, laws.GrowPathExpectedMinimumSynapses)
-	}
-}
-
-/*
 DifferentiateVocabUnits grows two firing groups until they produce significantly
 different patterns from one another.
 
@@ -235,9 +128,11 @@ func RunFiringPatternTraining(network *Network, vocab []VocabUnit) {
 
 }
 
-func fireNoise(network *Network) {
-	totalFires := int(math.Ceil(float64(len(network.Cells)) * laws.NoiseRatio))
-	for i := 0; i < totalFires; i++ {
-		network.getCell(network.RandomCellKey()).FireActionPotential()
-	}
+/*
+FindClosestOutputCollection finds the closest output collection
+statisitcally.
+*/
+func FindClosestOutputCollection(patt *FiringPattern, vocab *Vocabulary) (ov OutputValue) {
+
+	return ov
 }
