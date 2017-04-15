@@ -105,8 +105,8 @@ TrainingSample is a pairing of cells where the input should fire the output. It 
 for training, so theoretically one cell might fire another cell.
 */
 type TrainingSample struct {
-	InputCell  CellID
-	OutputCell CellID
+	InputCell      []CellID
+	ExpectedOutput OutputValue
 }
 
 /*

@@ -141,3 +141,9 @@ NewCellDifferentiationCount is how many new cells to add to a vocab
 unit when we find it is too similar to another vocab unit.
 */
 const NewCellDifferentiationCount int = 4
+
+/*
+NoiseRatio is the percentage of cells to purposely fire as noise
+during training (or sampling?).
+*/
+const NoiseRatio float64 = 0.3
