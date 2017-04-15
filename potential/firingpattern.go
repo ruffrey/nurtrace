@@ -88,6 +88,9 @@ func DiffFiringPatterns(fp1, fp2 FiringPattern) *FiringPatternDiff {
 	return diff
 }
 
+// InputValue is a unique string for the input
+type InputValue string
+
 /*
 A VocabUnit is a group of cells that represent a user-defined value.
 
@@ -95,37 +98,39 @@ VocabUnit is similar to the previous PerceptionUnit, when cells
 were single input and output. Here, a group of cells are the input.
 */
 type VocabUnit struct {
-	// Value is for the consumer
-	Value      interface{}
-	Tag        string
+	Value      InputValue
 	InputCells map[CellID]bool
 }
 
 /*
 NewVocabUnit is a factory for VocabUnit
 */
-func NewVocabUnit(value interface{}, tag string) *VocabUnit {
+func NewVocabUnit(value string) *VocabUnit {
 	return &VocabUnit{
-		Value:      value,
-		Tag:        tag,
+		Value:      InputValue(value),
 		InputCells: make(map[CellID]bool),
 	}
 }
 
+// OutputValue is a unique string for an output, useful for identifying it.
+type OutputValue string
+
 /*
-OutputCollection is a firing pattern that represents an output value.
+OutputCollection is a firing pattern that represents an output value. It is
+a collection of cells, which can change. These cells represent a value.
 */
 type OutputCollection struct {
-	Value       interface{}
-	Tag         string
+	Value       OutputValue
 	FirePattern FiringPattern
 }
 
 /*
 NewOutputCollection is a factory for OutputCollection
 */
-func NewOutputCollection(value interface{}, tag string) *OutputCollection {
-	return &OutputCollection{}
+func NewOutputCollection(value string) *OutputCollection {
+	return &OutputCollection{
+		Value: OutputValue(value),
+	}
 }
 
 /*
