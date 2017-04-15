@@ -7,7 +7,7 @@ import (
 )
 
 // CompareFiringPatterns prints information about a network or requested components of the network.
-func CompareFiringPatterns(network *potential.Network, cell1, cell2 []potential.CellID, n int) (err error) {
+func CompareFiringPatterns(network *potential.Network, cell1, cell2 map[potential.CellID]bool, n int) (err error) {
 	network.PrintTotals()
 	fmt.Println("Cell group 1:", cell1)
 	fmt.Println("Cell group 2:", cell2)
@@ -26,7 +26,7 @@ func CompareFiringPatterns(network *potential.Network, cell1, cell2 []potential.
 	network.ResetForTraining()
 	for i := 0; i < n; i++ {
 		isLast := i == (n - 1)
-		p := potential.FireNetworkUntilDone(network, cell1)
+		p := potential.FireNetworkUntilDone(network, cell2)
 		if isLast {
 			patt2 = p
 		}

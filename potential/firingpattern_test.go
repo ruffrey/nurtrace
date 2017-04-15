@@ -31,8 +31,9 @@ func Test_FiringPattern(t *testing.T) {
 		s3.Millivolts = laws.ActualSynapseMax
 
 		// never fires d
-
-		result := FireNetworkUntilDone(network, []CellID{a.ID})
+		cells := make(map[CellID]bool)
+		cells[a.ID] = true
+		result := FireNetworkUntilDone(network, cells)
 		fmt.Println(a.activating, b.activating, c.activating)
 		assert.Equal(t, 3, len(result), "wrong number of cells fired")
 		assert.Equal(t, false, result[d.ID], "should not have fired this cell")

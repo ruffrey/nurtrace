@@ -121,4 +121,23 @@ FiringIterationsPerSample is how many times to fire an input cell.
 Firing once may not cause much firing in the network. So firing
 10 or 100+ times in a row will excite many pathways.
 */
-const FiringIterationsPerSample uint8 = 10
+const FiringIterationsPerSample int = 25
+
+/*
+PatternSimilarityLimit represents the percentage/ratio of
+similarity between two firing patterns before one (or both?) of them
+need to change.
+*/
+const PatternSimilarityLimit float64 = 0.8
+
+/*
+InitialCellCountPerVocabUnit is how many cells will represent a single
+VocabUnit, to start off.
+*/
+const InitialCellCountPerVocabUnit int = 10
+
+/*
+NewCellDifferentiationCount is how many new cells to add to a vocab
+unit when we find it is too similar to another vocab unit.
+*/
+const NewCellDifferentiationCount int = 4

@@ -4,6 +4,12 @@ import (
 	"github.com/ruffrey/nurtrace/laws"
 )
 
+/*
+Glossary:
+- VocabUnit - single input value mapped to multiple input cells
+- OutputCollection - single output value mapped to multiple output cells
+*/
+
 // FiringPattern represents all cells that fired in a single step
 type FiringPattern map[CellID]bool
 
@@ -13,10 +19,10 @@ it has no more firing, up to `laws.MaxPostFireSteps`.
 
 Consider that you may want to ResetForTraining before running this.
 */
-func FireNetworkUntilDone(network *Network, seedCells []CellID) (fp FiringPattern) {
+func FireNetworkUntilDone(network *Network, seedCells map[CellID]bool) (fp FiringPattern) {
 	var i uint8
 	fp = make(map[CellID]bool)
-	for _, cellID := range seedCells {
+	for cellID := range seedCells {
 		network.getCell(cellID).FireActionPotential()
 		network.resetCellsOnNextStep[cellID] = true
 	}
@@ -80,4 +86,104 @@ func DiffFiringPatterns(fp1, fp2 FiringPattern) *FiringPatternDiff {
 		}
 	}
 	return diff
+}
+
+/*
+A VocabUnit is a group of cells that represent a user-defined value.
+
+VocabUnit is similar to the previous PerceptionUnit, when cells
+were single input and output. Here, a group of cells are the input.
+*/
+type VocabUnit struct {
+	// Value is for the consumer
+	Value      interface{}
+	Tag        string
+	InputCells map[CellID]bool
+}
+
+/*
+NewVocabUnit is a factory for VocabUnit
+*/
+func NewVocabUnit(value interface{}, tag string) *VocabUnit {
+	return &VocabUnit{
+		Value:      value,
+		Tag:        tag,
+		InputCells: make(map[CellID]bool),
+	}
+}
+
+/*
+OutputCollection is a firing pattern that represents an output value.
+*/
+type OutputCollection struct {
+	Value       interface{}
+	Tag         string
+	FirePattern FiringPattern
+}
+
+/*
+NewOutputCollection is a factory for OutputCollection
+*/
+func NewOutputCollection(value interface{}, tag string) *OutputCollection {
+	return &OutputCollection{}
+}
+
+/*
+InitRandomInputs chooses some input cells for the vocab unit.
+*/
+func (vu *VocabUnit) InitRandomInputs(network *Network) {
+	for i := 0; i < laws.InitialCellCountPerVocabUnit; i++ {
+		vu.InputCells[network.RandomCellKey()] = true
+	}
+}
+
+/*
+ExpandExistingInputs grows out from the vocab unit's existing InputCells
+so it has more uniqueness.
+*/
+func (vu *VocabUnit) ExpandExistingInputs(network *Network) {
+	for i := 0; i < laws.NewCellDifferentiationCount; i++ {
+		preCell := randCellFromMap(vu.InputCells)
+		network.GrowPathBetween(preCell, NewCell(network).ID, laws.GrowPathExpectedMinimumSynapses)
+	}
+}
+
+/*
+DifferentiateVocabUnits grows two firing groups until they produce significantly
+different patterns from one another.
+
+Does not modify the network.
+*/
+func DifferentiateVocabUnits(vu1, vu2 *VocabUnit, _network *Network) Diff {
+	// add general noise
+	n := CloneNetwork(_network)
+
+	for {
+		n.ResetForTraining()
+		vu1.ExpandExistingInputs(n)
+		for i := 0; i < laws.FiringIterationsPerSample-1; i++ {
+			FireNetworkUntilDone(n, vu1.InputCells)
+		}
+		patt1 := FireNetworkUntilDone(n, vu1.InputCells)
+		n.ResetForTraining()
+		vu2.ExpandExistingInputs(n)
+		for i := 0; i < laws.FiringIterationsPerSample-1; i++ {
+			FireNetworkUntilDone(n, vu2.InputCells)
+		}
+		patt2 := FireNetworkUntilDone(n, vu2.InputCells)
+		n.ResetForTraining()
+
+		fpDiff := DiffFiringPatterns(patt1, patt2)
+		if fpDiff.Ratio() < laws.PatternSimilarityLimit {
+			return DiffNetworks(_network, n)
+		}
+	}
+}
+
+/*
+RunFiringPatternTraining trains the network using the training samples,
+until training samples are differentiated from one another.
+*/
+func RunFiringPatternTraining(network *Network, vocab []VocabUnit) {
+
 }

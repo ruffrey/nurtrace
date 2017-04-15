@@ -9,7 +9,8 @@ import (
 // FireCell fires a cell n times and prints all cells that it fires.
 func FireCell(network *potential.Network, cell potential.CellID, n int) (err error) {
 	network.ResetForTraining()
-	cellArg := []potential.CellID{cell}
+	cellArg := make(map[potential.CellID]bool)
+	cellArg[cell] = true
 	for i := 0; i < n; i++ {
 		isLast := i == n-1
 		if isLast {
