@@ -1,7 +1,10 @@
 package potential
 
 import (
+	"encoding/json"
 	"fmt"
+	"io/ioutil"
+	"os"
 	"strings"
 )
 
@@ -9,7 +12,7 @@ import (
 Vocabulary holds the input and output values as well as some training samples.
 */
 type Vocabulary struct {
-	Net     *Network
+	Net     *Network `json:"-"`
 	Inputs  map[InputValue]*VocabUnit
 	Outputs map[OutputValue]*OutputCollection
 	samples map[InputValue]OutputValue
@@ -41,4 +44,29 @@ func (vocab *Vocabulary) addTrainingData(unitGroups []interface{}, expected stri
 		}
 		// preceeding group predicts this one
 	}
+}
+
+/*
+LoadVocabFromFile loads the vocab from a JSON file but does not populate
+the Net (the network).
+*/
+func LoadVocabFromFile(filepath string) (vocab *Vocabulary, err error) {
+	bytes, err := ioutil.ReadFile(filepath)
+	if err != nil {
+		return vocab, err
+	}
+	err = json.Unmarshal(bytes, &vocab)
+	return vocab, err
+}
+
+/*
+SaveToFile saves the vocab to a JSON file but does not save the Net
+property (the network).
+*/
+func (vocab *Vocabulary) SaveToFile(filepath string) error {
+	d, err := json.Marshal(vocab)
+	if err != nil {
+		return err
+	}
+	return ioutil.WriteFile(filepath, []byte(d), os.ModePerm)
 }
