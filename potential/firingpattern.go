@@ -124,15 +124,24 @@ func DifferentiateVocabUnits(vu1, vu2 *VocabUnit, _network *Network) Diff {
 RunFiringPatternTraining trains the network using the training samples,
 until training samples are differentiated from one another.
 */
-func RunFiringPatternTraining(network *Network, vocab []VocabUnit) {
+func RunFiringPatternTraining(vocab *Vocabulary) {
 
 }
 
 /*
 FindClosestOutputCollection finds the closest output collection
 statisitcally.
+patt = the actual firing pattern
 */
-func FindClosestOutputCollection(patt *FiringPattern, vocab *Vocabulary) (ov OutputValue) {
-
-	return ov
+func FindClosestOutputCollection(patt FiringPattern, vocab *Vocabulary) (oc *OutputCollection) {
+	var closestRatio float64
+	for _, outputCandidate := range vocab.Outputs {
+		r := DiffFiringPatterns(outputCandidate.FirePattern, patt).Ratio()
+		isCloser := r > closestRatio
+		if isCloser {
+			closestRatio = r
+			oc = outputCandidate
+		}
+	}
+	return oc
 }
