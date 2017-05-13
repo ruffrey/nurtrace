@@ -79,7 +79,7 @@ const DefaultSynapseMinFireThreshold = 8
 /*
 DefaultNeuronSynapses is the number of random synapses a new neuron will get.
 */
-const DefaultNeuronSynapses = 4
+const DefaultNeuronSynapses = 8
 
 /*
 RetrainNeuronsToGrow is the number of neurons to add when a single sample does not
@@ -107,3 +107,43 @@ Depth creates the opportunity for complexity and stateful decisions in the
 network.
 */
 const MaxDepthFromInputToOutput uint8 = 20
+
+/*
+MaxPostFireSteps is how long to keep firing the network while we collect
+the pattern. A network will get seeded with some initial cells to fire,
+then it will keep firing (stepping) while we record what gets fired.
+If it doesn't fizzle out on its own, it will stop at MaxPostFireSteps.
+*/
+const MaxPostFireSteps uint8 = 100
+
+/*
+FiringIterationsPerSample is how many times to fire an input cell.
+Firing once may not cause much firing in the network. So firing
+10 or 100+ times in a row will excite many pathways.
+*/
+const FiringIterationsPerSample int = 10
+
+/*
+PatternSimilarityLimit represents the percentage/ratio of
+similarity between two firing patterns before one (or both?) of them
+need to change.
+*/
+const PatternSimilarityLimit float64 = 0.7
+
+/*
+InitialCellCountPerVocabUnit is how many cells will represent a single
+VocabUnit, to start off.
+*/
+const InitialCellCountPerVocabUnit int = 10
+
+/*
+NewCellDifferentiationCount is how many new cells to add to a vocab
+unit when we find it is too similar to another vocab unit.
+*/
+const NewCellDifferentiationCount int = 4
+
+/*
+NoiseRatio is the percentage of cells to purposely fire as noise
+during training (or sampling?).
+*/
+const NoiseRatio float64 = 0.3

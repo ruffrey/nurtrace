@@ -11,9 +11,6 @@ import (
 	"github.com/ruffrey/nurtrace/potential"
 )
 
-type inputTextChars string
-type outputCategoryName string
-
 /*
 Charcatnn predicts a category from strings of characters.
 

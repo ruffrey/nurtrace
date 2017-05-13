@@ -6,9 +6,11 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 
 	cmd "github.com/ruffrey/nurtrace/cli/cmd"
+	"github.com/ruffrey/nurtrace/potential"
 	cli "gopkg.in/urfave/cli.v1"
 )
 
@@ -29,6 +31,88 @@ func main() {
 	app.EnableBashCompletion = true
 
 	app.Commands = []cli.Command{
+		{
+			Name:        "train2",
+			Usage:       "Train a multi-pattern neural network to percept and predict",
+			Description: "Will create the network first, if it does not exist.",
+			ArgsUsage:   "",
+			Flags: []cli.Flag{
+				cli.StringFlag{
+					Name:  "network, n",
+					Usage: "Network input/output save file",
+				},
+				cli.StringFlag{
+					Name:  "output, o",
+					Usage: "Optional network output file if you want it different than --network",
+				},
+				cli.StringFlag{
+					Name:  "vocab, v",
+					Usage: "File for loading and saving the vocab",
+				},
+				cli.StringFlag{
+					Name:  "data, d",
+					Usage: "Training data file",
+				},
+				cli.StringFlag{
+					Name:  "profile, p",
+					Usage: "Optionally train with either 'cpu' or 'mem' profiling enabled, for detecting performance issues and leaks",
+				},
+				cli.IntFlag{
+					Name:  "size, s",
+					Usage: "Optionally specify the initial network size when creating it",
+				},
+				cli.IntFlag{
+					Name:  "iterations, i",
+					Usage: "Optionally specify the number of times to train on the dataset.",
+				},
+			},
+			Before: func(c *cli.Context) error {
+				// validations
+				required := []string{"network", "data", "vocab"}
+				for _, field := range required {
+					if c.String(field) == "" {
+						return errors.New("Missing required argument " + field)
+					}
+				}
+				return nil
+			},
+			Action: func(c *cli.Context) (err error) {
+				// collect arguments and provide defaults
+				networkInputFile := c.String("network")
+				networkSaveFile := c.String("output")
+				if networkSaveFile == "" {
+					networkSaveFile = networkInputFile
+				}
+				vocabSaveFile := c.String("vocab")
+				testDataFile := c.String("data")
+				doProfile := c.String("profile")
+				initialNetworkNeurons := c.Int("size")
+				if initialNetworkNeurons == 0 {
+					initialNetworkNeurons = 200
+				}
+				iterations := c.Int("iterations")
+				if iterations == 0 {
+					iterations = 1
+				}
+
+				// run it
+
+				if iterations == 1 {
+					return cmd.Train2(networkInputFile, networkSaveFile, vocabSaveFile, testDataFile, doProfile, initialNetworkNeurons)
+				}
+				for i := 0; i < iterations; i++ {
+					fmt.Println("------ Start Iteration", i+1, "------")
+					err = cmd.Train2(networkInputFile, networkSaveFile, vocabSaveFile, testDataFile, doProfile, initialNetworkNeurons)
+					fmt.Println("------ End Iteration", i+1, "------")
+					if err != nil {
+						fmt.Println("Failed on iteration", i+1)
+						return err
+					}
+				}
+
+				return err
+			},
+		},
 		{
 			Name:        "train",
 			Usage:       "Train a neural network to percept and predict",
@@ -243,6 +327,10 @@ func main() {
 					Name:  "totals, t",
 					Usage: "Only print the totals about the network, instead of the entire network.",
 				},
+				cli.BoolFlag{
+					Name:  "tags, g",
+					Usage: "Print all cells that have a Tag property",
+				},
 				cli.IntFlag{
 					Name:  "cell, c",
 					Usage: "Print info about a specific cell",
@@ -261,7 +349,121 @@ func main() {
 			Action: func(c *cli.Context) (err error) {
 				net := c.Args().First()
 				fmt.Println("Reading network from", net)
-				return cmd.Inspect(net, c.Bool("integrity"), c.Bool("totals"), c.Int("cell"), c.Int("synapse"))
+				return cmd.Inspect(net, c.Bool("integrity"), c.Bool("totals"), c.Bool("tags"), c.Int("cell"), c.Int("synapse"))
+			},
+		},
+		{
+			Name:      "fire",
+			Usage:     "Fire a cell and print the firing pattern",
+			ArgsUsage: "[network file] [cell ID]",
+			Flags: []cli.Flag{
+				cli.IntFlag{
+					Name:  "n",
+					Usage: "Number of times to fire",
+				},
+			},
+			Before: func(c *cli.Context) error {
+				if c.Args().First() == "" {
+					return errors.New("Missing network filename")
+				}
+				if c.Args().Get(1) == "" {
+					return errors.New("Missing cell to fire")
+				}
+				return nil
+			},
+			Action: func(c *cli.Context) (err error) {
+				net := c.Args().First()
+				cellString := c.Args().Get(1)
+				n := c.Int("n")
+				var cell potential.CellID
+				if n == 0 {
+					n = 1
+				}
+				network, err := potential.LoadNetworkFromFile(net)
+				if err != nil {
+					return err
+				}
+				cellInt, err := strconv.Atoi(cellString)
+				if err != nil {
+					return err
+				}
+				cell = potential.CellID(cellInt)
+
+				return cmd.FireCell(network, cell, n)
+			},
+		},
+		{
+			Name:      "diff-firings",
+			Usage:     "Print the difference between the firing pattern of two cell groups. Random cells chosen otherwise ",
+			ArgsUsage: "[network file] [cell1 IDs] [cell2 IDs]",
+			Flags: []cli.Flag{
+				cli.IntFlag{
+					Name:  "i",
+					Usage: "Number of random cells per group",
+				},
+				cli.IntFlag{
+					Name:  "n",
+					Usage: "Number of times to fire",
+				},
+			},
+			Before: func(c *cli.Context) error {
+				if c.Args().First() == "" {
+					return errors.New("Missing network filename")
+				}
+				return nil
+			},
+			Action: func(c *cli.Context) (err error) {
+				net := c.Args().First()
+				cell1String := c.Args().Get(1)
+				cell2String := c.Args().Get(2)
+				r := c.Int("i")
+				n := c.Int("n")
+				cell1 := make(map[potential.CellID]bool)
+				cell2 := make(map[potential.CellID]bool)
+				if r == 0 {
+					r = 4
+				}
+				if n == 0 {
+					n = 1
+				}
+
+				network, err := potential.LoadNetworkFromFile(net)
+				if err != nil {
+					return err
+				}
+
+				if cell1String == "" {
+					for i := 0; i < r; i++ {
+						cell1[network.RandomCellKey()] = true
+					}
+				} else {
+					cellInts := strings.Split(cell1String, ",")
+					for i := 0; i < len(cellInts); i++ {
+						cellInt, err := strconv.Atoi(cellInts[i])
+						if err != nil {
+							return err
+						}
+						cell1[potential.CellID(cellInt)] = true
+					}
+
+				}
+				if cell2String == "" {
+					for i := 0; i < r; i++ {
+						cell2[network.RandomCellKey()] = true
+					}
+				} else {
+					cellInts := strings.Split(cell2String, ",")
+					for i := 0; i < len(cellInts); i++ {
+						cellInt, err := strconv.Atoi(cellInts[i])
+						if err != nil {
+							return err
+						}
+						cell2[potential.CellID(cellInt)] = true
+					}
+
+				}
+
+				return cmd.CompareFiringPatterns(network, cell1, cell2, n)
 			},
 		},
 		{
