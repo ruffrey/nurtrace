@@ -1,6 +1,8 @@
 package potential
 
 import (
+	"fmt"
+
 	"github.com/ruffrey/nurtrace/laws"
 )
 
@@ -138,7 +140,16 @@ func RunFiringPatternTraining(vocab *Vocabulary) {
 	vocab.Net.ResetForTraining()
 	finalPattern := make(FiringPattern)
 
+	tots := len(vocab.samples)
+	fmt.Println("Running samples", tots)
+	iteration := -1
 	for _, s := range vocab.samples {
+		iteration++
+		if iteration%5 == 0 {
+			fmt.Println("sample", iteration, "/", tots)
+			vocab.Net.PrintTotals()
+			fmt.Println("  outputs=", len(vocab.Outputs))
+		}
 		// fire the input a bunch of times. after that we can consider
 		// the output pattern as fired. set the output pattern.
 		inputs := vocab.Inputs[s.input].InputCells
