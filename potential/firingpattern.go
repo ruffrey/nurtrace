@@ -62,6 +62,19 @@ func (diff *FiringPatternDiff) Ratio() float64 {
 	return lenShared / (lenShared + lenUnshared)
 }
 
+func mergeFiringPatterns(fp1, fp2 FiringPattern) (merged FiringPattern) {
+	merged = make(FiringPattern)
+
+	for cellID := range fp1 {
+		merged[cellID] = true
+	}
+	for cellID := range fp2 {
+		merged[cellID] = true
+	}
+
+	return merged
+}
+
 /*
 DiffFiringPatterns figures out what was alike and unshared between
 two firing patterns.
@@ -89,49 +102,102 @@ func DiffFiringPatterns(fp1, fp2 FiringPattern) *FiringPatternDiff {
 }
 
 /*
-DifferentiateVocabUnits grows two firing groups until they produce significantly
-different patterns from one another.
+differentiateFiringPatterns grows two firing groups until should be
+significantly different.
 
-Does not modify the network.
+Does not modify the network, but returns a network diff so one thread can
+handle merging diffs to the master network.
 */
-func DifferentiateVocabUnits(vu1, vu2 *VocabUnit, _network *Network) Diff {
-	// add general noise
+func differentiateFiringPatterns(fp1, fp2 FiringPattern, _network *Network) Diff {
 	n := CloneNetwork(_network)
 
 	for {
 		n.ResetForTraining()
-		vu1.ExpandExistingInputs(n)
-		for i := 0; i < laws.FiringIterationsPerSample-1; i++ {
-			FireNetworkUntilDone(n, vu1.InputCells)
-		}
-		patt1 := FireNetworkUntilDone(n, vu1.InputCells)
+		ExpandExistingInputs(n, fp1)
 		n.ResetForTraining()
-		vu2.ExpandExistingInputs(n)
-		for i := 0; i < laws.FiringIterationsPerSample-1; i++ {
-			FireNetworkUntilDone(n, vu2.InputCells)
-		}
-		patt2 := FireNetworkUntilDone(n, vu2.InputCells)
-		n.ResetForTraining()
+		ExpandExistingInputs(n, fp2)
 
-		fpDiff := DiffFiringPatterns(patt1, patt2)
+		fpDiff := DiffFiringPatterns(fp1, fp2)
 		if fpDiff.Ratio() < laws.PatternSimilarityLimit {
 			return DiffNetworks(_network, n)
+		}
+	}
+
+}
+
+/*
+RunFiringPatternTraining trains the network using the training samples
+in the vocab, until training samples are differentiated from one another.
+
+The vocab should already be properly initiated and the network should be
+set before running this.
+
+TODO: make multithreaded and multi-workered
+*/
+func RunFiringPatternTraining(vocab *Vocabulary) {
+	vocab.Net.ResetForTraining()
+	finalPattern := make(FiringPattern)
+
+	for _, s := range vocab.samples {
+		// fire the input a bunch of times. after that we can consider
+		// the output pattern as fired. set the output pattern.
+		inputs := vocab.Inputs[s.input].InputCells
+		for i := 0; i < laws.FiringIterationsPerSample; i++ {
+			finalPattern = mergeFiringPatterns(finalPattern, FireNetworkUntilDone(vocab.Net, inputs))
+		}
+		if _, exists := vocab.Outputs[s.output]; !exists {
+			vocab.Outputs[s.output] = NewOutputCollection(s.output)
+		}
+		// the output value is now represented by what we just
+		// created above, merged with what we had before.
+		originalFP := vocab.Outputs[s.output].FirePattern
+		vocab.Outputs[s.output].FirePattern = mergeFiringPatterns(originalFP, finalPattern)
+
+		// Now that the output firing pattern has been changed,
+		// we need to ensure none of the other outputs are too similar.
+		var lastOutput *OutputCollection
+		i := -1
+		for _, o := range vocab.Outputs {
+			isThisOne := s.output == o.Value
+			if isThisOne {
+				continue
+			}
+			i++
+			if i < 1 {
+				lastOutput = o
+				continue
+			}
+			fpDiff := DiffFiringPatterns(inputs, lastOutput.FirePattern)
+			tooSimilar := fpDiff.Ratio() > laws.PatternSimilarityLimit
+			if tooSimilar {
+				// TODO: multithread here
+				diff := differentiateFiringPatterns(
+					lastOutput.FirePattern,
+					o.FirePattern,
+					vocab.Net,
+				)
+				ApplyDiff(diff, vocab.Net)
+			}
 		}
 	}
 }
 
 /*
-RunFiringPatternTraining trains the network using the training samples,
-until training samples are differentiated from one another.
+FiringPatternSample produces the raw string output based on seed text that
+was input
 */
-func RunFiringPatternTraining(vocab *Vocabulary) {
+func FiringPatternSample(seedText string, vocab *Vocabulary) (output string) {
 
+	return output
 }
 
 /*
 FindClosestOutputCollection finds the closest output collection
 statisitcally.
+
 patt = the actual firing pattern
+
+This is useful for sampling.
 */
 func FindClosestOutputCollection(patt FiringPattern, vocab *Vocabulary) (oc *OutputCollection) {
 	var closestRatio float64

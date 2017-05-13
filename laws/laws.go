@@ -79,7 +79,7 @@ const DefaultSynapseMinFireThreshold = 8
 /*
 DefaultNeuronSynapses is the number of random synapses a new neuron will get.
 */
-const DefaultNeuronSynapses = 4
+const DefaultNeuronSynapses = 8
 
 /*
 RetrainNeuronsToGrow is the number of neurons to add when a single sample does not
@@ -121,14 +121,14 @@ FiringIterationsPerSample is how many times to fire an input cell.
 Firing once may not cause much firing in the network. So firing
 10 or 100+ times in a row will excite many pathways.
 */
-const FiringIterationsPerSample int = 25
+const FiringIterationsPerSample int = 10
 
 /*
 PatternSimilarityLimit represents the percentage/ratio of
 similarity between two firing patterns before one (or both?) of them
 need to change.
 */
-const PatternSimilarityLimit float64 = 0.8
+const PatternSimilarityLimit float64 = 0.7
 
 /*
 InitialCellCountPerVocabUnit is how many cells will represent a single

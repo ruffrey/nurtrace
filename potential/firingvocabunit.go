@@ -13,7 +13,7 @@ were single input and output. Here, a group of cells are the input.
 */
 type VocabUnit struct {
 	Value      InputValue
-	InputCells map[CellID]bool
+	InputCells FiringPattern
 }
 
 /*
@@ -22,7 +22,7 @@ NewVocabUnit is a factory for VocabUnit
 func NewVocabUnit(value string) *VocabUnit {
 	return &VocabUnit{
 		Value:      InputValue(value),
-		InputCells: make(map[CellID]bool),
+		InputCells: make(FiringPattern),
 	}
 }
 
@@ -41,9 +41,10 @@ type OutputCollection struct {
 /*
 NewOutputCollection is a factory for OutputCollection
 */
-func NewOutputCollection(value string) *OutputCollection {
+func NewOutputCollection(value OutputValue) *OutputCollection {
 	return &OutputCollection{
-		Value: OutputValue(value),
+		Value:       OutputValue(value),
+		FirePattern: make(FiringPattern),
 	}
 }
 
@@ -57,12 +58,12 @@ func (vu *VocabUnit) InitRandomInputs(network *Network) {
 }
 
 /*
-ExpandExistingInputs grows out from the vocab unit's existing InputCells
-so it has more uniqueness.
+ExpandExistingInputs grows out from the firing pattern's existing
+cells so it has more uniqueness.
 */
-func (vu *VocabUnit) ExpandExistingInputs(network *Network) {
+func ExpandExistingInputs(network *Network, fp FiringPattern) {
 	for i := 0; i < laws.NewCellDifferentiationCount; i++ {
-		preCell := randCellFromMap(vu.InputCells)
+		preCell := randCellFromMap(fp)
 		network.GrowPathBetween(preCell, NewCell(network).ID, laws.GrowPathExpectedMinimumSynapses)
 	}
 }
