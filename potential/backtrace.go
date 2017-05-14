@@ -84,6 +84,9 @@ output cells.
 - step backward through the network from the unexpected output cells
 - upon finding a happy path cell that fired, immediately add an inhibitory synapse
 from it to the bad pathway cell.
+
+NOT currently in use. But this was pretty hefty and complex to implement,
+and it might be useful in the future.
 */
 func backwardTraceNoiseAndInhibit(network *Network, inputCells map[CellID]bool, unexpectedOutputCells map[CellID]bool, goodSynapses map[SynapseID]bool) {
 	var badPairs []badPair

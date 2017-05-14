@@ -25,8 +25,8 @@ func main() {
 	app.Usage = "Nurtrace - generic neural network library"
 	app.UsageText = "nt [global options] command [options]"
 	app.HelpName = "nt"
-	app.Version = "0.12.0"
-	app.Copyright = "Symbolic Logic (c) 2017"
+	app.Version = "0.13.0"
+	app.Copyright = "Symbolic Logic and Jeff Parrish (c) 2017"
 
 	app.EnableBashCompletion = true
 

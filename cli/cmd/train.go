@@ -82,7 +82,7 @@ func Train(networkInputFile, networkSaveFile, vocabSaveFile, testDataFile, doPro
 			fmt.Println("Failed saving vocab")
 			fmt.Println(err)
 		}
-		err = network.SaveToFile("network_" + now + ".json")
+		err = network.SaveToFile("network_" + now + ".nur")
 		if err != nil {
 			fmt.Println(err)
 		}
