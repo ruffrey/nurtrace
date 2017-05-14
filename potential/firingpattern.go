@@ -64,6 +64,10 @@ func (diff *FiringPatternDiff) Ratio() float64 {
 	return lenShared / (lenShared + lenUnshared)
 }
 
+/*
+mergeFiringPatterns returns a new FiringPattern containing a mashup of
+the two supplied patterns.
+*/
 func mergeFiringPatterns(fp1, fp2 FiringPattern) (merged FiringPattern) {
 	merged = make(FiringPattern)
 
@@ -75,6 +79,21 @@ func mergeFiringPatterns(fp1, fp2 FiringPattern) (merged FiringPattern) {
 	}
 
 	return merged
+}
+
+/*
+mergeAllOutputs modifies the original group of Outputs by merging
+every newer output collection into the original.
+*/
+func mergeAllOutputs(original, newer map[OutputValue]*OutputCollection) {
+	for outVal, collection := range newer {
+		if _, exists := original[outVal]; !exists {
+			original[outVal] = collection
+		} else {
+			origFP := original[outVal].FirePattern
+			original[outVal].FirePattern = mergeFiringPatterns(origFP, collection.FirePattern)
+		}
+	}
 }
 
 /*
@@ -140,10 +159,10 @@ func RunFiringPatternTraining(vocab *Vocabulary) {
 	vocab.Net.ResetForTraining()
 	finalPattern := make(FiringPattern)
 
-	tots := len(vocab.samples)
+	tots := len(vocab.Samples)
 	fmt.Println("Running samples", tots)
 	iteration := -1
-	for _, s := range vocab.samples {
+	for _, s := range vocab.Samples {
 		iteration++
 		if iteration%5 == 0 {
 			fmt.Println("sample", iteration, "/", tots)
@@ -181,7 +200,7 @@ func RunFiringPatternTraining(vocab *Vocabulary) {
 			fpDiff := DiffFiringPatterns(inputs, lastOutput.FirePattern)
 			tooSimilar := fpDiff.Ratio() > laws.PatternSimilarityLimit
 			if tooSimilar {
-				// TODO: multithread here
+				// TODO: multithread here?
 				diff := differentiateFiringPatterns(
 					lastOutput.FirePattern,
 					o.FirePattern,

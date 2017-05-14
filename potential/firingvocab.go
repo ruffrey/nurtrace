@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"runtime"
 	"strings"
 )
 
@@ -18,9 +19,11 @@ type Vocabulary struct {
 		cells. Sort of like how the letter A might fire a group of neurons
 		in a human brain.
 	*/
-	Inputs  map[InputValue]*VocabUnit
-	Outputs map[OutputValue]*OutputCollection
-	samples []sample
+	Inputs     map[InputValue]*VocabUnit
+	Outputs    map[OutputValue]*OutputCollection
+	Samples    []sample
+	Threads    int
+	Workerfile string
 }
 
 /*
@@ -31,12 +34,30 @@ func NewVocabulary(network *Network) *Vocabulary {
 		Net:     network,
 		Inputs:  make(map[InputValue]*VocabUnit),
 		Outputs: make(map[OutputValue]*OutputCollection),
+		Threads: runtime.NumCPU(),
 	}
 }
 
+// sample is a training data sample
 type sample struct {
 	input  InputValue
 	output OutputValue
+}
+
+/*
+CloneOutputs returns a new grouping of NEW OutputCollections (not shared
+pointers).
+*/
+func CloneOutputs(outputs map[OutputValue]*OutputCollection) map[OutputValue]*OutputCollection {
+	newOutputs := make(map[OutputValue]*OutputCollection)
+
+	for k, v := range outputs {
+		newOutputs[k] = &OutputCollection{
+			Value:       v.Value,
+			FirePattern: v.FirePattern,
+		}
+	}
+	return outputs
 }
 
 /*
@@ -64,7 +85,7 @@ func (vocab *Vocabulary) AddTrainingData(unitGroups []interface{}) {
 				continue
 			}
 			// preceeding group predicts this one
-			vocab.samples = append(vocab.samples, sample{
+			vocab.Samples = append(vocab.Samples, sample{
 				input:  InputValue(lastChar),
 				output: OutputValue(char),
 			})
