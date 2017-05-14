@@ -213,15 +213,6 @@ func RunFiringPatternTraining(vocab *Vocabulary) {
 }
 
 /*
-FiringPatternSample produces the raw string output based on seed text that
-was input
-*/
-func FiringPatternSample(seedText string, vocab *Vocabulary) (output string) {
-
-	return output
-}
-
-/*
 FindClosestOutputCollection finds the closest output collection
 statisitcally.
 
