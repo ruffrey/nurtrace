@@ -150,10 +150,11 @@ func (network *Network) RandomCellKey() (randCellID CellID) {
 }
 
 /*
-ResetForTraining resets transient properties on the network to their base resting state.
+ResetForTraining resets transient properties on the network to their base
+resting state.
 
-Does NOT reset synapse activation history - those should be reset only during a network.Prune()
-cycle. Additionally DOES NOT reset voltage, as this is part of the network's memory at work.
+DOES NOT reset voltage or activation history; this is part of the network's
+memory at work.
 */
 func (network *Network) ResetForTraining() {
 	for _, cell := range network.Cells {
