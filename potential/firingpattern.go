@@ -171,7 +171,6 @@ func RunFiringPatternTraining(vocab *Vocabulary) {
 		}
 		// fire the input a bunch of times. after that we can consider
 		// the output pattern as fired. set the output pattern.
-		fmt.Println("s.input=", s.input, "vocab.Inputs = ", vocab.Inputs)
 		inputs := vocab.Inputs[s.input].InputCells
 		for i := 0; i < laws.FiringIterationsPerSample; i++ {
 			finalPattern = mergeFiringPatterns(finalPattern, FireNetworkUntilDone(vocab.Net, inputs))

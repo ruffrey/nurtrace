@@ -45,6 +45,13 @@ type sample struct {
 }
 
 /*
+ClearSamples clears the samples
+*/
+func (vocab *Vocabulary) ClearSamples() {
+	vocab.Samples = make([]sample, 0)
+}
+
+/*
 CloneOutputs returns a new grouping of NEW OutputCollections (not shared
 pointers).
 */

@@ -235,7 +235,7 @@ func Train(masterVocab *Vocabulary, isRemoteWorkerWithTag string) {
 					dedupeSynapses(dupeGroup, masterVocab.Net)
 				}
 			}
-			break
+			return
 		}
 	}
 }

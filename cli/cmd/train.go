@@ -96,7 +96,8 @@ func Train(networkInputFile, networkSaveFile, vocabSaveFile, testDataFile, doPro
 
 	// Training is over
 
-	// Ensure we save the vocab
+	// Ensure we save the vocab, but empty the samples first.
+	vocab.ClearSamples()
 	err = vocab.SaveToFile(vocabSaveFile)
 	if err != nil {
 		fmt.Println("Failed saving vocab")
