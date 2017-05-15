@@ -12,9 +12,19 @@ import (
 )
 
 func copyVocabWithNewSamples(original *Vocabulary, samples []sample) *Vocabulary {
-	v := NewVocabulary(original.Net)
-	v.Samples = samples
-	return v
+	newVocab := NewVocabulary(CloneNetwork(original.Net))
+	// copy Inputs and Outputs maps
+	for k, v := range original.Inputs {
+		newVocab.Inputs[k] = v
+	}
+	for k, v := range original.Outputs {
+		newVocab.Outputs[k] = v
+	}
+	newVocab.Threads = original.Threads
+	newVocab.Workerfile = original.Workerfile
+	// this is the different one
+	newVocab.Samples = samples
+	return newVocab
 }
 
 // use the current time for easy reading, but also generate a random token
@@ -67,19 +77,16 @@ type Dataset struct {
 
 /*
 Train runs the training samples on local and remote threads, and applies them to
-the originalNetwork.
+the original network.
 
-ONLY prune on the original network:
+ONLY dedupe on the original network on a single protected thread.
 
-It is important to ONLY PRUNE on the original network. Diffing does not capture
-what was removed - that is a surprising rabbit hole. So if you diff and prune on an
-off-network, you can end up getting orphaned synapses - and bad integrity.
+Diffing does not capture what was removed - that is a surprising rabbit hole.
+So if you diff and dedupe on an off-network, you can end up getting orphaned
+synapses - and bad integrity.
 
 The Inputs should already be setup, before training. However the Outputs
 will change, so they should be merged along with the network merge.
-
-TODO: do we really need 3 concurrency primities to thread sync? two channels
-and a Mutex? can't we just use a single channel 1-buffered?
 */
 func Train(masterVocab *Vocabulary, isRemoteWorkerWithTag string) {
 	shouldDedupe := isRemoteWorkerWithTag == ""

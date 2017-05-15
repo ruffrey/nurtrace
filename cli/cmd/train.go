@@ -46,6 +46,7 @@ func Train(networkInputFile, networkSaveFile, vocabSaveFile, testDataFile, doPro
 	} else {
 		fmt.Println("Loaded vocab from disk", vocabSaveFile)
 	}
+	vocab.Net = network
 
 	fmt.Println("Reading test data file", testDataFile)
 	testDataBytes, err := ioutil.ReadFile(testDataFile)
@@ -91,7 +92,7 @@ func Train(networkInputFile, networkSaveFile, vocabSaveFile, testDataFile, doPro
 
 	fmt.Println("Beginning training")
 	network.Disabled = true // we just will never need it to fire
-	potential.RunFiringPatternTraining(vocab)
+	potential.Train(vocab, "")
 
 	// Training is over
 
