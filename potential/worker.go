@@ -13,8 +13,8 @@ import (
 )
 
 const workerLocation = "/opt/pworker"
-const trainingSettingsLocation = "/opt/pworker_settings.gob"
-const networkLocation = "/opt/network.json"
+const trainingVocabLocation = "/opt/pworker_vocab.json"
+const networkLocation = "/opt/network.nur"
 
 /*
 Worker is an instance of a remote training worker. We send it training
@@ -147,18 +147,18 @@ func (w *Worker) SCPGetFile(remoteFileLocation string, toLocalLocation string) (
 
 // Train runs the training session on a remote server. The remote party will
 // be doing `RunWorker()`.
-func (w *Worker) Train(localTrainingSettingsJSONLocation string, localTrainingNetworkJSONLocation string) (finalNetwork *Network, err error) {
+func (w *Worker) Train(localVocabLocation string, localTrainingNetworkJSONLocation string) (finalVocab *Vocabulary, err error) {
 	fmt.Println("Transferring settings to", w.host)
-	err = w.SCPSendFile(localTrainingSettingsJSONLocation, trainingSettingsLocation)
+	err = w.SCPSendFile(localVocabLocation, trainingVocabLocation)
 	if err != nil {
 		fmt.Println(err)
-		return finalNetwork, err
+		return finalVocab, err
 	}
 	fmt.Println("Transferring network to", w.host)
 	err = w.SCPSendFile(localTrainingNetworkJSONLocation, networkLocation)
 	if err != nil {
 		fmt.Println(w.host, err)
-		return finalNetwork, err
+		return finalVocab, err
 	}
 	fmt.Println("Training", w.host, "\n", workerLocation)
 
@@ -166,18 +166,18 @@ func (w *Worker) Train(localTrainingSettingsJSONLocation string, localTrainingNe
 	if err != nil {
 		fmt.Println(w.host, err)
 		fmt.Println(err)
-		return finalNetwork, err
+		return finalVocab, err
 	}
 	defer session.Close()
 
 	// do stderr on
 	stdout, err := session.StdoutPipe()
 	if err != nil {
-		return finalNetwork, err
+		return finalVocab, err
 	}
 	stderr, err := session.StderrPipe()
 	if err != nil {
-		return finalNetwork, err
+		return finalVocab, err
 	}
 	go io.Copy(os.Stdout, stdout)
 	go io.Copy(os.Stderr, stderr)
@@ -186,29 +186,57 @@ func (w *Worker) Train(localTrainingSettingsJSONLocation string, localTrainingNe
 	if err != nil {
 		fmt.Print(w.host, " ")
 		fmt.Println(err)
-		return finalNetwork, err
+		return finalVocab, err
 	}
-	// it is finished; write the remote file back over the local file.
+	// it is finished; write the remote files back over the local files.
 	// deleting the file first prevents some weird error where it was
 	// spitting out invalid json; like it was overwriting itself.
+
+	// Network file
 	err = os.Remove(localTrainingNetworkJSONLocation)
 	if err != nil {
-		return finalNetwork, err
+		return finalVocab, err
 	}
 	f, err := os.Create(localTrainingNetworkJSONLocation)
 	if err != nil {
-		return finalNetwork, err
+		return finalVocab, err
 	}
 	err = f.Close()
 	if err != nil {
-		return finalNetwork, err
+		return finalVocab, err
 	}
 	err = w.SCPGetFile(networkLocation, localTrainingNetworkJSONLocation)
 	if err != nil {
-		return finalNetwork, err
+		return finalVocab, err
 	}
-	finalNetwork, err = LoadNetworkFromFile(localTrainingNetworkJSONLocation)
-	return finalNetwork, err
+	finalNetwork, err := LoadNetworkFromFile(localTrainingNetworkJSONLocation)
+	if err != nil {
+		return finalVocab, err
+	}
+	// Vocabulary file
+	err = os.Remove(localVocabLocation)
+	if err != nil {
+		return finalVocab, err
+	}
+	f, err = os.Create(localVocabLocation)
+	if err != nil {
+		return finalVocab, err
+	}
+	err = f.Close()
+	if err != nil {
+		return finalVocab, err
+	}
+	err = w.SCPGetFile(trainingVocabLocation, localVocabLocation)
+	if err != nil {
+		return finalVocab, err
+	}
+	finalVocab, err = LoadVocabFromFile(localVocabLocation)
+	if err != nil {
+		return finalVocab, err
+	}
+	finalVocab.Net = finalNetwork
+
+	return finalVocab, err
 }
 
 func publicKeyFile(file string) ssh.AuthMethod {
@@ -249,7 +277,7 @@ func readWorkerfile(filename string) (remoteWorkers []string, remoteWorkerWeight
 
 // RunWorker is what gets run when this is a remote worker
 func RunWorker() (err error) {
-	settings, err := LoadTrainingSettingsFromFile(trainingSettingsLocation)
+	vocab, err := LoadVocabFromFile(trainingVocabLocation)
 	if err != nil {
 		return err
 	}
@@ -257,9 +285,10 @@ func RunWorker() (err error) {
 	if err != nil {
 		return err
 	}
+	vocab.Net = originalNetwork
 	hn, _ := os.Hostname()
 	prefix := "<" + hn + ">"
-	Train(settings, originalNetwork, prefix)
+	Train(vocab, prefix)
 	err = originalNetwork.SaveToFile(networkLocation)
 	if err != nil {
 		fmt.Println(prefix, err)

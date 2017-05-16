@@ -150,3 +150,33 @@ func (cell *Cell) addAxon(synapseID SynapseID) {
 	synapse.FromNeuronAxon = cell.ID
 	cell.AxonSynapses[synapseID] = true
 }
+
+/*
+PruneCell removes a cell and its synapses. It is independent of PruneSynapse.
+*/
+func (network *Network) PruneCell(cellID CellID) {
+	// fmt.Println("Pruning cell", cellID)
+	cell, ok := network.Cells[cellID]
+	if !ok {
+		fmt.Println("warn: attempt to prune cell which does not exist", cellID)
+		return
+	}
+
+	// with good code, the following should not be necessary.
+	// if len(cell.DendriteSynapses) > 0 {
+	// 	panic(fmt.Sprintf("Should not need to prune dendrite synapse from cell=%d (%v)", cellID, cell.DendriteSynapses))
+	// }
+	// if len(cell.AxonSynapses) > 0 {
+	// 	panic(fmt.Sprintf("Should not need to prune axon synapse from cell=%d (%v)", cellID, cell.AxonSynapses))
+	// }
+
+	// Do this after removing synapses, because otherwise we can end up with
+	// orphan synapses.
+	if cell.Immortal {
+		return
+	}
+
+	network.cellMux.Lock()
+	delete(network.Cells, cellID)
+	network.cellMux.Unlock()
+}

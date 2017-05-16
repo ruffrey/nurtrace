@@ -107,20 +107,6 @@ func Test_DiffNetworks(t *testing.T) {
 		ApplyDiff(diff, net1)
 		ok, report := CheckIntegrity(net1)
 		assert.True(t, ok, "merging unrelated networks failed integrity check", report)
-
-		// make sure a prune works afterward
-		half := len(net1.Synapses) / 2
-		iter := 0
-		for _, synapse := range net1.Synapses {
-			iter++
-			if iter > half {
-				break
-			}
-			synapse.ActivationHistory = 100
-		}
-		net1.Prune()
-		ok, report = CheckIntegrity(net1)
-		assert.True(t, ok, "pruning failed after merging totally different networks", report)
 	})
 }
 
@@ -277,26 +263,6 @@ func Test_ApplyDiff_TrickeryIntegrityTests(t *testing.T) {
 
 		ok, report = CheckIntegrity(network)
 		assert.Equal(t, true, ok, "no integrity after apply diff")
-
-		t.Run("and can withstand pruning some things yet keep network integrity", func(t *testing.T) {
-			network.Synapses[26].ActivationHistory = 100
-			network.Prune()
-
-			_, syn21 := network.Synapses[21]
-			assert.Equal(t, false, syn21, "synapse 21 still exists")
-			_, syn101 := network.Synapses[101]
-			assert.Equal(t, false, syn101, "synapse 101 still exists")
-			_, syn102 := network.Synapses[102]
-			assert.Equal(t, false, syn102, "synapse 102 still exists")
-
-			assert.Equal(t, 1, len(network.Synapses))
-			assert.Equal(t, 2, len(network.Cells))
-			ok, report = CheckIntegrity(network)
-			assert.Equal(t, true, ok, "no integrity after apply diff")
-			if !ok {
-				report.Print()
-			}
-		})
 	})
 	t.Run("when a cell is new and another already exists one of its synapses has been re-ID-d due to collision", func(t *testing.T) {
 		t.Run("the old synapse ID is removed from the dendrite synapse list", func(t *testing.T) {

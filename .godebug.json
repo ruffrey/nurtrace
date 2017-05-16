@@ -1,15 +1,9 @@
 {
     "configurations": [{
-        "name": "Shake Debug",
+        "name": "CLI Train Math-Addition",
         "mode": "debug",
-        "cwd": "${workspaceRoot}/shake",
-        "args": ["-data=less.txt"],
-        "env": {}
-    }, {
-        "name": "Shake II",
-        "mode": "debug",
-        "cwd": "${workspaceRoot}/shake",
-        "args": ["-model=charrnn", "-data=less.txt"],
+        "cwd": "${workspaceRoot}/cli",
+        "args": ["train", "-n n.nur", "-v v.json", "-data=../data/addition.txt"],
         "env": {}
     }, {
         "name": "Potential - Tests",

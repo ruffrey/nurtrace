@@ -1,9 +1,10 @@
 package main
 
 import (
-	"github.com/ruffrey/nurtrace/potential"
 	"fmt"
 	"os"
+
+	"github.com/ruffrey/nurtrace/potential"
 )
 
 func main() {

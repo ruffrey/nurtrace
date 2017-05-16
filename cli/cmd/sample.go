@@ -1,46 +1,28 @@
 package cmd
 
 import (
-	"errors"
+	"fmt"
 
-	"github.com/ruffrey/nurtrace/perception"
-	"github.com/ruffrey/nurtrace/perceptions/charcat"
-	"github.com/ruffrey/nurtrace/perceptions/charrnn"
 	"github.com/ruffrey/nurtrace/potential"
 )
 
 // Sample uses a pretrained network to generate a prediction based on user provided data.
-func Sample(perceptionModel, networkSaveFile, vocabSaveFile string, seed []byte) (err error) {
-	// Figure out how they want to run this program.
-
-	var t perception.Perception
-	switch perceptionModel {
-	case "category":
-		m := charcat.Charcatnn{}
-		t = &m
-		break
-	case "charrnn":
-		m := charrnn.Charrnn{}
-		t = &m
-		break
-	default:
-		return errors.New("Perception model valid choices are: charrnn, category")
+func Sample(networkSaveFile, vocabSaveFile string, seedText string) (err error) {
+	var vocab *potential.Vocabulary
+	vocab, err = potential.LoadVocabFromFile(vocabSaveFile)
+	if err != nil {
+		return err
 	}
-	settings := potential.NewTrainingSettings()
-	// start by initializing the network from disk or whatever
 	var network *potential.Network
 	network, err = potential.LoadNetworkFromFile(networkSaveFile)
 	if err != nil {
 		return err
 	}
 
-	err = t.LoadVocab(settings, vocabSaveFile)
-	if err != nil {
-		return err
-	}
+	vocab.Net = network
+	output := potential.Sample(seedText, vocab)
 
-	t.PrepareData(settings, network) // make sure all data is setup
-	t.SeedAndSample(settings, seed, network)
+	fmt.Println(output)
 
 	return nil
 }

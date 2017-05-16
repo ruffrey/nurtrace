@@ -1,9 +1,10 @@
 package potential
 
 import (
-	"github.com/ruffrey/nurtrace/laws"
 	"fmt"
 	"math/rand"
+
+	"github.com/ruffrey/nurtrace/laws"
 )
 
 // Synapses that fire together wire together.
@@ -113,4 +114,61 @@ func (synapse *Synapse) String() string {
 	s += fmt.Sprintf("\n  ToNeuronDendrite=%d", synapse.ToNeuronDendrite)
 
 	return s
+}
+
+/*
+PruneSynapse removes a synapse and all references to it.
+
+A synapse exists between two neurons. We get both neurons and remove the synapse
+from its list.
+
+If either of those neurons no longer has any synapses itself, kill off that neuron cell.
+
+Unless the neuron is immortal, then just remove the synapse.
+*/
+func (network *Network) PruneSynapse(synapseID SynapseID) {
+	// fmt.Println("remove synapse=", synapseID)
+	var synapse *Synapse
+
+	synapse, ok := network.Synapses[synapseID]
+	if !ok {
+		fmt.Println("warn: attempt to remove synapse that is not in network", synapseID)
+		return
+	}
+
+	// See if either cell (to/from) should be pruned, also.
+	// Technically this can result in a cell being the end of a dead pathway, or not receiving
+	// any input. But that is something to revisit. It is likely these cells would eventually
+	// build up more synapses via the grow process, or never fire and be pruned later.
+
+	network.removeSynapseFromCell(synapseID, synapse.FromNeuronAxon, true)
+	network.removeSynapseFromCell(synapseID, synapse.ToNeuronDendrite, false)
+
+	network.synMux.Lock()
+	delete(network.Synapses, synapse.ID)
+	network.synMux.Unlock()
+	// this synapse is now dead
+}
+
+func (network *Network) removeSynapseFromCell(s SynapseID, c CellID, isAxon bool) {
+	cell, exists := network.Cells[c]
+	if exists {
+		network.synMux.Lock()
+		if isAxon {
+			delete(cell.AxonSynapses, s)
+		} else {
+			delete(cell.DendriteSynapses, s)
+		}
+		network.synMux.Unlock()
+	} else {
+		fmt.Println("warn: cannot prune synapse", s, "(isAxon=", isAxon, ") from cell",
+			c, " cell does not exist")
+		panic("referenced cell on synapse does not exist so cannot remove it")
+	}
+
+	// after removing the synapses, see if this cell can be removed.
+	cellHasNoSynapses := len(cell.AxonSynapses) == 0 && len(cell.DendriteSynapses) == 0
+	if cellHasNoSynapses {
+		network.PruneCell(c)
+	}
 }
