@@ -48,11 +48,7 @@ func (network *Network) Step() (hasMore bool) {
 
 	// tally up all the synapse voltage results they will have on the cells
 	for synapseID := range network.nextSynapsesToActivate {
-		syn, exists := network.Synapses[synapseID]
-		if !exists {
-			fmt.Println("error: synapse cannot be activated because it does not exist")
-			continue
-		}
+		syn := network.getSyn(synapseID)
 
 		cellReceivingVoltage := network.getCell(syn.ToNeuronDendrite)
 		if cellReceivingVoltage.activating { // do not fire cells in refractory period
@@ -114,10 +110,5 @@ AddSynapseToNextStep provides a reusable method for having a synapse get activat
 next step.
 */
 func (network *Network) AddSynapseToNextStep(id SynapseID) {
-	_, exists := network.Synapses[id]
-	if !exists {
-		fmt.Println("error: cannot add synapse", id, "to activation list because it does not exist")
-		return
-	}
 	network.nextSynapsesToActivate[id] = true
 }
