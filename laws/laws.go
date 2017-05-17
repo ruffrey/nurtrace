@@ -56,36 +56,9 @@ CellFireVoltageThreshold represents the millivolts where an action potential wil
 const CellFireVoltageThreshold int = 100
 
 /*
-SynapseAPBoost is how much a synapse's ActivationHistory should be incremented extra when
-its firing results in activation (strengthening the synapse)
-*/
-const SynapseAPBoost uint = 1
-
-// There are two factors that result in degrading a synapse:
-
-/*
-SamplesBetweenMergingSessions is how many samples run on a network clone
-instance before merging any synapse or neuron changes back to the master
-network.
-*/
-const SamplesBetweenMergingSessions = 16
-
-/*
-DefaultSynapseMinFireThreshold represents the minimum we expect a synapse to fire between
-pruning sessions (`SamplesBetweenMergingSessions`), for this cell to get reinforced.
-*/
-const DefaultSynapseMinFireThreshold = 8
-
-/*
 DefaultNeuronSynapses is the number of random synapses a new neuron will get.
 */
 const DefaultNeuronSynapses = 8
-
-/*
-RetrainNeuronsToGrow is the number of neurons to add when a single sample does not
-yield the expected output firing.
-*/
-const RetrainNeuronsToGrow = 1
 
 /*
 GrowPathExpectedMinimumSynapses represents the maximum allowed number of

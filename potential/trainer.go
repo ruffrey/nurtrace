@@ -7,8 +7,6 @@ import (
 	"strconv"
 	"sync"
 	"time"
-
-	"github.com/ruffrey/nurtrace/laws"
 )
 
 func copyVocabWithNewSamples(original *Vocabulary, samples []sample) *Vocabulary {
@@ -205,7 +203,6 @@ func Train(masterVocab *Vocabulary, isRemoteWorkerWithTag string) {
 		done <- true
 	}()
 
-	var mergeNum int
 	for {
 		select {
 		case vocab := <-chSynchVocab:
@@ -214,20 +211,14 @@ func Train(masterVocab *Vocabulary, isRemoteWorkerWithTag string) {
 			oDiff := DiffNetworks(masterVocab.Net, vocab.Net)
 			ApplyDiff(oDiff, masterVocab.Net)
 
-			mergeNum++
-			if mergeNum%masterVocab.Threads == 0 {
-				// FYI: DO NOT prune cells except on the main network. Cannot
-				// remember why, but it likely could lead to orphans.
-				if shouldDedupe {
-					dupes := findDupeSynapses(masterVocab.Net)
-					for _, dupeGroup := range dupes {
-						dedupeSynapses(dupeGroup, masterVocab.Net)
-					}
+			if shouldDedupe {
+				dupes := findDupeSynapses(masterVocab.Net)
+				for _, dupeGroup := range dupes {
+					dedupeSynapses(dupeGroup, masterVocab.Net)
 				}
-				fmt.Println(isRemoteWorkerWithTag, "Progress:",
-					math.Floor(((float64(mergeNum)*float64(laws.SamplesBetweenMergingSessions))/float64(lenAllSamples))*100), "%,")
-				masterVocab.Net.PrintTotals()
 			}
+
+			masterVocab.Net.PrintTotals()
 		case <-done:
 			if shouldDedupe {
 				dupes := findDupeSynapses(masterVocab.Net)
