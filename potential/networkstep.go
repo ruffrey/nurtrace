@@ -14,13 +14,13 @@ look back and boost the synapses which resulted in the cell
 firing due to sufficient voltage increase.
 */
 type firingGroup struct {
-	synapses map[SynapseID]bool
+	synapses []SynapseID
 	voltage  int
 }
 
 func newFiringGroup(forCell *Cell) *firingGroup {
 	return &firingGroup{
-		synapses: make(map[SynapseID]bool),
+		synapses: make([]SynapseID, 0),
 		voltage:  int(forCell.Voltage),
 	}
 }
@@ -60,7 +60,7 @@ func (network *Network) Step() (hasMore bool) {
 		fg := voltageTallies[cellReceivingVoltage.ID]
 		fg.voltage += int(syn.Millivolts)
 		// save the synapse for later so it can be boosted if the cell fires
-		fg.synapses[syn.ID] = true
+		fg.synapses = append(fg.synapses, syn.ID)
 	}
 	// Reset this list of synapses now that we activated them. The next loop starts
 	// adding more for the next round.
@@ -81,7 +81,7 @@ func (network *Network) Step() (hasMore bool) {
 		nextCellResets[cellID] = true
 
 		// Reward the synapses that were involved in this cell firing.
-		for synapseID := range fg.synapses {
+		for _, synapseID := range fg.synapses {
 			fromSynapse := network.getSyn(synapseID)
 			fromSynapse.reinforce()
 		}
