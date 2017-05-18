@@ -58,10 +58,10 @@ func (vu *VocabUnit) InitRandomInputs(network *Network) {
 }
 
 /*
-ExpandExistingInputs grows out from the firing pattern's existing
+expandFiringPattern grows out from the firing pattern's existing
 cells so it has more uniqueness.
 */
-func ExpandExistingInputs(network *Network, fp FiringPattern) {
+func expandFiringPattern(network *Network, fp FiringPattern) {
 	for i := 0; i < laws.NewCellDifferentiationCount; i++ {
 		preCell := randCellFromMap(fp)
 		network.GrowPathBetween(preCell, NewCell(network).ID, laws.GrowPathExpectedMinimumSynapses)

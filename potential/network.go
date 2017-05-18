@@ -127,11 +127,7 @@ func randomIntBetween(min, max int) int {
 
 // randCell returns a random CellID from a map where cells are the keys.
 // probably could combine with RandCellKey
-func randCellFromMap(_cellMap interface{}) (randCellID CellID) {
-	cellMap, ok := _cellMap.(map[CellID]bool)
-	if !ok {
-		panic("randCellFromMap called with non-map")
-	}
+func randCellFromMap(cellMap map[CellID]bool) (randCellID CellID) {
 	iterate := randomIntBetween(0, len(cellMap)-1)
 	i := 0
 	for k := range cellMap {

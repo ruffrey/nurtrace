@@ -46,6 +46,7 @@ func (network *Network) Step() (hasMore bool) {
 	voltageTallies := make(map[CellID]*firingGroup)
 
 	// tally up all the synapse voltage results they will have on the cells
+	// fmt.Println("nextSynapsesToActivate=", len(network.nextSynapsesToActivate))
 	for synapseID := range network.nextSynapsesToActivate {
 		syn := network.GetSyn(synapseID)
 

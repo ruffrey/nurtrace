@@ -123,30 +123,6 @@ func DiffFiringPatterns(fp1, fp2 FiringPattern) *FiringPatternDiff {
 }
 
 /*
-differentiateFiringPatterns grows two firing groups until should be
-significantly different.
-
-Does not modify the network, but returns a network diff so one thread can
-handle merging diffs to the master network.
-*/
-func differentiateFiringPatterns(fp1, fp2 FiringPattern, _network *Network) Diff {
-	n := CloneNetwork(_network)
-
-	for {
-		n.ResetForTraining()
-		ExpandExistingInputs(n, fp1)
-		n.ResetForTraining()
-		ExpandExistingInputs(n, fp2)
-
-		fpDiff := DiffFiringPatterns(fp1, fp2)
-		if fpDiff.Ratio() < laws.PatternSimilarityLimit {
-			return DiffNetworks(_network, n)
-		}
-	}
-
-}
-
-/*
 RunFiringPatternTraining trains the network using the training samples
 in the vocab, until training samples are differentiated from one another.
 
@@ -161,13 +137,14 @@ func RunFiringPatternTraining(vocab *Vocabulary) {
 
 	tots := len(vocab.Samples)
 	fmt.Println("Running samples", tots)
-	iteration := -1
-	for _, s := range vocab.Samples {
-		iteration++
-		if iteration%5 == 0 {
+
+	for iteration := 0; iteration < len(vocab.Samples); iteration++ {
+		s := vocab.Samples[iteration]
+		if iteration%laws.TrainingResetIteration == 0 {
 			fmt.Println("sample", iteration, "/", tots)
 			vocab.Net.PrintTotals()
 			fmt.Println("  outputs=", len(vocab.Outputs))
+			vocab.Net.ResetForTraining()
 		}
 		// fire the input a bunch of times. after that we can consider
 		// the output pattern as fired. set the output pattern.
@@ -197,16 +174,18 @@ func RunFiringPatternTraining(vocab *Vocabulary) {
 				lastOutput = o
 				continue
 			}
-			fpDiff := DiffFiringPatterns(inputs, lastOutput.FirePattern)
-			tooSimilar := fpDiff.Ratio() > laws.PatternSimilarityLimit
+			fpDiff := DiffFiringPatterns(o.FirePattern, lastOutput.FirePattern)
+			ratio := fpDiff.Ratio()
+			// fmt.Println("Ratio:", lastOutput.Value, "vs", o.Value, "is", ratio)
+			tooSimilar := ratio > laws.PatternSimilarityLimit
+			// TODO: wrong because we decrement iteration which is
+			// from ABOVE!
 			if tooSimilar {
-				// TODO: multithread here?
-				diff := differentiateFiringPatterns(
-					lastOutput.FirePattern,
-					o.FirePattern,
-					vocab.Net,
-				)
-				ApplyDiff(diff, vocab.Net)
+				expandFiringPattern(vocab.Net, lastOutput.FirePattern)
+				expandFiringPattern(vocab.Net, o.FirePattern)
+				// now re-run this one
+				fmt.Println("RERUN:", lastOutput.Value, "vs", o.Value, "is", ratio)
+				iteration--
 			}
 		}
 	}
