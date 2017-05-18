@@ -90,11 +90,8 @@ FireActionPotential does an action potential cycle.
 */
 func (cell *Cell) FireActionPotential() {
 	cell.WasFired = true
-	if cell.Network.Disabled {
-		return
-	}
 	cell.activating = true
-	// fmt.Println("Action Potential Firing\n  cell=", cell.ID, "syanpses=", len(cell.AxonSynapses))
+	// fmt.Println("Action Potential Firing\n  cell=", cell.ID, "synapses=", len(cell.AxonSynapses))
 
 	for _, cb := range cell.OnFired {
 		cb(cell.ID)
