@@ -85,9 +85,9 @@ func (network *Network) GrowPathBetween(startCell, endCell CellID, minSynapses i
 		// look at the next cells in the axon chain from this one, to see
 		// if any are the endCell then send it down the channel.
 		go func() {
-			axonSynapses := network.getCell(cellID).AxonSynapses
+			axonSynapses := network.GetCell(cellID).AxonSynapses
 			for axonSynapseID := range axonSynapses {
-				s := network.getSyn(axonSynapseID)
+				s := network.GetSyn(axonSynapseID)
 				receiverCellID := s.ToNeuronDendrite
 
 				// It only counts if it is excitatory.

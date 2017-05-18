@@ -69,8 +69,8 @@ linkCells creates a new synapse and links the two referenced cells where the
 "to" cell has an axon firing the "from" cell's dendrite.
 */
 func (network *Network) linkCells(fromCellID CellID, toCellID CellID) *Synapse {
-	fromCell := network.getCell(fromCellID)
-	toCell := network.getCell(toCellID)
+	fromCell := network.GetCell(fromCellID)
+	toCell := network.GetCell(toCellID)
 
 	synapse := NewSynapse(network)
 	fromCell.addAxon(synapse.ID)
@@ -80,9 +80,9 @@ func (network *Network) linkCells(fromCellID CellID, toCellID CellID) *Synapse {
 }
 
 /*
-getCell safely returns a cell object so you don't have to use mutexes.
+GetCell safely returns a cell object so you don't have to use mutexes.
 */
-func (network *Network) getCell(cellID CellID) *Cell {
+func (network *Network) GetCell(cellID CellID) *Cell {
 	network.cellMux.Lock()
 	cell := network.Cells[cellID]
 	network.cellMux.Unlock()
@@ -90,13 +90,35 @@ func (network *Network) getCell(cellID CellID) *Cell {
 }
 
 /*
-getSyn safely returns a synapse object so you don't have to use mutexes.
+GetSyn safely returns a synapse object so you don't have to use mutexes.
 */
-func (network *Network) getSyn(synapseID SynapseID) *Synapse {
+func (network *Network) GetSyn(synapseID SynapseID) *Synapse {
 	network.synMux.Lock()
 	synapse := network.Synapses[synapseID]
 	network.synMux.Unlock()
 	return synapse
+}
+
+// CellExists checks if a cell is not nil and within the list of Cells
+func (network *Network) CellExists(cellID CellID) bool {
+	if int(cellID) > len(network.Cells)-1 {
+		return false
+	}
+	if network.GetCell(cellID) == nil {
+		return false
+	}
+	return true
+}
+
+// SynExists checks if a synapse is not nil and within the list of Synapses
+func (network *Network) SynExists(synapseID SynapseID) bool {
+	if int(synapseID) > len(network.Synapses)-1 {
+		return false
+	}
+	if network.GetSyn(synapseID) == nil {
+		return false
+	}
+	return true
 }
 
 func randomIntBetween(min, max int) int {
@@ -160,26 +182,6 @@ func (network *Network) ResetForTraining() {
 	network.nextSynapsesToActivate = make(map[SynapseID]bool)
 	network.resetCellsOnNextStep = make(map[CellID]bool)
 	network.Disabled = false
-}
-
-func (network *Network) cellExists(cellID CellID) bool {
-	if int(cellID) > len(network.Cells)-1 {
-		return false
-	}
-	if network.getCell(cellID) == nil {
-		return false
-	}
-	return true
-}
-
-func (network *Network) synExists(synapseID SynapseID) bool {
-	if int(synapseID) > len(network.Synapses)-1 {
-		return false
-	}
-	if network.getSyn(synapseID) == nil {
-		return false
-	}
-	return true
 }
 
 /*
@@ -280,7 +282,7 @@ FireNoise chooses `NoiseRatio` random cells and fires them.
 func (network *Network) FireNoise() {
 	totalFires := int(math.Ceil(float64(len(network.Cells)) * laws.NoiseRatio))
 	for i := 0; i < totalFires; i++ {
-		network.getCell(network.RandomCellKey()).FireActionPotential()
+		network.GetCell(network.RandomCellKey()).FireActionPotential()
 	}
 }
 

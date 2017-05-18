@@ -289,11 +289,11 @@ func Test_copyCellToNetwork(t *testing.T) {
 		newNetwork := NewNetwork()
 		originalCell := NewCell(originalNetwork)
 		copyCellToNetwork(originalCell, newNetwork)
-		exists := newNetwork.cellExists(originalCell.ID)
+		exists := newNetwork.CellExists(originalCell.ID)
 		if !exists {
 			t.Error("cell not copied to new network")
 		}
-		copiedCell := newNetwork.getCell(originalCell.ID)
+		copiedCell := newNetwork.GetCell(originalCell.ID)
 		if copiedCell.Network != newNetwork {
 			t.Error("cell copied but new network prop not set to new network pointer")
 		}

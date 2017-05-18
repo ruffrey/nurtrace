@@ -86,7 +86,7 @@ func Test_PruneSynapse(t *testing.T) {
 	t.Run("removes synapse from the network", func(t *testing.T) {
 		before()
 		network.PruneSynapse(synapse.ID)
-		ok := network.synExists(synapse.ID)
+		ok := network.SynExists(synapse.ID)
 		assert.Equal(t, false, ok, "synapse not removed from network during PruneNetwork")
 	})
 	t.Run("maintains integrity after removal", func(t *testing.T) {
@@ -110,11 +110,11 @@ func Test_PruneSynapse(t *testing.T) {
 	t.Run("when cells have no synapses, it removes them too", func(t *testing.T) {
 		before()
 		network.PruneSynapse(synapse.ID)
-		ok := network.cellExists(cell1.ID)
+		ok := network.CellExists(cell1.ID)
 
 		assert.Equal(t, false, ok, "cell1 not removed from network when synapses were zero during synapse prune")
 
-		ok = network.cellExists(cell2.ID)
+		ok = network.CellExists(cell2.ID)
 		assert.Equal(t, false, ok, "cell2 not removed from network when synapses were zero during synapse prune")
 	})
 	t.Run("removeSynapseFromCell panics when cell does not exist", func(t *testing.T) {

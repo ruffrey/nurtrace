@@ -37,10 +37,10 @@ func backwardTraceFirings(network *Network, fromOutput CellID, toInput CellID) (
 		wg.Add(1)
 		go func() {
 			// find all of synapses, then cells that could have fired this cell
-			dendrites := network.getCell(cellID).DendriteSynapses
+			dendrites := network.GetCell(cellID).DendriteSynapses
 			for synapseID := range dendrites {
-				synapse := network.getSyn(synapseID)
-				axon := network.getCell(synapse.FromNeuronAxon)
+				synapse := network.GetSyn(synapseID)
+				axon := network.GetCell(synapse.FromNeuronAxon)
 				// walk up the synapse to see if its cell was fired.
 				// We want to keep walking up the excitatory cells.
 				// We do not want to walk up inhibitory synapses,
@@ -115,12 +115,12 @@ func backwardTraceNoiseAndInhibit(network *Network, inputCells map[CellID]bool, 
 		wg.Add(1)
 		go func() {
 			// find all of synapses, then cells that could have fired this cell
-			dendrites := network.getCell(cellID).DendriteSynapses
+			dendrites := network.GetCell(cellID).DendriteSynapses
 			for synapseID := range dendrites {
 				// If this bad cell was fired by a good synapse,
 				// use the good synapse's dendrite cell to inhibit
 				// this bad cell.
-				synapse := network.getSyn(synapseID)
+				synapse := network.GetSyn(synapseID)
 				excitatory := synapse.Millivolts > 0
 				if _, isGood := goodSynapses[synapseID]; isGood && excitatory {
 					bp := badPair{
@@ -135,7 +135,7 @@ func backwardTraceNoiseAndInhibit(network *Network, inputCells map[CellID]bool, 
 				if !excitatory {
 					continue
 				}
-				axon := network.getCell(synapse.FromNeuronAxon)
+				axon := network.GetCell(synapse.FromNeuronAxon)
 				if !axon.WasFired {
 					continue
 				}

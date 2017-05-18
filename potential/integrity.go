@@ -47,12 +47,12 @@ func CheckIntegrity(network *Network) (bool, IntegrityReport) {
 			continue
 		}
 		for synapseID := range cell.AxonSynapses {
-			if ok := network.synExists(synapseID); !ok {
+			if ok := network.SynExists(synapseID); !ok {
 				report.cellHasMissingAxonSynapse[CellID(cellID)] = synapseID
 			}
 		}
 		for synapseID := range cell.DendriteSynapses {
-			if ok := network.synExists(synapseID); !ok {
+			if ok := network.SynExists(synapseID); !ok {
 				report.cellHasMissingDendriteSynapse[CellID(cellID)] = synapseID
 			}
 		}
@@ -62,10 +62,10 @@ func CheckIntegrity(network *Network) (bool, IntegrityReport) {
 		if synapse == nil {
 			continue
 		}
-		if ok := network.cellExists(synapse.FromNeuronAxon); !ok {
+		if ok := network.CellExists(synapse.FromNeuronAxon); !ok {
 			report.synapseHasMissingAxonCell[SynapseID(synapseID)] = synapse.FromNeuronAxon
 		}
-		if ok := network.cellExists(synapse.ToNeuronDendrite); !ok {
+		if ok := network.CellExists(synapse.ToNeuronDendrite); !ok {
 			report.synapseHasMissingDendriteCell[SynapseID(synapseID)] = synapse.ToNeuronDendrite
 		}
 	}

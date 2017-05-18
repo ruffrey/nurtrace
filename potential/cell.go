@@ -124,13 +124,13 @@ func (cell *Cell) String() string {
 }
 
 func (cell *Cell) addDendrite(synapseID SynapseID) {
-	synapse := cell.Network.getSyn(synapseID)
+	synapse := cell.Network.GetSyn(synapseID)
 	synapse.ToNeuronDendrite = cell.ID
 	cell.DendriteSynapses[synapseID] = true
 }
 
 func (cell *Cell) addAxon(synapseID SynapseID) {
-	synapse := cell.Network.getSyn(synapseID)
+	synapse := cell.Network.GetSyn(synapseID)
 	synapse.FromNeuronAxon = cell.ID
 	cell.AxonSynapses[synapseID] = true
 }
@@ -140,7 +140,7 @@ PruneCell removes a cell and its synapses. It is independent of PruneSynapse.
 */
 func (network *Network) PruneCell(cellID CellID) {
 	// fmt.Println("Pruning cell", cellID)
-	cell := network.getCell(cellID)
+	cell := network.GetCell(cellID)
 	// with good code, the following should not be necessary.
 	if len(cell.DendriteSynapses) > 0 {
 		panic(fmt.Sprintf("Should not need to prune dendrite synapse from cell=%d (%v)", cellID, cell.DendriteSynapses))

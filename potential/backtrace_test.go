@@ -76,12 +76,12 @@ func Test_addInhibitorSynapse(t *testing.T) {
 
 		inhibitorSynapseID := addInhibitorSynapse(network, noisySynapse.ToNeuronDendrite, inhibitFromGoodPathCell.ID, noisySynapse.Millivolts)
 
-		exists := network.synExists(inhibitorSynapseID)
+		exists := network.SynExists(inhibitorSynapseID)
 		if !exists {
 			assert.Fail(t, "inhibitor synapses was not added to the network")
 			return
 		}
-		inhibitor := network.getSyn(inhibitorSynapseID)
+		inhibitor := network.GetSyn(inhibitorSynapseID)
 		assert.Equal(t, int16(-15), inhibitor.Millivolts,
 			"wrong millivolts for inhibitory synapse")
 		assert.Equal(t, true, inhibitFromGoodPathCell.AxonSynapses[inhibitor.ID],

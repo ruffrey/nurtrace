@@ -13,7 +13,7 @@ func Test_NewCell(t *testing.T) {
 		// network.Cells[cell.ID] = cell
 		// cell.Network = network
 		assert.Equal(t, 1, len(network.Cells))
-		ok := network.cellExists(cell.ID)
+		ok := network.CellExists(cell.ID)
 		if !ok {
 			panic("NewCell() did not add cell to the network")
 		}
@@ -51,9 +51,9 @@ func Test_PruneCell(t *testing.T) {
 		network := NewNetwork()
 		cell := NewCell(network)
 		cell.Immortal = false
-		assert.Equal(t, true, network.cellExists(cell.ID))
+		assert.Equal(t, true, network.CellExists(cell.ID))
 		network.PruneCell(cell.ID)
-		assert.Equal(t, false, network.cellExists(cell.ID))
+		assert.Equal(t, false, network.CellExists(cell.ID))
 	})
 	t.Run("does not remove an immortal cell from the network", func(t *testing.T) {
 		network := NewNetwork()

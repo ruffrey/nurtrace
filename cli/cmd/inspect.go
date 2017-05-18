@@ -40,19 +40,21 @@ func Inspect(filename string, integrity bool, totals bool, allTags bool, cell in
 	}
 
 	if cell != 0 {
-		c, exists := net.Cells[potential.CellID(cell)]
+		exists := net.CellExists(potential.CellID(cell))
 		if !exists {
 			return errors.New("Cell " + strconv.Itoa(cell) + "does not exist")
 		}
+		c := net.Cells[potential.CellID(cell)]
 		fmt.Println(c)
 		return nil
 	}
 
 	if synapse != 0 {
-		s, exists := net.Synapses[potential.SynapseID(synapse)]
+		exists := net.SynExists(potential.SynapseID(synapse))
 		if !exists {
 			return errors.New("Synapse " + strconv.Itoa(synapse) + "does not exist")
 		}
+		s := net.Synapses[potential.SynapseID(synapse)]
 		fmt.Println(s)
 		return nil
 	}

@@ -113,7 +113,7 @@ Unless the neuron is immortal, then just remove the synapse.
 */
 func (network *Network) PruneSynapse(synapseID SynapseID) {
 	// fmt.Println("remove synapse=", synapseID)
-	synapse := network.getSyn(synapseID)
+	synapse := network.GetSyn(synapseID)
 
 	// See if either cell (to/from) should be pruned, also.
 	// Technically this can result in a cell being the end of a dead pathway, or not receiving
@@ -130,7 +130,7 @@ func (network *Network) PruneSynapse(synapseID SynapseID) {
 }
 
 func (network *Network) removeSynapseFromCell(s SynapseID, c CellID, isAxon bool) {
-	cell := network.getCell(c)
+	cell := network.GetCell(c)
 	network.synMux.Lock()
 	if isAxon {
 		delete(cell.AxonSynapses, s)

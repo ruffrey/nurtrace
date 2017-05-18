@@ -69,7 +69,7 @@ func DiffNetworks(originalNetwork, newerNetwork *Network) (diff Diff) {
 
 	// Get new synapses and the millivolt differences between existing synapses
 	for id, newerNetworkSynapse := range newerNetwork.Synapses {
-		alreadyExisted := originalNetwork.synExists(SynapseID(id))
+		alreadyExisted := originalNetwork.SynExists(SynapseID(id))
 		if !alreadyExisted {
 			// we may want it derefenced so it is an instance, not a pointer. that will ensure
 			// later we can need to update the synapse to be pointing to the originalNetwork
@@ -77,7 +77,7 @@ func DiffNetworks(originalNetwork, newerNetwork *Network) (diff Diff) {
 			diff.addedSynapses = append(diff.addedSynapses, newerNetworkSynapse)
 			continue
 		}
-		originalSynapse := originalNetwork.getSyn(SynapseID(id))
+		originalSynapse := originalNetwork.GetSyn(SynapseID(id))
 		// the syanpse ID is not unique on the original network.
 		// we need to make sure we didn't happen to generate it in a collision, though.
 		isSame := newerNetworkSynapse.ToNeuronDendrite == originalSynapse.ToNeuronDendrite && newerNetworkSynapse.FromNeuronAxon == originalSynapse.FromNeuronAxon
@@ -105,7 +105,7 @@ func DiffNetworks(originalNetwork, newerNetwork *Network) (diff Diff) {
 
 	// Get new cells that were added to the network
 	for id, newerNetworkCell := range newerNetwork.Cells {
-		alreadyExisted := originalNetwork.cellExists(CellID(id))
+		alreadyExisted := originalNetwork.CellExists(CellID(id))
 		if !alreadyExisted {
 			diff.addedCells[CellID(id)] = newerNetworkCell
 		}
@@ -167,12 +167,12 @@ func ApplyDiff(diff Diff, originalNetwork *Network) (err error) {
 
 	// Update voltages and activations on existing synapses
 	for synapseID, diffValue := range diff.synapseDiffs {
-		s := originalNetwork.getSyn(synapseID)
+		s := originalNetwork.GetSyn(synapseID)
 		s.Millivolts += diffValue
 	}
 	// add the activation history
 	for synapseID, activations := range diff.synapseFires {
-		s := originalNetwork.getSyn(synapseID)
+		s := originalNetwork.GetSyn(synapseID)
 		s.ActivationHistory += activations
 	}
 
@@ -265,8 +265,8 @@ func copySynapseToNetwork(synapse *Synapse, newNetwork *Network) SynapseID {
 
 	d := copiedSynapse.ToNeuronDendrite
 	a := copiedSynapse.FromNeuronAxon
-	dCell := newNetwork.getCell(d)
-	aCell := newNetwork.getCell(a)
+	dCell := newNetwork.GetCell(d)
+	aCell := newNetwork.GetCell(a)
 
 	newNetwork.cellMux.Lock()
 	dCell.DendriteSynapses[copiedSynapse.ID] = true

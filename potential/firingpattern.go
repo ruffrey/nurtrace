@@ -25,7 +25,7 @@ func FireNetworkUntilDone(network *Network, seedCells map[CellID]bool) (fp Firin
 	var i uint8
 	fp = make(map[CellID]bool)
 	for cellID := range seedCells {
-		network.getCell(cellID).FireActionPotential()
+		network.GetCell(cellID).FireActionPotential()
 		network.resetCellsOnNextStep[cellID] = true
 	}
 	// we ignore the seedCells
