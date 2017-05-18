@@ -42,6 +42,10 @@ func CheckIntegrity(network *Network) (bool, IntegrityReport) {
 	report := newIntegrityReport()
 
 	for cellID, cell := range network.Cells {
+		wasRemoved := cell == nil
+		if wasRemoved {
+			continue
+		}
 		for synapseID := range cell.AxonSynapses {
 			if ok := network.synExists(synapseID); !ok {
 				report.cellHasMissingAxonSynapse[CellID(cellID)] = synapseID
@@ -55,6 +59,9 @@ func CheckIntegrity(network *Network) (bool, IntegrityReport) {
 	}
 
 	for synapseID, synapse := range network.Synapses {
+		if synapse == nil {
+			continue
+		}
 		if ok := network.cellExists(synapse.FromNeuronAxon); !ok {
 			report.synapseHasMissingAxonCell[SynapseID(synapseID)] = synapse.FromNeuronAxon
 		}

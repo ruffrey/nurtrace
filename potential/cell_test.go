@@ -51,9 +51,9 @@ func Test_PruneCell(t *testing.T) {
 		network := NewNetwork()
 		cell := NewCell(network)
 		cell.Immortal = false
-		assert.Equal(t, 1, len(network.Cells))
+		assert.Equal(t, true, network.cellExists(cell.ID))
 		network.PruneCell(cell.ID)
-		assert.Equal(t, 0, len(network.Cells))
+		assert.Equal(t, false, network.cellExists(cell.ID))
 	})
 	t.Run("does not remove an immortal cell from the network", func(t *testing.T) {
 		network := NewNetwork()

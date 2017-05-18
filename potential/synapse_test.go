@@ -77,16 +77,10 @@ func Test_PruneSynapse(t *testing.T) {
 	before := func() {
 		// setup
 		network = NewNetwork()
-		synapse = NewSynapse(network)
-		network.Synapses[synapse.ID] = synapse
-		synapse.Network = network
 		// cell 1 fires into cell 2
 		cell1 = NewCell(network)
 		cell2 = NewCell(network)
-		cell1.AxonSynapses[synapse.ID] = true
-		cell2.DendriteSynapses[synapse.ID] = true
-		synapse.FromNeuronAxon = cell1.ID
-		synapse.ToNeuronDendrite = cell2.ID
+		synapse = network.linkCells(cell1.ID, cell2.ID)
 	}
 
 	t.Run("removes synapse from the network", func(t *testing.T) {
@@ -98,8 +92,8 @@ func Test_PruneSynapse(t *testing.T) {
 	t.Run("maintains integrity after removal", func(t *testing.T) {
 		before()
 		network.PruneSynapse(synapse.ID)
-		ok, _ := CheckIntegrity(network)
-		assert.Equal(t, true, ok)
+		ok, integrity := CheckIntegrity(network)
+		assert.Equal(t, true, ok, integrity)
 	})
 	t.Run("removes synapses from the actual network cells (not copying)", func(t *testing.T) {
 		before()
@@ -117,16 +111,11 @@ func Test_PruneSynapse(t *testing.T) {
 		before()
 		network.PruneSynapse(synapse.ID)
 		ok := network.cellExists(cell1.ID)
-		assert.Equal(t, 0, len(network.Cells), "network has too many cells after pruning synapse")
 
 		assert.Equal(t, false, ok, "cell1 not removed from network when synapses were zero during synapse prune")
 
 		ok = network.cellExists(cell2.ID)
 		assert.Equal(t, false, ok, "cell2 not removed from network when synapses were zero during synapse prune")
-	})
-	t.Run("does not crash when synapse does not exist", func(t *testing.T) {
-		n := NewNetwork()
-		n.PruneSynapse(54)
 	})
 	t.Run("removeSynapseFromCell panics when cell does not exist", func(t *testing.T) {
 		n := NewNetwork()

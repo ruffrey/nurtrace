@@ -90,7 +90,7 @@ func Test_ConsolidateSynapses(t *testing.T) {
 			dupes := dupeSynapses{s1dupe.ID, s2dupe.ID}
 			dedupeSynapses(dupes, network)
 
-			assert.Equal(t, 5, len(network.Synapses))
+			assert.Equal(t, false, network.synExists(s2dupe.ID))
 			assert.Equal(t, int16(66), s1dupe.Millivolts)
 
 			stillHasS2 := network.synExists(s2dupe.ID)
@@ -106,7 +106,7 @@ func Test_ConsolidateSynapses(t *testing.T) {
 			dupes := dupeSynapses{s1dupe.ID, s2dupe.ID}
 			dedupeSynapses(dupes, network)
 
-			assert.Equal(t, 5, len(network.Synapses))
+			assert.Equal(t, false, network.synExists(s2dupe.ID))
 			assert.Equal(t, int16(-37), s1dupe.Millivolts)
 		})
 		t.Run("duplicate synapses mixed signs", func(t *testing.T) {
@@ -118,7 +118,7 @@ func Test_ConsolidateSynapses(t *testing.T) {
 			dupes := dupeSynapses{s1dupe.ID, s2dupe.ID}
 			dedupeSynapses(dupes, network)
 
-			assert.Equal(t, 5, len(network.Synapses))
+			assert.Equal(t, false, network.synExists(s2dupe.ID))
 			assert.Equal(t, int16(7), s1dupe.Millivolts)
 		})
 		t.Run("many dupes with mixed signs", func(t *testing.T) {
@@ -144,7 +144,18 @@ func Test_ConsolidateSynapses(t *testing.T) {
 			leftovers := dedupeSynapses(dupes[sig], network)
 			assert.Equal(t, 1, len(leftovers))
 
-			assert.Equal(t, 5, len(network.Synapses))
+			empties := 0
+			nonEmpties := 0
+			for _, s := range network.Synapses {
+				if s == nil {
+					empties++
+				} else {
+					nonEmpties++
+				}
+			}
+			assert.Equal(t, 5, empties)
+			assert.Equal(t, 5, nonEmpties)
+
 			assert.Equal(t, int16(149), network.getSyn(leftovers[0]).Millivolts)
 		})
 		t.Run("dupes overflowing +int16 keeps more synapses", func(t *testing.T) {
@@ -160,7 +171,18 @@ func Test_ConsolidateSynapses(t *testing.T) {
 			leftovers := dedupeSynapses(dupeSynapses{s1dupe.ID, s2dupe.ID, s3dupe.ID}, network)
 			assert.Equal(t, 2, len(leftovers))
 
-			assert.Equal(t, 6, len(network.Synapses))
+			empties := 0
+			nonEmpties := 0
+			for _, s := range network.Synapses {
+				if s == nil {
+					empties++
+				} else {
+					nonEmpties++
+				}
+			}
+			assert.Equal(t, 1, empties)
+			assert.Equal(t, 6, nonEmpties)
+
 			assert.Equal(t, laws.ActualSynapseMax, network.getSyn(leftovers[0]).Millivolts)
 			assert.Equal(t, int16(17297), network.getSyn(leftovers[1]).Millivolts)
 		})
@@ -177,7 +199,18 @@ func Test_ConsolidateSynapses(t *testing.T) {
 			leftovers := dedupeSynapses(dupeSynapses{s1dupe.ID, s2dupe.ID, s3dupe.ID}, network)
 			assert.Equal(t, 2, len(leftovers))
 
-			assert.Equal(t, 6, len(network.Synapses))
+			empties := 0
+			nonEmpties := 0
+			for _, s := range network.Synapses {
+				if s == nil {
+					empties++
+				} else {
+					nonEmpties++
+				}
+			}
+			assert.Equal(t, 1, empties)
+			assert.Equal(t, 6, nonEmpties)
+
 			assert.Equal(t, laws.ActualSynapseMin, network.getSyn(leftovers[0]).Millivolts)
 			assert.Equal(t, int16(-17296), network.getSyn(leftovers[1]).Millivolts)
 		})

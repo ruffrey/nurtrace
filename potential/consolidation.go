@@ -28,6 +28,9 @@ func findDupeSynapses(network *Network) map[string]dupeSynapses {
 	dupes := make(map[string]dupeSynapses)
 
 	for _, synapse := range network.Synapses {
+		if synapse == nil {
+			continue
+		}
 		sig := synapseSignature(synapse)
 		synapsesByDendrite[sig] = append(synapsesByDendrite[sig], synapse.ID)
 	}

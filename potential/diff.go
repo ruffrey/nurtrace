@@ -215,7 +215,6 @@ Returns the cell ID of the copied cell, in case it had to change.
 func copyCellToNetwork(origCell *Cell, newNetwork *Network) {
 	// fresh cell on a new network that will serve as the copy
 	copiedCell := NewCell(newNetwork)
-	fmt.Println("copiedCell=", copiedCell)
 
 	copiedCell.Network = newNetwork
 

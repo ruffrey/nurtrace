@@ -151,6 +151,9 @@ memory at work.
 */
 func (network *Network) ResetForTraining() {
 	for _, cell := range network.Cells {
+		if cell == nil {
+			continue
+		}
 		cell.activating = false
 		cell.WasFired = false
 	}
@@ -186,12 +189,20 @@ func (network *Network) Print() {
 	fmt.Println("----------")
 	fmt.Println("Network")
 	for id, cell := range network.Cells {
+		if cell == nil {
+			fmt.Println("  --------\nremoved cell=", id)
+			continue
+		}
 		fmt.Println("  --------\n  cell key=", id, "ID=", cell.ID)
 		fmt.Println("  voltage=", cell.Voltage)
 		fmt.Println("  synapses to axon=", cell.AxonSynapses)
 		fmt.Println("  synapses to dendrite=", cell.DendriteSynapses)
 	}
 	for id, syn := range network.Synapses {
+		if syn == nil {
+			fmt.Println("  --------\nremoved synapse=", id)
+			continue
+		}
 		fmt.Println("  --------\n  synapse key=", id, "ID=", syn.ID)
 		fmt.Println("  millivolts=", syn.Millivolts)
 		fmt.Println("  axon=", syn.FromNeuronAxon)
@@ -315,9 +326,15 @@ func LoadNetworkFromFile(filepath string) (*Network, error) {
 	}
 
 	for _, synapse := range network.Synapses {
+		if synapse == nil {
+			continue
+		}
 		synapse.Network = network
 	}
 	for _, cell := range network.Cells {
+		if cell == nil {
+			continue
+		}
 		cell.Network = network
 	}
 
