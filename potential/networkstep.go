@@ -1,7 +1,6 @@
 package potential
 
 import (
-	"fmt"
 	"math"
 
 	"github.com/ruffrey/nurtrace/laws"
@@ -89,11 +88,7 @@ func (network *Network) Step() (hasMore bool) {
 
 	// for the cells from the last step, make them fire-able again
 	for cellID := range network.resetCellsOnNextStep {
-		cell, exists := network.Cells[cellID]
-		if !exists {
-			fmt.Println("error: cell cannot be reset because it does not exist")
-			continue
-		}
+		cell := network.getCell(cellID)
 		cell.Voltage = laws.CellRestingVoltage
 		cell.activating = false
 	}

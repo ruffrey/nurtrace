@@ -2,7 +2,6 @@ package potential
 
 import (
 	"fmt"
-	"math/rand"
 
 	"github.com/ruffrey/nurtrace/laws"
 )
@@ -13,13 +12,6 @@ import (
 SynapseID should be unique for all the synapses in the network.
 */
 type SynapseID uint32
-
-/*
-NewSynapseID generates a new random SynapseID
-*/
-func NewSynapseID() (sid SynapseID) {
-	return SynapseID(rand.Uint32())
-}
 
 /*
 Synapse is a construct representing the connection between two cells.
@@ -45,23 +37,16 @@ NewSynapse instantiates a synapse with a random millivolt weight.
 It is up to the implementer to set add it to the network and set the pointer.
 */
 func NewSynapse(network *Network) *Synapse {
-	var id SynapseID
-	for {
-		id = NewSynapseID()
-		if _, alreadyExists := network.Synapses[id]; !alreadyExists {
-			break
-		}
-		// fmt.Println("warn: would have gotten dupe synapse ID")
-	}
 	mv := int16(randomIntBetween(laws.NewSynapseMinMillivolts, laws.NewSynapseMaxMillivolts))
+
+	network.synMux.Lock()
 	s := Synapse{
-		ID:         id,
+		ID:         SynapseID(len(network.Synapses)),
 		Network:    network,
 		Millivolts: mv,
 	}
 	synapse := &s
-	network.synMux.Lock()
-	network.Synapses[id] = synapse
+	network.Synapses = append(network.Synapses, synapse)
 	network.synMux.Unlock()
 	return synapse
 }
@@ -128,13 +113,7 @@ Unless the neuron is immortal, then just remove the synapse.
 */
 func (network *Network) PruneSynapse(synapseID SynapseID) {
 	// fmt.Println("remove synapse=", synapseID)
-	var synapse *Synapse
-
-	synapse, ok := network.Synapses[synapseID]
-	if !ok {
-		fmt.Println("warn: attempt to remove synapse that is not in network", synapseID)
-		return
-	}
+	synapse := network.getSyn(synapseID)
 
 	// See if either cell (to/from) should be pruned, also.
 	// Technically this can result in a cell being the end of a dead pathway, or not receiving
@@ -145,26 +124,20 @@ func (network *Network) PruneSynapse(synapseID SynapseID) {
 	network.removeSynapseFromCell(synapseID, synapse.ToNeuronDendrite, false)
 
 	network.synMux.Lock()
-	delete(network.Synapses, synapse.ID)
+	network.Synapses[synapse.ID] = nil
 	network.synMux.Unlock()
 	// this synapse is now dead
 }
 
 func (network *Network) removeSynapseFromCell(s SynapseID, c CellID, isAxon bool) {
-	cell, exists := network.Cells[c]
-	if exists {
-		network.synMux.Lock()
-		if isAxon {
-			delete(cell.AxonSynapses, s)
-		} else {
-			delete(cell.DendriteSynapses, s)
-		}
-		network.synMux.Unlock()
+	cell := network.getCell(c)
+	network.synMux.Lock()
+	if isAxon {
+		delete(cell.AxonSynapses, s)
 	} else {
-		fmt.Println("warn: cannot prune synapse", s, "(isAxon=", isAxon, ") from cell",
-			c, " cell does not exist")
-		panic("referenced cell on synapse does not exist so cannot remove it")
+		delete(cell.DendriteSynapses, s)
 	}
+	network.synMux.Unlock()
 
 	// after removing the synapses, see if this cell can be removed.
 	cellHasNoSynapses := len(cell.AxonSynapses) == 0 && len(cell.DendriteSynapses) == 0

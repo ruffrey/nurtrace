@@ -2,7 +2,6 @@ package potential
 
 import (
 	"fmt"
-	"math/rand"
 
 	"github.com/ruffrey/nurtrace/laws"
 )
@@ -11,13 +10,6 @@ import (
 CellID should be unique for all cells in a network.
 */
 type CellID uint32
-
-/*
-NewCellID makes a new random CellID.
-*/
-func NewCellID() (cid CellID) {
-	return CellID(rand.Uint32())
-}
 
 /*
 Cell holds voltage, receives input from Dendrites, and upon reaching the activation voltage,
@@ -75,16 +67,9 @@ NewCell instantiates a Cell and returns a pointer to it.
 Sets the network pointer to the supplied network.
 */
 func NewCell(network *Network) *Cell {
-	var id CellID
-	for {
-		id = NewCellID()
-		if _, alreadyExists := network.Cells[id]; !alreadyExists {
-			break
-		}
-		// fmt.Println("warn: would have gotten dupe cell ID")
-	}
+	network.cellMux.Lock()
 	c := Cell{
-		ID:               id,
+		ID:               CellID(len(network.Cells)),
 		Network:          network,
 		Immortal:         false,
 		Voltage:          laws.CellRestingVoltage,
@@ -95,8 +80,7 @@ func NewCell(network *Network) *Cell {
 		OnFired:          make([]func(CellID), 0),
 	}
 	cell := &c
-	network.cellMux.Lock()
-	network.Cells[cell.ID] = cell
+	network.Cells = append(network.Cells, cell)
 	network.cellMux.Unlock()
 	return cell
 }
@@ -156,19 +140,14 @@ PruneCell removes a cell and its synapses. It is independent of PruneSynapse.
 */
 func (network *Network) PruneCell(cellID CellID) {
 	// fmt.Println("Pruning cell", cellID)
-	cell, ok := network.Cells[cellID]
-	if !ok {
-		fmt.Println("warn: attempt to prune cell which does not exist", cellID)
-		return
-	}
-
+	cell := network.getCell(cellID)
 	// with good code, the following should not be necessary.
-	// if len(cell.DendriteSynapses) > 0 {
-	// 	panic(fmt.Sprintf("Should not need to prune dendrite synapse from cell=%d (%v)", cellID, cell.DendriteSynapses))
-	// }
-	// if len(cell.AxonSynapses) > 0 {
-	// 	panic(fmt.Sprintf("Should not need to prune axon synapse from cell=%d (%v)", cellID, cell.AxonSynapses))
-	// }
+	if len(cell.DendriteSynapses) > 0 {
+		panic(fmt.Sprintf("Should not need to prune dendrite synapse from cell=%d (%v)", cellID, cell.DendriteSynapses))
+	}
+	if len(cell.AxonSynapses) > 0 {
+		panic(fmt.Sprintf("Should not need to prune axon synapse from cell=%d (%v)", cellID, cell.AxonSynapses))
+	}
 
 	// Do this after removing synapses, because otherwise we can end up with
 	// orphan synapses.
@@ -177,6 +156,6 @@ func (network *Network) PruneCell(cellID CellID) {
 	}
 
 	network.cellMux.Lock()
-	delete(network.Cells, cellID)
+	network.Cells[cellID] = nil
 	network.cellMux.Unlock()
 }

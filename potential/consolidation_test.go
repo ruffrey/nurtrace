@@ -1,9 +1,10 @@
 package potential
 
 import (
-	"github.com/ruffrey/nurtrace/laws"
 	"strconv"
 	"testing"
+
+	"github.com/ruffrey/nurtrace/laws"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -92,8 +93,9 @@ func Test_ConsolidateSynapses(t *testing.T) {
 			assert.Equal(t, 5, len(network.Synapses))
 			assert.Equal(t, int16(66), s1dupe.Millivolts)
 
-			_, stillHasS2 := network.Synapses[s2dupe.ID]
-			assert.Equal(t, false, stillHasS2, "Did not remove synapse from network!")
+			stillHasS2 := network.synExists(s2dupe.ID)
+			assert.Equal(t, false, stillHasS2,
+				"Did not remove synapse from network!")
 		})
 		t.Run("duplicate synapses negative", func(t *testing.T) {
 			beforeEach()
