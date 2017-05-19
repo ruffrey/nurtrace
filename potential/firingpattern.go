@@ -133,13 +133,13 @@ TODO: make multithreaded and multi-workered
 */
 func RunFiringPatternTraining(vocab *Vocabulary) {
 	vocab.Net.ResetForTraining()
-	finalPattern := make(FiringPattern)
 
 	tots := len(vocab.Samples)
 	fmt.Println("Running samples", tots)
 
 	for iteration := 0; iteration < len(vocab.Samples); iteration++ {
 		s := vocab.Samples[iteration]
+		finalPattern := make(FiringPattern)
 		if iteration%laws.TrainingResetIteration == 0 {
 			fmt.Println("sample", iteration, "/", tots)
 			vocab.Net.PrintTotals()
