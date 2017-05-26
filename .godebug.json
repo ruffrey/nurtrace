@@ -11,5 +11,11 @@
         "cwd": "${workspaceRoot}/potential",
         "args": [],
         "env": {}
+    }, {
+        "name": "Potential - single test",
+        "mode": "test",
+        "cwd": "${workspaceRoot}/potential",
+        "args": ["-v", "-run Test_PruneSynapse/maintains_integrity_after_removal"],
+        "env": {}
     }]
 }

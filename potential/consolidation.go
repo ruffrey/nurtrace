@@ -28,6 +28,9 @@ func findDupeSynapses(network *Network) map[string]dupeSynapses {
 	dupes := make(map[string]dupeSynapses)
 
 	for _, synapse := range network.Synapses {
+		if synapse == nil {
+			continue
+		}
 		sig := synapseSignature(synapse)
 		synapsesByDendrite[sig] = append(synapsesByDendrite[sig], synapse.ID)
 	}
@@ -54,7 +57,7 @@ func dedupeSynapses(synapses dupeSynapses, network *Network) []SynapseID {
 	dupeSynapsesTotal := len(synapses)
 
 	for _, synapseID := range synapses {
-		sum += float64(network.getSyn(synapseID).Millivolts) // unlikely to overflow, but may
+		sum += float64(network.GetSyn(synapseID).Millivolts) // unlikely to overflow, but may
 	}
 
 	keepTotal := int(math.Ceil(math.Abs(sum) / _actualSynapseMaxFloat64))
@@ -78,7 +81,7 @@ func dedupeSynapses(synapses dupeSynapses, network *Network) []SynapseID {
 	lastIndex := len(keepSynapses) - 1
 	for i, synapseID := range keepSynapses {
 		isLast := lastIndex == i
-		synapse := network.getSyn(synapseID)
+		synapse := network.GetSyn(synapseID)
 		if isLast {
 			synapse.Millivolts = int16(lastKeepNewMillivolts)
 		} else {

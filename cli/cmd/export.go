@@ -31,6 +31,9 @@ func Export(outFormat, networkFile, outFile string) (err error) {
 		}
 		fmt.Println("- Adding synapses", len(network.Synapses))
 		for _, synapse := range network.Synapses {
+			if synapse == nil {
+				continue
+			}
 			graph.AddEdge(strconv.Itoa(int(synapse.FromNeuronAxon)), strconv.Itoa(int(synapse.ToNeuronDendrite)), directed, nil)
 		}
 

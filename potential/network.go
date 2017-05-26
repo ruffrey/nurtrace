@@ -26,14 +26,16 @@ type Network struct {
 	/*
 	   Synapses are where the magic happens.
 	*/
-	Synapses map[SynapseID]*Synapse
-	synMux   sync.Mutex
+	Synapses    []*Synapse
+	SynIDCursor int
+	synMux      sync.Mutex
 	/*
 		Cells are the neurons that hold the actual structure of the potential brain.
 		However, with perception layers and
 	*/
-	Cells   map[CellID]*Cell
-	cellMux sync.Mutex
+	Cells        []*Cell
+	CellIDCursor int
+	cellMux      sync.Mutex
 
 	// private
 
@@ -43,6 +45,10 @@ type Network struct {
 	resetCellsOnNextStep map[CellID]bool
 }
 
+// storeBlockSize is how much to increase the fixed array size of the store
+// (Cells or Synapses)
+const storeBlockSize = 5000
+
 /*
 NewNetwork is a constructor that, which also happens to reset the random number generator
 when called. Seems like a good time.
@@ -50,8 +56,8 @@ when called. Seems like a good time.
 func NewNetwork() *Network {
 	n := Network{
 		Disabled: false,
-		Synapses: make(map[SynapseID]*Synapse),
-		Cells:    make(map[CellID]*Cell),
+		Synapses: make([]*Synapse, 0),
+		Cells:    make([]*Cell, 0),
 		nextSynapsesToActivate: make(map[SynapseID]bool),
 		resetCellsOnNextStep:   make(map[CellID]bool),
 	}
@@ -63,8 +69,8 @@ linkCells creates a new synapse and links the two referenced cells where the
 "to" cell has an axon firing the "from" cell's dendrite.
 */
 func (network *Network) linkCells(fromCellID CellID, toCellID CellID) *Synapse {
-	fromCell := network.getCell(fromCellID)
-	toCell := network.getCell(toCellID)
+	fromCell := network.GetCell(fromCellID)
+	toCell := network.GetCell(toCellID)
 
 	synapse := NewSynapse(network)
 	fromCell.addAxon(synapse.ID)
@@ -74,9 +80,9 @@ func (network *Network) linkCells(fromCellID CellID, toCellID CellID) *Synapse {
 }
 
 /*
-getCell safely returns a cell object so you don't have to use mutexes.
+GetCell safely returns a cell object so you don't have to use mutexes.
 */
-func (network *Network) getCell(cellID CellID) *Cell {
+func (network *Network) GetCell(cellID CellID) *Cell {
 	network.cellMux.Lock()
 	cell := network.Cells[cellID]
 	network.cellMux.Unlock()
@@ -84,13 +90,35 @@ func (network *Network) getCell(cellID CellID) *Cell {
 }
 
 /*
-getSyn safely returns a synapse object so you don't have to use mutexes.
+GetSyn safely returns a synapse object so you don't have to use mutexes.
 */
-func (network *Network) getSyn(synapseID SynapseID) *Synapse {
+func (network *Network) GetSyn(synapseID SynapseID) *Synapse {
 	network.synMux.Lock()
 	synapse := network.Synapses[synapseID]
 	network.synMux.Unlock()
 	return synapse
+}
+
+// CellExists checks if a cell is not nil and within the list of Cells
+func (network *Network) CellExists(cellID CellID) bool {
+	if int(cellID) > len(network.Cells)-1 {
+		return false
+	}
+	if network.GetCell(cellID) == nil {
+		return false
+	}
+	return true
+}
+
+// SynExists checks if a synapse is not nil and within the list of Synapses
+func (network *Network) SynExists(synapseID SynapseID) bool {
+	if int(synapseID) > len(network.Synapses)-1 {
+		return false
+	}
+	if network.GetSyn(synapseID) == nil {
+		return false
+	}
+	return true
 }
 
 func randomIntBetween(min, max int) int {
@@ -99,11 +127,7 @@ func randomIntBetween(min, max int) int {
 
 // randCell returns a random CellID from a map where cells are the keys.
 // probably could combine with RandCellKey
-func randCellFromMap(_cellMap interface{}) (randCellID CellID) {
-	cellMap, ok := _cellMap.(map[CellID]bool)
-	if !ok {
-		panic("randCellFromMap called with non-map")
-	}
+func randCellFromMap(cellMap map[CellID]bool) (randCellID CellID) {
 	iterate := randomIntBetween(0, len(cellMap)-1)
 	i := 0
 	for k := range cellMap {
@@ -112,9 +136,6 @@ func randCellFromMap(_cellMap interface{}) (randCellID CellID) {
 			break
 		}
 		i++
-	}
-	if randCellID == CellID(0) {
-		panic("Should never get cell ID 0")
 	}
 	return randCellID
 }
@@ -134,18 +155,8 @@ RandomCellKey gets the key of a random one in the map.
 This is pretty slow, as it turns out.
 */
 func (network *Network) RandomCellKey() (randCellID CellID) {
-	iterate := randomIntBetween(0, len(network.Cells)-1)
-	i := 0
-	for k := range network.Cells {
-		if i == iterate {
-			randCellID = CellID(k)
-			break
-		}
-		i++
-	}
-	if randCellID == CellID(0) {
-		panic("Should never get cell ID 0")
-	}
+	i := randomIntBetween(0, len(network.Cells)-1)
+	randCellID = CellID(i)
 	return randCellID
 }
 
@@ -158,6 +169,9 @@ memory at work.
 */
 func (network *Network) ResetForTraining() {
 	for _, cell := range network.Cells {
+		if cell == nil {
+			continue
+		}
 		cell.activating = false
 		cell.WasFired = false
 	}
@@ -173,12 +187,20 @@ func (network *Network) Print() {
 	fmt.Println("----------")
 	fmt.Println("Network")
 	for id, cell := range network.Cells {
+		if cell == nil {
+			fmt.Println("  --------\nremoved cell=", id)
+			continue
+		}
 		fmt.Println("  --------\n  cell key=", id, "ID=", cell.ID)
 		fmt.Println("  voltage=", cell.Voltage)
 		fmt.Println("  synapses to axon=", cell.AxonSynapses)
 		fmt.Println("  synapses to dendrite=", cell.DendriteSynapses)
 	}
 	for id, syn := range network.Synapses {
+		if syn == nil {
+			fmt.Println("  --------\nremoved synapse=", id)
+			continue
+		}
 		fmt.Println("  --------\n  synapse key=", id, "ID=", syn.ID)
 		fmt.Println("  millivolts=", syn.Millivolts)
 		fmt.Println("  axon=", syn.FromNeuronAxon)
@@ -256,7 +278,7 @@ FireNoise chooses `NoiseRatio` random cells and fires them.
 func (network *Network) FireNoise() {
 	totalFires := int(math.Ceil(float64(len(network.Cells)) * laws.NoiseRatio))
 	for i := 0; i < totalFires; i++ {
-		network.getCell(network.RandomCellKey()).FireActionPotential()
+		network.GetCell(network.RandomCellKey()).FireActionPotential()
 	}
 }
 
@@ -302,9 +324,15 @@ func LoadNetworkFromFile(filepath string) (*Network, error) {
 	}
 
 	for _, synapse := range network.Synapses {
+		if synapse == nil {
+			continue
+		}
 		synapse.Network = network
 	}
 	for _, cell := range network.Cells {
+		if cell == nil {
+			continue
+		}
 		cell.Network = network
 	}
 

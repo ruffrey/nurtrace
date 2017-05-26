@@ -1,7 +1,6 @@
 package potential
 
 import (
-	"fmt"
 	"math"
 
 	"github.com/ruffrey/nurtrace/laws"
@@ -47,10 +46,11 @@ func (network *Network) Step() (hasMore bool) {
 	voltageTallies := make(map[CellID]*firingGroup)
 
 	// tally up all the synapse voltage results they will have on the cells
+	// fmt.Println("nextSynapsesToActivate=", len(network.nextSynapsesToActivate))
 	for synapseID := range network.nextSynapsesToActivate {
-		syn := network.getSyn(synapseID)
+		syn := network.GetSyn(synapseID)
 
-		cellReceivingVoltage := network.getCell(syn.ToNeuronDendrite)
+		cellReceivingVoltage := network.GetCell(syn.ToNeuronDendrite)
 		if cellReceivingVoltage.activating { // do not fire cells in refractory period
 			continue
 		}
@@ -68,7 +68,7 @@ func (network *Network) Step() (hasMore bool) {
 
 	// see if any cells fired
 	for cellID, fg := range voltageTallies {
-		cell := network.getCell(cellID)
+		cell := network.GetCell(cellID)
 		if fg.voltage < laws.CellFireVoltageThreshold {
 			// prevent out of bounds voltage
 			cell.Voltage = int16(math.Max(float64(fg.voltage), float64(laws.ActualSynapseMin)))
@@ -82,18 +82,14 @@ func (network *Network) Step() (hasMore bool) {
 
 		// Reward the synapses that were involved in this cell firing.
 		for _, synapseID := range fg.synapses {
-			fromSynapse := network.getSyn(synapseID)
+			fromSynapse := network.GetSyn(synapseID)
 			fromSynapse.reinforce()
 		}
 	}
 
 	// for the cells from the last step, make them fire-able again
 	for cellID := range network.resetCellsOnNextStep {
-		cell, exists := network.Cells[cellID]
-		if !exists {
-			fmt.Println("error: cell cannot be reset because it does not exist")
-			continue
-		}
+		cell := network.GetCell(cellID)
 		cell.Voltage = laws.CellRestingVoltage
 		cell.activating = false
 	}

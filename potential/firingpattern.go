@@ -25,7 +25,7 @@ func FireNetworkUntilDone(network *Network, seedCells map[CellID]bool) (fp Firin
 	var i uint8
 	fp = make(map[CellID]bool)
 	for cellID := range seedCells {
-		network.getCell(cellID).FireActionPotential()
+		network.GetCell(cellID).FireActionPotential()
 		network.resetCellsOnNextStep[cellID] = true
 	}
 	// we ignore the seedCells
@@ -123,51 +123,27 @@ func DiffFiringPatterns(fp1, fp2 FiringPattern) *FiringPatternDiff {
 }
 
 /*
-differentiateFiringPatterns grows two firing groups until should be
-significantly different.
-
-Does not modify the network, but returns a network diff so one thread can
-handle merging diffs to the master network.
-*/
-func differentiateFiringPatterns(fp1, fp2 FiringPattern, _network *Network) Diff {
-	n := CloneNetwork(_network)
-
-	for {
-		n.ResetForTraining()
-		ExpandExistingInputs(n, fp1)
-		n.ResetForTraining()
-		ExpandExistingInputs(n, fp2)
-
-		fpDiff := DiffFiringPatterns(fp1, fp2)
-		if fpDiff.Ratio() < laws.PatternSimilarityLimit {
-			return DiffNetworks(_network, n)
-		}
-	}
-
-}
-
-/*
 RunFiringPatternTraining trains the network using the training samples
 in the vocab, until training samples are differentiated from one another.
 
 The vocab should already be properly initiated and the network should be
 set before running this.
-
-TODO: make multithreaded and multi-workered
 */
-func RunFiringPatternTraining(vocab *Vocabulary) {
+func RunFiringPatternTraining(vocab *Vocabulary, tag string) {
 	vocab.Net.ResetForTraining()
-	finalPattern := make(FiringPattern)
 
 	tots := len(vocab.Samples)
-	fmt.Println("Running samples", tots)
-	iteration := -1
-	for _, s := range vocab.Samples {
-		iteration++
-		if iteration%5 == 0 {
-			fmt.Println("sample", iteration, "/", tots)
+	fmt.Println(tag, "Running samples", tots)
+
+	for iteration := 0; iteration < len(vocab.Samples); iteration++ {
+		s := vocab.Samples[iteration]
+		finalPattern := make(FiringPattern)
+
+		if iteration%laws.TrainingResetIteration == 0 {
+			fmt.Println(tag, "sample", iteration, "/", tots)
 			vocab.Net.PrintTotals()
-			fmt.Println("  outputs=", len(vocab.Outputs))
+			fmt.Println(tag, "  outputs=", len(vocab.Outputs))
+			vocab.Net.ResetForTraining()
 		}
 		// fire the input a bunch of times. after that we can consider
 		// the output pattern as fired. set the output pattern.
@@ -186,6 +162,7 @@ func RunFiringPatternTraining(vocab *Vocabulary) {
 		// Now that the output firing pattern has been changed,
 		// we need to ensure none of the other outputs are too similar.
 		var lastOutput *OutputCollection
+		atLeastOneWasTooSimilar := false
 		i := -1
 		for _, o := range vocab.Outputs {
 			isThisOne := s.output == o.Value
@@ -197,17 +174,22 @@ func RunFiringPatternTraining(vocab *Vocabulary) {
 				lastOutput = o
 				continue
 			}
-			fpDiff := DiffFiringPatterns(inputs, lastOutput.FirePattern)
-			tooSimilar := fpDiff.Ratio() > laws.PatternSimilarityLimit
+			fpDiff := DiffFiringPatterns(o.FirePattern, lastOutput.FirePattern)
+			ratio := fpDiff.Ratio()
+			// fmt.Println(tag, "Ratio:", lastOutput.Value, "vs", o.Value, "is", ratio)
+			tooSimilar := ratio > laws.PatternSimilarityLimit
 			if tooSimilar {
-				// TODO: multithread here?
-				diff := differentiateFiringPatterns(
-					lastOutput.FirePattern,
-					o.FirePattern,
-					vocab.Net,
-				)
-				ApplyDiff(diff, vocab.Net)
+				atLeastOneWasTooSimilar = true
+				// change input cell pattern
+				expandInputs(vocab.Net, vocab.Inputs[s.input].InputCells)
+				// change this output pattern
+				expandOutputs(vocab.Net, ratio, o.FirePattern)
+				// now re-run this one
+				fmt.Println(tag, "RERUN:", lastOutput.Value, "vs", o.Value, "is", ratio)
 			}
+		}
+		if atLeastOneWasTooSimilar {
+			iteration--
 		}
 	}
 }

@@ -1,9 +1,10 @@
 package potential
 
 import (
-	"github.com/ruffrey/nurtrace/laws"
 	"strconv"
 	"testing"
+
+	"github.com/ruffrey/nurtrace/laws"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -89,11 +90,12 @@ func Test_ConsolidateSynapses(t *testing.T) {
 			dupes := dupeSynapses{s1dupe.ID, s2dupe.ID}
 			dedupeSynapses(dupes, network)
 
-			assert.Equal(t, 5, len(network.Synapses))
+			assert.Equal(t, false, network.SynExists(s2dupe.ID))
 			assert.Equal(t, int16(66), s1dupe.Millivolts)
 
-			_, stillHasS2 := network.Synapses[s2dupe.ID]
-			assert.Equal(t, false, stillHasS2, "Did not remove synapse from network!")
+			stillHasS2 := network.SynExists(s2dupe.ID)
+			assert.Equal(t, false, stillHasS2,
+				"Did not remove synapse from network!")
 		})
 		t.Run("duplicate synapses negative", func(t *testing.T) {
 			beforeEach()
@@ -104,7 +106,7 @@ func Test_ConsolidateSynapses(t *testing.T) {
 			dupes := dupeSynapses{s1dupe.ID, s2dupe.ID}
 			dedupeSynapses(dupes, network)
 
-			assert.Equal(t, 5, len(network.Synapses))
+			assert.Equal(t, false, network.SynExists(s2dupe.ID))
 			assert.Equal(t, int16(-37), s1dupe.Millivolts)
 		})
 		t.Run("duplicate synapses mixed signs", func(t *testing.T) {
@@ -116,7 +118,7 @@ func Test_ConsolidateSynapses(t *testing.T) {
 			dupes := dupeSynapses{s1dupe.ID, s2dupe.ID}
 			dedupeSynapses(dupes, network)
 
-			assert.Equal(t, 5, len(network.Synapses))
+			assert.Equal(t, false, network.SynExists(s2dupe.ID))
 			assert.Equal(t, int16(7), s1dupe.Millivolts)
 		})
 		t.Run("many dupes with mixed signs", func(t *testing.T) {
@@ -142,8 +144,19 @@ func Test_ConsolidateSynapses(t *testing.T) {
 			leftovers := dedupeSynapses(dupes[sig], network)
 			assert.Equal(t, 1, len(leftovers))
 
-			assert.Equal(t, 5, len(network.Synapses))
-			assert.Equal(t, int16(149), network.getSyn(leftovers[0]).Millivolts)
+			empties := 0
+			nonEmpties := 0
+			for _, s := range network.Synapses {
+				if s == nil {
+					empties++
+				} else {
+					nonEmpties++
+				}
+			}
+			assert.Equal(t, 5, empties)
+			assert.Equal(t, 5, nonEmpties)
+
+			assert.Equal(t, int16(149), network.GetSyn(leftovers[0]).Millivolts)
 		})
 		t.Run("dupes overflowing +int16 keeps more synapses", func(t *testing.T) {
 			beforeEach()
@@ -158,9 +171,20 @@ func Test_ConsolidateSynapses(t *testing.T) {
 			leftovers := dedupeSynapses(dupeSynapses{s1dupe.ID, s2dupe.ID, s3dupe.ID}, network)
 			assert.Equal(t, 2, len(leftovers))
 
-			assert.Equal(t, 6, len(network.Synapses))
-			assert.Equal(t, laws.ActualSynapseMax, network.getSyn(leftovers[0]).Millivolts)
-			assert.Equal(t, int16(17297), network.getSyn(leftovers[1]).Millivolts)
+			empties := 0
+			nonEmpties := 0
+			for _, s := range network.Synapses {
+				if s == nil {
+					empties++
+				} else {
+					nonEmpties++
+				}
+			}
+			assert.Equal(t, 1, empties)
+			assert.Equal(t, 6, nonEmpties)
+
+			assert.Equal(t, laws.ActualSynapseMax, network.GetSyn(leftovers[0]).Millivolts)
+			assert.Equal(t, int16(17297), network.GetSyn(leftovers[1]).Millivolts)
 		})
 		t.Run("dupes overflowing -int16 keeps more synapses", func(t *testing.T) {
 			beforeEach()
@@ -175,9 +199,20 @@ func Test_ConsolidateSynapses(t *testing.T) {
 			leftovers := dedupeSynapses(dupeSynapses{s1dupe.ID, s2dupe.ID, s3dupe.ID}, network)
 			assert.Equal(t, 2, len(leftovers))
 
-			assert.Equal(t, 6, len(network.Synapses))
-			assert.Equal(t, laws.ActualSynapseMin, network.getSyn(leftovers[0]).Millivolts)
-			assert.Equal(t, int16(-17296), network.getSyn(leftovers[1]).Millivolts)
+			empties := 0
+			nonEmpties := 0
+			for _, s := range network.Synapses {
+				if s == nil {
+					empties++
+				} else {
+					nonEmpties++
+				}
+			}
+			assert.Equal(t, 1, empties)
+			assert.Equal(t, 6, nonEmpties)
+
+			assert.Equal(t, laws.ActualSynapseMin, network.GetSyn(leftovers[0]).Millivolts)
+			assert.Equal(t, int16(-17296), network.GetSyn(leftovers[1]).Millivolts)
 		})
 	})
 }

@@ -1,6 +1,10 @@
 package potential
 
-import "github.com/ruffrey/nurtrace/laws"
+import (
+	"math"
+
+	"github.com/ruffrey/nurtrace/laws"
+)
 
 // InputValue is a unique string for the input
 type InputValue string
@@ -58,12 +62,25 @@ func (vu *VocabUnit) InitRandomInputs(network *Network) {
 }
 
 /*
-ExpandExistingInputs grows out from the firing pattern's existing
-cells so it has more uniqueness.
+expandInputs expands an input firing pattern by a set number of cells.
 */
-func ExpandExistingInputs(network *Network, fp FiringPattern) {
-	for i := 0; i < laws.NewCellDifferentiationCount; i++ {
+func expandInputs(network *Network, fp FiringPattern) {
+	for i := 0; i < laws.InputCellDifferentiationCount; i++ {
 		preCell := randCellFromMap(fp)
-		network.GrowPathBetween(preCell, NewCell(network).ID, laws.GrowPathExpectedMinimumSynapses)
+		newCell := NewCell(network)
+		network.linkCells(preCell, newCell.ID)
+		// fp[newCell.ID] = true
+	}
+}
+
+/*
+expandOutputs expands an output firing pattern by adding more synapses
+to new cells that are attached to random cells in its map.
+*/
+func expandOutputs(network *Network, noiseLevel float64, fp FiringPattern) {
+	noisyCellsToAdd := int(math.Ceil(noiseLevel * float64(len(fp))))
+	for i := 0; i < noisyCellsToAdd; i++ {
+		preCell := randCellFromMap(fp)
+		network.linkCells(preCell, NewCell(network).ID)
 	}
 }

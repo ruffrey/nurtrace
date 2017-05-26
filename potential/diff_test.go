@@ -176,35 +176,14 @@ func Test_ApplyDiff(t *testing.T) {
 }
 
 func Test_ApplyDiff_TrickeryIntegrityTests(t *testing.T) {
-	t.Run("a cell ID is new and one synapse ID is not unique so it gets reassigned, keeps network integrity", func(t *testing.T) {
+	t.Run("a cell ID is new and all synapses get reassigned, keeping network integrity", func(t *testing.T) {
 		// network 1
 		network := NewNetwork()
 		n1Cell1 := NewCell(network)
 		n1Cell2 := NewCell(network)
-		delete(network.Cells, n1Cell1.ID)
-		delete(network.Cells, n1Cell2.ID)
-		n1Cell1.ID = 11
-		n1Cell2.ID = 12
-		network.Cells[n1Cell1.ID] = n1Cell1
-		network.Cells[n1Cell2.ID] = n1Cell2
-		n1Syn1 := NewSynapse(network)
-		n1Syn2 := NewSynapse(network)
-		delete(network.Synapses, n1Syn1.ID)
-		delete(network.Synapses, n1Syn2.ID)
-		n1Syn1.ID = 101
-		n1Syn2.ID = 102
-		network.Synapses[n1Syn1.ID] = n1Syn1
-		network.Synapses[n1Syn2.ID] = n1Syn2
 
-		n1Syn1.FromNeuronAxon = n1Cell1.ID
-		n1Syn1.ToNeuronDendrite = n1Cell2.ID
-		n1Cell1.AxonSynapses[n1Syn1.ID] = true
-		n1Cell2.DendriteSynapses[n1Syn1.ID] = true
-
-		n1Syn2.FromNeuronAxon = n1Cell2.ID
-		n1Syn2.ToNeuronDendrite = n1Cell1.ID
-		n1Cell1.DendriteSynapses[n1Syn2.ID] = true
-		n1Cell2.AxonSynapses[n1Syn2.ID] = true
+		network.linkCells(n1Cell1.ID, n1Cell2.ID)
+		network.linkCells(n1Cell2.ID, n1Cell1.ID)
 
 		ok, report := CheckIntegrity(network)
 		assert.Equal(t, true, ok)
@@ -217,30 +196,12 @@ func Test_ApplyDiff_TrickeryIntegrityTests(t *testing.T) {
 		net2 := NewNetwork()
 		n2Cell1 := NewCell(net2)
 		n2Cell2 := NewCell(net2)
-		delete(net2.Cells, n2Cell1.ID)
-		delete(net2.Cells, n2Cell2.ID)
-		n2Cell1.ID = 21
-		n2Cell2.ID = 12 // cell ID collision with first network
-		net2.Cells[n2Cell1.ID] = n2Cell1
-		net2.Cells[n2Cell2.ID] = n2Cell2
-		n2Syn1 := NewSynapse(net2)
-		n2Syn2 := NewSynapse(net2)
-		delete(net2.Synapses, n2Syn1.ID)
-		delete(net2.Synapses, n2Syn2.ID)
-		n2Syn1.ID = 101 // synapse ID collision with first network
-		n2Syn2.ID = 26
-		net2.Synapses[n2Syn1.ID] = n2Syn1
-		net2.Synapses[n2Syn2.ID] = n2Syn2
+		n2Cell3 := NewCell(net2)
 
-		n2Syn1.FromNeuronAxon = n2Cell1.ID
-		n2Syn1.ToNeuronDendrite = n2Cell2.ID
-		n2Cell1.AxonSynapses[n2Syn1.ID] = true
-		n2Cell2.DendriteSynapses[n2Syn1.ID] = true
-
-		n2Syn2.FromNeuronAxon = n2Cell2.ID
-		n2Syn2.ToNeuronDendrite = n2Cell1.ID
-		n2Cell1.DendriteSynapses[n2Syn2.ID] = true
-		n2Cell2.AxonSynapses[n2Syn2.ID] = true
+		net2.linkCells(n2Cell1.ID, n2Cell2.ID)
+		net2.linkCells(n2Cell2.ID, n2Cell1.ID)
+		net2.linkCells(n2Cell3.ID, n2Cell1.ID)
+		net2.linkCells(n2Cell2.ID, n2Cell3.ID)
 
 		ok, report = CheckIntegrity(net2)
 		assert.Equal(t, true, ok)
@@ -264,7 +225,7 @@ func Test_ApplyDiff_TrickeryIntegrityTests(t *testing.T) {
 		ok, report = CheckIntegrity(network)
 		assert.Equal(t, true, ok, "no integrity after apply diff")
 	})
-	t.Run("when a cell is new and another already exists one of its synapses has been re-ID-d due to collision", func(t *testing.T) {
+	t.Run("when a cell is new and another already exists one of its synapses was new", func(t *testing.T) {
 		t.Run("the old synapse ID is removed from the dendrite synapse list", func(t *testing.T) {
 			network := NewNetwork()
 			assert.Equal(t, 0, len(network.Cells))
@@ -275,62 +236,43 @@ func Test_ApplyDiff_TrickeryIntegrityTests(t *testing.T) {
 			// which purposely collides with one already on the network
 			// we are merging onto
 			cell := NewCell(network)
-			delete(network.Cells, cell.ID)
-			cell.ID = 1
-			network.Cells[cell.ID] = cell
-			s1 := NewSynapse(network)
-			s1.Millivolts = 7
-			delete(network.Synapses, s1.ID)
-			s1.ID = 101
-			network.Synapses[s1.ID] = s1
 			receiver := NewCell(network)
-			delete(network.Cells, receiver.ID)
-			receiver.ID = 2
-			network.Cells[receiver.ID] = receiver
-			s1.FromNeuronAxon = cell.ID
-			cell.AxonSynapses[s1.ID] = true
-			s1.ToNeuronDendrite = receiver.ID
-			receiver.DendriteSynapses[s1.ID] = true
+
+			s1 := network.linkCells(cell.ID, receiver.ID)
+			s1.Millivolts = 7
+
 			pretestok, _ := CheckIntegrity(network)
 			assert.Equal(t, true, pretestok)
 			assert.Equal(t, 1, len(network.Synapses))
 			assert.Equal(t, 2, len(network.Cells))
 
 			net2 := NewNetwork()
-			s2 := NewSynapse(net2)
-			s2.Millivolts = 10
-			delete(net2.Synapses, s2.ID)
-			assert.Equal(t, 0, len(net2.Synapses))
-			s2.ID = 101
-			net2.Synapses[s2.ID] = s2
+			NewCell(net2)
+			NewCell(net2) // a couple of extras
 			cell2 := NewCell(net2)
-			delete(net2.Cells, cell2.ID)
-			cell2.ID = 1
-			net2.Cells[cell2.ID] = cell2
 			receiver2 := NewCell(net2)
-			delete(net2.Cells, receiver2.ID)
-			receiver2.ID = 44
-			net2.Cells[receiver2.ID] = receiver2
-			s2.FromNeuronAxon = cell2.ID
-			s2.ToNeuronDendrite = receiver2.ID
-			cell2.AxonSynapses[s2.ID] = true
-			receiver2.DendriteSynapses[s2.ID] = true
-			assert.Equal(t, 1, len(net2.Synapses))
-			assert.Equal(t, 2, len(net2.Cells))
+
+			s2 := net2.linkCells(cell2.ID, receiver2.ID)
+			s3 := net2.linkCells(receiver2.ID, cell2.ID)
+			s2.Millivolts = 10
+			s3.Millivolts = 11
+
+			assert.Equal(t, 2, len(net2.Synapses))
+			assert.Equal(t, 4, len(net2.Cells))
 			pretestNet2ok, _ := CheckIntegrity(net2)
 			assert.Equal(t, true, pretestNet2ok)
 
 			// now do the diffing and checking
 			diff := DiffNetworks(network, net2)
 			assert.Equal(t, 0, len(diff.synapseDiffs))
-			assert.Equal(t, 1, len(diff.addedCells))
+			assert.Equal(t, 2, len(diff.addedCells))
 			assert.Equal(t, 0, len(diff.synapseFires))
-			assert.Equal(t, 1, len(diff.addedSynapses))
-			assert.Equal(t, s2, diff.addedSynapses[0])
+			assert.Equal(t, 2, len(diff.addedSynapses))
 			// the diff is right. let's apply it.
 
 			ApplyDiff(diff, network)
-			assert.Equal(t, 2, len(network.Synapses), "wrong number of synapses on original network after diff applied", network.Synapses)
+			assert.Equal(t, 4, len(network.Cells), "wrong number of cells on original network after diff applied")
+			assert.Equal(t, 3, len(network.Synapses), "wrong number of synapses on original network after diff applied", network.Synapses, diff)
 
 			postMergeIntegrityOK, report := CheckIntegrity(network)
 			assert.Equal(t, true, postMergeIntegrityOK)
@@ -347,10 +289,11 @@ func Test_copyCellToNetwork(t *testing.T) {
 		newNetwork := NewNetwork()
 		originalCell := NewCell(originalNetwork)
 		copyCellToNetwork(originalCell, newNetwork)
-		copiedCell, exists := newNetwork.Cells[originalCell.ID]
+		exists := newNetwork.CellExists(originalCell.ID)
 		if !exists {
 			t.Error("cell not copied to new network")
 		}
+		copiedCell := newNetwork.GetCell(originalCell.ID)
 		if copiedCell.Network != newNetwork {
 			t.Error("cell copied but new network prop not set to new network pointer")
 		}
