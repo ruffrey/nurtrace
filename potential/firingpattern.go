@@ -128,22 +128,21 @@ in the vocab, until training samples are differentiated from one another.
 
 The vocab should already be properly initiated and the network should be
 set before running this.
-
-TODO: make multithreaded and multi-workered
 */
-func RunFiringPatternTraining(vocab *Vocabulary) {
+func RunFiringPatternTraining(vocab *Vocabulary, tag string) {
 	vocab.Net.ResetForTraining()
 
 	tots := len(vocab.Samples)
-	fmt.Println("Running samples", tots)
+	fmt.Println(tag, "Running samples", tots)
 
 	for iteration := 0; iteration < len(vocab.Samples); iteration++ {
 		s := vocab.Samples[iteration]
 		finalPattern := make(FiringPattern)
+
 		if iteration%laws.TrainingResetIteration == 0 {
-			fmt.Println("sample", iteration, "/", tots)
+			fmt.Println(tag, "sample", iteration, "/", tots)
 			vocab.Net.PrintTotals()
-			fmt.Println("  outputs=", len(vocab.Outputs))
+			fmt.Println(tag, "  outputs=", len(vocab.Outputs))
 			vocab.Net.ResetForTraining()
 		}
 		// fire the input a bunch of times. after that we can consider
@@ -163,6 +162,7 @@ func RunFiringPatternTraining(vocab *Vocabulary) {
 		// Now that the output firing pattern has been changed,
 		// we need to ensure none of the other outputs are too similar.
 		var lastOutput *OutputCollection
+		atLeastOneWasTooSimilar := false
 		i := -1
 		for _, o := range vocab.Outputs {
 			isThisOne := s.output == o.Value
@@ -176,17 +176,20 @@ func RunFiringPatternTraining(vocab *Vocabulary) {
 			}
 			fpDiff := DiffFiringPatterns(o.FirePattern, lastOutput.FirePattern)
 			ratio := fpDiff.Ratio()
-			// fmt.Println("Ratio:", lastOutput.Value, "vs", o.Value, "is", ratio)
+			// fmt.Println(tag, "Ratio:", lastOutput.Value, "vs", o.Value, "is", ratio)
 			tooSimilar := ratio > laws.PatternSimilarityLimit
-			// TODO: wrong because we decrement iteration which is
-			// from ABOVE!
 			if tooSimilar {
-				expandFiringPattern(vocab.Net, lastOutput.FirePattern)
-				expandFiringPattern(vocab.Net, o.FirePattern)
+				atLeastOneWasTooSimilar = true
+				// change input cell pattern
+				expandInputs(vocab.Net, vocab.Inputs[s.input].InputCells)
+				// change this output pattern
+				expandOutputs(vocab.Net, ratio, o.FirePattern)
 				// now re-run this one
-				fmt.Println("RERUN:", lastOutput.Value, "vs", o.Value, "is", ratio)
-				iteration--
+				fmt.Println(tag, "RERUN:", lastOutput.Value, "vs", o.Value, "is", ratio)
 			}
+		}
+		if atLeastOneWasTooSimilar {
+			iteration--
 		}
 	}
 }
