@@ -3,7 +3,8 @@ preinstall:
 	go get github.com/stretchr/testify/assert
 	go get github.com/y0ssar1an/q
 	go get github.com/pkg/sftp
-	go get github.com/ruffrey/nurtrace
+preinstall-test:
+	go get github.com/ruffrey/nurtrace/laws
 
 test:
 	go test -v
