@@ -2,6 +2,7 @@ package potential
 
 import (
 	"fmt"
+	"math"
 
 	"github.com/ruffrey/nurtrace/laws"
 )
@@ -13,7 +14,7 @@ Glossary:
 */
 
 // FiringPattern represents all cells that fired in a single step
-type FiringPattern map[CellID]bool
+type FiringPattern map[CellID]uint16
 
 /*
 FireNetworkUntilDone takes some seed cells then fires the network until
@@ -21,9 +22,9 @@ it has no more firing, up to `laws.MaxPostFireSteps`.
 
 Consider that you may want to ResetForTraining before running this.
 */
-func FireNetworkUntilDone(network *Network, seedCells map[CellID]bool) (fp FiringPattern) {
+func FireNetworkUntilDone(network *Network, seedCells FiringPattern) (fp FiringPattern) {
 	var i uint8
-	fp = make(map[CellID]bool)
+	fp = make(FiringPattern)
 	for cellID := range seedCells {
 		network.GetCell(cellID).FireActionPotential()
 		network.resetCellsOnNextStep[cellID] = true
@@ -35,7 +36,10 @@ func FireNetworkUntilDone(network *Network, seedCells map[CellID]bool) (fp Firin
 		}
 		hasMore := network.Step()
 		for cellID := range network.resetCellsOnNextStep {
-			fp[cellID] = true
+			if _, ok := fp[cellID]; !ok {
+				fp[cellID] = 0
+			}
+			fp[cellID]++
 		}
 		if !hasMore {
 			break
@@ -50,8 +54,8 @@ FiringPatternDiff represents the firing differences between two
 FiringPatterns.
 */
 type FiringPatternDiff struct {
-	Shared   map[CellID]bool
-	Unshared map[CellID]bool
+	Shared   map[CellID]uint16
+	Unshared map[CellID]uint16
 }
 
 /*
@@ -71,11 +75,15 @@ the two supplied patterns.
 func mergeFiringPatterns(fp1, fp2 FiringPattern) (merged FiringPattern) {
 	merged = make(FiringPattern)
 
-	for cellID := range fp1 {
-		merged[cellID] = true
+	for cellID, fires := range fp1 {
+		merged[cellID] = fires
 	}
-	for cellID := range fp2 {
-		merged[cellID] = true
+	for cellID, fires := range fp2 {
+		if otherFires, already := merged[cellID]; already {
+			merged[cellID] = uint16(math.Floor(float64(otherFires + fires/2)))
+		} else {
+			merged[cellID] = fires
+		}
 	}
 
 	return merged
@@ -102,21 +110,21 @@ two firing patterns.
 */
 func DiffFiringPatterns(fp1, fp2 FiringPattern) *FiringPatternDiff {
 	diff := &FiringPatternDiff{
-		Shared:   make(map[CellID]bool),
-		Unshared: make(map[CellID]bool),
+		Shared:   make(map[CellID]uint16),
+		Unshared: make(map[CellID]uint16),
 	}
 
-	for cellID := range fp1 {
-		if fp2[cellID] {
-			diff.Shared[cellID] = true
+	for cellID, fires := range fp1 {
+		if fp2Fires, ok := fp2[cellID]; ok {
+			diff.Shared[cellID] = uint16(math.Abs(float64(fires) - float64(fp2Fires)))
 		} else {
-			diff.Unshared[cellID] = true
+			diff.Unshared[cellID] = fires
 		}
 	}
-	for cellID := range fp2 {
+	for cellID, fires := range fp2 {
 		// already been through the shared ones
-		if !fp1[cellID] {
-			diff.Unshared[cellID] = true
+		if _, ok := fp1[cellID]; !ok {
+			diff.Unshared[cellID] = fires
 		}
 	}
 	return diff
