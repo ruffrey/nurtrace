@@ -1,6 +1,7 @@
 preinstall:
 	go get github.com/pkg/sftp
-
+preinstall-test:
+	go get github.com/ruffrey/nurtrace/potential
 build:
 	rm -f worker_linux*
 	rm -f worker_darwin*
