@@ -7,7 +7,7 @@ import (
 )
 
 // CompareFiringPatterns prints information about a network or requested components of the network.
-func CompareFiringPatterns(network *potential.Network, cell1, cell2 map[potential.CellID]bool, n int) (err error) {
+func CompareFiringPatterns(network *potential.Network, cell1, cell2 potential.FiringPattern, n int) (err error) {
 	network.PrintTotals()
 	fmt.Println("Cell group 1:", cell1)
 	fmt.Println("Cell group 2:", cell2)
@@ -34,9 +34,6 @@ func CompareFiringPatterns(network *potential.Network, cell1, cell2 map[potentia
 
 	fmt.Println("Cell 1 pattern:", patt1)
 	fmt.Println("Cell 2 pattern:", patt2)
-	diff := potential.DiffFiringPatterns(patt1, patt2)
-	fmt.Println("Shared cells fired:", diff.Shared)
-	fmt.Println("Unshared cells fired:", diff.Unshared)
-	fmt.Println("Ratio:", diff.Ratio())
+	fmt.Println("Ratio:", potential.DiffFiringPatterns(patt1, patt2))
 	return nil
 }
