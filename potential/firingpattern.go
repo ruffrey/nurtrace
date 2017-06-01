@@ -2,6 +2,7 @@ package potential
 
 import (
 	"fmt"
+	"math"
 
 	"github.com/ruffrey/nurtrace/laws"
 )
@@ -13,7 +14,7 @@ Glossary:
 */
 
 // FiringPattern represents all cells that fired in a single step
-type FiringPattern map[CellID]bool
+type FiringPattern map[CellID]uint16
 
 /*
 FireNetworkUntilDone takes some seed cells then fires the network until
@@ -21,9 +22,9 @@ it has no more firing, up to `laws.MaxPostFireSteps`.
 
 Consider that you may want to ResetForTraining before running this.
 */
-func FireNetworkUntilDone(network *Network, seedCells map[CellID]bool) (fp FiringPattern) {
+func FireNetworkUntilDone(network *Network, seedCells FiringPattern) (fp FiringPattern) {
 	var i uint8
-	fp = make(map[CellID]bool)
+	fp = make(FiringPattern)
 	for cellID := range seedCells {
 		network.GetCell(cellID).FireActionPotential()
 		network.resetCellsOnNextStep[cellID] = true
@@ -35,7 +36,10 @@ func FireNetworkUntilDone(network *Network, seedCells map[CellID]bool) (fp Firin
 		}
 		hasMore := network.Step()
 		for cellID := range network.resetCellsOnNextStep {
-			fp[cellID] = true
+			if _, ok := fp[cellID]; !ok {
+				fp[cellID] = 0
+			}
+			fp[cellID]++
 		}
 		if !hasMore {
 			break
@@ -46,36 +50,21 @@ func FireNetworkUntilDone(network *Network, seedCells map[CellID]bool) (fp Firin
 }
 
 /*
-FiringPatternDiff represents the firing differences between two
-FiringPatterns.
-*/
-type FiringPatternDiff struct {
-	Shared   map[CellID]bool
-	Unshared map[CellID]bool
-}
-
-/*
-Ratio is a measure of how alike the firing patterns of the diffed
-cells were.
-*/
-func (diff *FiringPatternDiff) Ratio() float64 {
-	lenShared := float64(len(diff.Shared))
-	lenUnshared := float64(len(diff.Unshared))
-	return lenShared / (lenShared + lenUnshared)
-}
-
-/*
 mergeFiringPatterns returns a new FiringPattern containing a mashup of
 the two supplied patterns.
 */
 func mergeFiringPatterns(fp1, fp2 FiringPattern) (merged FiringPattern) {
 	merged = make(FiringPattern)
 
-	for cellID := range fp1 {
-		merged[cellID] = true
+	for cellID, fires := range fp1 {
+		merged[cellID] = fires
 	}
-	for cellID := range fp2 {
-		merged[cellID] = true
+	for cellID, fires := range fp2 {
+		if otherFires, already := merged[cellID]; already {
+			merged[cellID] = uint16(math.Floor(float64(otherFires + fires/2)))
+		} else {
+			merged[cellID] = fires
+		}
 	}
 
 	return merged
@@ -100,26 +89,37 @@ func mergeAllOutputs(original, newer map[OutputValue]*OutputCollection) {
 DiffFiringPatterns figures out what was alike and unshared between
 two firing patterns.
 */
-func DiffFiringPatterns(fp1, fp2 FiringPattern) *FiringPatternDiff {
-	diff := &FiringPatternDiff{
-		Shared:   make(map[CellID]bool),
-		Unshared: make(map[CellID]bool),
+func DiffFiringPatterns(fp1, fp2 FiringPattern) float64 {
+	unshared := make(map[CellID]float64)
+
+	total := 0.0
+	for cellID, fires := range fp1 {
+		fire1_64 := float64(fires)
+		if fp2Fires, ok := fp2[cellID]; ok {
+			fire2_64 := float64(fp2Fires)
+			max := math.Max(fire1_64, fire2_64)
+			min := math.Min(fire1_64, fire2_64)
+			total += max
+			unshared[cellID] = max - min
+		} else {
+			unshared[cellID] = fire1_64
+			total += fire1_64
+		}
+	}
+	for cellID, fires := range fp2 {
+		fire1_64 := float64(fires)
+		// already been through the shared ones
+		if _, ok := fp1[cellID]; !ok {
+			unshared[cellID] = fire1_64
+			total += fire1_64
+		}
 	}
 
-	for cellID := range fp1 {
-		if fp2[cellID] {
-			diff.Shared[cellID] = true
-		} else {
-			diff.Unshared[cellID] = true
-		}
+	allUnshared := 0.0
+	for _, fires := range unshared {
+		allUnshared += fires
 	}
-	for cellID := range fp2 {
-		// already been through the shared ones
-		if !fp1[cellID] {
-			diff.Unshared[cellID] = true
-		}
-	}
-	return diff
+	return (total - allUnshared) / total
 }
 
 /*
@@ -174,8 +174,7 @@ func RunFiringPatternTraining(vocab *Vocabulary, tag string) {
 				lastOutput = o
 				continue
 			}
-			fpDiff := DiffFiringPatterns(o.FirePattern, lastOutput.FirePattern)
-			ratio := fpDiff.Ratio()
+			ratio := DiffFiringPatterns(o.FirePattern, lastOutput.FirePattern)
 			// fmt.Println(tag, "Ratio:", lastOutput.Value, "vs", o.Value, "is", ratio)
 			tooSimilar := ratio > laws.PatternSimilarityLimit
 			if tooSimilar {
@@ -205,7 +204,7 @@ This is useful for sampling.
 func FindClosestOutputCollection(patt FiringPattern, vocab *Vocabulary) (oc *OutputCollection) {
 	var closestRatio float64
 	for _, outputCandidate := range vocab.Outputs {
-		r := DiffFiringPatterns(outputCandidate.FirePattern, patt).Ratio()
+		r := DiffFiringPatterns(outputCandidate.FirePattern, patt)
 		isCloser := r > closestRatio
 		if isCloser {
 			closestRatio = r

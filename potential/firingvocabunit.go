@@ -57,7 +57,7 @@ InitRandomInputs chooses some input cells for the vocab unit.
 */
 func (vu *VocabUnit) InitRandomInputs(network *Network) {
 	for i := 0; i < laws.InitialCellCountPerVocabUnit; i++ {
-		vu.InputCells[network.RandomCellKey()] = true
+		vu.InputCells[network.RandomCellKey()] = 1
 	}
 }
 
@@ -66,11 +66,24 @@ expandInputs expands an input firing pattern by a set number of cells.
 */
 func expandInputs(network *Network, fp FiringPattern) {
 	for i := 0; i < laws.InputCellDifferentiationCount; i++ {
-		preCell := randCellFromMap(fp)
+		preCell := randCellFromFP(fp)
 		newCell := NewCell(network)
 		network.linkCells(preCell, newCell.ID)
 		// fp[newCell.ID] = true
 	}
+}
+
+func randCellFromFP(cellMap FiringPattern) (randCellID CellID) {
+	iterate := randomIntBetween(0, len(cellMap)-1)
+	i := 0
+	for k := range cellMap {
+		if i == iterate {
+			randCellID = CellID(k)
+			break
+		}
+		i++
+	}
+	return randCellID
 }
 
 /*
@@ -80,7 +93,7 @@ to new cells that are attached to random cells in its map.
 func expandOutputs(network *Network, noiseLevel float64, fp FiringPattern) {
 	noisyCellsToAdd := int(math.Ceil(noiseLevel * float64(len(fp))))
 	for i := 0; i < noisyCellsToAdd; i++ {
-		preCell := randCellFromMap(fp)
+		preCell := randCellFromFP(fp)
 		network.linkCells(preCell, NewCell(network).ID)
 	}
 }
