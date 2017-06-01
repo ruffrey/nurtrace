@@ -1,5 +1,5 @@
 test:
   override:
     - cd potential && make preinstall && make preinstall-test && make test
-    - cd cli && make preinstall && make preinstall-test make build
+    - cd cli && make preinstall && make preinstall-test && make build
     - cd worker && make preinstall && make preinstall-test && make build
