@@ -1,5 +1,6 @@
 preinstall:
 	go get gopkg.in/urfave/cli.v1
+	go get github.com/awalterschulze/gographviz
 preinstall-test:
 	go get github.com/ruffrey/nurtrace/potential
 
