@@ -36,10 +36,10 @@ func Test_FiringPattern(t *testing.T) {
 		result := FireNetworkUntilDone(network, cells)
 		fmt.Println(a.activating, b.activating, c.activating)
 		assert.Equal(t, 3, len(result), "wrong number of cells fired")
-		assert.Equal(t, false, result[d.ID], "should not have fired this cell")
-		assert.Equal(t, true, result[a.ID], "did not fire cell: a")
-		assert.Equal(t, true, result[b.ID], "did not fire cell: b")
-		assert.Equal(t, true, result[c.ID], "did not fire cell: c")
+		assert.Equal(t, uint16(0), result[d.ID], "should not have fired this cell")
+		assert.Equal(t, uint16(6), result[a.ID], "did not fire cell: a")
+		assert.Equal(t, uint16(7), result[b.ID], "did not fire cell: b")
+		assert.Equal(t, uint16(7), result[c.ID], "did not fire cell: c")
 	})
 }
 
