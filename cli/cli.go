@@ -323,8 +323,8 @@ func main() {
 				cell2String := c.Args().Get(2)
 				r := c.Int("i")
 				n := c.Int("n")
-				cell1 := make(map[potential.CellID]bool)
-				cell2 := make(map[potential.CellID]bool)
+				cell1 := make(potential.FiringPattern)
+				cell2 := make(potential.FiringPattern)
 				if r == 0 {
 					r = 4
 				}
@@ -339,7 +339,7 @@ func main() {
 
 				if cell1String == "" {
 					for i := 0; i < r; i++ {
-						cell1[network.RandomCellKey()] = true
+						cell1[network.RandomCellKey()] = 1
 					}
 				} else {
 					cellInts := strings.Split(cell1String, ",")
@@ -348,13 +348,13 @@ func main() {
 						if err != nil {
 							return err
 						}
-						cell1[potential.CellID(cellInt)] = true
+						cell1[potential.CellID(cellInt)] = 1
 					}
 
 				}
 				if cell2String == "" {
 					for i := 0; i < r; i++ {
-						cell2[network.RandomCellKey()] = true
+						cell2[network.RandomCellKey()] = 1
 					}
 				} else {
 					cellInts := strings.Split(cell2String, ",")
@@ -363,7 +363,7 @@ func main() {
 						if err != nil {
 							return err
 						}
-						cell2[potential.CellID(cellInt)] = true
+						cell2[potential.CellID(cellInt)] = 1
 					}
 
 				}
