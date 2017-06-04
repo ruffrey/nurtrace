@@ -26,17 +26,19 @@ func Test_CloneNetwork(t *testing.T) {
 		original := NewNetwork()
 
 		beforeCell := NewCell(original)
+		afterCell := NewCell(original)
+		original.linkCells(beforeCell.ID, afterCell.ID)
 
 		cloned := CloneNetwork(original)
 		// change something
 		one := SynapseID(0)
-		cloned.Synapses[one].fireNextRound = true
+		cloned.GetSyn(one).fireNextRound = true
 
-		if cloned.Synapses[one].fireNextRound == original.Synapses[one].fireNextRound {
+		if cloned.GetSyn(one).fireNextRound == original.GetSyn(one).fireNextRound {
 			t.Error("changing props of cloned network should not change original")
 		}
 
-		if &cloned.Cells[beforeCell.ID].Network == &original.Cells[beforeCell.ID].Network {
+		if &cloned.GetCell(beforeCell.ID).Network == &original.GetCell(beforeCell.ID).Network {
 			t.Error("cloned and original cells should not point to the same network")
 		}
 
