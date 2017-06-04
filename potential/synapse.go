@@ -29,6 +29,7 @@ type Synapse struct {
 	FromNeuronAxon    CellID
 	ToNeuronDendrite  CellID
 	ActivationHistory uint `json:"-"` // unnecessary to recreate synapse
+	fireNextRound     bool
 }
 
 /*
@@ -41,9 +42,10 @@ func NewSynapse(network *Network) *Synapse {
 
 	network.synMux.Lock()
 	s := Synapse{
-		ID:         SynapseID(len(network.Synapses)),
-		Network:    network,
-		Millivolts: mv,
+		ID:            SynapseID(len(network.Synapses)),
+		Network:       network,
+		Millivolts:    mv,
+		fireNextRound: false,
 	}
 	synapse := &s
 	network.Synapses = append(network.Synapses, synapse)

@@ -42,13 +42,15 @@ func (network *Network) Step() (hasMore bool) {
 		return false
 	}
 
-	nextCellResets := make(map[CellID]bool) // these cells got fired
+	nextCellResets := make(map[CellID]bool) // these cells get fired next
 	voltageTallies := make(map[CellID]*firingGroup)
 
 	// tally up all the synapse voltage results they will have on the cells
 	// fmt.Println("nextSynapsesToActivate=", len(network.nextSynapsesToActivate))
-	for synapseID := range network.nextSynapsesToActivate {
-		syn := network.GetSyn(synapseID)
+	for _, syn := range network.Synapses {
+		if !syn.fireNextRound {
+			continue
+		}
 
 		cellReceivingVoltage := network.GetCell(syn.ToNeuronDendrite)
 		if cellReceivingVoltage.activating { // do not fire cells in refractory period
@@ -61,10 +63,11 @@ func (network *Network) Step() (hasMore bool) {
 		fg.voltage += int(syn.Millivolts)
 		// save the synapse for later so it can be boosted if the cell fires
 		fg.synapses = append(fg.synapses, syn.ID)
+
+		// Reset this list of synapses now that we activated them. The next loop starts
+		// adding more for the next round.
+		syn.fireNextRound = false
 	}
-	// Reset this list of synapses now that we activated them. The next loop starts
-	// adding more for the next round.
-	network.nextSynapsesToActivate = make(map[SynapseID]bool)
 
 	// see if any cells fired
 	for cellID, fg := range voltageTallies {
@@ -88,15 +91,16 @@ func (network *Network) Step() (hasMore bool) {
 	}
 
 	// for the cells from the last step, make them fire-able again
-	for cellID := range network.resetCellsOnNextStep {
-		cell := network.GetCell(cellID)
+	for cellID, cell := range network.Cells {
 		cell.Voltage = laws.CellRestingVoltage
-		cell.activating = false
+		if cell.activating {
+			cell.activating = false
+		} else if nextCellResets[CellID(cellID)] {
+			cell.activating = true
+		}
 	}
 
 	hasMore = len(nextCellResets) > 0
-
-	network.resetCellsOnNextStep = nextCellResets
 
 	return hasMore
 }
@@ -106,5 +110,5 @@ AddSynapseToNextStep provides a reusable method for having a synapse get activat
 next step.
 */
 func (network *Network) AddSynapseToNextStep(id SynapseID) {
-	network.nextSynapsesToActivate[id] = true
+	network.GetSyn(id).fireNextRound = true
 }

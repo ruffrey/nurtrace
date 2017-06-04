@@ -27,7 +27,7 @@ func FireNetworkUntilDone(network *Network, seedCells FiringPattern) (fp FiringP
 	fp = make(FiringPattern)
 	for cellID := range seedCells {
 		network.GetCell(cellID).FireActionPotential()
-		network.resetCellsOnNextStep[cellID] = true
+		network.Cells[cellID].activating = true
 	}
 	// we ignore the seedCells
 	for {
@@ -35,11 +35,14 @@ func FireNetworkUntilDone(network *Network, seedCells FiringPattern) (fp FiringP
 			break
 		}
 		hasMore := network.Step()
-		for cellID := range network.resetCellsOnNextStep {
-			if _, ok := fp[cellID]; !ok {
-				fp[cellID] = 0
+		for _cellID, cell := range network.Cells {
+			cellID := CellID(_cellID)
+			if cell.activating {
+				if _, ok := fp[cellID]; !ok {
+					fp[cellID] = 0
+				}
+				fp[cellID]++
 			}
-			fp[cellID]++
 		}
 		if !hasMore {
 			break
