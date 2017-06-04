@@ -47,7 +47,10 @@ type Cell struct {
 	*/
 	AxonSynapses map[SynapseID]bool
 	/*
-	  WasFired is used during training to know if this cell fired during the session
+	  WasFired is used during training to know if this cell fired during the session.
+	  TODO: may no longer be necessary because 1) activating property might handle
+	  this, and 2) only used during backtracing which is dead code at the time of
+	  writing.
 	*/
 	WasFired bool
 	/*
@@ -87,10 +90,11 @@ func NewCell(network *Network) *Cell {
 
 /*
 FireActionPotential does an action potential cycle.
+
+`cell.activating` property is set in `Step()`
 */
 func (cell *Cell) FireActionPotential() {
 	cell.WasFired = true
-	cell.activating = true
 	// fmt.Println("Action Potential Firing\n  cell=", cell.ID, "synapses=", len(cell.AxonSynapses))
 
 	for _, cb := range cell.OnFired {

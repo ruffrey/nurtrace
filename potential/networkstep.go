@@ -68,7 +68,6 @@ func (network *Network) Step() (hasMore bool) {
 		// adding more for the next round.
 		syn.fireNextRound = false
 	}
-
 	// see if any cells fired
 	for cellID, fg := range voltageTallies {
 		cell := network.GetCell(cellID)
