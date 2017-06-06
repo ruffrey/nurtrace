@@ -94,3 +94,27 @@ func Test_FiringDiffRatio(t *testing.T) {
 		assert.Equal(t, (tot-(1+2+4.0))/tot, diff)
 	})
 }
+
+func Test_FiringPatternMerge(t *testing.T) {
+	t.Run("merging firing patterns returns a new combined pattern", func(t *testing.T) {
+		fp1 := make(FiringPattern)
+		fp2 := make(FiringPattern)
+
+		// 1 different
+		fp1[CellID(0)] = 2
+		fp2[CellID(0)] = 1
+
+		// 2 different
+		fp1[CellID(1)] = 14
+		fp2[CellID(1)] = 16
+
+		// 4 different / unshared
+		fp1[CellID(2)] = 4
+
+		merged := mergeFiringPatterns(fp1, fp2)
+
+		assert.Equal(t, uint16(1), merged[CellID(0)])
+		assert.Equal(t, uint16(15), merged[CellID(1)])
+		assert.Equal(t, uint16(4), merged[CellID(2)])
+	})
+}

@@ -53,7 +53,7 @@ func FireNetworkUntilDone(network *Network, seedCells FiringPattern) (fp FiringP
 }
 
 /*
-mergeFiringPatterns returns a new FiringPattern containing a mashup of
+mergeFiringPatterns returns a new FiringPattern containing an average of
 the two supplied patterns.
 */
 func mergeFiringPatterns(fp1, fp2 FiringPattern) (merged FiringPattern) {
@@ -64,7 +64,10 @@ func mergeFiringPatterns(fp1, fp2 FiringPattern) (merged FiringPattern) {
 	}
 	for cellID, fires := range fp2 {
 		if otherFires, already := merged[cellID]; already {
-			merged[cellID] = uint16(math.Floor(float64(otherFires + fires/2)))
+			combined := (otherFires + fires)
+			average := float64(combined / 2)
+			bottomValue := uint16(math.Floor(average))
+			merged[cellID] = bottomValue
 		} else {
 			merged[cellID] = fires
 		}
