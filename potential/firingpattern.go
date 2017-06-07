@@ -22,18 +22,28 @@ it has no more firing, up to `laws.MaxPostFireSteps`.
 
 Consider that you may want to ResetForTraining before running this.
 */
-func FireNetworkUntilDone(network *Network, seedCells FiringPattern) (fp FiringPattern) {
-	var i uint8
-	fp = make(FiringPattern)
+func FireNetworkUntilDone(network *Network, seedCells FiringPattern) FiringPattern {
+	i := 0
+	fp := make(FiringPattern)
+
+	// The first round takes the actual seeding
 	for cellID := range seedCells {
 		network.GetCell(cellID).FireActionPotential()
 		network.Cells[cellID].activating = true
 	}
 	// we ignore the seedCells
+	iterationsDone := false
 	for {
-		if i >= laws.MaxPostFireSteps {
-			break
+		if i > laws.FiringIterationsPerSample {
+			iterationsDone = true
 		}
+
+		if iterationsDone {
+			if (i - laws.FiringIterationsPerSample) >= laws.MaxPostFireSteps {
+				break
+			}
+		}
+
 		hasMore := network.Step()
 		for _cellID, cell := range network.Cells {
 			cellID := CellID(_cellID)
@@ -44,9 +54,13 @@ func FireNetworkUntilDone(network *Network, seedCells FiringPattern) (fp FiringP
 				fp[cellID]++
 			}
 		}
-		if !hasMore {
-			break
+
+		if iterationsDone {
+			if !hasMore {
+				break
+			}
 		}
+
 		i++
 	}
 	return fp
@@ -146,10 +160,12 @@ func RunFiringPatternTraining(vocab *Vocabulary, tag string) {
 		finalPattern := make(FiringPattern)
 
 		if iteration%laws.TrainingResetIteration == 0 {
-			fmt.Println(tag, "sample", iteration, "/", tots)
-			vocab.Net.PrintTotals()
-			fmt.Println(tag, "  outputs=", len(vocab.Outputs))
-			vocab.Net.ResetForTraining()
+			if iteration != 0 {
+				fmt.Println(tag, "sample", iteration, "/", tots)
+				vocab.Net.PrintTotals()
+				fmt.Println(tag, "  outputs=", len(vocab.Outputs))
+				vocab.Net.ResetForTraining()
+			}
 		}
 		// fire the input a bunch of times. after that we can consider
 		// the output pattern as fired. set the output pattern.
@@ -163,7 +179,10 @@ func RunFiringPatternTraining(vocab *Vocabulary, tag string) {
 		// the output value is now represented by what we just
 		// created above, merged with what we had before.
 		originalFP := vocab.Outputs[s.output].FirePattern
-		vocab.Outputs[s.output].FirePattern = mergeFiringPatterns(originalFP, finalPattern)
+		vocab.Outputs[s.output] = &OutputCollection{
+			Value:       s.output,
+			FirePattern: mergeFiringPatterns(originalFP, finalPattern),
+		}
 
 		// Now that the output firing pattern has been changed,
 		// we need to ensure none of the other outputs are too similar.

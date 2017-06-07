@@ -1,10 +1,11 @@
 package potential
 
 import (
-	"github.com/ruffrey/nurtrace/laws"
 	"io/ioutil"
 	"os"
 	"testing"
+
+	"github.com/ruffrey/nurtrace/laws"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -154,7 +155,7 @@ func Test_LinkCells(t *testing.T) {
 }
 
 func Test_ResetForTraining(t *testing.T) {
-	t.Run("resets cell props activating, wasFired, but NOT voltage", func(t *testing.T) {
+	t.Run("resets cell props activating, wasFired, and voltage", func(t *testing.T) {
 		network := NewNetwork()
 
 		// pretest
@@ -165,7 +166,7 @@ func Test_ResetForTraining(t *testing.T) {
 
 		// setup
 		cell1.activating = true
-		cell1.Voltage = int16(100)
+		cell1.Voltage = int16(laws.CellRestingVoltage)
 		cell1.WasFired = true
 
 		network.Cells[cell1.ID] = cell1
@@ -174,7 +175,7 @@ func Test_ResetForTraining(t *testing.T) {
 
 		// assertions
 		assert.Equal(t, false, cell1.activating)
-		assert.Equal(t, int16(100), cell1.Voltage)
+		assert.Equal(t, int16(laws.CellRestingVoltage), cell1.Voltage)
 		assert.Equal(t, false, cell1.WasFired)
 	})
 

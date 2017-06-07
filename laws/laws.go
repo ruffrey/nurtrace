@@ -32,7 +32,7 @@ const NewSynapseMinMillivolts int = -30
 NewSynapseMaxMillivolts is the bottom range of how much a new synapse will
 have for the `Millivolts` property.
 */
-const NewSynapseMaxMillivolts int = 30
+const NewSynapseMaxMillivolts int = 100
 
 /*
 SynapseLearnRate is how much a synapse should get bumped when it is being reinforced.
@@ -87,7 +87,7 @@ the pattern. A network will get seeded with some initial cells to fire,
 then it will keep firing (stepping) while we record what gets fired.
 If it doesn't fizzle out on its own, it will stop at MaxPostFireSteps.
 */
-const MaxPostFireSteps uint8 = 20
+const MaxPostFireSteps int = 20
 
 /*
 FiringIterationsPerSample is how many times to fire an input cell.

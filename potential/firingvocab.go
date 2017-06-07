@@ -122,5 +122,17 @@ func (vocab *Vocabulary) SaveToFile(filepath string) error {
 	if err != nil {
 		return err
 	}
-	return ioutil.WriteFile(filepath, []byte(d), os.ModePerm)
+	return ioutil.WriteFile(filepath, d, os.ModePerm)
+}
+
+func (vocab *Vocabulary) printInputs() {
+	for k, v := range vocab.Inputs {
+		fmt.Println("Input:", k, v)
+	}
+}
+
+func (vocab *Vocabulary) printOutputs() {
+	for k, v := range vocab.Outputs {
+		fmt.Println("Output:", k, v)
+	}
 }

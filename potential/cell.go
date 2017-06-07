@@ -160,3 +160,12 @@ func (network *Network) PruneCell(cellID CellID) {
 	network.Cells[cellID] = nil
 	network.cellMux.Unlock()
 }
+
+/*
+postRefractoryReset does things that happen after a cell has been through
+the refractory period after it fired.
+*/
+func (cell *Cell) postRefractoryReset() {
+	cell.activating = false
+	cell.Voltage = laws.CellRestingVoltage
+}

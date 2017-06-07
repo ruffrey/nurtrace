@@ -206,7 +206,13 @@ func Train(masterVocab *Vocabulary, isRemoteWorkerWithTag string) {
 	for {
 		select {
 		case vocab := <-chSynchVocab:
+			fmt.Println("masterVocab.Outputs BEFORE")
+			masterVocab.printOutputs()
+			fmt.Println("--------")
 			mergeAllOutputs(masterVocab.Outputs, vocab.Outputs)
+			fmt.Println("masterVocab.Outputs AFTER")
+			masterVocab.printOutputs()
+			fmt.Println("--------")
 
 			oDiff := DiffNetworks(masterVocab.Net, vocab.Net)
 			ApplyDiff(oDiff, masterVocab.Net)

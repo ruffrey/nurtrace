@@ -46,7 +46,6 @@ func (network *Network) Step() (hasMore bool) {
 	voltageTallies := make(map[CellID]*firingGroup)
 
 	// tally up all the synapse voltage results they will have on the cells
-	// fmt.Println("nextSynapsesToActivate=", len(network.nextSynapsesToActivate))
 	for _, syn := range network.Synapses {
 		if !syn.fireNextRound {
 			continue
@@ -91,9 +90,8 @@ func (network *Network) Step() (hasMore bool) {
 
 	// for the cells from the last step, make them fire-able again
 	for cellID, cell := range network.Cells {
-		cell.Voltage = laws.CellRestingVoltage
 		if cell.activating {
-			cell.activating = false
+			cell.postRefractoryReset()
 		} else if nextCellResets[CellID(cellID)] {
 			cell.activating = true
 		}

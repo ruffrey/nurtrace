@@ -150,16 +150,13 @@ func (network *Network) RandomCellKey() (randCellID CellID) {
 /*
 ResetForTraining resets transient properties on the network to their base
 resting state.
-
-DOES NOT reset voltage or activation history; this is part of the network's
-memory at work.
 */
 func (network *Network) ResetForTraining() {
 	for _, cell := range network.Cells {
 		if cell == nil {
 			continue
 		}
-		cell.activating = false
+		cell.postRefractoryReset()
 		cell.WasFired = false
 	}
 	for _, synapse := range network.Synapses {
