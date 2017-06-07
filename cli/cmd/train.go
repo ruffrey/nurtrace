@@ -78,7 +78,7 @@ func Train(networkInputFile, networkSaveFile, vocabSaveFile, testDataFile, doPro
 	go func() {
 		<-c
 		now := strconv.FormatInt(time.Now().UTC().UnixNano(), 10)
-		err = vocab.SaveToFile(vocabSaveFile)
+		err = vocab.SaveToFile("vocab_" + now + ".json")
 		if err != nil {
 			fmt.Println("Failed saving vocab")
 			fmt.Println(err)
