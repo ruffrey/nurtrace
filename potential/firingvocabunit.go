@@ -61,21 +61,6 @@ func (vu *VocabUnit) InitRandomInputs(network *Network) {
 	}
 }
 
-/*
-expandInputs expands an input firing pattern by a set number of cells and uses
-an excitatory synapse to link them.
-*/
-func expandInputs(network *Network, fp FiringPattern) {
-	for i := 0; i < laws.InputCellDifferentiationCount; i++ {
-		preCell := randCellFromFP(fp)
-		newCell := NewCell(network)
-		newSynapse := network.linkCells(preCell, newCell.ID)
-		// excitatory
-		newSynapse.Millivolts = int16(math.Abs(float64(newSynapse.Millivolts)))
-		// fp[newCell.ID] = true
-	}
-}
-
 func randCellFromFP(cellMap FiringPattern) (randCellID CellID) {
 	iterate := randomIntBetween(0, len(cellMap)-1)
 	i := 0
@@ -90,11 +75,29 @@ func randCellFromFP(cellMap FiringPattern) (randCellID CellID) {
 }
 
 /*
+expandInputs expands an input firing pattern by a set number of cells and uses
+an excitatory synapse to link them.
+*/
+func expandInputs(network *Network, fp FiringPattern) {
+	for i := 0; i < laws.InputCellDifferentiationCount; i++ {
+		preCell1 := randCellFromFP(fp)
+		preCell2 := randCellFromFP(fp)
+		newCell := NewCell(network)
+
+		newSynapse1 := network.linkCells(preCell1, newCell.ID)
+		newSynapse2 := network.linkCells(preCell2, newCell.ID)
+		// excitatory
+		newSynapse1.Millivolts = int16(math.Abs(float64(newSynapse1.Millivolts)))
+		newSynapse2.Millivolts = int16(math.Abs(float64(newSynapse2.Millivolts)))
+		// fp[newCell.ID] = true
+	}
+}
+
+/*
 expandOutputs expands an output firing pattern by adding more INHIBITORY
 synapses to new cells that are attached to random cells in its map.
 */
-func expandOutputs(network *Network, noiseLevel float64, fp FiringPattern) {
-	noisyCellsToAdd := int(math.Ceil(noiseLevel * float64(len(fp))))
+func expandOutputs(network *Network, noisyCellsToAdd int, fp FiringPattern) {
 	for i := 0; i < noisyCellsToAdd; i++ {
 		preCell := randCellFromFP(fp)
 		newSynapse := network.linkCells(preCell, NewCell(network).ID)

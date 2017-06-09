@@ -87,7 +87,9 @@ The Inputs should already be setup, before training. However the Outputs
 will change, so they should be merged along with the network merge.
 */
 func Train(masterVocab *Vocabulary, isRemoteWorkerWithTag string) {
-	shouldDedupe := isRemoteWorkerWithTag == ""
+	// TODO: deduping is turned off because of #40
+	shouldDedupe := false
+	// shouldDedupe := isRemoteWorkerWithTag == ""
 	if shouldDedupe {
 		isRemoteWorkerWithTag = "<local>"
 	}
@@ -206,13 +208,7 @@ func Train(masterVocab *Vocabulary, isRemoteWorkerWithTag string) {
 	for {
 		select {
 		case vocab := <-chSynchVocab:
-			fmt.Println("masterVocab.Outputs BEFORE")
-			masterVocab.printOutputs()
-			fmt.Println("--------")
 			mergeAllOutputs(masterVocab.Outputs, vocab.Outputs)
-			fmt.Println("masterVocab.Outputs AFTER")
-			masterVocab.printOutputs()
-			fmt.Println("--------")
 
 			oDiff := DiffNetworks(masterVocab.Net, vocab.Net)
 			ApplyDiff(oDiff, masterVocab.Net)
