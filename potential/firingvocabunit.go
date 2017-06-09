@@ -100,7 +100,8 @@ synapses to new cells that are attached to random cells in its map.
 func expandOutputs(network *Network, noisyCellsToAdd int, fp FiringPattern) {
 	for i := 0; i < noisyCellsToAdd; i++ {
 		preCell := randCellFromFP(fp)
-		newSynapse := network.linkCells(preCell, NewCell(network).ID)
+		newCell := NewCell(network)
+		newSynapse := network.linkCells(preCell, newCell.ID)
 		// inhibitory
 		newSynapse.Millivolts = -int16(math.Abs(float64(newSynapse.Millivolts)))
 	}

@@ -87,7 +87,7 @@ the pattern. A network will get seeded with some initial cells to fire,
 then it will keep firing (stepping) while we record what gets fired.
 If it doesn't fizzle out on its own, it will stop at MaxPostFireSteps.
 */
-const MaxPostFireSteps int = 5
+const MaxPostFireSteps int = 4
 
 /*
 FiringIterationsPerSample is how many times to fire an input cell.
@@ -107,7 +107,7 @@ const PatternSimilarityLimit float64 = 0.7
 InitialCellCountPerVocabUnit is how many cells will represent a single
 VocabUnit, to start off.
 */
-const InitialCellCountPerVocabUnit int = 12
+const InitialCellCountPerVocabUnit int = 6
 
 /*
 InputCellDifferentiationCount is the number of cells to add in order to

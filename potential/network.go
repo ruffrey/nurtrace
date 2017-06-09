@@ -137,9 +137,7 @@ that tracks all the keys in an array of integers.
 */
 
 /*
-RandomCellKey gets the key of a random one in the map.
-
-This is pretty slow, as it turns out.
+RandomCellKey gets the key of a random one in the array.
 */
 func (network *Network) RandomCellKey() (randCellID CellID) {
 	i := randomIntBetween(0, len(network.Cells)-1)

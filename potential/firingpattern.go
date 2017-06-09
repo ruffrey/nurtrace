@@ -196,9 +196,8 @@ func RunFiringPatternTraining(vocab *Vocabulary, tag string) {
 		// fire the input a bunch of times. after that we can consider
 		// the output pattern as fired. set the output pattern.
 		inputs := vocab.Inputs[s.input].InputCells
-		for i := 0; i < laws.FiringIterationsPerSample; i++ {
-			finalPattern = mergeFiringPatterns(finalPattern, FireNetworkUntilDone(vocab.Net, inputs))
-		}
+		finalPattern = mergeFiringPatterns(finalPattern, FireNetworkUntilDone(vocab.Net, inputs))
+
 		if _, exists := vocab.Outputs[s.output]; !exists {
 			vocab.Outputs[s.output] = NewOutputCollection(s.output)
 		}
@@ -235,11 +234,11 @@ func RunFiringPatternTraining(vocab *Vocabulary, tag string) {
 				// change input cell pattern
 				expandInputs(vocab.Net, vocab.Inputs[s.input].InputCells)
 				// change this output pattern
-				noisyCellsToAdd := int(math.Ceil((ratio - laws.PatternSimilarityLimit) * float64(len(o.FirePattern))))
+				noisyCellsToAdd := int(math.Ceil((ratio - laws.PatternSimilarityLimit) * math.Abs(float64(len(o.FirePattern)-len(unsharedFiringPattern)))))
 
 				expandOutputs(vocab.Net, noisyCellsToAdd, unsharedFiringPattern)
 				// now re-run this one
-				fmt.Println(tag, "RERUN:", lastOutput.Value, "vs", o.Value, "is", ratio)
+				fmt.Println(tag, "RERUN:", lastOutput.Value, "vs", o.Value, "is", ratio, "added", noisyCellsToAdd, "cells")
 			}
 		}
 		if atLeastOneWasTooSimilar {
