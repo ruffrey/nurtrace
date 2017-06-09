@@ -34,13 +34,13 @@ func Test_FiringPattern(t *testing.T) {
 		cells := make(FiringPattern)
 		cells[a.ID] = 1
 		result := FireNetworkUntilDone(network, cells)
-		fmt.Println(a.activating, b.activating, c.activating)
+		fmt.Println(a.WasFired, b.WasFired, c.WasFired)
 		assert.Equal(t, 3, len(result), "wrong number of cells fired")
 		fmt.Println("result=", result)
 		assert.Equal(t, uint16(0), result[d.ID], "should not have fired this cell")
-		assert.Equal(t, uint16(10), result[a.ID], "did not fire cell: a-0")
-		assert.Equal(t, uint16(10), result[b.ID], "did not fire cell: b-1")
-		assert.Equal(t, uint16(10), result[c.ID], "did not fire cell: c-2")
+		assert.Equal(t, uint16(3), result[a.ID], "did not fire cell: a-0")
+		assert.Equal(t, uint16(4), result[b.ID], "did not fire cell: b-1")
+		assert.Equal(t, uint16(3), result[c.ID], "did not fire cell: c-2")
 	})
 }
 
@@ -58,7 +58,8 @@ func Test_FiringDiffRatio(t *testing.T) {
 		fp2[CellID(1)] = 7
 
 		diff := DiffFiringPatterns(fp1, fp2)
-		assert.Equal(t, 1.0, diff)
+		r, _ := diff.Ratio()
+		assert.Equal(t, 1.0, r)
 	})
 	t.Run("totally different firing patterns have ratio of 0", func(t *testing.T) {
 		fp1 := make(FiringPattern)
@@ -71,7 +72,8 @@ func Test_FiringDiffRatio(t *testing.T) {
 		fp2[CellID(99)] = 4
 
 		diff := DiffFiringPatterns(fp1, fp2)
-		assert.Equal(t, 0.0, diff)
+		r, _ := diff.Ratio()
+		assert.Equal(t, 0.0, r)
 	})
 	t.Run("radio calculates the number of unrepresented fires to represented fires", func(t *testing.T) {
 		fp1 := make(FiringPattern)
@@ -89,10 +91,10 @@ func Test_FiringDiffRatio(t *testing.T) {
 		fp1[CellID(2)] = 4
 
 		diff := DiffFiringPatterns(fp1, fp2)
-
+		r, _ := diff.Ratio()
 		// (1 + 2 + 4) / (3 + 14 + 16 + 4)
 		tot := 2 + 16 + 4.0
-		assert.Equal(t, (tot-(1+2+4.0))/tot, diff)
+		assert.Equal(t, (tot-(1+2+4.0))/tot, r)
 	})
 }
 
