@@ -34,6 +34,31 @@ func Test_NewCell(t *testing.T) {
 	})
 }
 
+func Test_CellFireAP(t *testing.T) {
+	t.Run("firing cell results in its synapses having the fire-next flag set", func(t *testing.T) {
+		network := NewNetwork()
+		cell := NewCell(network)
+		receiverCell := NewCell(network)
+
+		// two synapses from cell to receiver
+		network.linkCells(cell.ID, receiverCell.ID)
+		network.linkCells(cell.ID, receiverCell.ID)
+
+		// pretest
+		assert.Equal(t, false, network.GetSyn(0).fireNextRound,
+			"bad initial fire state of synapse")
+		assert.Equal(t, false, network.GetSyn(1).fireNextRound,
+			"bad initial fire state of synapse")
+
+		// test
+		network.GetCell(0).FireActionPotential()
+		assert.Equal(t, true, network.GetSyn(0).fireNextRound,
+			"synapse should be flagged for firing next round")
+		assert.Equal(t, true, network.GetSyn(1).fireNextRound,
+			"synapse should be flagged for firing next round")
+	})
+}
+
 func Test_CellStringer(t *testing.T) {
 	t.Run("String works without crashing", func(t *testing.T) {
 		network := NewNetwork()

@@ -36,18 +36,7 @@ type Network struct {
 	Cells        []*Cell
 	CellIDCursor int
 	cellMux      sync.Mutex
-
-	// private
-
-	// nextSynapsesToActivate will fire their axon cell on the next step. always true
-	nextSynapsesToActivate map[SynapseID]bool
-
-	resetCellsOnNextStep map[CellID]bool
 }
-
-// storeBlockSize is how much to increase the fixed array size of the store
-// (Cells or Synapses)
-const storeBlockSize = 5000
 
 /*
 NewNetwork is a constructor that, which also happens to reset the random number generator
@@ -58,8 +47,6 @@ func NewNetwork() *Network {
 		Disabled: false,
 		Synapses: make([]*Synapse, 0),
 		Cells:    make([]*Cell, 0),
-		nextSynapsesToActivate: make(map[SynapseID]bool),
-		resetCellsOnNextStep:   make(map[CellID]bool),
 	}
 	return &n
 }
@@ -163,20 +150,19 @@ func (network *Network) RandomCellKey() (randCellID CellID) {
 /*
 ResetForTraining resets transient properties on the network to their base
 resting state.
-
-DOES NOT reset voltage or activation history; this is part of the network's
-memory at work.
 */
 func (network *Network) ResetForTraining() {
 	for _, cell := range network.Cells {
 		if cell == nil {
 			continue
 		}
-		cell.activating = false
+		cell.postRefractoryReset()
 		cell.WasFired = false
 	}
-	network.nextSynapsesToActivate = make(map[SynapseID]bool)
-	network.resetCellsOnNextStep = make(map[CellID]bool)
+	for _, synapse := range network.Synapses {
+		synapse.fireNextRound = false
+	}
+
 	network.Disabled = false
 }
 

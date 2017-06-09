@@ -32,7 +32,7 @@ const NewSynapseMinMillivolts int = -30
 NewSynapseMaxMillivolts is the bottom range of how much a new synapse will
 have for the `Millivolts` property.
 */
-const NewSynapseMaxMillivolts int = 30
+const NewSynapseMaxMillivolts int = 60
 
 /*
 SynapseLearnRate is how much a synapse should get bumped when it is being reinforced.
@@ -53,7 +53,7 @@ const CellRestingVoltage int16 = -10
 /*
 CellFireVoltageThreshold represents the millivolts where an action potential will result.
 */
-const CellFireVoltageThreshold int = 100
+const CellFireVoltageThreshold int = 240
 
 /*
 DefaultNeuronSynapses is the number of random synapses a new neuron will get.
@@ -87,14 +87,14 @@ the pattern. A network will get seeded with some initial cells to fire,
 then it will keep firing (stepping) while we record what gets fired.
 If it doesn't fizzle out on its own, it will stop at MaxPostFireSteps.
 */
-const MaxPostFireSteps uint8 = 20
+const MaxPostFireSteps int = 5
 
 /*
 FiringIterationsPerSample is how many times to fire an input cell.
 Firing once may not cause much firing in the network. So firing
 10 or 100+ times in a row will excite many pathways.
 */
-const FiringIterationsPerSample int = 10
+const FiringIterationsPerSample int = 5
 
 /*
 PatternSimilarityLimit represents the percentage/ratio of
