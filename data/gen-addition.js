@@ -1,6 +1,6 @@
 /*
 [{
-    "CategoryName": "12",
+    "ExpectedOutput": "12",
     "InputText": "4+8"
 }]
 */
@@ -19,12 +19,12 @@ for (let i = 0; i < desiredTotal; i++) {
     const a = rand();
     const b = rand();
     const testCase = {
-        CategoryName: `${a+b}`,
+        ExpectedOutput: `${a+b}`,
         InputText: `${a}+${b}`
     };
     const input = testCase.InputText.split('');
     assert.equal(
-        parseInt(testCase.CategoryName, 10),
+        parseInt(testCase.ExpectedOutput, 10),
         parseInt(input[0], 10) + parseInt(input[2]),
         "Failed with test case " + JSON.stringify(testCase, null, 2)
     );

@@ -1,42 +1,42 @@
 [
     {
-        "CategoryName": "zero",
+        "ExpectedOutput": "zero",
         "InputText": "0"
     },
     {
-        "CategoryName": "one",
+        "ExpectedOutput": "one",
         "InputText": "1"
     },
     {
-        "CategoryName": "two",
+        "ExpectedOutput": "two",
         "InputText": "2"
     },
     {
-        "CategoryName": "three",
+        "ExpectedOutput": "three",
         "InputText": "3"
     },
     {
-        "CategoryName": "four",
+        "ExpectedOutput": "four",
         "InputText": "4"
     },
     {
-        "CategoryName": "five",
+        "ExpectedOutput": "five",
         "InputText": "5"
     },
     {
-        "CategoryName": "six",
+        "ExpectedOutput": "six",
         "InputText": "6"
     },
     {
-        "CategoryName": "seven",
+        "ExpectedOutput": "seven",
         "InputText": "7"
     },
     {
-        "CategoryName": "eight",
+        "ExpectedOutput": "eight",
         "InputText": "8"
     },
     {
-        "CategoryName": "nine",
+        "ExpectedOutput": "nine",
         "InputText": "9"
     }
 ]

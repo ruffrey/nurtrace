@@ -1,6 +1,8 @@
 package potential
 
 import (
+	"encoding/json"
+	"fmt"
 	"strings"
 )
 
@@ -14,15 +16,29 @@ func Sample(seedText string, vocab *Vocabulary) (output string) {
 	for _, char := range characters {
 		charArray = append(charArray, interface{}(char))
 	}
-	// produce a set of samples - []sample
-	vocab.AddTrainingData(charArray)
+	// do some shenanigans to get data in the right format
+	unit := UnitGroup{InputText: seedText}
+	unitArray := make([]*UnitGroup, 1)
+	unitArray[0] = &unit
+	unitJSON, err := json.Marshal(unitArray)
+	if err != nil {
+		fmt.Println(
+			"Failed parsing UnitGroup with seedText into JSON. seedText=",
+			seedText)
+		panic(err)
+	}
+
+	err = vocab.AddTrainingData(unitJSON)
+	if err != nil {
+		panic(err)
+	}
 	output = ""
 	// fire the samples, not resetting in between (?)
 	for _, s := range vocab.Samples {
 		// fire the input a bunch of times. after that we can consider
 		// the output pattern as fired. set the output pattern.
-		inputs := vocab.Inputs[s.input].InputCells
-		finalPattern := FireNetworkUntilDone(vocab.Net, inputs)
+		cellsToFireForInputValues := GetInputPatternForInputs(vocab, s.inputs)
+		finalPattern := FireNetworkUntilDone(vocab.Net, cellsToFireForInputValues)
 		closest := FindClosestOutputCollection(finalPattern, vocab)
 		if closest != nil {
 			output += string(closest.Value)

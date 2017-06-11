@@ -39,7 +39,7 @@ func Test_FiringPattern(t *testing.T) {
 		fmt.Println("result=", result)
 		assert.Equal(t, uint16(0), result[d.ID], "should not have fired this cell")
 		assert.Equal(t, uint16(3), result[a.ID], "did not fire cell: a-0")
-		assert.Equal(t, uint16(4), result[b.ID], "did not fire cell: b-1")
+		assert.Equal(t, uint16(3), result[b.ID], "did not fire cell: b-1")
 		assert.Equal(t, uint16(3), result[c.ID], "did not fire cell: c-2")
 	})
 }

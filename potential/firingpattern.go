@@ -169,6 +169,26 @@ func DiffFiringPatterns(fp1, fp2 FiringPattern) *FiringPatternDiff {
 }
 
 /*
+GetInputPatternForInputs accepts an array of input characters and
+returns a merged firing pattern to be fired for that entire group
+of inputs and their underlying cells.
+
+For example, given the inputs `[]{"a", "b", "c"}` it will return the
+input cells to be fired for these three input values.
+*/
+func GetInputPatternForInputs(vocab *Vocabulary, inputs []InputValue) FiringPattern {
+	cellsToFireForInputValues := make(FiringPattern)
+	for _, inputChar := range inputs {
+		cellsForInputChar := vocab.Inputs[inputChar]
+
+		cellsToFireForInputValues = mergeFiringPatterns(
+			cellsToFireForInputValues, cellsForInputChar.InputCells)
+	}
+
+	return cellsToFireForInputValues
+}
+
+/*
 RunFiringPatternTraining trains the network using the training samples
 in the vocab, until training samples are differentiated from one another.
 
@@ -176,71 +196,69 @@ The vocab should already be properly initiated and the network should be
 set before running this.
 */
 func RunFiringPatternTraining(vocab *Vocabulary, tag string) {
-	vocab.Net.ResetForTraining()
-
 	tots := len(vocab.Samples)
 	fmt.Println(tag, "Running samples", tots)
 
-	for sampleIndex := 0; sampleIndex < len(vocab.Samples); sampleIndex++ {
-		s := vocab.Samples[sampleIndex]
-		finalPattern := make(FiringPattern)
+	for sampleIndex, s := range vocab.Samples {
+		var sampleFirePattern FiringPattern
 
-		if sampleIndex%laws.TrainingResetIteration == 0 {
-			// Recalibrating outputs
-			if sampleIndex != 0 {
-				fmt.Println(tag, "sample", sampleIndex, "/", tots)
+		// merge the inputs first
+		cellsToFireForInputValues := GetInputPatternForInputs(vocab, s.inputs)
 
-				// Ensure none of the other outputs are too similar.
-				var lastOutput *OutputCollection
-				i := -1
-				for _, o := range vocab.Outputs {
-					isThisOne := s.output == o.Value
-					if isThisOne {
-						continue
-					}
-					i++
-					if i < 1 {
-						lastOutput = o
-						continue
-					}
-
-					diff := DiffFiringPatterns(o.FirePattern, lastOutput.FirePattern)
-					ratio, unsharedFiringPattern := diff.Ratio()
-					// fmt.Println(tag, "Ratio:", lastOutput.Value, "vs", o.Value, "is", ratio)
-					tooSimilar := ratio > laws.PatternSimilarityLimit
-					if tooSimilar {
-						// change input cell pattern
-						expandInputs(vocab.Net, vocab.Inputs[s.input].InputCells)
-						// change this output pattern
-						// noisyCellsToAdd := int(math.Ceil((ratio - laws.PatternSimilarityLimit) * math.Abs(float64(len(o.FirePattern)-len(unsharedFiringPattern)))))
-
-						expandOutputs(vocab.Net, unsharedFiringPattern)
-						// now re-run this one
-						fmt.Println(tag, "EXPAND:", lastOutput.Value, "vs", o.Value, "is", ratio)
-					}
-				}
-
-				vocab.Net.PrintTotals()
-				vocab.Net.ResetForTraining()
-			}
-		}
+		vocab.Net.ResetForTraining()
 
 		// Training
 
-		// fire the input a bunch of times. after that we can consider
+		// fire the inputs a bunch of times. after that we can consider
 		// the output pattern as fired. set the output pattern.
-		inputs := vocab.Inputs[s.input].InputCells
-		finalPattern = mergeFiringPatterns(finalPattern, FireNetworkUntilDone(vocab.Net, inputs))
+		sampleFirePattern = FireNetworkUntilDone(vocab.Net, cellsToFireForInputValues)
 
-		if _, exists := vocab.Outputs[s.output]; !exists {
-			vocab.Outputs[s.output] = NewOutputCollection(s.output)
-		}
 		// the output value is now represented by what we just
 		// created above, merged with what we had before.
 		originalFP := vocab.Outputs[s.output].FirePattern
 		vocab.Outputs[s.output] = &OutputCollection{
 			Value:       s.output,
-			FirePattern: mergeFiringPatterns(originalFP, finalPattern),
+			FirePattern: mergeFiringPatterns(originalFP, sampleFirePattern),
+		}
+
+		// Ensure none of the other outputs are too similar.
+		var lastOutput *OutputCollection
+		i := -1
+		for _, o := range vocab.Outputs {
+			isThisOne := s.output == o.Value
+			if isThisOne {
+				continue
+			}
+			i++
+			if i < 1 {
+				lastOutput = o
+				continue
+			}
+
+			diff := DiffFiringPatterns(o.FirePattern, lastOutput.FirePattern)
+			ratio, unsharedFiringPattern := diff.Ratio()
+			// fmt.Println(tag, "Ratio:", lastOutput.Value, "vs", o.Value, "is", ratio)
+			tooSimilar := ratio > laws.PatternSimilarityLimit
+			if tooSimilar {
+				// change input cell pattern
+				expandInputs(vocab.Net, cellsToFireForInputValues)
+				// change this output pattern
+				// noisyCellsToAdd := int(math.Ceil((ratio - laws.PatternSimilarityLimit) * math.Abs(float64(len(o.FirePattern)-len(unsharedFiringPattern)))))
+
+				expandOutputs(vocab.Net, unsharedFiringPattern)
+				// now re-run this one
+				fmt.Println(tag, "EXPAND:", lastOutput.Value, "vs", o.Value, "is", ratio)
+			}
+		}
+
+		// sample is finished here, but provide an update on progress
+		shouldLog := sampleIndex%laws.TrainingResetIteration == 0
+		if shouldLog {
+			// Recalibrating outputs
+			if sampleIndex != 0 {
+				fmt.Println(tag, "sample", sampleIndex, "/", tots)
+				vocab.Net.PrintTotals()
+			}
 		}
 	}
 }
@@ -258,6 +276,7 @@ func FindClosestOutputCollection(patt FiringPattern, vocab *Vocabulary) (oc *Out
 	for _, outputCandidate := range vocab.Outputs {
 		r, _ := DiffFiringPatterns(outputCandidate.FirePattern, patt).Ratio()
 		isCloser := r > closestRatio
+		fmt.Println("Ratio check", outputCandidate.FirePattern, patt, r)
 		if isCloser {
 			closestRatio = r
 			oc = outputCandidate

@@ -6,7 +6,6 @@ import (
 	"os"
 	"os/signal"
 	"strconv"
-	"strings"
 	"syscall"
 	"time"
 
@@ -48,20 +47,17 @@ func Train(networkInputFile, networkSaveFile, vocabSaveFile, testDataFile, doPro
 	}
 	vocab.Net = network
 
-	fmt.Println("Reading test data file", testDataFile)
+	fmt.Println("Reading training data file", testDataFile)
 	testDataBytes, err := ioutil.ReadFile(testDataFile)
 	if err != nil {
-		fmt.Println("Unable to read test data file", testDataFile)
+		fmt.Println("Unable to read training data file", testDataFile, err)
 		return err
 	}
-
-	// for now, convert to string
-	sd := strings.Split(string(testDataBytes), "\n")
-	var td []interface{}
-	for _, line := range sd {
-		td = append(td, interface{}(line))
+	err = vocab.AddTrainingData(testDataBytes)
+	if err != nil {
+		fmt.Println("Failed adding training data", testDataFile, err)
+		return err
 	}
-	vocab.AddTrainingData(td)
 
 	// TODO: Workerfile
 

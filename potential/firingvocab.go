@@ -40,7 +40,7 @@ func NewVocabulary(network *Network) *Vocabulary {
 
 // sample is a training data sample
 type sample struct {
-	input  InputValue
+	inputs []InputValue
 	output OutputValue
 }
 
@@ -68,36 +68,64 @@ func CloneOutputs(outputs map[OutputValue]*OutputCollection) map[OutputValue]*Ou
 }
 
 /*
+UnitGroup is a basic training data item. A JSON array of these makes
+TrainingData.
+*/
+type UnitGroup struct {
+	InputText      string
+	ExpectedOutput string
+}
+
+/*
+TrainingData consists of an array of UnitGroups, and these would be
+stored as normal JSON. Users must supply this training data.
+*/
+type TrainingData []*UnitGroup
+
+/*
 AddTrainingData takes a group of units, such as a group of
 pixels, or a word, and breaks it into its smaller parts. Then it finds those
 corresponding smaller parts in the VocabUnit collection. It adds training
 samples for this also
 */
-func (vocab *Vocabulary) AddTrainingData(unitGroups []interface{}) {
-	var lastChar string
-	for _, inputGroup := range unitGroups {
-		groupParts := strings.Split(fmt.Sprint(inputGroup), "")
+func (vocab *Vocabulary) AddTrainingData(testDataBytes []byte) (err error) {
+	// for now, convert to string
+	td := make(TrainingData, 0)
+	err = json.Unmarshal(testDataBytes, &td)
+	if err != nil {
+		fmt.Println("Unable to parse training data JSON", err)
+		return err
+	}
+
+	for _, inputGroup := range td {
+		inputParts := strings.Split(fmt.Sprint(inputGroup.InputText), "")
+		var inputs []InputValue
+		output := OutputValue(inputGroup.ExpectedOutput)
 
 		// make sure there is an input for this character
-		for _, char := range groupParts {
+		for _, char := range inputParts {
 			_, exists := vocab.Inputs[InputValue(char)]
 			if !exists {
 				vu := NewVocabUnit(char)
 				vu.InitRandomInputs(vocab.Net)
 				vocab.Inputs[InputValue(char)] = vu
 			}
-			firstHasNoPreceedingPredictor := lastChar == ""
-			if firstHasNoPreceedingPredictor {
-				lastChar = char
-				continue
-			}
-			// preceeding group predicts this one
-			vocab.Samples = append(vocab.Samples, sample{
-				input:  InputValue(lastChar),
-				output: OutputValue(char),
-			})
+			inputs = append(inputs, InputValue(char))
 		}
+
+		// make sure output exists
+		if _, exists := vocab.Outputs[output]; !exists {
+			vocab.Outputs[output] = NewOutputCollection(output)
+		}
+
+		vocab.Samples = append(vocab.Samples, sample{
+			inputs,
+			output,
+		})
+
 	}
+
+	return nil
 }
 
 /*
