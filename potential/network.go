@@ -127,6 +127,19 @@ func randCellFromMap(cellMap map[CellID]bool) (randCellID CellID) {
 	return randCellID
 }
 
+func randSynapseFromMap(synapseMap map[SynapseID]bool) (randSynapseID SynapseID) {
+	iterate := randomIntBetween(0, len(synapseMap)-1)
+	i := 0
+	for k := range synapseMap {
+		if i == iterate {
+			randSynapseID = SynapseID(k)
+			break
+		}
+		i++
+	}
+	return randSynapseID
+}
+
 /*
 Methods for random map keys below select a random integer between 0 and the map length,
 then interate into the map that many times to find the map key we want.

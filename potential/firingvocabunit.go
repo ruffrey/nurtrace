@@ -81,28 +81,32 @@ an excitatory synapse to link them.
 func expandInputs(network *Network, fp FiringPattern) {
 	for i := 0; i < laws.InputCellDifferentiationCount; i++ {
 		preCell1 := randCellFromFP(fp)
-		preCell2 := randCellFromFP(fp)
 		newCell := NewCell(network)
 
 		newSynapse1 := network.linkCells(preCell1, newCell.ID)
-		newSynapse2 := network.linkCells(preCell2, newCell.ID)
 		// excitatory
 		newSynapse1.Millivolts = int16(math.Abs(float64(newSynapse1.Millivolts)))
-		newSynapse2.Millivolts = int16(math.Abs(float64(newSynapse2.Millivolts)))
-		// fp[newCell.ID] = true
 	}
 }
 
 /*
-expandOutputs expands an output firing pattern by adding more INHIBITORY
-synapses to new cells that are attached to random cells in its map.
+expandOutputs expands an output firing pattern by adding more EXCITATORY
+synapses from the firting pattern to random cells.
 */
-func expandOutputs(network *Network, noisyCellsToAdd int, fp FiringPattern) {
-	for i := 0; i < noisyCellsToAdd; i++ {
+func expandOutputs(network *Network, fp FiringPattern) {
+	for i := 0; i < laws.InputCellDifferentiationCount; i++ {
 		preCell := randCellFromFP(fp)
-		newCell := NewCell(network)
-		newSynapse := network.linkCells(preCell, newCell.ID)
-		// inhibitory
-		newSynapse.Millivolts = -int16(math.Abs(float64(newSynapse.Millivolts)))
+		newCellID := network.RandomCellKey()
+		newSynapse := network.linkCells(preCell, newCellID)
+		// excitatory
+		newSynapse.Millivolts = int16(math.Abs(float64(newSynapse.Millivolts)))
+
+		// also reinforce a random unshared synapse
+		anotherCell := network.GetCell(randCellFromFP(fp))
+		if len(anotherCell.AxonSynapses) != 0 {
+			randReinforceSynapse := randSynapseFromMap(anotherCell.AxonSynapses)
+
+			network.GetSyn(randReinforceSynapse).reinforce()
+		}
 	}
 }

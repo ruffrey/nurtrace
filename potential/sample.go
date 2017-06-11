@@ -16,7 +16,7 @@ func Sample(seedText string, vocab *Vocabulary) (output string) {
 	}
 	// produce a set of samples - []sample
 	vocab.AddTrainingData(charArray)
-
+	output = ""
 	// fire the samples, not resetting in between (?)
 	for _, s := range vocab.Samples {
 		// fire the input a bunch of times. after that we can consider
@@ -24,7 +24,9 @@ func Sample(seedText string, vocab *Vocabulary) (output string) {
 		inputs := vocab.Inputs[s.input].InputCells
 		finalPattern := FireNetworkUntilDone(vocab.Net, inputs)
 		closest := FindClosestOutputCollection(finalPattern, vocab)
-		output += string(closest.Value)
+		if closest != nil {
+			output += string(closest.Value)
+		}
 	}
 
 	// collect the firing pattern at each step
