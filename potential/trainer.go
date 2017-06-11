@@ -189,7 +189,7 @@ func Train(masterVocab *Vocabulary, isRemoteWorkerWithTag string) {
 			}
 
 			// normal local worker
-			RunFiringPatternTraining(vocab, isRemoteWorkerWithTag+" "+strconv.Itoa(thread))
+			RunFiringPatternTraining(vocab, isRemoteWorkerWithTag+"<"+strconv.Itoa(thread)+">")
 
 			fmt.Println(isRemoteWorkerWithTag,
 				"local thread", thread, "done")

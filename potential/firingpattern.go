@@ -211,15 +211,30 @@ func RunFiringPatternTraining(vocab *Vocabulary, tag string) {
 
 		// fire the inputs a bunch of times. after that we can consider
 		// the output pattern as fired. set the output pattern.
-		sampleFirePattern = FireNetworkUntilDone(vocab.Net, cellsToFireForInputValues)
+		for {
+			sampleFirePattern = FireNetworkUntilDone(vocab.Net, cellsToFireForInputValues)
+			nothingFired := len(sampleFirePattern) == 0
+			if nothingFired {
+				expandInputs(vocab.Net, cellsToFireForInputValues)
+				continue
+			}
+			// just runs once if things fired
+			break
+		}
 
 		// the output value is now represented by what we just
 		// created above, merged with what we had before.
 		originalFP := vocab.Outputs[s.output].FirePattern
+		// fmt.Println(tag, "Setting output fire pattern",
+		// 	s.output,
+		// 	sampleFirePattern)
 		vocab.Outputs[s.output] = &OutputCollection{
 			Value:       s.output,
 			FirePattern: mergeFiringPatterns(originalFP, sampleFirePattern),
 		}
+		// fmt.Println(tag, "Set output fire pattern",
+		// 	s.output,
+		// 	vocab.Outputs[s.output])
 
 		// Ensure none of the other outputs are too similar.
 		var lastOutput *OutputCollection
