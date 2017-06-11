@@ -101,7 +101,7 @@ PatternSimilarityLimit represents the percentage/ratio of
 similarity between two firing patterns before one (or both?) of them
 need to change.
 */
-const PatternSimilarityLimit float64 = 0.7
+const PatternSimilarityLimit float64 = 0.75
 
 /*
 InitialCellCountPerVocabUnit is how many cells will represent a single
