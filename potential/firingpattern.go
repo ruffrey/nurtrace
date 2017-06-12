@@ -115,10 +115,10 @@ type FiringPatternDiff struct {
 }
 
 /*
-Ratio returns the ratio of alike to non-alike fires in a diff, and also
+SimilarityRatio returns the ratio of alike to non-alike fires in a diff, and also
 gives the unshared map as a firing pattern for easier use.
 */
-func (fpdiff *FiringPatternDiff) Ratio() (float64, FiringPattern) {
+func (fpdiff *FiringPatternDiff) SimilarityRatio() (float64, FiringPattern) {
 	allUnshared := 0.0
 	fp := make(FiringPattern)
 	for cellID, fires := range fpdiff.unshared {
@@ -241,31 +241,47 @@ func RunFiringPatternTraining(vocab *Vocabulary, tag string) {
 		}
 	}
 
-	// Ensure none of the other outputs are too similar.
+	vocab.CheckAndReduceSimilarity(tag)
+}
 
-	var lastOutput *OutputCollection
-	for _, s := range vocab.Samples {
-		i := -1
-		for _, o := range vocab.Outputs {
-			isThisOne := s.output == o.Value
+/*
+CheckAndReduceSimilarity ensures none of the other outputs are too similar.
+
+Each output pattern is compared to all other output patterns.
+
+Argument `tag` is for logging.
+*/
+func (vocab *Vocabulary) CheckAndReduceSimilarity(tag string) {
+	alreadyCompared := make(map[string]bool)
+
+	for _, primary := range vocab.Outputs {
+		vocab.Net.ResetForTraining()
+		for _, secondary := range vocab.Outputs {
+			isThisOne := secondary.Value == primary.Value
 			if isThisOne {
 				continue
 			}
-			i++
-			if i < 1 {
-				lastOutput = o
+			var key string
+			sPri := string(primary.Value)
+			sSec := string(secondary.Value)
+			if primary.Value > secondary.Value {
+				key = sPri + sSec
+			} else {
+				key = sSec + sPri
+			}
+			if alreadyCompared[key] {
 				continue
 			}
+			alreadyCompared[key] = true
 
-			diff := DiffFiringPatterns(o.FirePattern, lastOutput.FirePattern)
-			ratio, unsharedFiringPattern := diff.Ratio()
-			// fmt.Println(tag, "Ratio:", lastOutput.Value, "vs", o.Value, "is", ratio)
+			diff := DiffFiringPatterns(primary.FirePattern, secondary.FirePattern)
+			ratio, unsharedFiringPattern := diff.SimilarityRatio()
 			tooSimilar := ratio > laws.PatternSimilarityLimit
 			if tooSimilar {
 				// change this output pattern
 				expandOutputs(vocab.Net, unsharedFiringPattern)
 				// now re-run this one
-				fmt.Println(tag, "EXPAND:", lastOutput.Value, "vs", o.Value, "is", ratio)
+				fmt.Println(tag, "EXPAND:", secondary.Value, "vs", primary.Value, "is", ratio)
 			}
 		}
 	}
@@ -282,7 +298,7 @@ This is useful for sampling.
 func FindClosestOutputCollection(patt FiringPattern, vocab *Vocabulary) (oc *OutputCollection) {
 	closestRatio := 0.0
 	for _, outputCandidate := range vocab.Outputs {
-		r, _ := DiffFiringPatterns(outputCandidate.FirePattern, patt).Ratio()
+		r, _ := DiffFiringPatterns(outputCandidate.FirePattern, patt).SimilarityRatio()
 		isCloser := r > closestRatio
 		if isCloser {
 			closestRatio = r

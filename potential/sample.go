@@ -10,7 +10,7 @@ import (
 Sample produces the raw string output based on seed text that was input
 by the user.
 */
-func Sample(seedText string, vocab *Vocabulary) (output string) {
+func Sample(seedText string, vocab *Vocabulary, maxLength int) (output string) {
 	characters := strings.Split(string(seedText), "")
 	var charArray []interface{}
 	for _, char := range characters {
@@ -42,6 +42,9 @@ func Sample(seedText string, vocab *Vocabulary) (output string) {
 		closest := FindClosestOutputCollection(finalPattern, vocab)
 		if closest != nil {
 			output += string(closest.Value)
+		}
+		if len(output) >= maxLength {
+			break
 		}
 	}
 

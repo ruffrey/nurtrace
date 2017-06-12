@@ -7,7 +7,7 @@ import (
 )
 
 // Sample uses a pretrained network to generate a prediction based on user provided data.
-func Sample(networkSaveFile, vocabSaveFile string, seedText string) (err error) {
+func Sample(networkSaveFile, vocabSaveFile string, seedText string, sampleLength int) (err error) {
 	var vocab *potential.Vocabulary
 	vocab, err = potential.LoadVocabFromFile(vocabSaveFile)
 	if err != nil {
@@ -20,7 +20,7 @@ func Sample(networkSaveFile, vocabSaveFile string, seedText string) (err error) 
 	}
 
 	vocab.Net = network
-	output := potential.Sample(seedText, vocab)
+	output := potential.Sample(seedText, vocab, sampleLength)
 
 	fmt.Println(output)
 

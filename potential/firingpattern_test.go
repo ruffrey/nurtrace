@@ -59,7 +59,7 @@ func Test_FiringDiffRatio(t *testing.T) {
 		fp2[CellID(1)] = 7
 
 		diff := DiffFiringPatterns(fp1, fp2)
-		r, _ := diff.Ratio()
+		r, _ := diff.SimilarityRatio()
 		assert.Equal(t, 1.0, r)
 	})
 	t.Run("totally different firing patterns have ratio of 0", func(t *testing.T) {
@@ -73,7 +73,7 @@ func Test_FiringDiffRatio(t *testing.T) {
 		fp2[CellID(99)] = 4
 
 		diff := DiffFiringPatterns(fp1, fp2)
-		r, _ := diff.Ratio()
+		r, _ := diff.SimilarityRatio()
 		assert.Equal(t, 0.0, r)
 	})
 	t.Run("radio calculates the number of unrepresented fires to represented fires", func(t *testing.T) {
@@ -92,7 +92,7 @@ func Test_FiringDiffRatio(t *testing.T) {
 		fp1[CellID(2)] = 4
 
 		diff := DiffFiringPatterns(fp1, fp2)
-		r, _ := diff.Ratio()
+		r, _ := diff.SimilarityRatio()
 		// (1 + 2 + 4) / (3 + 14 + 16 + 4)
 		tot := 2 + 16 + 4.0
 		assert.Equal(t, (tot-(1+2+4.0))/tot, r)
@@ -149,6 +149,159 @@ func Test_RunFiringPatternTraining(t *testing.T) {
 
 		assert.NotEqual(t, 0, len(vocab.Outputs[OutputValue("4")].FirePattern))
 
-		assert.Equal(t, "4", Sample("1+3", vocab))
+		network.ResetForTraining()
+		assert.Equal(t, "4", Sample("1+3", vocab, 1))
+	})
+	t.Run("single input out-of-order will predict correctly", func(t *testing.T) {
+		// setup the network
+		network := NewNetwork()
+		network.GrowRandomNeurons(50, 10)
+		vocab := NewVocabulary(network)
+
+		// setup the training data
+		unit := UnitGroup{InputText: "1+3", ExpectedOutput: "4"}
+		unitArray := make([]*UnitGroup, 1)
+		unitArray[0] = &unit
+		unitJSON, err := json.Marshal(unitArray)
+		assert.Nil(t, err)
+
+		err = vocab.AddTrainingData(unitJSON)
+
+		assert.Nil(t, err)
+		assert.Equal(t, 1, len(vocab.Samples))
+		assert.Equal(t, 3, len(vocab.Inputs))
+		assert.Equal(t, 1, len(vocab.Outputs))
+		assert.Equal(t, 0, len(vocab.Outputs[OutputValue("4")].FirePattern))
+
+		RunFiringPatternTraining(vocab, "")
+
+		assert.NotEqual(t, 0, len(vocab.Outputs[OutputValue("4")].FirePattern))
+
+		network.ResetForTraining()
+		assert.Equal(t, "4", Sample("3+1", vocab, 1))
+	})
+	t.Run("two non-overlapping inputs and outputs will predict correctly", func(t *testing.T) {
+		// setup the network
+		network := NewNetwork()
+		network.GrowRandomNeurons(100, 10)
+		vocab := NewVocabulary(network)
+
+		// setup the training data
+		unit1 := UnitGroup{InputText: "1+3", ExpectedOutput: "4"}
+		unit2 := UnitGroup{InputText: "2+5", ExpectedOutput: "7"}
+
+		unitArray := make([]*UnitGroup, 2)
+		unitArray[0] = &unit1
+		unitArray[1] = &unit2
+		unitJSON, err := json.Marshal(unitArray)
+		assert.Nil(t, err)
+
+		err = vocab.AddTrainingData(unitJSON)
+		assert.Nil(t, err)
+
+		// prechecks
+		assert.Equal(t, 2, len(vocab.Samples))
+		assert.Equal(t, 5, len(vocab.Inputs))
+		assert.Equal(t, 2, len(vocab.Outputs))
+		assert.Equal(t, 0, len(vocab.Outputs[OutputValue("4")].FirePattern))
+		assert.Equal(t, 0, len(vocab.Outputs[OutputValue("7")].FirePattern))
+
+		RunFiringPatternTraining(vocab, "")
+
+		// tests
+		assert.NotEqual(t, 0, len(vocab.Outputs[OutputValue("4")].FirePattern))
+		assert.NotEqual(t, 0, len(vocab.Outputs[OutputValue("7")].FirePattern))
+
+		// most important checks
+		network.ResetForTraining()
+		assert.Equal(t, "4", Sample("1+3", vocab, 1))
+		network.ResetForTraining()
+		assert.Equal(t, "7", Sample("2+5", vocab, 1))
+	})
+	t.Run("two overlapping inputs and outputs will predict correctly", func(t *testing.T) {
+		// setup the network
+		network := NewNetwork()
+		network.GrowRandomNeurons(100, 16)
+		vocab := NewVocabulary(network)
+
+		// setup the training data
+		unit1 := UnitGroup{InputText: "2+3", ExpectedOutput: "5"}
+		unit2 := UnitGroup{InputText: "3+5", ExpectedOutput: "8"}
+
+		unitArray := make([]*UnitGroup, 2)
+		unitArray[0] = &unit1
+		unitArray[1] = &unit2
+		unitJSON, err := json.Marshal(unitArray)
+		assert.Nil(t, err)
+
+		err = vocab.AddTrainingData(unitJSON)
+		assert.Nil(t, err)
+
+		// prechecks
+		assert.Equal(t, 2, len(vocab.Samples))
+		assert.Equal(t, 4, len(vocab.Inputs))
+		assert.Equal(t, 2, len(vocab.Outputs))
+		assert.Equal(t, 0, len(vocab.Outputs[OutputValue("5")].FirePattern))
+		assert.Equal(t, 0, len(vocab.Outputs[OutputValue("8")].FirePattern))
+
+		RunFiringPatternTraining(vocab, "")
+
+		// tests
+		assert.NotEqual(t, 0, len(vocab.Outputs[OutputValue("5")].FirePattern))
+		assert.NotEqual(t, 0, len(vocab.Outputs[OutputValue("8")].FirePattern))
+
+		// most important checks
+		network.ResetForTraining()
+		assert.Equal(t, "5", Sample("2+3", vocab, 1))
+		network.ResetForTraining()
+		assert.Equal(t, "8", Sample("3+5", vocab, 1))
+	})
+	t.Run("mixed inputs and overlapping outputs will predict correctly", func(t *testing.T) {
+		// setup the network
+		network := NewNetwork()
+		network.GrowRandomNeurons(200, 20)
+		vocab := NewVocabulary(network)
+
+		// setup the training data
+		unit1 := UnitGroup{InputText: "2+3", ExpectedOutput: "5"}
+		unit2 := UnitGroup{InputText: "3+5", ExpectedOutput: "8"}
+		unit3 := UnitGroup{InputText: "1+5", ExpectedOutput: "6"}
+		unit4 := UnitGroup{InputText: "4+2", ExpectedOutput: "6"}
+
+		unitArray := make([]*UnitGroup, 4)
+		unitArray[0] = &unit1
+		unitArray[1] = &unit2
+		unitArray[2] = &unit3
+		unitArray[3] = &unit4
+		unitJSON, err := json.Marshal(unitArray)
+		assert.Nil(t, err)
+
+		err = vocab.AddTrainingData(unitJSON)
+		assert.Nil(t, err)
+
+		// prechecks
+		assert.Equal(t, 4, len(vocab.Samples))
+		assert.Equal(t, 6, len(vocab.Inputs))
+		assert.Equal(t, 3, len(vocab.Outputs))
+		assert.Equal(t, 0, len(vocab.Outputs[OutputValue("5")].FirePattern))
+		assert.Equal(t, 0, len(vocab.Outputs[OutputValue("8")].FirePattern))
+		assert.Equal(t, 0, len(vocab.Outputs[OutputValue("6")].FirePattern))
+
+		RunFiringPatternTraining(vocab, "")
+
+		// tests
+		assert.NotEqual(t, 0, len(vocab.Outputs[OutputValue("5")].FirePattern))
+		assert.NotEqual(t, 0, len(vocab.Outputs[OutputValue("8")].FirePattern))
+		assert.NotEqual(t, 0, len(vocab.Outputs[OutputValue("6")].FirePattern))
+
+		// most important checks
+		network.ResetForTraining()
+		assert.Equal(t, "5", Sample("2+3", vocab, 1))
+		network.ResetForTraining()
+		assert.Equal(t, "8", Sample("3+5", vocab, 1))
+		network.ResetForTraining()
+		assert.Equal(t, "6", Sample("1+5", vocab, 1))
+		network.ResetForTraining()
+		assert.Equal(t, "6", Sample("4+2", vocab, 1))
 	})
 }

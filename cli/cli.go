@@ -130,6 +130,10 @@ func main() {
 					Name:  "seed-file, f",
 					Usage: "Read raw seed data from a file, to activate network for prediction",
 				},
+				cli.IntFlag{
+					Name:  "length, l",
+					Usage: "Optional length of response to wait for, defaults to 10",
+				},
 			},
 			Before: func(c *cli.Context) error {
 				if c.Args().First() == "" {
@@ -149,6 +153,7 @@ func main() {
 				vocabSaveFile := c.String("vocab")
 				seed := c.String("seed")
 				seedFile := c.String("seed-file")
+				desiredLength := c.Int("length")
 				if seedFile != "" {
 					_seed, err := ioutil.ReadFile(seedFile)
 					if err != nil {
@@ -156,8 +161,11 @@ func main() {
 					}
 					seed = string(_seed)
 				}
+				if desiredLength >= 0 {
+					desiredLength = 10
+				}
 
-				return cmd.Sample(networkSaveFile, vocabSaveFile, seed)
+				return cmd.Sample(networkSaveFile, vocabSaveFile, seed, desiredLength)
 			},
 		},
 		{
