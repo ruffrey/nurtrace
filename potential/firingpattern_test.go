@@ -1,6 +1,7 @@
 package potential
 
 import (
+	"encoding/json"
 	"fmt"
 	"testing"
 
@@ -119,5 +120,35 @@ func Test_FiringPatternMerge(t *testing.T) {
 		assert.Equal(t, uint16(1), merged[CellID(0)])
 		assert.Equal(t, uint16(15), merged[CellID(1)])
 		assert.Equal(t, uint16(4), merged[CellID(2)])
+	})
+}
+
+func Test_RunFiringPatternTraining(t *testing.T) {
+	t.Run("single input and output will predict correctly", func(t *testing.T) {
+		// setup the network
+		network := NewNetwork()
+		network.GrowRandomNeurons(50, 10)
+		vocab := NewVocabulary(network)
+
+		// setup the training data
+		unit := UnitGroup{InputText: "1+3", ExpectedOutput: "4"}
+		unitArray := make([]*UnitGroup, 1)
+		unitArray[0] = &unit
+		unitJSON, err := json.Marshal(unitArray)
+		assert.Nil(t, err)
+
+		err = vocab.AddTrainingData(unitJSON)
+
+		assert.Nil(t, err)
+		assert.Equal(t, 1, len(vocab.Samples))
+		assert.Equal(t, 3, len(vocab.Inputs))
+		assert.Equal(t, 1, len(vocab.Outputs))
+		assert.Equal(t, 0, len(vocab.Outputs[OutputValue("4")].FirePattern))
+
+		RunFiringPatternTraining(vocab, "")
+
+		assert.NotEqual(t, 0, len(vocab.Outputs[OutputValue("4")].FirePattern))
+
+		assert.Equal(t, "4", Sample("1+3", vocab))
 	})
 }
