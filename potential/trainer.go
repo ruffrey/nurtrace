@@ -102,6 +102,7 @@ func Train(masterVocab *Vocabulary, isRemoteWorkerWithTag string) {
 	var remoteWorkerTotalWeights int
 	var err error
 	chSynchVocab := make(chan *Vocabulary, 1)
+	chSendBackVocab := make(chan *Vocabulary, 1)
 
 	if masterVocab.Workerfile != "" {
 		remoteWorkers, remoteWorkerWeights, remoteWorkerTotalWeights, err = readWorkerfile(masterVocab.Workerfile)
@@ -189,11 +190,11 @@ func Train(masterVocab *Vocabulary, isRemoteWorkerWithTag string) {
 			}
 
 			// normal local worker
-			RunFiringPatternTraining(vocab, isRemoteWorkerWithTag+"<"+strconv.Itoa(thread)+">")
+			thisTag := isRemoteWorkerWithTag + "<" + strconv.Itoa(thread) + ">"
+			RunFiringPatternTraining(vocab, chSynchVocab, chSendBackVocab, thisTag)
 
 			fmt.Println(isRemoteWorkerWithTag,
 				"local thread", thread, "done")
-			chSynchVocab <- vocab
 			fmt.Println(isRemoteWorkerWithTag,
 				"applied final diff on local thread", thread)
 			wg.Done()
@@ -220,6 +221,8 @@ func Train(masterVocab *Vocabulary, isRemoteWorkerWithTag string) {
 				}
 			}
 
+			masterVocab.CheckAndReduceSimilarity()
+			chSendBackVocab <- copyVocabWithNewSamples(masterVocab, vocab.Samples)
 			masterVocab.Net.PrintTotals()
 		case <-done:
 			if shouldDedupe {

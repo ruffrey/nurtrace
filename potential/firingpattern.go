@@ -31,7 +31,6 @@ func FireNetworkUntilDone(network *Network, seedCells FiringPattern) FiringPatte
 	for ; i < laws.FiringIterationsPerSample; i++ {
 		for cellID := range seedCells {
 			network.GetCell(cellID).FireActionPotential()
-			network.Cells[cellID].activating = true
 		}
 		network.Step()
 	}
@@ -45,6 +44,13 @@ func FireNetworkUntilDone(network *Network, seedCells FiringPattern) FiringPatte
 		hasMore := network.Step()
 		for _cellID, cell := range network.Cells {
 			cellID := CellID(_cellID)
+			// skip seed cells on first round because they will
+			// still be activating
+			if i == 0 {
+				if _, isSeedCell := seedCells[cellID]; isSeedCell {
+					continue
+				}
+			}
 			if cell.activating {
 				if _, ok := fp[cellID]; !ok {
 					fp[cellID] = 0
@@ -191,7 +197,7 @@ in the vocab, until training samples are differentiated from one another.
 The vocab should already be properly initiated and the network should be
 set before running this.
 */
-func RunFiringPatternTraining(vocab *Vocabulary, tag string) {
+func RunFiringPatternTraining(vocab *Vocabulary, chSynchVocab chan *Vocabulary, chSendBackVocab chan *Vocabulary, tag string) {
 	tots := len(vocab.Samples)
 	fmt.Println(tag, "Running samples", tots)
 
@@ -234,10 +240,10 @@ func RunFiringPatternTraining(vocab *Vocabulary, tag string) {
 				fmt.Println(tag, "sample", sampleIndex, "/", tots)
 				vocab.Net.PrintTotals()
 			}
+			chSynchVocab <- vocab
+			vocab = <-chSendBackVocab
 		}
 	}
-
-	vocab.CheckAndReduceSimilarity(tag)
 }
 
 /*
@@ -247,7 +253,7 @@ Each output pattern is compared to all other output patterns.
 
 Argument `tag` is for logging.
 */
-func (vocab *Vocabulary) CheckAndReduceSimilarity(tag string) {
+func (vocab *Vocabulary) CheckAndReduceSimilarity() {
 	alreadyCompared := make(map[string]bool)
 
 	for _, primary := range vocab.Outputs {
@@ -277,7 +283,7 @@ func (vocab *Vocabulary) CheckAndReduceSimilarity(tag string) {
 				// change this output pattern
 				expandOutputs(vocab.Net, unsharedFiringPattern)
 				// now re-run this one
-				fmt.Println(tag, "EXPAND:", secondary.Value, "vs", primary.Value, "is", ratio)
+				fmt.Println("EXPAND:", secondary.Value, "vs", primary.Value, "is", ratio)
 			}
 		}
 	}

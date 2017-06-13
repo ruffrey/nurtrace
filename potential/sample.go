@@ -33,8 +33,8 @@ func Sample(seedText string, vocab *Vocabulary, maxLength int) (output string) {
 		panic(err)
 	}
 	output = ""
-	// fire the samples, not resetting in between (?)
 	for _, s := range vocab.Samples {
+		vocab.Net.ResetForTraining()
 		// fire the input a bunch of times. after that we can consider
 		// the output pattern as fired. set the output pattern.
 		cellsToFireForInputValues := GetInputPatternForInputs(vocab, s.inputs)
