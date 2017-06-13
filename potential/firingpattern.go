@@ -244,6 +244,9 @@ func RunFiringPatternTraining(vocab *Vocabulary, chSynchVocab chan *Vocabulary, 
 			vocab = <-chSendBackVocab
 		}
 	}
+
+	chSynchVocab <- vocab
+	vocab = <-chSendBackVocab
 }
 
 /*
@@ -283,7 +286,7 @@ func (vocab *Vocabulary) CheckAndReduceSimilarity() {
 				// change this output pattern
 				expandOutputs(vocab.Net, unsharedFiringPattern)
 				// now re-run this one
-				fmt.Println("EXPAND:", secondary.Value, "vs", primary.Value, "is", ratio)
+				// fmt.Println("EXPAND:", secondary.Value, "vs", primary.Value, "is", ratio)
 			}
 		}
 	}
