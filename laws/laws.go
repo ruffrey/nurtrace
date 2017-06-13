@@ -58,7 +58,7 @@ const CellFireVoltageThreshold int = 240
 /*
 DefaultNeuronSynapses is the number of random synapses a new neuron will get.
 */
-const DefaultNeuronSynapses = 8
+const DefaultNeuronSynapses = 12
 
 /*
 GrowPathExpectedMinimumSynapses represents the maximum allowed number of

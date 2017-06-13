@@ -17,8 +17,9 @@ Glossary:
 type FiringPattern map[CellID]uint16
 
 /*
-FireNetworkUntilDone takes some seed cells then fires the network until
-it has no more firing, up to `laws.MaxPostFireSteps`.
+FireNetworkUntilDone takes some seed cells, fires them,
+then fires the network until it has no more firing - up
+to `laws.MaxPostFireSteps`.
 
 Consider that you may want to ResetForTraining before running this.
 */
@@ -26,22 +27,19 @@ func FireNetworkUntilDone(network *Network, seedCells FiringPattern) FiringPatte
 	i := 0
 	fp := make(FiringPattern)
 
-	// The first round takes the actual seeding
-	for cellID := range seedCells {
-		network.GetCell(cellID).FireActionPotential()
-		network.Cells[cellID].activating = true
-	}
-	// we ignore the seedCells
-	iterationsDone := false
-	for {
-		if i > laws.FiringIterationsPerSample {
-			iterationsDone = true
+	// Do the seeding
+	for ; i < laws.FiringIterationsPerSample; i++ {
+		for cellID := range seedCells {
+			network.GetCell(cellID).FireActionPotential()
+			network.Cells[cellID].activating = true
 		}
+		network.Step()
+	}
 
-		if iterationsDone {
-			if (i - laws.FiringIterationsPerSample) >= laws.MaxPostFireSteps {
-				break
-			}
+	i = 0
+	for {
+		if i >= laws.MaxPostFireSteps {
+			break
 		}
 
 		hasMore := network.Step()
@@ -55,10 +53,8 @@ func FireNetworkUntilDone(network *Network, seedCells FiringPattern) FiringPatte
 			}
 		}
 
-		if iterationsDone {
-			if !hasMore {
-				break
-			}
+		if !hasMore {
+			break
 		}
 
 		i++

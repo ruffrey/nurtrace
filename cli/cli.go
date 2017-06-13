@@ -161,7 +161,7 @@ func main() {
 					}
 					seed = string(_seed)
 				}
-				if desiredLength >= 0 {
+				if desiredLength <= 0 {
 					desiredLength = 10
 				}
 
