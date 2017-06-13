@@ -55,10 +55,26 @@ func NewOutputCollection(value OutputValue) *OutputCollection {
 /*
 InitRandomInputs chooses some input cells for the vocab unit.
 */
-func (vu *VocabUnit) InitRandomInputs(network *Network) {
+func (vu *VocabUnit) InitRandomInputs(vocab *Vocabulary) {
 	for i := 0; i < laws.InitialCellCountPerVocabUnit; i++ {
-		vu.InputCells[network.RandomCellKey()] = 1
+		var cellID CellID
+		for {
+			cellID = vocab.Net.RandomCellKey()
+			if !_isCellOnAnyInput(cellID, vocab.Inputs) {
+				break
+			}
+		}
+		vu.InputCells[cellID] = 1
 	}
+}
+
+func _isCellOnAnyInput(cellID CellID, inputs map[InputValue]*VocabUnit) bool {
+	for _, vu := range inputs {
+		if _, exists := vu.InputCells[cellID]; exists {
+			return true
+		}
+	}
+	return false
 }
 
 func randCellFromFP(cellMap FiringPattern) (randCellID CellID) {

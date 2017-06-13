@@ -107,7 +107,7 @@ func (vocab *Vocabulary) AddTrainingData(testDataBytes []byte) (err error) {
 			_, exists := vocab.Inputs[InputValue(char)]
 			if !exists {
 				vu := NewVocabUnit(char)
-				vu.InitRandomInputs(vocab.Net)
+				vu.InitRandomInputs(vocab)
 				vocab.Inputs[InputValue(char)] = vu
 			}
 			inputs = append(inputs, InputValue(char))
