@@ -145,11 +145,12 @@ func Test_RunFiringPatternTraining(t *testing.T) {
 		assert.Equal(t, 1, len(vocab.Outputs))
 		assert.Equal(t, 0, len(vocab.Outputs[OutputValue("4")].FirePattern))
 
-		in := make(chan *Vocabulary, 1)
-		out := make(chan *Vocabulary, 1)
+		in := make(chan *Vocabulary)
+		out := make(chan *Vocabulary)
 		go RunFiringPatternTraining(vocab, in, out, "")
 		vocab = <-in
 		out <- vocab
+		vocab = <-in
 
 		assert.NotEqual(t, 0, len(vocab.Outputs[OutputValue("4")].FirePattern))
 
@@ -177,11 +178,12 @@ func Test_RunFiringPatternTraining(t *testing.T) {
 		assert.Equal(t, 1, len(vocab.Outputs))
 		assert.Equal(t, 0, len(vocab.Outputs[OutputValue("4")].FirePattern))
 
-		in := make(chan *Vocabulary, 1)
-		out := make(chan *Vocabulary, 1)
+		in := make(chan *Vocabulary)
+		out := make(chan *Vocabulary)
 		go RunFiringPatternTraining(vocab, in, out, "")
 		vocab = <-in
 		out <- vocab
+		vocab = <-in
 
 		assert.NotEqual(t, 0, len(vocab.Outputs[OutputValue("4")].FirePattern))
 
@@ -214,11 +216,12 @@ func Test_RunFiringPatternTraining(t *testing.T) {
 		assert.Equal(t, 0, len(vocab.Outputs[OutputValue("4")].FirePattern))
 		assert.Equal(t, 0, len(vocab.Outputs[OutputValue("7")].FirePattern))
 
-		in := make(chan *Vocabulary, 1)
-		out := make(chan *Vocabulary, 1)
+		in := make(chan *Vocabulary)
+		out := make(chan *Vocabulary)
 		go RunFiringPatternTraining(vocab, in, out, "")
 		vocab = <-in
 		out <- vocab
+		vocab = <-in
 
 		// tests
 		assert.NotEqual(t, 0, len(vocab.Outputs[OutputValue("4")].FirePattern))
@@ -256,11 +259,12 @@ func Test_RunFiringPatternTraining(t *testing.T) {
 		assert.Equal(t, 0, len(vocab.Outputs[OutputValue("5")].FirePattern))
 		assert.Equal(t, 0, len(vocab.Outputs[OutputValue("8")].FirePattern))
 
-		in := make(chan *Vocabulary, 1)
-		out := make(chan *Vocabulary, 1)
+		in := make(chan *Vocabulary)
+		out := make(chan *Vocabulary)
 		go RunFiringPatternTraining(vocab, in, out, "")
 		vocab = <-in
 		out <- vocab
+		vocab = <-in
 
 		// tests
 		assert.NotEqual(t, 0, len(vocab.Outputs[OutputValue("5")].FirePattern))
@@ -303,11 +307,12 @@ func Test_RunFiringPatternTraining(t *testing.T) {
 		assert.Equal(t, 0, len(vocab.Outputs[OutputValue("8")].FirePattern))
 		assert.Equal(t, 0, len(vocab.Outputs[OutputValue("6")].FirePattern))
 
-		in := make(chan *Vocabulary, 1)
-		out := make(chan *Vocabulary, 1)
+		in := make(chan *Vocabulary)
+		out := make(chan *Vocabulary)
 		go RunFiringPatternTraining(vocab, in, out, "")
 		vocab = <-in
 		out <- vocab
+		vocab = <-in
 
 		// tests
 		assert.NotEqual(t, 0, len(vocab.Outputs[OutputValue("5")].FirePattern))

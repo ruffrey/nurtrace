@@ -101,8 +101,8 @@ func Train(masterVocab *Vocabulary, isRemoteWorkerWithTag string) {
 	var remoteWorkerWeights []int
 	var remoteWorkerTotalWeights int
 	var err error
-	chSynchVocab := make(chan *Vocabulary, 1)
-	chSendBackVocab := make(chan *Vocabulary, 1)
+	chSynchVocab := make(chan *Vocabulary)
+	chSendBackVocab := make(chan *Vocabulary)
 
 	if masterVocab.Workerfile != "" {
 		remoteWorkers, remoteWorkerWeights, remoteWorkerTotalWeights, err = readWorkerfile(masterVocab.Workerfile)
