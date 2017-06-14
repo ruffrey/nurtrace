@@ -76,6 +76,20 @@ func Test_FiringDiffRatio(t *testing.T) {
 		r, _ := diff.SimilarityRatio()
 		assert.Equal(t, 0.0, r)
 	})
+	t.Run("half the same firing patterns have 0.5 ratio", func(t *testing.T) {
+		fp1 := make(FiringPattern)
+		fp2 := make(FiringPattern)
+
+		fp1[CellID(0)] = 1
+		fp1[CellID(1)] = 1
+
+		fp2[CellID(0)] = 1
+		fp2[CellID(2)] = 0
+
+		diff := DiffFiringPatterns(fp1, fp2)
+		r, _ := diff.SimilarityRatio()
+		assert.Equal(t, 0.5, r)
+	})
 	t.Run("radio calculates the number of unrepresented fires to represented fires", func(t *testing.T) {
 		fp1 := make(FiringPattern)
 		fp2 := make(FiringPattern)
@@ -329,4 +343,111 @@ func Test_RunFiringPatternTraining(t *testing.T) {
 		network.ResetForTraining()
 		assert.Equal(t, "6", Sample("4+2", vocab, 1))
 	})
+}
+
+func Test_FindClosestOutputCollection(t *testing.T) {
+	t.Run("finds an exact firing pattern", func(t *testing.T) {
+		network := NewNetwork()
+		vocab := NewVocabulary(network)
+
+		outputA := make(FiringPattern)
+		outputA[CellID(0)] = 2
+		outputA[CellID(1)] = 2
+		outputA[CellID(2)] = 2
+		vocab.Outputs[OutputValue("A")] = NewOutputCollection(OutputValue("A"))
+		vocab.Outputs[OutputValue("A")].FirePattern = outputA
+
+		outputB := make(FiringPattern)
+		outputB[CellID(0)] = 1
+		outputB[CellID(1)] = 1
+		vocab.Outputs[OutputValue("B")] = NewOutputCollection(OutputValue("B"))
+		vocab.Outputs[OutputValue("B")].FirePattern = outputB
+
+		// what we will try to find
+		fp := make(FiringPattern)
+		fp[CellID(0)] = 1
+		fp[CellID(1)] = 1
+
+		foundOutput := FindClosestOutputCollection(fp, vocab)
+		assert.Equal(t, OutputValue("B"), foundOutput.Value)
+	})
+	t.Run("finds a partial match", func(t *testing.T) {
+		network := NewNetwork()
+		vocab := NewVocabulary(network)
+
+		outputA := make(FiringPattern)
+		outputA[CellID(0)] = 1
+		outputA[CellID(1)] = 1
+		outputA[CellID(2)] = 1
+		vocab.Outputs[OutputValue("A")] = NewOutputCollection(OutputValue("A"))
+		vocab.Outputs[OutputValue("A")].FirePattern = outputA
+
+		outputB := make(FiringPattern)
+		outputB[CellID(0)] = 3
+		outputB[CellID(1)] = 3
+		outputB[CellID(2)] = 3
+		vocab.Outputs[OutputValue("B")] = NewOutputCollection(OutputValue("B"))
+		vocab.Outputs[OutputValue("B")].FirePattern = outputB
+
+		// what we will try to find
+		fp := make(FiringPattern)
+		fp[CellID(0)] = 1
+		fp[CellID(1)] = 1
+
+		foundOutput := FindClosestOutputCollection(fp, vocab)
+		assert.Equal(t, OutputValue("A"), foundOutput.Value)
+	})
+	t.Run("finds a partial match when only slightly different", func(t *testing.T) {
+		network := NewNetwork()
+		vocab := NewVocabulary(network)
+
+		outputA := make(FiringPattern)
+		outputA[CellID(0)] = 1
+		outputA[CellID(1)] = 1
+		outputA[CellID(2)] = 1
+		vocab.Outputs[OutputValue("A")] = NewOutputCollection(OutputValue("A"))
+		vocab.Outputs[OutputValue("A")].FirePattern = outputA
+
+		outputB := make(FiringPattern)
+		outputB[CellID(0)] = 1
+		outputB[CellID(1)] = 1
+		outputB[CellID(2)] = 2
+		vocab.Outputs[OutputValue("B")] = NewOutputCollection(OutputValue("B"))
+		vocab.Outputs[OutputValue("B")].FirePattern = outputB
+
+		// what we will try to find
+		fp := make(FiringPattern)
+		fp[CellID(0)] = 1
+		fp[CellID(1)] = 1
+		fp[CellID(2)] = 1
+
+		foundOutput := FindClosestOutputCollection(fp, vocab)
+		assert.Equal(t, OutputValue("A"), foundOutput.Value)
+	})
+	t.Run("finds a partial match with only vague overlaps", func(t *testing.T) {
+		network := NewNetwork()
+		vocab := NewVocabulary(network)
+
+		outputA := make(FiringPattern)
+		outputA[CellID(0)] = 1
+		outputA[CellID(1)] = 1
+		outputA[CellID(2)] = 1
+		vocab.Outputs[OutputValue("A")] = NewOutputCollection(OutputValue("A"))
+		vocab.Outputs[OutputValue("A")].FirePattern = outputA
+
+		outputB := make(FiringPattern)
+		outputB[CellID(2)] = 1
+		outputB[CellID(3)] = 1
+		outputB[CellID(4)] = 1
+		vocab.Outputs[OutputValue("B")] = NewOutputCollection(OutputValue("B"))
+		vocab.Outputs[OutputValue("B")].FirePattern = outputB
+
+		// what we will try to find
+		fp := make(FiringPattern)
+		fp[CellID(4)] = 1
+
+		foundOutput := FindClosestOutputCollection(fp, vocab)
+		assert.Equal(t, OutputValue("B"), foundOutput.Value)
+	})
+
 }
