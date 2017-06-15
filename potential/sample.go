@@ -1,8 +1,6 @@
 package potential
 
 import (
-	"encoding/json"
-	"fmt"
 	"strings"
 )
 
@@ -12,47 +10,31 @@ by the user.
 */
 func Sample(seedText string, vocab *Vocabulary, maxLength int) (output string) {
 	characters := strings.Split(string(seedText), "")
-	var charArray []interface{}
-	for _, char := range characters {
-		charArray = append(charArray, interface{}(char))
-	}
-	// do some shenanigans to get data in the right format
-	unit := UnitGroup{InputText: seedText}
-	unitArray := make([]*UnitGroup, 1)
-	unitArray[0] = &unit
-	unitJSON, err := json.Marshal(unitArray)
-	if err != nil {
-		fmt.Println(
-			"Failed parsing UnitGroup with seedText into JSON. seedText=",
-			seedText)
-		panic(err)
+	charTotal := len(characters)
+	inputs := make([]InputValue, charTotal)
+	for i := 0; i < charTotal; i++ {
+		inputs[i] = InputValue(characters[i])
 	}
 
-	err = vocab.AddTrainingData(unitJSON)
-	if err != nil {
-		panic(err)
-	}
 	output = ""
-	for _, s := range vocab.Samples {
-		vocab.Net.ResetForTraining()
-		// fire the input a bunch of times. after that we can consider
-		// the output pattern as fired. set the output pattern.
-		cellsToFireForInputValues := GetInputPatternForInputs(vocab, s.inputs)
-		finalPattern := FireNetworkUntilDone(vocab.Net, cellsToFireForInputValues)
-		closest := FindClosestOutputCollection(finalPattern, vocab)
-		if closest != nil {
-			output += string(closest.Value)
-		}
-		if len(output) >= maxLength {
-			break
-		}
+	vocab.Net.ResetForTraining()
+	// need to combine cells to be fired
+	cellsToFireForInputValues := make(FiringPattern)
+
+	fp := GetInputPatternForInputs(vocab, inputs)
+	cellsToFireForInputValues = mergeFiringPatterns(cellsToFireForInputValues, fp)
+	finalPattern := FireNetworkUntilDone(vocab.Net, cellsToFireForInputValues)
+
+	// TODO: find more than one match?
+	closest := FindClosestOutputCollection(finalPattern, vocab)
+	if closest != nil {
+		output += string(closest.Value)
 	}
 
-	// collect the firing pattern at each step
-
-	// find closest firing pattern and append its output to the sample
-
-	// once all inputs fired and network fizzles out, end the sampling
+	// TODO: this is useless code
+	if len(output) >= maxLength {
+		return output
+	}
 
 	return output
 }

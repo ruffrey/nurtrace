@@ -235,8 +235,10 @@ func RunFiringPatternTraining(vocab *Vocabulary, chSynchVocab chan *Vocabulary, 
 		// sample is finished here, but provide an update on progress
 		shouldRecalibrate := sampleIndex%laws.TrainingResetIteration == 0
 		if shouldRecalibrate {
-			chSynchVocab <- vocab
-			vocab = <-chSendBackVocab
+			if sampleIndex != 0 { // not the first time
+				chSynchVocab <- vocab
+				vocab = <-chSendBackVocab
+			}
 		}
 	}
 
@@ -298,7 +300,7 @@ This is useful for sampling.
 func FindClosestOutputCollection(patt FiringPattern, vocab *Vocabulary) (oc *OutputCollection) {
 	closestRatio := 0.0
 	for _, outputCandidate := range vocab.Outputs {
-		r, _ := DiffFiringPatterns(outputCandidate.FirePattern, patt).SimilarityRatio()
+		r, _ := DiffFiringPatterns(patt, outputCandidate.FirePattern).SimilarityRatio()
 		isCloser := r > closestRatio
 		if isCloser {
 			closestRatio = r

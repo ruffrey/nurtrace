@@ -9,3 +9,4 @@ potential.test
 *.test
 stats.sh
 debug
+.idea
