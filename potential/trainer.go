@@ -223,7 +223,6 @@ func Train(masterVocab *Vocabulary, isRemoteWorkerWithTag string) {
 
 			masterVocab.CheckAndReduceSimilarity()
 			chSendBackVocab <- copyVocabWithNewSamples(masterVocab, vocab.Samples)
-			masterVocab.Net.PrintTotals()
 		case <-done:
 			if shouldDedupe {
 				dupes := findDupeSynapses(masterVocab.Net)
