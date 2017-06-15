@@ -256,6 +256,9 @@ Argument `tag` is for logging.
 */
 func (vocab *Vocabulary) CheckAndReduceSimilarity() {
 	alreadyCompared := make(map[string]bool)
+	totalOutputs := len(vocab.Outputs)
+	outputCellMap := make(map[CellID]int)
+	uselessCells := make(map[CellID]bool)
 
 	// returns whether the outputs were too similar, and we need to recheck
 	// the output collection. This has the effect of making sure outputs are
@@ -300,7 +303,31 @@ func (vocab *Vocabulary) CheckAndReduceSimilarity() {
 				}
 			}
 		}
+		// track cells in map so we can see which cells don't
+		// provide new information
+		for cellID := range primary.FirePattern {
+			if _, exists := outputCellMap[cellID]; !exists {
+				outputCellMap[cellID] = 0
+			}
+			outputCellMap[cellID]++
+		}
 	}
+
+	for cellID, outputsThatHaveIt := range outputCellMap {
+		if outputsThatHaveIt >= totalOutputs {
+			uselessCells[cellID] = true
+		}
+	}
+	totalUseless := len(uselessCells)
+	if totalUseless > 0 {
+		fmt.Println("useless output cells:", totalUseless)
+	}
+	for _, oc := range vocab.Outputs {
+		for cellID := range uselessCells {
+			delete(oc.FirePattern, cellID)
+		}
+	}
+
 }
 
 /*
