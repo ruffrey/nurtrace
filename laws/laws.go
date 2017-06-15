@@ -128,6 +128,6 @@ during training (or sampling?).
 const NoiseRatio float64 = 0.3
 
 /*
-TrainingResetIteration is the point at which we reset a network during training.
+TrainingMergeBackIteration is the point at which we reset a network during training.
 */
-const TrainingResetIteration = 5
+const TrainingMergeBackIteration = 10

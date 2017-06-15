@@ -233,12 +233,13 @@ func RunFiringPatternTraining(vocab *Vocabulary, chSynchVocab chan *Vocabulary, 
 		}
 
 		// sample is finished here, but provide an update on progress
-		shouldRecalibrate := sampleIndex%laws.TrainingResetIteration == 0
+		shouldRecalibrate := sampleIndex%laws.TrainingMergeBackIteration == 0
 		if shouldRecalibrate {
 			if sampleIndex != 0 { // not the first time
 				chSynchVocab <- vocab
 				vocab = <-chSendBackVocab
 			}
+			fmt.Println(tag, "progress", sampleIndex, "/", tots)
 		}
 	}
 
