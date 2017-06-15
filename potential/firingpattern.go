@@ -317,7 +317,7 @@ func (vocab *Vocabulary) CheckAndReduceSimilarity() {
 	}
 	totalUseless := len(uselessCells)
 	if totalUseless > 0 {
-		fmt.Println("Useless:\n ", totalUseless)
+		fmt.Println("Clearing shared outputs cells: ", totalUseless)
 		for _, oc := range vocab.Outputs {
 			for cellID := range uselessCells {
 				delete(oc.FirePattern, cellID)

@@ -46,19 +46,19 @@ to zero, until it is 2, then it will become zero.
 const SynapseLearnRate int16 = 2
 
 /*
-CellRestingVoltage is what a neuron gets reset to after it has fired.
-*/
-const CellRestingVoltage int16 = -100
-
-/*
 CellFireVoltageThreshold represents the millivolts where an action potential will result.
 */
-const CellFireVoltageThreshold int = 300
+const CellFireVoltageThreshold int = 180
+
+/*
+CellRestingVoltage is what a neuron gets reset to after it has fired.
+*/
+const CellRestingVoltage int16 = -int16(CellFireVoltageThreshold/6)
 
 /*
 DefaultNeuronSynapses is the number of random synapses a new neuron will get.
 */
-const DefaultNeuronSynapses = 12
+const DefaultNeuronSynapses = 20
 
 /*
 MaxDepthFromInputToOutput is how far the path between an input cell and its
@@ -90,13 +90,13 @@ PatternSimilarityLimit represents the percentage/ratio of
 similarity between two firing patterns before one (or both?) of them
 need to change.
 */
-const PatternSimilarityLimit float64 = 0.75
+const PatternSimilarityLimit float64 = 0.6
 
 /*
 InitialCellCountPerVocabUnit is how many cells will represent a single
 VocabUnit, to start off.
 */
-const InitialCellCountPerVocabUnit int = 12
+const InitialCellCountPerVocabUnit int = 16
 
 /*
 InputCellDifferentiationCount is the number of cells to add in order to
@@ -113,4 +113,4 @@ const NoiseRatio float64 = 0.3
 /*
 TrainingMergeBackIteration is the point at which we reset a network during training.
 */
-const TrainingMergeBackIteration = 10
+const TrainingMergeBackIteration = 5
