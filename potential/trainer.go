@@ -206,6 +206,7 @@ func Train(masterVocab *Vocabulary, isRemoteWorkerWithTag string) {
 		done <- true
 	}()
 
+	merges := 0
 	for {
 		select {
 		case vocab := <-chSynchVocab:
@@ -223,6 +224,15 @@ func Train(masterVocab *Vocabulary, isRemoteWorkerWithTag string) {
 
 			masterVocab.CheckAndReduceSimilarity()
 			chSendBackVocab <- copyVocabWithNewSamples(masterVocab, vocab.Samples)
+
+			merges++
+			if merges % 10 == 0 {
+				masterVocab.Net.PrintTotals()
+				fmt.Println("sample: 1+1=",Sample("1+1", vocab, 1))
+				fmt.Println("sample: 2+3=",Sample("2+3", vocab, 1))
+				fmt.Println("sample: 3+4=",Sample("3+4", vocab, 1))
+				fmt.Println("sample: 5+6=",Sample("5+6", vocab, 1))
+			}
 		case <-done:
 			if shouldDedupe {
 				dupes := findDupeSynapses(masterVocab.Net)

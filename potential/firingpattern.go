@@ -257,34 +257,47 @@ Argument `tag` is for logging.
 func (vocab *Vocabulary) CheckAndReduceSimilarity() {
 	alreadyCompared := make(map[string]bool)
 
+	// returns whether the outputs were too similar, and we need to recheck
+	// the output collection. This has the effect of making sure outputs are
+	// sufficiently different from one another, before moving on
+	runMap := func(primary *OutputCollection, secondary *OutputCollection) bool {
+		isThisOne := secondary.Value == primary.Value
+		if isThisOne {
+			return false
+		}
+		var key string
+		sPri := string(primary.Value)
+		sSec := string(secondary.Value)
+		if primary.Value > secondary.Value {
+			key = sPri + sSec
+		} else {
+			key = sSec + sPri
+		}
+		if alreadyCompared[key] {
+			return false
+		}
+		alreadyCompared[key] = true
+
+		diff := DiffFiringPatterns(primary.FirePattern, secondary.FirePattern)
+		ratio, unsharedFiringPattern := diff.SimilarityRatio()
+		tooSimilar := ratio > laws.PatternSimilarityLimit
+		if tooSimilar {
+			// change this output pattern
+			expandOutputs(vocab.Net, unsharedFiringPattern)
+			 //fmt.Println(tag, "EXPAND:", secondary.Value, "vs", primary.Value, "is", ratio)
+			return true
+		}
+		return false
+	}
+
 	for _, primary := range vocab.Outputs {
 		vocab.Net.ResetForTraining()
 		for _, secondary := range vocab.Outputs {
-			isThisOne := secondary.Value == primary.Value
-			if isThisOne {
-				continue
-			}
-			var key string
-			sPri := string(primary.Value)
-			sSec := string(secondary.Value)
-			if primary.Value > secondary.Value {
-				key = sPri + sSec
-			} else {
-				key = sSec + sPri
-			}
-			if alreadyCompared[key] {
-				continue
-			}
-			alreadyCompared[key] = true
-
-			diff := DiffFiringPatterns(primary.FirePattern, secondary.FirePattern)
-			ratio, unsharedFiringPattern := diff.SimilarityRatio()
-			tooSimilar := ratio > laws.PatternSimilarityLimit
-			if tooSimilar {
-				// change this output pattern
-				expandOutputs(vocab.Net, unsharedFiringPattern)
-				// now re-run this one
-				// fmt.Println("EXPAND:", secondary.Value, "vs", primary.Value, "is", ratio)
+			for {
+				rerun := runMap(primary, secondary)
+				if !rerun {
+					break
+				}
 			}
 		}
 	}

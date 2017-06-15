@@ -26,13 +26,13 @@ const ActualSynapseMax int16 = 32766 - int16(SynapseLearnRate)
 NewSynapseMinMillivolts is the bottom range of how much a new synapse will
 have for the `Millivolts` property.
 */
-const NewSynapseMinMillivolts int = -30
+const NewSynapseMinMillivolts int = -100
 
 /*
 NewSynapseMaxMillivolts is the bottom range of how much a new synapse will
 have for the `Millivolts` property.
 */
-const NewSynapseMaxMillivolts int = 60
+const NewSynapseMaxMillivolts int = 100
 
 /*
 SynapseLearnRate is how much a synapse should get bumped when it is being reinforced.
@@ -48,28 +48,17 @@ const SynapseLearnRate int16 = 2
 /*
 CellRestingVoltage is what a neuron gets reset to after it has fired.
 */
-const CellRestingVoltage int16 = -10
+const CellRestingVoltage int16 = -100
 
 /*
 CellFireVoltageThreshold represents the millivolts where an action potential will result.
 */
-const CellFireVoltageThreshold int = 240
+const CellFireVoltageThreshold int = 300
 
 /*
 DefaultNeuronSynapses is the number of random synapses a new neuron will get.
 */
 const DefaultNeuronSynapses = 12
-
-/*
-GrowPathExpectedMinimumSynapses represents the maximum allowed number of
-synapses between an input and output cell in the network which get added
-when an input cell fails to fire the output cell.
-
-By default, it assumes each new synapse has a default mv value of they synapse learn rate (not
-true for randomly grown synapses) and we will grow enough to essentially fire the cell if all
-these synapses fire.
-*/
-const GrowPathExpectedMinimumSynapses = 2
 
 /*
 MaxDepthFromInputToOutput is how far the path between an input cell and its
@@ -107,19 +96,13 @@ const PatternSimilarityLimit float64 = 0.75
 InitialCellCountPerVocabUnit is how many cells will represent a single
 VocabUnit, to start off.
 */
-const InitialCellCountPerVocabUnit int = 7
+const InitialCellCountPerVocabUnit int = 12
 
 /*
 InputCellDifferentiationCount is the number of cells to add in order to
 make a set of inputs more different.
 */
 const InputCellDifferentiationCount = 3
-
-/*
-NewCellDifferentiationCount is how many new cells to add to a vocab
-unit when we find it is too similar to another vocab unit.
-*/
-// const NewCellDifferentiationCount int = 100
 
 /*
 NoiseRatio is the percentage of cells to purposely fire as noise
