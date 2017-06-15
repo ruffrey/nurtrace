@@ -227,10 +227,7 @@ func RunFiringPatternTraining(vocab *Vocabulary, chSynchVocab chan *Vocabulary, 
 		// the output value is now represented by what we just
 		// created above, merged with what we had before.
 		originalFP := vocab.Outputs[s.output].FirePattern
-		vocab.Outputs[s.output] = &OutputCollection{
-			Value:       s.output,
-			FirePattern: mergeFiringPatterns(originalFP, sampleFirePattern),
-		}
+		vocab.Outputs[s.output].FirePattern = mergeFiringPatterns(originalFP, sampleFirePattern)
 
 		// sample is finished here, but provide an update on progress
 		shouldRecalibrate := sampleIndex%laws.TrainingMergeBackIteration == 0
@@ -320,14 +317,13 @@ func (vocab *Vocabulary) CheckAndReduceSimilarity() {
 	}
 	totalUseless := len(uselessCells)
 	if totalUseless > 0 {
-		fmt.Println("useless output cells:", totalUseless)
-	}
-	for _, oc := range vocab.Outputs {
-		for cellID := range uselessCells {
-			delete(oc.FirePattern, cellID)
+		fmt.Println("Useless:\n ", totalUseless)
+		for _, oc := range vocab.Outputs {
+			for cellID := range uselessCells {
+				delete(oc.FirePattern, cellID)
+			}
 		}
 	}
-
 }
 
 /*
