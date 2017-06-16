@@ -106,19 +106,16 @@ func expandInputs(network *Network, fp FiringPattern) {
 }
 
 /*
-expandOutputs expands an output firing pattern by adding more EXCITATORY
+expandOutputs expands an output firing pattern by adding more
 synapses from the firting pattern to random cells.
 */
-func expandOutputs(network *Network, fp FiringPattern) {
-	for i := 0; i < laws.InputCellDifferentiationCount; i++ {
-		preCell := randCellFromFP(fp)
-		newCellID := network.RandomCellKey()
-		newSynapse := network.linkCells(preCell, newCellID)
-		// excitatory
-		newSynapse.Millivolts = int16(math.Abs(float64(newSynapse.Millivolts)))
+func expandOutputs(network *Network, unsharedCellsFP FiringPattern) {
+	for unsharedCellID := range unsharedCellsFP {
+		newCellID := NewCell(network).ID
+		network.linkCells(unsharedCellID, newCellID)
 
 		// also reinforce a random unshared synapse
-		anotherCell := network.GetCell(randCellFromFP(fp))
+		anotherCell := network.GetCell(randCellFromFP(unsharedCellsFP))
 		if len(anotherCell.AxonSynapses) != 0 {
 			randReinforceSynapse := randSynapseFromMap(anotherCell.AxonSynapses)
 

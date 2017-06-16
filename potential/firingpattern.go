@@ -80,7 +80,7 @@ func mergeFiringPatterns(fp1, fp2 FiringPattern) (merged FiringPattern) {
 	}
 	for cellID, fires := range fp2 {
 		if otherFires, already := merged[cellID]; already {
-			combined := (otherFires + fires)
+			combined := otherFires + fires
 			average := float64(combined / 2)
 			bottomValue := uint16(math.Floor(average))
 			merged[cellID] = bottomValue
@@ -112,7 +112,7 @@ FiringPatternDiff represents the difference between two firing groups.
 */
 type FiringPatternDiff struct {
 	unshared map[CellID]float64
-	shared   FiringPattern
+	shared   map[CellID]float64
 	total    float64
 }
 
@@ -120,18 +120,23 @@ type FiringPatternDiff struct {
 SimilarityRatio returns the ratio of alike to non-alike fires in a diff, and also
 gives the unshared map as a firing pattern for easier use.
 */
-func (fpdiff *FiringPatternDiff) SimilarityRatio() (float64, FiringPattern) {
+func (fpdiff *FiringPatternDiff) SimilarityRatio() (similarity float64, unsharedCells FiringPattern) {
 	allUnshared := 0.0
-	fp := make(FiringPattern)
+	unsharedCells = make(FiringPattern)
 	for cellID, fires := range fpdiff.unshared {
 		allUnshared += fires
 		if fires < float64(math.MaxUint16) {
-			fp[cellID] = uint16(fires)
+			unsharedCells[cellID] = uint16(fires)
 		} else {
-			fp[cellID] = math.MaxUint16
+			unsharedCells[cellID] = math.MaxUint16
 		}
 	}
-	return (fpdiff.total - allUnshared) / fpdiff.total, fp
+	for _, fires := range fpdiff.shared {
+		allUnshared += fires
+	}
+
+	similarity = (fpdiff.total - allUnshared) / fpdiff.total
+	return similarity, unsharedCells
 }
 
 /*
@@ -141,7 +146,7 @@ two firing patterns.
 func DiffFiringPatterns(fp1, fp2 FiringPattern) *FiringPatternDiff {
 	diff := FiringPatternDiff{
 		unshared: make(map[CellID]float64),
-		shared:   make(FiringPattern),
+		shared:   make(map[CellID]float64),
 		total:    0.0,
 	}
 
@@ -152,7 +157,7 @@ func DiffFiringPatterns(fp1, fp2 FiringPattern) *FiringPatternDiff {
 			max := math.Max(fire1_64, fire2_64)
 			min := math.Min(fire1_64, fire2_64)
 			diff.total += max
-			diff.unshared[cellID] = max - min
+			diff.shared[cellID] = max - min
 		} else {
 			diff.unshared[cellID] = fire1_64
 			diff.total += fire1_64
@@ -257,47 +262,36 @@ func (vocab *Vocabulary) CheckAndReduceSimilarity() {
 	outputCellMap := make(map[CellID]int)
 	uselessCells := make(map[CellID]bool)
 
-	// returns whether the outputs were too similar, and we need to recheck
-	// the output collection. This has the effect of making sure outputs are
-	// sufficiently different from one another, before moving on
-	runMap := func(primary *OutputCollection, secondary *OutputCollection) bool {
-		isThisOne := secondary.Value == primary.Value
-		if isThisOne {
-			return false
-		}
-		var key string
-		sPri := string(primary.Value)
-		sSec := string(secondary.Value)
-		if primary.Value > secondary.Value {
-			key = sPri + sSec
-		} else {
-			key = sSec + sPri
-		}
-		if alreadyCompared[key] {
-			return false
-		}
-		alreadyCompared[key] = true
-
-		diff := DiffFiringPatterns(primary.FirePattern, secondary.FirePattern)
-		ratio, unsharedFiringPattern := diff.SimilarityRatio()
-		tooSimilar := ratio > laws.PatternSimilarityLimit
-		if tooSimilar {
-			// change this output pattern
-			expandOutputs(vocab.Net, unsharedFiringPattern)
-			 //fmt.Println(tag, "EXPAND:", secondary.Value, "vs", primary.Value, "is", ratio)
-			return true
-		}
-		return false
-	}
-
 	for _, primary := range vocab.Outputs {
 		vocab.Net.ResetForTraining()
 		for _, secondary := range vocab.Outputs {
-			for {
-				rerun := runMap(primary, secondary)
-				if !rerun {
-					break
-				}
+			isThisOne := secondary.Value == primary.Value
+			if isThisOne {
+				continue
+			}
+			// only run each comparison once
+			var key string
+			sPri := string(primary.Value)
+			sSec := string(secondary.Value)
+			if primary.Value > secondary.Value {
+				key = sPri + sSec
+			} else {
+				key = sSec + sPri
+			}
+			if alreadyCompared[key] {
+				continue
+			}
+			alreadyCompared[key] = true
+
+			// cause dissimiliarity between the unshared cells in the
+			// two patterns
+			diff := DiffFiringPatterns(primary.FirePattern, secondary.FirePattern)
+			ratio, unsharedFiringPattern := diff.SimilarityRatio()
+			tooSimilar := ratio > laws.PatternSimilarityLimit
+			if tooSimilar {
+				// change this output pattern
+				//fmt.Println("EXPAND:", secondary.Value, "vs", primary.Value, "is", ratio)
+				expandOutputs(vocab.Net, unsharedFiringPattern)
 			}
 		}
 		// track cells in map so we can see which cells don't
