@@ -114,3 +114,9 @@ const NoiseRatio float64 = 0.3
 TrainingMergeBackIteration is the point at which we reset a network during training.
 */
 const TrainingMergeBackIteration = 5
+
+/*
+MinUniqueCellsDuringExpand is how many cells are required to be unique in
+an output pattern. Being under this many will result in more being added.
+*/
+const MinUniqueCellsDuringExpand = 10

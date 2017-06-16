@@ -108,6 +108,21 @@ func mergeAllOutputs(original, newer map[OutputValue]*OutputCollection) {
 }
 
 /*
+mergeAllInputs modifies the original group of INputs by merging
+every newer output collection into the original.
+*/
+func mergeAllInputs(original, newer map[InputValue]*VocabUnit) {
+	for inVal, unit := range newer {
+		if _, exists := original[inVal]; !exists {
+			original[inVal] = unit
+		} else {
+			origFP := original[inVal].InputCells
+			original[inVal].InputCells = mergeFiringPatterns(origFP, unit.InputCells)
+		}
+	}
+}
+
+/*
 FiringPatternDiff represents the difference between two firing groups.
 */
 type FiringPatternDiff struct {
@@ -229,10 +244,21 @@ func RunFiringPatternTraining(vocab *Vocabulary, chSynchVocab chan *Vocabulary, 
 			break
 		}
 
-		// the output value is now represented by what we just
-		// created above, merged with what we had before.
 		originalFP := vocab.Outputs[s.output].FirePattern
-		vocab.Outputs[s.output].FirePattern = mergeFiringPatterns(originalFP, sampleFirePattern)
+		var newPattern FiringPattern
+		closestOutput := FindClosestOutputCollection(sampleFirePattern, vocab)
+		// Did this predict the right thing? If not, we just keep the sampleFirePattern
+		// because the old pattern wasn't close enough.
+		// TODO: is this a good rule?
+		if closestOutput == nil {
+			newPattern = sampleFirePattern // first timer?
+		} else if closestOutput.Value == s.output {
+			newPattern = mergeFiringPatterns(originalFP, sampleFirePattern)
+		} else {
+			expandInputs(vocab.Net, cellsToFireForInputValues)
+			newPattern = sampleFirePattern
+		}
+		vocab.Outputs[s.output].FirePattern = newPattern
 
 		// sample is finished here, but provide an update on progress
 		shouldRecalibrate := sampleIndex%laws.TrainingMergeBackIteration == 0
@@ -254,13 +280,15 @@ CheckAndReduceSimilarity ensures none of the other outputs are too similar.
 
 Each output pattern is compared to all other output patterns.
 
-Argument `tag` is for logging.
+Should be called only on the master vocab, if doing multithreading.
 */
 func (vocab *Vocabulary) CheckAndReduceSimilarity() {
 	alreadyCompared := make(map[string]bool)
 	totalOutputs := len(vocab.Outputs)
 	outputCellMap := make(map[CellID]int)
 	uselessCells := make(map[CellID]bool)
+
+	//outputsUnique := make(map[OutputValue]map[CellID]bool)
 
 	for _, primary := range vocab.Outputs {
 		vocab.Net.ResetForTraining()
@@ -291,11 +319,11 @@ func (vocab *Vocabulary) CheckAndReduceSimilarity() {
 			if tooSimilar {
 				// change this output pattern
 				//fmt.Println("EXPAND:", secondary.Value, "vs", primary.Value, "is", ratio)
-				expandOutputs(vocab.Net, unsharedFiringPattern)
+				expandOutputs(vocab.Net, unsharedFiringPattern, ratio)
 			}
 		}
 		// track cells in map so we can see which cells don't
-		// provide new information
+		// provide new information later
 		for cellID := range primary.FirePattern {
 			if _, exists := outputCellMap[cellID]; !exists {
 				outputCellMap[cellID] = 0
@@ -304,6 +332,10 @@ func (vocab *Vocabulary) CheckAndReduceSimilarity() {
 		}
 	}
 
+	//for outputValue, uniqueFireCells := range outputsUnique {
+	//	expandOutputs(vocab.Net, uniqueFireCells, ratio)
+	//}
+	// which cells are fired on every expected output?
 	for cellID, outputsThatHaveIt := range outputCellMap {
 		if outputsThatHaveIt >= totalOutputs {
 			uselessCells[cellID] = true
