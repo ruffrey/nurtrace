@@ -1,7 +1,7 @@
 package main
 
 import (
-	"fmt"
+	"log"
 
 	"github.com/bjwbell/gensimd/simd"
 )
@@ -11,5 +11,5 @@ func main() {
 	b := simd.I16x8{-8, -7, -6, -5, -4, -3, -2, -1}
 
 	result := simd.AddI16x8(a, b)
-	fmt.Println(result)
+	log.Println(result)
 }

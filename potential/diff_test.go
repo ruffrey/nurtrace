@@ -1,7 +1,7 @@
 package potential
 
 import (
-	"fmt"
+	"log"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -188,7 +188,7 @@ func Test_ApplyDiff_TrickeryIntegrityTests(t *testing.T) {
 		ok, report := CheckIntegrity(network)
 		assert.Equal(t, true, ok)
 		if !ok {
-			fmt.Println("network")
+			log.Println("network")
 			report.Print()
 		}
 
@@ -206,7 +206,7 @@ func Test_ApplyDiff_TrickeryIntegrityTests(t *testing.T) {
 		ok, report = CheckIntegrity(net2)
 		assert.Equal(t, true, ok)
 		if !ok {
-			fmt.Println("net2")
+			log.Println("net2")
 			report.Print()
 		}
 

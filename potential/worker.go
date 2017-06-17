@@ -1,13 +1,14 @@
 package potential
 
 import (
-	"fmt"
 	"io"
 	"io/ioutil"
+	"log"
 	"os"
 	"strconv"
 	"strings"
 
+	"fmt"
 	"github.com/pkg/sftp"
 	"golang.org/x/crypto/ssh"
 )
@@ -69,7 +70,7 @@ func (w *Worker) TranserExecutable() (err error) {
 
 	remoteOS = s[0]
 	remoteArch = s[1]
-	fmt.Println("Transferring training program to", w.host, remoteOS, remoteArch)
+	log.Println("Transferring training program to", w.host, remoteOS, remoteArch)
 
 	err = w.SCPSendFile("../worker/worker_"+remoteOS+"_"+remoteArch, workerLocation)
 	if err != nil {
@@ -82,13 +83,13 @@ func (w *Worker) TranserExecutable() (err error) {
 	}
 	defer session2.Close()
 	cmd2 := "chmod +x " + workerLocation
-	fmt.Println("  ", w.host, cmd2)
+	log.Println("  ", w.host, cmd2)
 	bytes, err = session2.CombinedOutput(cmd2)
 	if err != nil {
 		return err
 	}
 	if len(bytes) > 0 {
-		fmt.Println("  ", w.host, string(bytes))
+		log.Println("  ", w.host, string(bytes))
 	}
 	return nil
 }
@@ -148,24 +149,24 @@ func (w *Worker) SCPGetFile(remoteFileLocation string, toLocalLocation string) (
 // Train runs the training session on a remote server. The remote party will
 // be doing `RunWorker()`.
 func (w *Worker) Train(localVocabLocation string, localTrainingNetworkJSONLocation string) (finalVocab *Vocabulary, err error) {
-	fmt.Println("Transferring settings to", w.host)
+	log.Println("Transferring settings to", w.host)
 	err = w.SCPSendFile(localVocabLocation, trainingVocabLocation)
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
 		return finalVocab, err
 	}
-	fmt.Println("Transferring network to", w.host)
+	log.Println("Transferring network to", w.host)
 	err = w.SCPSendFile(localTrainingNetworkJSONLocation, networkLocation)
 	if err != nil {
-		fmt.Println(w.host, err)
+		log.Println(w.host, err)
 		return finalVocab, err
 	}
-	fmt.Println("Training", w.host, "\n", workerLocation)
+	log.Println("Training", w.host, "\n", workerLocation)
 
 	session, err := w.conn.NewSession()
 	if err != nil {
-		fmt.Println(w.host, err)
-		fmt.Println(err)
+		log.Println(w.host, err)
+		log.Println(err)
 		return finalVocab, err
 	}
 	defer session.Close()
@@ -185,7 +186,7 @@ func (w *Worker) Train(localVocabLocation string, localTrainingNetworkJSONLocati
 	err = session.Run(workerLocation)
 	if err != nil {
 		fmt.Print(w.host, " ")
-		fmt.Println(err)
+		log.Println(err)
 		return finalVocab, err
 	}
 	// it is finished; write the remote files back over the local files.
@@ -291,7 +292,7 @@ func RunWorker() (err error) {
 	Train(vocab, prefix)
 	err = originalNetwork.SaveToFile(networkLocation)
 	if err != nil {
-		fmt.Println(prefix, err)
+		log.Println(prefix, err)
 		return err
 	}
 	return nil

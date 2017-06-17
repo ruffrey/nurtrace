@@ -1,7 +1,7 @@
 package cmd
 
 import (
-	"fmt"
+	"log"
 
 	"github.com/ruffrey/nurtrace/potential"
 )
@@ -16,7 +16,7 @@ func FireCell(network *potential.Network, cell potential.CellID, n int) (err err
 		if isLast {
 			pattern := potential.FireNetworkUntilDone(network, cellArg)
 			for firedCell := range pattern {
-				fmt.Println(firedCell)
+				log.Println(firedCell)
 			}
 			continue
 		}

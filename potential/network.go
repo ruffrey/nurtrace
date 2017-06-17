@@ -4,13 +4,14 @@ import (
 	"bytes"
 	"compress/gzip"
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
+	"log"
 	"math"
 	"math/rand"
 	"os"
 	"sync"
 
+	"fmt"
 	"github.com/ruffrey/nurtrace/laws"
 )
 
@@ -181,29 +182,29 @@ func (network *Network) ResetForTraining() {
 Print logs the network cells to console
 */
 func (network *Network) Print() {
-	fmt.Println("----------")
-	fmt.Println("Network")
+	log.Println("----------")
+	log.Println("Network")
 	for id, cell := range network.Cells {
 		if cell == nil {
-			fmt.Println("  --------\nremoved cell=", id)
+			log.Println("  --------\nremoved cell=", id)
 			continue
 		}
-		fmt.Println("  --------\n  cell key=", id, "ID=", cell.ID)
-		fmt.Println("  voltage=", cell.Voltage)
-		fmt.Println("  synapses to axon=", cell.AxonSynapses)
-		fmt.Println("  synapses to dendrite=", cell.DendriteSynapses)
+		log.Println("  --------\n  cell key=", id, "ID=", cell.ID)
+		log.Println("  voltage=", cell.Voltage)
+		log.Println("  synapses to axon=", cell.AxonSynapses)
+		log.Println("  synapses to dendrite=", cell.DendriteSynapses)
 	}
 	for id, syn := range network.Synapses {
 		if syn == nil {
-			fmt.Println("  --------\nremoved synapse=", id)
+			log.Println("  --------\nremoved synapse=", id)
 			continue
 		}
-		fmt.Println("  --------\n  synapse key=", id, "ID=", syn.ID)
-		fmt.Println("  millivolts=", syn.Millivolts)
-		fmt.Println("  axon=", syn.FromNeuronAxon)
-		fmt.Println("  dendrite=", syn.ToNeuronDendrite)
+		log.Println("  --------\n  synapse key=", id, "ID=", syn.ID)
+		log.Println("  millivolts=", syn.Millivolts)
+		log.Println("  axon=", syn.FromNeuronAxon)
+		log.Println("  dendrite=", syn.ToNeuronDendrite)
 	}
-	fmt.Println("----------")
+	log.Println("----------")
 }
 
 /*
@@ -212,10 +213,10 @@ PrintTotals lists the most basic info about the network.
 func (network *Network) PrintTotals() {
 	lenCells := len(network.Cells)
 	lenSynapses := len(network.Synapses)
-	fmt.Println("Network")
-	fmt.Println(" ", lenCells, "cells")
-	fmt.Println(" ", lenSynapses, "synapses")
-	fmt.Println(" ", lenSynapses/lenCells, "avg synapses per cell")
+	log.Println("Network")
+	log.Println(" ", lenCells, "cells")
+	log.Println(" ", lenSynapses, "synapses")
+	log.Println(" ", lenSynapses/lenCells, "avg synapses per cell")
 }
 
 /*

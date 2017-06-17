@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"os"
 	"runtime"
 	"strings"
@@ -93,7 +94,7 @@ func (vocab *Vocabulary) AddTrainingData(testDataBytes []byte) (err error) {
 	td := make(TrainingData, 0)
 	err = json.Unmarshal(testDataBytes, &td)
 	if err != nil {
-		fmt.Println("Unable to parse training data JSON", err)
+		log.Println("Unable to parse training data JSON", err)
 		return err
 	}
 
@@ -155,12 +156,12 @@ func (vocab *Vocabulary) SaveToFile(filepath string) error {
 
 func (vocab *Vocabulary) printInputs() {
 	for k, v := range vocab.Inputs {
-		fmt.Println("Input:", k, v)
+		log.Println("Input:", k, v)
 	}
 }
 
 func (vocab *Vocabulary) printOutputs() {
 	for k, v := range vocab.Outputs {
-		fmt.Println("Output:", k, v)
+		log.Println("Output:", k, v)
 	}
 }

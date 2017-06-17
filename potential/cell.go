@@ -95,7 +95,7 @@ FireActionPotential does an action potential cycle.
 */
 func (cell *Cell) FireActionPotential() {
 	cell.WasFired = true
-	// fmt.Println("Action Potential Firing\n  cell=", cell.ID, "synapses=", len(cell.AxonSynapses))
+	// log.Println("Action Potential Firing\n  cell=", cell.ID, "synapses=", len(cell.AxonSynapses))
 
 	for _, cb := range cell.OnFired {
 		cb(cell.ID)
@@ -140,7 +140,7 @@ func (cell *Cell) addAxon(synapseID SynapseID) {
 PruneCell removes a cell and its synapses. It is independent of PruneSynapse.
 */
 func (network *Network) PruneCell(cellID CellID) {
-	// fmt.Println("Pruning cell", cellID)
+	// log.Println("Pruning cell", cellID)
 	cell := network.GetCell(cellID)
 	// with good code, the following should not be necessary.
 	if len(cell.DendriteSynapses) > 0 {

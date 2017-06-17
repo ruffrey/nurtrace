@@ -1,6 +1,6 @@
 package potential
 
-import "fmt"
+import "log"
 
 /*
 IntegrityReport lists all bad connections in a network that was tested.
@@ -25,10 +25,10 @@ func newIntegrityReport() IntegrityReport {
 Print outputs the contents of the report to stdout
 */
 func (report *IntegrityReport) Print() {
-	fmt.Println("cellHasMissingAxonSynapse", report.cellHasMissingAxonSynapse)
-	fmt.Println("cellHasMissingDendriteSynapse", report.cellHasMissingDendriteSynapse)
-	fmt.Println("synapseHasMissingDendriteCell", report.synapseHasMissingDendriteCell)
-	fmt.Println("synapseHasMissingAxonCell", report.synapseHasMissingAxonCell)
+	log.Println("cellHasMissingAxonSynapse", report.cellHasMissingAxonSynapse)
+	log.Println("cellHasMissingDendriteSynapse", report.cellHasMissingDendriteSynapse)
+	log.Println("synapseHasMissingDendriteCell", report.synapseHasMissingDendriteCell)
+	log.Println("synapseHasMissingAxonCell", report.synapseHasMissingAxonCell)
 }
 
 func (report *IntegrityReport) isOK() bool {

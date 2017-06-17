@@ -1,7 +1,7 @@
 package main
 
 import (
-	"fmt"
+	"log"
 	"os"
 
 	"github.com/ruffrey/nurtrace/potential"
@@ -13,5 +13,5 @@ func main() {
 		panic(err)
 	}
 	hn, _ := os.Hostname()
-	fmt.Println("Remote training finished", hn)
+	log.Println("Remote training finished", hn)
 }

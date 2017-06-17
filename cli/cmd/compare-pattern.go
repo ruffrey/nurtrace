@@ -1,7 +1,7 @@
 package cmd
 
 import (
-	"fmt"
+	"log"
 
 	"github.com/ruffrey/nurtrace/potential"
 )
@@ -9,9 +9,9 @@ import (
 // CompareFiringPatterns prints information about a network or requested components of the network.
 func CompareFiringPatterns(network *potential.Network, cell1, cell2 potential.FiringPattern, n int) (err error) {
 	network.PrintTotals()
-	fmt.Println("Cell group 1:", cell1)
-	fmt.Println("Cell group 2:", cell2)
-	fmt.Println("Firing", n, "times")
+	log.Println("Cell group 1:", cell1)
+	log.Println("Cell group 2:", cell2)
+	log.Println("Firing", n, "times")
 	network.ResetForTraining()
 	var patt1 potential.FiringPattern
 	var patt2 potential.FiringPattern
@@ -32,8 +32,8 @@ func CompareFiringPatterns(network *potential.Network, cell1, cell2 potential.Fi
 		}
 	}
 
-	fmt.Println("Cell 1 pattern:", patt1)
-	fmt.Println("Cell 2 pattern:", patt2)
-	fmt.Println("Ratio:", potential.DiffFiringPatterns(patt1, patt2))
+	log.Println("Cell 1 pattern:", patt1)
+	log.Println("Cell 2 pattern:", patt2)
+	log.Println("Ratio:", potential.DiffFiringPatterns(patt1, patt2))
 	return nil
 }

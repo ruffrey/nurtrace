@@ -2,7 +2,7 @@ package cmd
 
 import (
 	"errors"
-	"fmt"
+	"log"
 	"strconv"
 
 	"github.com/ruffrey/nurtrace/potential"
@@ -18,7 +18,7 @@ func Inspect(filename string, integrity bool, totals bool, allTags bool, cell in
 	if integrity {
 		ok, report := potential.CheckIntegrity(net)
 		if ok {
-			fmt.Println("Integrity OK - no dangling connections.")
+			log.Println("Integrity OK - no dangling connections.")
 			return nil
 		}
 		report.Print()
@@ -33,7 +33,7 @@ func Inspect(filename string, integrity bool, totals bool, allTags bool, cell in
 	if allTags {
 		for _, c := range net.Cells {
 			if c.Tag != "" {
-				fmt.Println(c.Tag, c.ID)
+				log.Println(c.Tag, c.ID)
 			}
 		}
 		return nil
@@ -45,7 +45,7 @@ func Inspect(filename string, integrity bool, totals bool, allTags bool, cell in
 			return errors.New("Cell " + strconv.Itoa(cell) + "does not exist")
 		}
 		c := net.Cells[potential.CellID(cell)]
-		fmt.Println(c)
+		log.Println(c)
 		return nil
 	}
 
@@ -55,7 +55,7 @@ func Inspect(filename string, integrity bool, totals bool, allTags bool, cell in
 			return errors.New("Synapse " + strconv.Itoa(synapse) + "does not exist")
 		}
 		s := net.Synapses[potential.SynapseID(synapse)]
-		fmt.Println(s)
+		log.Println(s)
 		return nil
 	}
 

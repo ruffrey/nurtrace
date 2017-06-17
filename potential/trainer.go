@@ -2,6 +2,7 @@ package potential
 
 import (
 	"fmt"
+	"log"
 	"math"
 	"math/rand"
 	"strconv"
@@ -120,7 +121,7 @@ func Train(masterVocab *Vocabulary, isRemoteWorkerWithTag string) {
 	// precheck
 	ok, report := CheckIntegrity(masterVocab.Net)
 	if !ok {
-		fmt.Println(isRemoteWorkerWithTag, report)
+		log.Println(isRemoteWorkerWithTag, report)
 		panic("integrity failed before training")
 	}
 
@@ -129,7 +130,7 @@ func Train(masterVocab *Vocabulary, isRemoteWorkerWithTag string) {
 	jobChunks := masterVocab.Threads + remoteWorkerTotalWeights
 	partSize := math.Ceil(float64(lenAllSamples) / float64(jobChunks))
 	maxSampleIndex := len(masterVocab.Samples) - 1
-	fmt.Println(isRemoteWorkerWithTag, partSize,
+	log.Println(isRemoteWorkerWithTag, partSize,
 		"samples per chunk,", masterVocab.Threads, "local threads,",
 		remoteWorkerTotalWeights, "remote weights (", jobChunks, "chunks )")
 	sampleCursor := 0
@@ -148,15 +149,15 @@ func Train(masterVocab *Vocabulary, isRemoteWorkerWithTag string) {
 		if to > maxSampleIndex {
 			to = maxSampleIndex
 		}
-		fmt.Println(sampleCursor, to)
+		log.Println(sampleCursor, to)
 		samples := masterVocab.Samples[sampleCursor:to]
 		vocab := copyVocabWithNewSamples(masterVocab, samples)
 
 		if isRemote {
-			fmt.Println(isRemoteWorkerWithTag, "thread", thread, "from",
+			log.Println(isRemoteWorkerWithTag, "thread", thread, "from",
 				sampleCursor, "to", to, "on", remoteWorkers[thread])
 		} else {
-			fmt.Println(isRemoteWorkerWithTag, "thread", thread, "from",
+			log.Println(isRemoteWorkerWithTag, "thread", thread, "from",
 				sampleCursor, "to", to)
 		}
 
@@ -168,7 +169,7 @@ func Train(masterVocab *Vocabulary, isRemoteWorkerWithTag string) {
 			if isRemote {
 				w, err := NewWorker(remoteWorkers[thread])
 				if err != nil {
-					fmt.Println("error making new worker", remoteWorkers[thread])
+					log.Println("error making new worker", remoteWorkers[thread])
 					panic(err)
 				}
 				defer w.conn.Close()
@@ -185,12 +186,12 @@ func Train(masterVocab *Vocabulary, isRemoteWorkerWithTag string) {
 				}
 				vocab, err = w.Train(tempVocabFile, tempNetworkFile)
 				if err != nil {
-					fmt.Println("Error from remote worker", w.host)
+					log.Println("Error from remote worker", w.host)
 					panic(err)
 				}
-				fmt.Println("Remote thread", thread, w.host, "done")
+				log.Println("Remote thread", thread, w.host, "done")
 				chSynchVocab <- vocab
-				fmt.Println("Applied final diff on remote thread", thread)
+				log.Println("Applied final diff on remote thread", thread)
 				wg.Done()
 				return
 			}
@@ -199,9 +200,9 @@ func Train(masterVocab *Vocabulary, isRemoteWorkerWithTag string) {
 			thisTag := isRemoteWorkerWithTag + "<" + strconv.Itoa(thread) + ">"
 			RunFiringPatternTraining(vocab, chSynchVocab, chSendBackVocab, thisTag)
 
-			fmt.Println(isRemoteWorkerWithTag,
+			log.Println(isRemoteWorkerWithTag,
 				"local thread", thread, "done")
-			fmt.Println(isRemoteWorkerWithTag,
+			log.Println(isRemoteWorkerWithTag,
 				"applied final diff on local thread", thread)
 			wg.Done()
 		}(thread)
@@ -242,13 +243,13 @@ func Train(masterVocab *Vocabulary, isRemoteWorkerWithTag string) {
 			merges++
 			if merges%(masterVocab.Threads+1) == 0 {
 				masterVocab.Net.PrintTotals()
-				fmt.Println("sample: 1+1=", Sample("1+1", vocab, 1))
-				fmt.Println("sample: 4+0=", Sample("4+0", vocab, 1))
-				fmt.Println("sample: 2+3=", Sample("2+3", vocab, 1))
-				fmt.Println("sample: 3+4=", Sample("3+4", vocab, 1))
-				fmt.Println("sample: 5+6=", Sample("5+6", vocab, 1))
-				fmt.Println("sample: 5+5=", Sample("5+5", vocab, 1))
-				fmt.Println("sample: 7+8=", Sample("7+8", vocab, 1))
+				log.Println("sample: 1+1=", Sample("1+1", vocab, 1))
+				log.Println("sample: 4+0=", Sample("4+0", vocab, 1))
+				log.Println("sample: 2+3=", Sample("2+3", vocab, 1))
+				log.Println("sample: 3+4=", Sample("3+4", vocab, 1))
+				log.Println("sample: 5+6=", Sample("5+6", vocab, 1))
+				log.Println("sample: 5+5=", Sample("5+5", vocab, 1))
+				log.Println("sample: 7+8=", Sample("7+8", vocab, 1))
 			}
 			masterVocab.CheckAndReduceSimilarity()
 			chSendBackVocab <- copyVocabWithNewSamples(masterVocab, vocab.Samples)
@@ -281,7 +282,7 @@ func rerouteChangedIOCellIDs(idChanges map[CellID]CellID, vocab *Vocabulary) {
 	for _, outColl := range vocab.Outputs {
 		for oldCellID, fires := range outColl.FirePattern {
 			if newCellID, didChange := idChanges[oldCellID]; didChange {
-				//fmt.Println("Swapping Output:", oldCellID, "for", newCellID)
+				//log.Println("Swapping Output:", oldCellID, "for", newCellID)
 				outColl.FirePattern[newCellID] = fires
 				delete(outColl.FirePattern, oldCellID)
 			}
@@ -290,7 +291,7 @@ func rerouteChangedIOCellIDs(idChanges map[CellID]CellID, vocab *Vocabulary) {
 	for _, vocabUnit := range vocab.Inputs {
 		for oldCellID, fires := range vocabUnit.InputCells {
 			if newCellID, didChange := idChanges[oldCellID]; didChange {
-				//fmt.Println("Swapping Input:", oldCellID, "for", newCellID)
+				//log.Println("Swapping Input:", oldCellID, "for", newCellID)
 				vocabUnit.InputCells[newCellID] = fires
 				delete(vocabUnit.InputCells, oldCellID)
 			}

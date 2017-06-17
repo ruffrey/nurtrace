@@ -91,6 +91,6 @@ func dedupeSynapses(synapses dupeSynapses, network *Network) []SynapseID {
 	for _, synapseID := range removeSynapses {
 		network.PruneSynapse(synapseID)
 	}
-	// fmt.Println("removed", len(removeSynapses), "dupe synapses")
+	// log.Println("removed", len(removeSynapses), "dupe synapses")
 	return keepSynapses
 }

@@ -2,7 +2,7 @@ package cmd
 
 import (
 	"errors"
-	"fmt"
+	"log"
 	"io/ioutil"
 	"os"
 	"strconv"
@@ -25,11 +25,11 @@ func Export(outFormat, networkFile, outFile string) (err error) {
 	case "dot":
 		graph := gographviz.NewGraph()
 
-		fmt.Println("- Adding cells", len(network.Cells))
+		log.Println("- Adding cells", len(network.Cells))
 		for _, cell := range network.Cells {
 			graph.AddNode("G", strconv.Itoa(int(cell.ID)), nil)
 		}
-		fmt.Println("- Adding synapses", len(network.Synapses))
+		log.Println("- Adding synapses", len(network.Synapses))
 		for _, synapse := range network.Synapses {
 			if synapse == nil {
 				continue
@@ -39,15 +39,15 @@ func Export(outFormat, networkFile, outFile string) (err error) {
 
 		output := graph.String()
 
-		fmt.Println("- Writing to", outFile)
+		log.Println("- Writing to", outFile)
 		err = ioutil.WriteFile(outFile, []byte(output), os.ModePerm)
 		if err != nil {
-			fmt.Println("Failed to save!")
+			log.Println("Failed to save!")
 			return err
 		}
-		// fmt.Println("You can render the dot file using Dataviz:")
-		// fmt.Println("  sfdp -x -Goverlap=scale -Tpng", *outFile, "> output.png")
-		// fmt.Println("Done")
+		// log.Println("You can render the dot file using Dataviz:")
+		// log.Println("  sfdp -x -Goverlap=scale -Tpng", *outFile, "> output.png")
+		// log.Println("Done")
 		return nil
 	case "json":
 		return network.SaveToFileReadable(outFile)

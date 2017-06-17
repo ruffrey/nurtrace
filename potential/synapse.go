@@ -114,7 +114,7 @@ If either of those neurons no longer has any synapses itself, kill off that neur
 Unless the neuron is immortal, then just remove the synapse.
 */
 func (network *Network) PruneSynapse(synapseID SynapseID) {
-	// fmt.Println("remove synapse=", synapseID)
+	// log.Println("remove synapse=", synapseID)
 	synapse := network.GetSyn(synapseID)
 
 	// See if either cell (to/from) should be pruned, also.

@@ -2,8 +2,8 @@ package main
 
 import (
 	"errors"
-	"fmt"
 	"io/ioutil"
+	"log"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -101,11 +101,11 @@ func main() {
 					return cmd.Train(networkInputFile, networkSaveFile, vocabSaveFile, testDataFile, doProfile, initialNetworkNeurons)
 				}
 				for i := 0; i < iterations; i++ {
-					fmt.Println("------ Start Iteration", i+1, "------")
+					log.Println("------ Start Iteration", i+1, "------")
 					err = cmd.Train(networkInputFile, networkSaveFile, vocabSaveFile, testDataFile, doProfile, initialNetworkNeurons)
-					fmt.Println("------ End Iteration", i+1, "------")
+					log.Println("------ End Iteration", i+1, "------")
 					if err != nil {
-						fmt.Println("Failed on iteration", i+1)
+						log.Println("Failed on iteration", i+1)
 						return err
 					}
 				}
@@ -261,7 +261,7 @@ func main() {
 			},
 			Action: func(c *cli.Context) (err error) {
 				net := c.Args().First()
-				fmt.Println("Reading network from", net)
+				log.Println("Reading network from", net)
 				return cmd.Inspect(net, c.Bool("integrity"), c.Bool("totals"), c.Bool("tags"), c.Int("cell"), c.Int("synapse"))
 			},
 		},

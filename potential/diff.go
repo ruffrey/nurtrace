@@ -1,7 +1,7 @@
 package potential
 
 import (
-	"fmt"
+	"log"
 )
 
 /*
@@ -26,16 +26,16 @@ type Diff struct {
 Print prints the diff to stdout
 */
 func (diff *Diff) Print() {
-	fmt.Println("Diff")
-	fmt.Println("  synapseDiffs", diff.synapseDiffs)
-	fmt.Println("  synapseFires", diff.synapseFires)
-	fmt.Println("  addedSynapse")
+	log.Println("Diff")
+	log.Println("  synapseDiffs", diff.synapseDiffs)
+	log.Println("  synapseFires", diff.synapseFires)
+	log.Println("  addedSynapse")
 	for _, s := range diff.addedSynapses {
-		fmt.Println("    ", s.ID)
+		log.Println("    ", s.ID)
 	}
-	fmt.Println("  addedCells")
+	log.Println("  addedCells")
 	for _, c := range diff.addedCells {
-		fmt.Println("    ", c.ID)
+		log.Println("    ", c.ID)
 	}
 }
 
@@ -107,7 +107,7 @@ func DiffNetworks(originalNetwork, newerNetwork *Network) (diff Diff) {
 	for id, newerNetworkCell := range newerNetwork.Cells {
 		alreadyExisted := originalNetwork.CellExists(CellID(id))
 		if !alreadyExisted {
-			//fmt.Println("Diff: new cell", id)
+			//log.Println("Diff: new cell", id)
 			diff.addedCells[CellID(id)] = newerNetworkCell
 		}
 		// Here, we could theoretically get diff information on existing cells.
@@ -157,14 +157,14 @@ func ApplyDiff(diff Diff, originalNetwork *Network) (reIDedCells map[CellID]Cell
 		copySynapseToNetwork(synapse, originalNetwork)
 		// old axon connection removed from cell if cell is new
 		if _, isNewCell := diff.addedCells[synapse.FromNeuronAxon]; isNewCell {
-			// fmt.Println("  removing old synapse reference from new cell (axon)", synapse.FromNeuronAxon)
+			// log.Println("  removing old synapse reference from new cell (axon)", synapse.FromNeuronAxon)
 
 			delete(originalNetwork.Cells[synapse.FromNeuronAxon].AxonSynapses, synapse.ID)
 		}
 
 		// old dendrite connection removed from cell if cell is new
 		if _, isNewCell := diff.addedCells[synapse.ToNeuronDendrite]; isNewCell {
-			// fmt.Println("  removing old synapse reference from new cell (dendrite)", synapse.ToNeuronDendrite)
+			// log.Println("  removing old synapse reference from new cell (dendrite)", synapse.ToNeuronDendrite)
 
 			delete(originalNetwork.Cells[synapse.ToNeuronDendrite].DendriteSynapses, synapse.ID)
 		}

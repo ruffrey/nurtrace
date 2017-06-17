@@ -112,7 +112,7 @@ func (network *Network) GrowPathBetween(startCell, endCell CellID, minSynapses i
 	}()
 
 	for synapseToOutputCell := range ch {
-		// fmt.Println("synapseToOutputCell", synapseToOutputCell)
+		// log.Println("synapseToOutputCell", synapseToOutputCell)
 		synapsesToEndMux.Lock()
 		synapsesToEnd[synapseToOutputCell] = true
 		synapsesToEndMux.Unlock()
@@ -161,7 +161,7 @@ func (network *Network) GrowPathBetween(startCell, endCell CellID, minSynapses i
 GrowRandomNeurons will randomly add neurons with the default number of synapses to the network.
 */
 func (network *Network) GrowRandomNeurons(neuronsToAdd, synapsesPerNeuron int) {
-	// fmt.Println("  adding neurons =", neuronsToAdd)
+	// log.Println("  adding neurons =", neuronsToAdd)
 	// Now - all the new neurons are added first with no synapses. If synapses were added at
 	// create time, the newer neurons would end up with far fewer connections to the following
 	// newer neurons.

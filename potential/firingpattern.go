@@ -1,7 +1,7 @@
 package potential
 
 import (
-	"fmt"
+	"log"
 	"math"
 
 	"github.com/ruffrey/nurtrace/laws"
@@ -231,7 +231,7 @@ set before running this.
 */
 func RunFiringPatternTraining(vocab *Vocabulary, chSynchVocab chan *Vocabulary, chSendBackVocab chan *Vocabulary, tag string) {
 	tots := len(vocab.Samples)
-	fmt.Println(tag, "Running samples", tots)
+	log.Println(tag, "Running samples", tots)
 
 	for sampleIndex, s := range vocab.Samples {
 		var sampleFirePattern FiringPattern
@@ -281,7 +281,7 @@ func RunFiringPatternTraining(vocab *Vocabulary, chSynchVocab chan *Vocabulary, 
 				chSynchVocab <- vocab
 				vocab = <-chSendBackVocab
 			}
-			fmt.Println(tag, "progress", sampleIndex, "/", tots)
+			log.Println(tag, "progress", sampleIndex, "/", tots)
 		}
 	}
 
@@ -332,7 +332,7 @@ func (vocab *Vocabulary) CheckAndReduceSimilarity() {
 			tooSimilar := ratio > laws.PatternSimilarityLimit
 			if tooSimilar {
 				// change this output pattern
-				//fmt.Println("EXPAND:", secondary.Value, "vs", primary.Value, "is", ratio)
+				//log.Println("EXPAND:", secondary.Value, "vs", primary.Value, "is", ratio)
 				expandOutputs(vocab.Net, unsharedFiringPattern, ratio)
 			}
 		}
@@ -357,7 +357,7 @@ func (vocab *Vocabulary) CheckAndReduceSimilarity() {
 	}
 	totalUseless := len(uselessCells)
 	if totalUseless > 0 {
-		fmt.Println("Clearing shared outputs cells: ", totalUseless)
+		log.Println("Clearing shared outputs cells: ", totalUseless)
 		for _, oc := range vocab.Outputs {
 			for cellID := range uselessCells {
 				delete(oc.FirePattern, cellID)
