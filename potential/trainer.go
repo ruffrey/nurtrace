@@ -14,13 +14,13 @@ func copyVocabWithNewSamples(original *Vocabulary, samples []sample) *Vocabulary
 	// copy Inputs and Outputs maps (maps pass by reference so new ones are needed)
 	for k, v := range original.Inputs {
 		newVocab.Inputs[k] = &VocabUnit{
-			Value: v.Value,
+			Value:      v.Value,
 			InputCells: cloneFiringPattern(v.InputCells),
 		}
 	}
 	for k, v := range original.Outputs {
 		newVocab.Outputs[k] = &OutputCollection{
-			Value: v.Value,
+			Value:       v.Value,
 			FirePattern: cloneFiringPattern(v.FirePattern),
 		}
 	}
