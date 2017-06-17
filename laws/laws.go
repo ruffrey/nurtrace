@@ -35,6 +35,17 @@ have for the `Millivolts` property.
 const NewSynapseMaxMillivolts int = 100
 
 /*
+IdealCellSynapseBalance is a ratio of the number of cells per synapse.
+There should always be more synapses than cells, so this value is between
+0 and 1.
+
+Examples:
+- 10 synapses per cell would be a ratio of `0.1`.
+- 20 synapses per cell would be a ratio of `.05`.
+*/
+const IdealCellSynapseBalance int = 0.1
+
+/*
 SynapseLearnRate is how much a synapse should get bumped when it is being reinforced.
 
 This is an absolute value because the synapse may be positive or negative, and this

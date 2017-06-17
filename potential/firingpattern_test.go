@@ -324,7 +324,7 @@ func Test_RunFiringPatternTraining(t *testing.T) {
 	t.Run("mixed inputs and overlapping outputs will predict correctly", func(t *testing.T) {
 		// setup the network
 		network := NewNetwork()
-		network.GrowRandomNeurons(300, 20)
+		network.GrowRandomNeurons(300, 10)
 		vocab := NewVocabulary(network)
 
 		// setup the training data
