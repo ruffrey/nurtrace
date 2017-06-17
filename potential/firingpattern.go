@@ -17,6 +17,18 @@ Glossary:
 type FiringPattern map[CellID]uint16
 
 /*
+cloneFiringPattern is necessary because maps are pass-by-reference,
+and are often part of cloning
+*/
+func cloneFiringPattern(fp FiringPattern) FiringPattern {
+	newFP := make(FiringPattern)
+	for cellID, fires := range fp {
+		newFP[cellID] = fires
+	}
+	return newFP
+}
+
+/*
 FireNetworkUntilDone takes some seed cells, fires them,
 then fires the network until it has no more firing - up
 to `laws.MaxPostFireSteps`.
@@ -108,7 +120,7 @@ func mergeAllOutputs(original, newer map[OutputValue]*OutputCollection) {
 }
 
 /*
-mergeAllInputs modifies the original group of INputs by merging
+mergeAllInputs modifies the original group of Inputs by merging
 every newer output collection into the original.
 */
 func mergeAllInputs(original, newer map[InputValue]*VocabUnit) {

@@ -107,6 +107,7 @@ func DiffNetworks(originalNetwork, newerNetwork *Network) (diff Diff) {
 	for id, newerNetworkCell := range newerNetwork.Cells {
 		alreadyExisted := originalNetwork.CellExists(CellID(id))
 		if !alreadyExisted {
+			//fmt.Println("Diff: new cell", id)
 			diff.addedCells[CellID(id)] = newerNetworkCell
 		}
 		// Here, we could theoretically get diff information on existing cells.
@@ -131,12 +132,16 @@ no need to copy any changes from existing cell voltages.
 
 **The order of operations in ApplyDiff matters!**
 
-This will update the network version, also.
+Returns a map of any cells that had their IDs change. `map[fromCellID]toCellID`
 */
-func ApplyDiff(diff Diff, originalNetwork *Network) (err error) {
+func ApplyDiff(diff Diff, originalNetwork *Network) (reIDedCells map[CellID]CellID) {
+	reIDedCells = make(map[CellID]CellID) // old ID:newID
 	// New cells
 	for _, cell := range diff.addedCells {
-		copyCellToNetwork(cell, originalNetwork)
+		newCellID := copyCellToNetwork(cell, originalNetwork)
+		if cell.ID != newCellID {
+			reIDedCells[cell.ID] = newCellID
+		}
 	}
 
 	// New synapses
@@ -176,7 +181,7 @@ func ApplyDiff(diff Diff, originalNetwork *Network) (err error) {
 		s.ActivationHistory += activations
 	}
 
-	return nil
+	return reIDedCells
 }
 
 /*
@@ -207,12 +212,11 @@ func CloneNetwork(originalNetwork *Network) *Network {
 }
 
 /*
-copyCellToNetwork copies the properies of once cell to a new one, and updates the network pointer
+copyCellToNetwork copies the properies of one cell to a new one, and updates the network pointer
 on the new cell to a different given network. It also adds the cell to the new network.
-
-Returns the cell ID of the copied cell, in case it had to change.
+The cell will have a different id.
 */
-func copyCellToNetwork(origCell *Cell, newNetwork *Network) {
+func copyCellToNetwork(origCell *Cell, newNetwork *Network) CellID {
 	// fresh cell on a new network that will serve as the copy
 	copiedCell := NewCell(newNetwork)
 
@@ -232,6 +236,8 @@ func copyCellToNetwork(origCell *Cell, newNetwork *Network) {
 		copiedCell.DendriteSynapses[synapseID] = true
 	}
 	newNetwork.cellMux.Unlock()
+
+	return copiedCell.ID
 }
 
 /*

@@ -11,12 +11,18 @@ import (
 
 func copyVocabWithNewSamples(original *Vocabulary, samples []sample) *Vocabulary {
 	newVocab := NewVocabulary(CloneNetwork(original.Net))
-	// copy Inputs and Outputs maps
+	// copy Inputs and Outputs maps (maps pass by reference so new ones are needed)
 	for k, v := range original.Inputs {
-		newVocab.Inputs[k] = v
+		newVocab.Inputs[k] = &VocabUnit{
+			Value: v.Value,
+			InputCells: cloneFiringPattern(v.InputCells),
+		}
 	}
 	for k, v := range original.Outputs {
-		newVocab.Outputs[k] = v
+		newVocab.Outputs[k] = &OutputCollection{
+			Value: v.Value,
+			FirePattern: cloneFiringPattern(v.FirePattern),
+		}
 	}
 	newVocab.Threads = original.Threads
 	newVocab.Workerfile = original.Workerfile
@@ -210,11 +216,21 @@ func Train(masterVocab *Vocabulary, isRemoteWorkerWithTag string) {
 	for {
 		select {
 		case vocab := <-chSynchVocab:
-			mergeAllOutputs(masterVocab.Outputs, vocab.Outputs)
-			mergeAllInputs(masterVocab.Inputs, vocab.Inputs)
-
 			oDiff := DiffNetworks(masterVocab.Net, vocab.Net)
-			ApplyDiff(oDiff, masterVocab.Net)
+			idChanges := ApplyDiff(oDiff, masterVocab.Net)
+
+			// IDs that were reassigned need to be updated throughout
+			// vocab also. Merging a diff on the network does not handle that.
+			if len(idChanges) > 0 {
+				rerouteChangedIOCellIDs(idChanges, vocab) // old vocab
+			}
+
+			mergeAllOutputs(masterVocab.Outputs, vocab.Outputs)
+			// should not be adding inputs on any network except the main one.
+			// it presents a complication merging the firing patterns
+			// from the branched network when the firing patterns reference
+			// cells that do not yet exist on the new network
+			mergeAllInputs(masterVocab.Inputs, vocab.Inputs)
 
 			if shouldDedupe {
 				dupes := findDupeSynapses(masterVocab.Net)
@@ -244,6 +260,40 @@ func Train(masterVocab *Vocabulary, isRemoteWorkerWithTag string) {
 				}
 			}
 			return
+		}
+	}
+}
+
+/*
+rerouteChangedIOCellIDs prevents nonexistent cells in the firing patterns of Inputs
+and Outputs after merging to master vocab.
+
+During a Network diff and merge, sometimes cells on the new network get new IDs.
+
+When the cells with new IDs were part of the Input or Output firing pattern on the
+branched networ/vocab, they would be referencing cells that do not exist on the
+master network once they are merged to the master vocab.Inputs and vocab.Outputs.
+
+This function updates those changed cell IDs on the vocab to be in sync with the
+network.
+*/
+func rerouteChangedIOCellIDs(idChanges map[CellID]CellID, vocab *Vocabulary) {
+	for _, outColl := range vocab.Outputs {
+		for oldCellID, fires := range outColl.FirePattern {
+			if newCellID, didChange := idChanges[oldCellID]; didChange {
+				//fmt.Println("Swapping Output:", oldCellID, "for", newCellID)
+				outColl.FirePattern[newCellID] = fires
+				delete(outColl.FirePattern, oldCellID)
+			}
+		}
+	}
+	for _, vocabUnit := range vocab.Inputs {
+		for oldCellID, fires := range vocabUnit.InputCells {
+			if newCellID, didChange := idChanges[oldCellID]; didChange {
+				//fmt.Println("Swapping Input:", oldCellID, "for", newCellID)
+				vocabUnit.InputCells[newCellID] = fires
+				delete(vocabUnit.InputCells, oldCellID)
+			}
 		}
 	}
 }
