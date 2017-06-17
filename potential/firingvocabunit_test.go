@@ -7,7 +7,7 @@ import (
 )
 
 func Test_VocabUnit(t *testing.T) {
-	t.Run("_isCellOnAnyInput returns true when cell is on inputs", func(t *testing.T) {
+	t.Run("isCellOnAnyInput returns true when cell is on inputs", func(t *testing.T) {
 		inputs := make(map[InputValue]*VocabUnit)
 		cellID := CellID(5)
 
@@ -22,9 +22,9 @@ func Test_VocabUnit(t *testing.T) {
 		inputs[g].InputCells[CellID(2)] = 2
 		inputs[g].InputCells[CellID(13)] = 1
 
-		assert.True(t, _isCellOnAnyInput(cellID, inputs))
+		assert.True(t, isCellOnAnyInput(cellID, inputs))
 	})
-	t.Run("_isCellOnAnyInput returns false when cell is NOT on inputs", func(t *testing.T) {
+	t.Run("isCellOnAnyInput returns false when cell is NOT on inputs", func(t *testing.T) {
 		inputs := make(map[InputValue]*VocabUnit)
 		cellID := CellID(5)
 
@@ -39,6 +39,6 @@ func Test_VocabUnit(t *testing.T) {
 		inputs[g].InputCells[CellID(6)] = 2
 		inputs[g].InputCells[CellID(18)] = 1
 
-		assert.False(t, _isCellOnAnyInput(cellID, inputs))
+		assert.False(t, isCellOnAnyInput(cellID, inputs))
 	})
 }

@@ -249,7 +249,7 @@ func RunFiringPatternTraining(vocab *Vocabulary, chSynchVocab chan *Vocabulary, 
 			sampleFirePattern = FireNetworkUntilDone(vocab.Net, cellsToFireForInputValues)
 			nothingFired := len(sampleFirePattern) == 0
 			if nothingFired {
-				expandInputs(vocab.Net, cellsToFireForInputValues)
+				expandInputs(vocab, cellsToFireForInputValues)
 				continue
 			}
 			// just runs once if things fired
@@ -263,11 +263,13 @@ func RunFiringPatternTraining(vocab *Vocabulary, chSynchVocab chan *Vocabulary, 
 		// because the old pattern wasn't close enough.
 		// TODO: is this a good rule?
 		if closestOutput == nil {
-			newPattern = sampleFirePattern // first timer?
+			newPattern = sampleFirePattern // first timer, or not enough data
 		} else if closestOutput.Value == s.output {
+			// not enough data, or it did a poor prediction
 			newPattern = mergeFiringPatterns(originalFP, sampleFirePattern)
 		} else {
-			expandInputs(vocab.Net, cellsToFireForInputValues)
+			// first timer, or poor prediction
+			expandInputs(vocab, cellsToFireForInputValues)
 			newPattern = sampleFirePattern
 		}
 		vocab.Outputs[s.output].FirePattern = newPattern

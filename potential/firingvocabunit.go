@@ -60,7 +60,7 @@ func (vu *VocabUnit) InitRandomInputs(vocab *Vocabulary) {
 		var cellID CellID
 		for {
 			cellID = vocab.Net.RandomCellKey()
-			if !_isCellOnAnyInput(cellID, vocab.Inputs) {
+			if !isCellOnAnyInput(cellID, vocab.Inputs) {
 				break
 			}
 		}
@@ -68,7 +68,7 @@ func (vu *VocabUnit) InitRandomInputs(vocab *Vocabulary) {
 	}
 }
 
-func _isCellOnAnyInput(cellID CellID, inputs map[InputValue]*VocabUnit) bool {
+func isCellOnAnyInput(cellID CellID, inputs map[InputValue]*VocabUnit) bool {
 	for _, vu := range inputs {
 		if _, exists := vu.InputCells[cellID]; exists {
 			return true
@@ -91,17 +91,21 @@ func randCellFromFP(cellMap FiringPattern) (randCellID CellID) {
 }
 
 /*
-expandInputs expands an input firing pattern by a set number of cells and uses
-an excitatory synapse to link them.
+expandInputs expands an input firing pattern by a set number of synapses.
 */
-func expandInputs(network *Network, fp FiringPattern) {
+func expandInputs(vocab *Vocabulary, fp FiringPattern) {
 	for i := 0; i < laws.InputCellDifferentiationCount; i++ {
-		preCell1 := randCellFromFP(fp)
-		newCell := NewCell(network)
+		preCell := randCellFromFP(fp)
+		// do not just fire another input cell; that would
+		// be a little confounding right out of the gate.
+		for {
+			anotherCell := vocab.Net.RandomCellKey()
+			if !isCellOnAnyInput(anotherCell, vocab.Inputs) {
+				vocab.Net.linkCells(preCell, anotherCell)
+				break
+			}
+		}
 
-		newSynapse1 := network.linkCells(preCell1, newCell.ID)
-		// excitatory
-		newSynapse1.Millivolts = int16(math.Abs(float64(newSynapse1.Millivolts)))
 	}
 }
 

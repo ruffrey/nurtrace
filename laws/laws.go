@@ -102,7 +102,7 @@ const InitialCellCountPerVocabUnit int = 16
 InputCellDifferentiationCount is the number of cells to add in order to
 make a set of inputs more different.
 */
-const InputCellDifferentiationCount = 3
+const InputCellDifferentiationCount = 1
 
 /*
 NoiseRatio is the percentage of cells to purposely fire as noise
