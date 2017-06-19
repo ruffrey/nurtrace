@@ -43,7 +43,7 @@ Examples:
 - 10 synapses per cell would be a ratio of `0.1`.
 - 20 synapses per cell would be a ratio of `.05`.
 */
-const IdealCellSynapseBalance int = 0.1
+const IdealCellSynapseBalance float64 = 0.1
 
 /*
 SynapseLearnRate is how much a synapse should get bumped when it is being reinforced.
@@ -124,7 +124,7 @@ const NoiseRatio float64 = 0.3
 /*
 TrainingMergeBackIteration is the point at which we reset a network during training.
 */
-const TrainingMergeBackIteration = 5
+const TrainingMergeBackIteration = 25
 
 /*
 MinUniqueCellsDuringExpand is how many cells are required to be unique in
