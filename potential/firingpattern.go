@@ -355,15 +355,17 @@ func (vocab *Vocabulary) CheckAndReduceSimilarity() {
 			uselessCells[cellID] = true
 		}
 	}
-	totalUseless := len(uselessCells)
-	if totalUseless > 0 {
-		log.Println("Clearing shared outputs cells: ", totalUseless)
-		for _, oc := range vocab.Outputs {
-			for cellID := range uselessCells {
-				delete(oc.FirePattern, cellID)
-			}
-		}
-	}
+
+	// turned off because it isn't clear whether this really helps or not
+	//totalUseless := len(uselessCells)
+	//if totalUseless > 0 {
+	//	log.Println("Clearing shared outputs cells: ", totalUseless)
+	//	for _, oc := range vocab.Outputs {
+	//		for cellID := range uselessCells {
+	//			delete(oc.FirePattern, cellID)
+	//		}
+	//	}
+	//}
 }
 
 /*
