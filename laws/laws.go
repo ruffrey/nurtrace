@@ -43,7 +43,7 @@ Examples:
 - 10 synapses per cell would be a ratio of `0.1`.
 - 20 synapses per cell would be a ratio of `.05`.
 */
-const IdealCellSynapseBalance float64 = 0.1
+const IdealCellSynapseBalance float64 = 0.09
 
 /*
 SynapseLearnRate is how much a synapse should get bumped when it is being reinforced.
@@ -101,7 +101,7 @@ PatternSimilarityLimit represents the percentage/ratio of
 similarity between two firing patterns before one (or both?) of them
 need to change.
 */
-const PatternSimilarityLimit float64 = 0.6
+const PatternSimilarityLimit float64 = 0.7
 
 /*
 InitialCellCountPerVocabUnit is how many cells will represent a single
@@ -125,9 +125,3 @@ const NoiseRatio float64 = 0.3
 TrainingMergeBackIteration is the point at which we reset a network during training.
 */
 const TrainingMergeBackIteration = 25
-
-/*
-MinUniqueCellsDuringExpand is how many cells are required to be unique in
-an output pattern. Being under this many will result in more being added.
-*/
-const MinUniqueCellsDuringExpand = 10

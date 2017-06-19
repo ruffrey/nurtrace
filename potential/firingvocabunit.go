@@ -96,7 +96,7 @@ expandInputs expands an input firing pattern by a set number of synapses.
 func expandInputs(vocab *Vocabulary, fp FiringPattern) {
 	for i := 0; i < laws.InputCellDifferentiationCount; i++ {
 		preCell := randCellFromFP(fp)
-		// do not just fire another input cell; that would
+		// Do not just fire another input cell; that would
 		// be a little confounding right out of the gate.
 		for {
 			anotherCell := vocab.Net.RandomCellKey()
@@ -109,6 +109,8 @@ func expandInputs(vocab *Vocabulary, fp FiringPattern) {
 	}
 }
 
+// Not greater than 10% more synapses than the ideal number of synapses per cell.
+const _maxSynapseRatio float64 = laws.IdealCellSynapseBalance - (laws.IdealCellSynapseBalance * .1)
 /*
 expandOutputs expands an output firing pattern by adding more
 synapses from the firting pattern to random cells.
@@ -117,22 +119,21 @@ func expandOutputs(network *Network, unsharedCellsFP FiringPattern, similarity f
 	totalUnshared := float64(len(unsharedCellsFP))
 	pctOverLimit := similarity - laws.PatternSimilarityLimit
 	uniquenessToAdd := int(math.Ceil(pctOverLimit * totalUnshared))
+
+	currentRatio := float64(len(network.Cells)) / float64(len(network.Synapses))
+	shouldAddCell := currentRatio > laws.IdealCellSynapseBalance || currentRatio < _maxSynapseRatio
+
 	for i := 0; i < uniquenessToAdd; i++ {
-		var preCell CellID
-		// fewer than this means we need to add more unique cells
-		if totalUnshared > laws.MinUniqueCellsDuringExpand {
-			preCell = randCellFromFP(unsharedCellsFP)
+		preCell := randCellFromFP(unsharedCellsFP)
+		var nextCell CellID
+
+		if shouldAddCell {
+			nextCell = NewCell(network).ID
+			network.linkCells(nextCell, network.RandomCellKey())
 		} else {
-			preCell = NewCell(network).ID
+			nextCell = network.RandomCellKey()
 		}
-		network.linkCells(preCell, network.RandomCellKey())
 
-		// also reinforce a random unshared synapse
-		anotherCell := network.GetCell(randCellFromFP(unsharedCellsFP))
-		if len(anotherCell.AxonSynapses) != 0 {
-			randReinforceSynapse := randSynapseFromMap(anotherCell.AxonSynapses)
-
-			network.GetSyn(randReinforceSynapse).reinforce()
-		}
+		network.linkCells(preCell, nextCell)
 	}
 }
