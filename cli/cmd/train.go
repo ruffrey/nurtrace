@@ -28,7 +28,7 @@ func Train(networkInputFile, networkSaveFile, vocabSaveFile, testDataFile, doPro
 		network = potential.NewNetwork()
 		neuronsToAdd := initialNetworkNeurons
 		synapsesToAdd := 0
-		network.Grow(neuronsToAdd, laws.DefaultNeuronSynapses, synapsesToAdd)
+		network.Grow(neuronsToAdd, laws.ComputedSynapsesPerCell, synapsesToAdd)
 		log.Println("Created network,", len(network.Cells), "cells",
 			len(network.Synapses), "synapses")
 	} else {

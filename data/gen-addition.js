@@ -15,12 +15,19 @@ const outputFile = `${__dirname}/charcat-addition.json`;
 const write = () => fs.writeFileSync(outputFile, JSON.stringify(data, null, 2));
 let data = [];
 
+const alreadyInput = [];
+
 for (let i = 0; i < desiredTotal; i++) {
     const a = rand();
     const b = rand();
+    const InputText = `${a}+${b}`;
+    if (alreadyInput.includes(InputText)) {
+        continue
+    }
+    alreadyInput.push(InputText);
     const testCase = {
         ExpectedOutput: `${a+b}`,
-        InputText: `${a}+${b}`
+        InputText
     };
     const input = testCase.InputText.split('');
     assert.equal(

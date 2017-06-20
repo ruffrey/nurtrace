@@ -1,5 +1,7 @@
 package laws
 
+import "math"
+
 /*
 laws.go is the collection of constants.
 
@@ -43,7 +45,9 @@ Examples:
 - 10 synapses per cell would be a ratio of `0.1`.
 - 20 synapses per cell would be a ratio of `.05`.
 */
-const IdealCellSynapseBalance float64 = 0.09
+const IdealCellSynapseBalance float64 = 0.05
+
+var ComputedSynapsesPerCell int = int(math.Ceil(1/IdealCellSynapseBalance))
 
 /*
 SynapseLearnRate is how much a synapse should get bumped when it is being reinforced.
@@ -65,11 +69,6 @@ const CellFireVoltageThreshold int = 180
 CellRestingVoltage is what a neuron gets reset to after it has fired.
 */
 const CellRestingVoltage int16 = -int16(CellFireVoltageThreshold/6)
-
-/*
-DefaultNeuronSynapses is the number of random synapses a new neuron will get.
-*/
-const DefaultNeuronSynapses = 20
 
 /*
 MaxDepthFromInputToOutput is how far the path between an input cell and its
@@ -119,9 +118,9 @@ const InputCellDifferentiationCount = 1
 NoiseRatio is the percentage of cells to purposely fire as noise
 during training (or sampling?).
 */
-const NoiseRatio float64 = 0.3
+const NoiseRatio float64 = 0.01
 
 /*
 TrainingMergeBackIteration is the point at which we reset a network during training.
 */
-const TrainingMergeBackIteration = 25
+const TrainingMergeBackIteration = 10

@@ -40,6 +40,7 @@ func FireNetworkUntilDone(network *Network, seedCells FiringPattern) FiringPatte
 	fp := make(FiringPattern)
 
 	// Do the seeding
+	network.FireNoise()
 	for ; i < laws.FiringIterationsPerSample; i++ {
 		for cellID := range seedCells {
 			network.GetCell(cellID).FireActionPotential()
@@ -233,7 +234,8 @@ func RunFiringPatternTraining(vocab *Vocabulary, chSynchVocab chan *Vocabulary, 
 	tots := len(vocab.Samples)
 	log.Println(tag, "Running samples", tots)
 
-	for sampleIndex, s := range vocab.Samples {
+	for sampleIndex := 0; sampleIndex < len(vocab.Samples); sampleIndex++ {
+		s := vocab.Samples[sampleIndex]
 		var sampleFirePattern FiringPattern
 
 		// merge the inputs first
@@ -263,15 +265,17 @@ func RunFiringPatternTraining(vocab *Vocabulary, chSynchVocab chan *Vocabulary, 
 		// because the old pattern wasn't close enough.
 		// TODO: is this a good rule?
 		if closestOutput == nil {
-			newPattern = sampleFirePattern // first timer, or not enough data
+			// first timer, or not enough data, or nothing fired
+			newPattern = sampleFirePattern
 		} else if closestOutput.Value == s.output {
-			// not enough data, or it did a poor prediction
+			// predicted correctly
 			newPattern = mergeFiringPatterns(originalFP, sampleFirePattern)
 		} else {
 			// first timer, or poor prediction
 			expandInputs(vocab, cellsToFireForInputValues)
 			newPattern = sampleFirePattern
 		}
+
 		vocab.Outputs[s.output].FirePattern = newPattern
 
 		// sample is finished here, but provide an update on progress
