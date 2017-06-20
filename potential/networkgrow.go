@@ -10,9 +10,6 @@ import (
 
 /*
 Grow is a general growth that encompasses all growth methods.
-
-It adds neurons, adds new synapses, prunes old neurons, and strengthens synapses that have
-fired a lot.
 */
 func (network *Network) Grow(neuronsToAdd, synapsesPerNewNeuron, synapsesToAdd int) {
 	network.GrowRandomNeurons(neuronsToAdd, synapsesPerNewNeuron)
