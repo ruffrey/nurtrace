@@ -54,6 +54,32 @@ func Test_NetworkStep(t *testing.T) {
 		assert.Equal(t, false, hasMore,
 			"Step should not yield more cells to reset next round")
 	})
-	t.Skip("when firing one round results in firing the next round it returns true")
-	t.Skip("when firing one round results in no new firings it returns false")
+	t.Run("when firing one round results in no next firings it returns false", func(r *testing.T) {
+		network := NewNetwork()
+		cell := NewCell(network)
+		receiverCellA := NewCell(network)
+		receiverCellB := NewCell(network)
+		receiverCellA.Voltage = 0
+		receiverCellB.Voltage = 0
+
+		// setup two synapses, from cell to each receiver
+		network.linkCells(cell.ID, receiverCellA.ID)
+		network.linkCells(cell.ID, receiverCellB.ID)
+
+		network.GetSyn(0).fireNextRound = false
+		network.GetSyn(1).fireNextRound = false
+		// enough to fire next cell
+		network.GetSyn(0).Millivolts = int16(laws.CellFireVoltageThreshold)
+		network.GetSyn(1).Millivolts = int16(laws.CellFireVoltageThreshold)
+
+		// some pretesting
+		assert.Equal(t, false, receiverCellA.activating)
+		assert.Equal(t, false, receiverCellB.activating)
+
+		// actual test
+		hasMore := network.Step()
+
+		assert.Equal(t, false, hasMore,
+			"should not have resets on next Step")
+	})
 }
