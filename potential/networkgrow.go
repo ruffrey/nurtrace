@@ -4,6 +4,7 @@ import (
 	"sync"
 
 	"github.com/ruffrey/nurtrace/laws"
+	"log"
 )
 
 // All methods on a network that relate to growing are here.
@@ -12,8 +13,24 @@ import (
 Grow is a general growth that encompasses all growth methods.
 */
 func (network *Network) Grow(neuronsToAdd, synapsesPerNewNeuron, synapsesToAdd int) {
-	network.GrowRandomNeurons(neuronsToAdd, synapsesPerNewNeuron)
+	someSynapses := synapsesPerNewNeuron / 4
+	network.GrowRandomNeurons(neuronsToAdd, someSynapses)
 	network.GrowRandomSynapses(synapsesToAdd)
+	for i := 0; i < neuronsToAdd; i++ {
+		if i % 25 == 0 {
+			log.Println("growing deep synapses, progress=", i, "/", neuronsToAdd,
+				"totalSynapses=", len(network.Synapses))
+		}
+		from := network.RandomCellKey()
+		var to CellID
+		for {
+			to = network.RandomCellKey()
+			if to != from {
+				break
+			}
+		}
+		network.GrowPathBetween(from, to, laws.ComputedSynapsesPerCell)
+	}
 }
 
 /*
@@ -169,8 +186,8 @@ func (network *Network) GrowRandomNeurons(neuronsToAdd, synapsesPerNeuron int) {
 	}
 
 	// Now we add the default number of synapses to our new neurons, with random other neurons.
-	// Create the synapse, then choose a random cell from the network, then choose whether
-	// this new cell will be a sender or receiver.
+	// Create the synapse, then choose a random cell from the network. This cell
+	// will be the sender to the random cell.
 	for _, cell := range addedNeurons {
 		for i := 0; i < synapsesPerNeuron; {
 			ix := network.RandomCellKey()
@@ -180,21 +197,10 @@ func (network *Network) GrowRandomNeurons(neuronsToAdd, synapsesPerNeuron int) {
 				continue
 			}
 
-			if chooseIfSender() {
-				network.linkCells(cell.ID, otherCell.ID)
-			} else {
-				network.linkCells(otherCell.ID, cell.ID)
-			}
+			network.linkCells(cell.ID, otherCell.ID)
 			i++
 		}
 	}
-}
-
-func chooseIfSender() bool {
-	if randomIntBetween(0, 1) == 1 {
-		return true
-	}
-	return false
 }
 
 /*
