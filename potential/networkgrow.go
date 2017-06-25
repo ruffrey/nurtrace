@@ -17,7 +17,7 @@ func (network *Network) Grow(neuronsToAdd, synapsesPerNewNeuron, synapsesToAdd i
 	network.GrowRandomNeurons(neuronsToAdd, someSynapses)
 	network.GrowRandomSynapses(synapsesToAdd)
 	for i := 0; i < neuronsToAdd; i++ {
-		if i % 50 == 0 {
+		if i%50 == 0 {
 			log.Println("growing deep synapses, progress=", i, "/", neuronsToAdd,
 				"totalSynapses=", len(network.Synapses))
 		}

@@ -307,7 +307,7 @@ func (vocab *Vocabulary) CheckAndReduceSimilarity() {
 	alreadyCompared := make(map[string]bool)
 	totalOutputs := len(vocab.Outputs)
 	outputCellMap := make(map[CellID]int)
-	uselessCells := make(map[CellID]bool)
+	uselessCells := make(FiringPattern)
 
 	//outputsUnique := make(map[OutputValue]map[CellID]bool)
 
@@ -353,26 +353,15 @@ func (vocab *Vocabulary) CheckAndReduceSimilarity() {
 		}
 	}
 
-	//for outputValue, uniqueFireCells := range outputsUnique {
-	//	expandOutputs(vocab.Net, uniqueFireCells, ratio)
-	//}
 	// which cells are fired on every expected output?
 	for cellID, outputsThatHaveIt := range outputCellMap {
 		if outputsThatHaveIt >= totalOutputs {
-			uselessCells[cellID] = true
+			uselessCells[cellID] = 1
 		}
 	}
 
 	// turned off because it isn't clear whether this really helps or not
-	//totalUseless := len(uselessCells)
-	//if totalUseless > 0 {
-	//	log.Println("Clearing shared outputs cells: ", totalUseless)
-	//	for _, oc := range vocab.Outputs {
-	//		for cellID := range uselessCells {
-	//			delete(oc.FirePattern, cellID)
-	//		}
-	//	}
-	//}
+	vocab.Noise = uselessCells
 }
 
 /*
@@ -388,7 +377,8 @@ Subtracting noise is done.
 func FindClosestOutputCollection(patt FiringPattern, vocab *Vocabulary) (oc *OutputCollection) {
 	closestRatio := 0.0
 	for _, outputCandidate := range vocab.Outputs {
-		r, _ := DiffFiringPatterns(patt, outputCandidate.FirePattern).SimilarityRatio()
+		noiselessPattern := removeNoise(vocab.Noise, outputCandidate.FirePattern)
+		r, _ := DiffFiringPatterns(patt, noiselessPattern).SimilarityRatio()
 		isCloser := r > closestRatio
 		if isCloser {
 			closestRatio = r
@@ -396,4 +386,19 @@ func FindClosestOutputCollection(patt FiringPattern, vocab *Vocabulary) (oc *Out
 		}
 	}
 	return oc
+}
+
+// removeNoise returns a new firing pattern with noise removed
+func removeNoise(noisePatt, fp FiringPattern) (denoisedFP FiringPattern) {
+	denoisedFP = cloneFiringPattern(fp)
+	for cellID, noiseReductionFires := range noisePatt {
+		if fireTotal, hasNoise := denoisedFP[cellID]; hasNoise {
+			noiselessValue := fireTotal - noiseReductionFires
+			if noiselessValue < 0 {
+				noiselessValue = 0
+			}
+			denoisedFP[cellID] = noiselessValue
+		}
+	}
+	return denoisedFP
 }

@@ -24,6 +24,7 @@ type Vocabulary struct {
 	Outputs    map[OutputValue]*OutputCollection
 	Samples    []sample
 	Threads    int
+	Noise      FiringPattern
 	Workerfile string
 }
 
@@ -36,6 +37,7 @@ func NewVocabulary(network *Network) *Vocabulary {
 		Inputs:  make(map[InputValue]*VocabUnit),
 		Outputs: make(map[OutputValue]*OutputCollection),
 		Threads: runtime.NumCPU(),
+		Noise:   make(FiringPattern),
 	}
 }
 

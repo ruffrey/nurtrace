@@ -180,7 +180,7 @@ func (cell *Cell) towardResting() {
 	}
 	isOver := cell.Voltage > laws.CellRestingVoltage
 	amount := int16(math.Abs(float64(cell.Voltage - laws.CellRestingVoltage)))
-	movementAmount := amount/int16(laws.FiringIterationsPerSample)
+	movementAmount := amount / int16(laws.FiringIterationsPerSample)
 	if isOver {
 		cell.Voltage -= movementAmount
 		return

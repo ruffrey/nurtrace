@@ -3,8 +3,8 @@ package potential
 import (
 	"testing"
 
-	"github.com/stretchr/testify/assert"
 	"github.com/ruffrey/nurtrace/laws"
+	"github.com/stretchr/testify/assert"
 )
 
 func Test_NewCell(t *testing.T) {

@@ -119,6 +119,7 @@ func expandInputs(vocab *Vocabulary, fp FiringPattern) {
 
 // Not greater than 10% more synapses than the ideal number of synapses per cell.
 const _maxSynapseRatio float64 = laws.IdealCellSynapseBalance - (laws.IdealCellSynapseBalance * .1)
+
 /*
 expandOutputs expands an output firing pattern by adding more
 synapses from the firting pattern to random cells.
