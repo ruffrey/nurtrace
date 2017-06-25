@@ -109,7 +109,7 @@ func expandInputs(vocab *Vocabulary, fp FiringPattern) {
 		for {
 			anotherCell := vocab.Net.RandomCellKey()
 			if !isCellOnAnyInput(anotherCell, vocab.Inputs) {
-				vocab.Net.linkCells(preCell, anotherCell)
+				vocab.Net.GrowPathBetween(preCell, anotherCell, laws.ComputedSynapsesPerCell)
 				break
 			}
 		}
@@ -142,6 +142,6 @@ func expandOutputs(network *Network, unsharedCellsFP FiringPattern, similarity f
 			nextCell = network.RandomCellKey()
 		}
 
-		network.linkCells(preCell, nextCell)
+		network.GrowPathBetween(preCell, nextCell, laws.ComputedSynapsesPerCell)
 	}
 }
