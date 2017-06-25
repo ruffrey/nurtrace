@@ -265,15 +265,18 @@ func RunFiringPatternTraining(vocab *Vocabulary, chSynchVocab chan *Vocabulary, 
 		// because the old pattern wasn't close enough.
 		// TODO: is this a good rule?
 		if closestOutput == nil {
-			// first timer, or not enough data, or nothing fired
+			// first timer, or not enough data, or not enough fired.
 			newPattern = sampleFirePattern
 		} else if closestOutput.Value == s.output {
 			// predicted correctly
 			newPattern = mergeFiringPatterns(originalFP, sampleFirePattern)
 		} else {
-			// first timer, or poor prediction
+			// first timer, or poor prediction:
+			// expected pattern gets overwritten
 			expandInputs(vocab, cellsToFireForInputValues)
 			newPattern = sampleFirePattern
+			// actual pattern gets expanded for more uniqueness
+			expandOutputs(vocab.Net, closestOutput.FirePattern, 1-laws.PatternSimilarityLimit)
 		}
 
 		vocab.Outputs[s.output].FirePattern = newPattern
@@ -374,11 +377,13 @@ func (vocab *Vocabulary) CheckAndReduceSimilarity() {
 
 /*
 FindClosestOutputCollection finds the closest output collection
-statisitcally.
+by simple average.
 
 patt = the actual firing pattern
 
 This is useful for sampling.
+
+Subtracting noise is done.
 */
 func FindClosestOutputCollection(patt FiringPattern, vocab *Vocabulary) (oc *OutputCollection) {
 	closestRatio := 0.0
