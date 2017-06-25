@@ -57,14 +57,22 @@ InitRandomInputs chooses some input cells for the vocab unit.
 */
 func (vu *VocabUnit) InitRandomInputs(vocab *Vocabulary) {
 	for i := 0; i < laws.InitialCellCountPerVocabUnit; i++ {
-		var cellID CellID
+		var inputCellID CellID
+		var depthGrowerCellID CellID // attempt to ensure there are deep paths in the net
 		for {
-			cellID = vocab.Net.RandomCellKey()
-			if !isCellOnAnyInput(cellID, vocab.Inputs) {
+			inputCellID = vocab.Net.RandomCellKey()
+			if !isCellOnAnyInput(inputCellID, vocab.Inputs) {
 				break
 			}
 		}
-		vu.InputCells[cellID] = 1
+		for {
+			depthGrowerCellID = vocab.Net.RandomCellKey()
+			if !isCellOnAnyInput(depthGrowerCellID, vocab.Inputs) {
+				break
+			}
+		}
+		vu.InputCells[inputCellID] = 1
+		vocab.Net.GrowPathBetween(inputCellID, depthGrowerCellID, laws.ComputedSynapsesPerCell)
 	}
 }
 
