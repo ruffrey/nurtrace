@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/ruffrey/nurtrace/laws"
+	"math"
 )
 
 /*
@@ -168,4 +169,21 @@ the refractory period after it fired.
 func (cell *Cell) postRefractoryReset() {
 	cell.activating = false
 	cell.Voltage = laws.CellRestingVoltage
+}
+
+/*
+towardResting moves cell voltage in the direction of the resting voltage.
+*/
+func (cell *Cell) towardResting() {
+	if cell.Voltage == laws.CellRestingVoltage {
+		return
+	}
+	isOver := cell.Voltage > laws.CellRestingVoltage
+	amount := int16(math.Abs(float64(cell.Voltage - laws.CellRestingVoltage)))
+	movementAmount := amount/int16(laws.FiringIterationsPerSample)
+	if isOver {
+		cell.Voltage -= movementAmount
+		return
+	}
+	cell.Voltage += movementAmount
 }

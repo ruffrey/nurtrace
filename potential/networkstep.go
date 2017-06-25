@@ -94,6 +94,8 @@ func (network *Network) Step() (hasMore bool) {
 			cell.postRefractoryReset()
 		} else if nextCellResets[CellID(cellID)] {
 			cell.activating = true
+		} else {
+			cell.towardResting()
 		}
 	}
 

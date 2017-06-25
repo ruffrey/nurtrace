@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/ruffrey/nurtrace/laws"
 )
 
 func Test_NewCell(t *testing.T) {
@@ -101,5 +102,44 @@ func Test_PruneCell(t *testing.T) {
 		assert.Panics(t, func() {
 			network.PruneCell(cell2.ID)
 		})
+	})
+}
+
+func Test_CellTowardResting(t *testing.T) {
+	t.Run("when voltage is already resting it keeps it", func(t *testing.T) {
+		network := NewNetwork()
+		cell := NewCell(network)
+
+		cell.Voltage = laws.CellRestingVoltage
+		cell.towardResting()
+		assert.Equal(t, laws.CellRestingVoltage, cell.Voltage)
+	})
+	t.Run("when voltage is greater than resting, it moves toward zero", func(t *testing.T) {
+		network := NewNetwork()
+		cell := NewCell(network)
+
+		// first test
+		cell.Voltage = laws.CellRestingVoltage + 50
+		cell.towardResting()
+		assert.Equal(t, int16(8), cell.Voltage)
+
+		// another
+		cell.Voltage = laws.CellRestingVoltage + 9
+		cell.towardResting()
+		assert.Equal(t, int16(-23), cell.Voltage)
+	})
+	t.Run("when voltage is less than resting, it moves toward zero", func(t *testing.T) {
+		network := NewNetwork()
+		cell := NewCell(network)
+
+		// first test
+		cell.Voltage = laws.CellRestingVoltage - 22
+		cell.towardResting()
+		assert.Equal(t, int16(-47), cell.Voltage)
+
+		// another
+		cell.Voltage = laws.CellRestingVoltage - 67
+		cell.towardResting()
+		assert.Equal(t, int16(-81), cell.Voltage)
 	})
 }
