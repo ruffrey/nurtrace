@@ -376,9 +376,10 @@ Subtracting noise is done.
 */
 func FindClosestOutputCollection(patt FiringPattern, vocab *Vocabulary) (oc *OutputCollection) {
 	closestRatio := 0.0
+	slimPatt := removeNoise(vocab.Noise, patt)
 	for _, outputCandidate := range vocab.Outputs {
 		noiselessPattern := removeNoise(vocab.Noise, outputCandidate.FirePattern)
-		r, _ := DiffFiringPatterns(patt, noiselessPattern).SimilarityRatio()
+		r, _ := DiffFiringPatterns(slimPatt, noiselessPattern).SimilarityRatio()
 		isCloser := r > closestRatio
 		if isCloser {
 			closestRatio = r
