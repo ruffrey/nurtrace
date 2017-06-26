@@ -1,7 +1,7 @@
 package cmd
 
 import (
-	"log"
+	"fmt"
 
 	"github.com/ruffrey/nurtrace/potential"
 )
@@ -22,7 +22,7 @@ func Sample(networkSaveFile, vocabSaveFile string, seedText string, sampleLength
 	vocab.Net = network
 	output := potential.Sample(seedText, vocab, sampleLength)
 
-	log.Println(output)
+	fmt.Println(output)
 
 	return nil
 }
