@@ -143,7 +143,7 @@ func Train(masterVocab *Vocabulary, isRemoteWorkerWithTag string) {
 		} else {
 			threadIteration++
 		}
-		to := threadIteration * int(partSize) +1
+		to := threadIteration*int(partSize) + 1
 		// protect likely array out of bounds on last thread
 		if to > lenAllSamples {
 			to = lenAllSamples
