@@ -1,8 +1,8 @@
 package cmd
 
 import (
-	"log"
 	"io/ioutil"
+	"log"
 	"os"
 	"os/signal"
 	"strconv"

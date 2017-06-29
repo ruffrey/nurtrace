@@ -2,8 +2,8 @@ package cmd
 
 import (
 	"errors"
-	"log"
 	"io/ioutil"
+	"log"
 	"os"
 	"strconv"
 
