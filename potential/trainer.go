@@ -241,13 +241,6 @@ func Train(masterVocab *Vocabulary, isRemoteWorkerWithTag string) {
 			merges++
 			if merges%(masterVocab.Threads+1) == 0 {
 				masterVocab.Net.PrintTotals()
-				log.Println("sample: 1+1=", Sample("1+1", vocab, 1))
-				log.Println("sample: 4+0=", Sample("4+0", vocab, 1))
-				log.Println("sample: 2+3=", Sample("2+3", vocab, 1))
-				log.Println("sample: 3+4=", Sample("3+4", vocab, 1))
-				log.Println("sample: 5+6=", Sample("5+6", vocab, 1))
-				log.Println("sample: 5+5=", Sample("5+5", vocab, 1))
-				log.Println("sample: 7+8=", Sample("7+8", vocab, 1))
 			}
 			masterVocab.CheckAndReduceSimilarity()
 			chSendBackVocab <- copyVocabWithNewSamples(masterVocab, vocab.Samples)
