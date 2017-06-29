@@ -1,0 +1,14 @@
+[
+    {
+        "ExpectedOutput": "p",
+        "InputText": "br"
+    },
+    {
+        "ExpectedOutput": "o",
+        "InputText": "ry"
+    },
+    {
+        "ExpectedOutput": "t",
+        "InputText": "gb"
+    }
+]
