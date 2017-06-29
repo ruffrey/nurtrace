@@ -359,7 +359,7 @@ func (vocab *Vocabulary) CheckAndReduceSimilarity() {
 			uselessCells[cellID] = 1
 		}
 	}
-
+	log.Println("Noise=", float64(len(uselessCells))/float64(len(vocab.Net.Cells)))
 	// turned off because it isn't clear whether this really helps or not
 	vocab.Noise = uselessCells
 }
