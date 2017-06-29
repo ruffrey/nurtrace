@@ -149,7 +149,6 @@ func (network *Network) GrowPathBetween(startCell, endCell CellID, minSynapses i
 
 			synapsesAdded[newLinkingSynapse.ID] = true
 
-			newLinkingSynapse.Millivolts = int16(laws.CellFireVoltageThreshold)
 			lastCell = intermediary
 		}
 

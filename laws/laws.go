@@ -28,13 +28,13 @@ const ActualSynapseMax int16 = 32766 - int16(SynapseLearnRate)
 NewSynapseMinMillivolts is the bottom range of how much a new synapse will
 have for the `Millivolts` property.
 */
-const NewSynapseMinMillivolts int = -100
+const NewSynapseMinMillivolts int = -5
 
 /*
 NewSynapseMaxMillivolts is the bottom range of how much a new synapse will
 have for the `Millivolts` property.
 */
-const NewSynapseMaxMillivolts int = 100
+const NewSynapseMaxMillivolts int = 5
 
 /*
 IdealCellSynapseBalance is a ratio of the number of cells per synapse.
@@ -47,7 +47,7 @@ Examples:
 */
 const IdealCellSynapseBalance float64 = 0.05
 
-var ComputedSynapsesPerCell int = int(math.Ceil(1/IdealCellSynapseBalance))
+var ComputedSynapsesPerCell int = int(math.Ceil(1 / IdealCellSynapseBalance))
 
 /*
 SynapseLearnRate is how much a synapse should get bumped when it is being reinforced.
@@ -63,12 +63,12 @@ const SynapseLearnRate int16 = 2
 /*
 CellFireVoltageThreshold represents the millivolts where an action potential will result.
 */
-const CellFireVoltageThreshold int = 180
+const CellFireVoltageThreshold int = 100
 
 /*
 CellRestingVoltage is what a neuron gets reset to after it has fired.
 */
-const CellRestingVoltage int16 = -int16(CellFireVoltageThreshold/6)
+const CellRestingVoltage int16 = -int16(CellFireVoltageThreshold / 6)
 
 /*
 MaxDepthFromInputToOutput is how far the path between an input cell and its
