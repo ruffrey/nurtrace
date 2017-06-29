@@ -273,10 +273,10 @@ func RunFiringPatternTraining(vocab *Vocabulary, chSynchVocab chan *Vocabulary, 
 		} else {
 			// first timer, or poor prediction:
 			// expected pattern gets overwritten
-			expandInputs(vocab, cellsToFireForInputValues)
+			//expandInputs(vocab, cellsToFireForInputValues)
 			newPattern = sampleFirePattern
 			// actual pattern gets expanded for more uniqueness
-			expandOutputs(vocab.Net, closestOutput.FirePattern, 1-laws.PatternSimilarityLimit)
+			//expandOutputs(vocab.Net, closestOutput.FirePattern, 1-laws.PatternSimilarityLimit)
 		}
 
 		vocab.Outputs[s.output].FirePattern = newPattern
@@ -335,12 +335,13 @@ func (vocab *Vocabulary) CheckAndReduceSimilarity() {
 			// cause dissimiliarity between the unshared cells in the
 			// two patterns
 			diff := DiffFiringPatterns(primary.FirePattern, secondary.FirePattern)
-			ratio, unsharedFiringPattern := diff.SimilarityRatio()
+			//ratio, unsharedFiringPattern := diff.SimilarityRatio()
+			ratio, _ := diff.SimilarityRatio()
 			tooSimilar := ratio > laws.PatternSimilarityLimit
 			if tooSimilar {
 				// change this output pattern
 				//log.Println("EXPAND:", secondary.Value, "vs", primary.Value, "is", ratio)
-				expandOutputs(vocab.Net, unsharedFiringPattern, ratio)
+				//expandOutputs(vocab.Net, unsharedFiringPattern, ratio)
 			}
 		}
 		// track cells in map so we can see which cells don't
