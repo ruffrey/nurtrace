@@ -129,7 +129,6 @@ func Train(masterVocab *Vocabulary, isRemoteWorkerWithTag string) {
 	lenAllSamples := len(masterVocab.Samples)
 	jobChunks := masterVocab.Threads + remoteWorkerTotalWeights
 	partSize := math.Ceil(float64(lenAllSamples) / float64(jobChunks))
-	maxSampleIndex := len(masterVocab.Samples) - 1
 	log.Println(isRemoteWorkerWithTag, partSize,
 		"samples per chunk,", masterVocab.Threads, "local threads,",
 		remoteWorkerTotalWeights, "remote weights (", jobChunks, "chunks )")
@@ -144,12 +143,11 @@ func Train(masterVocab *Vocabulary, isRemoteWorkerWithTag string) {
 		} else {
 			threadIteration++
 		}
-		to := threadIteration * int(partSize)
+		to := threadIteration * int(partSize) +1
 		// protect likely array out of bounds on last thread
-		if to > maxSampleIndex {
-			to = maxSampleIndex
+		if to > lenAllSamples {
+			to = lenAllSamples
 		}
-		log.Println(sampleCursor, to)
 		samples := masterVocab.Samples[sampleCursor:to]
 		vocab := copyVocabWithNewSamples(masterVocab, samples)
 
