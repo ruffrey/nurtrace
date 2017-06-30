@@ -231,8 +231,8 @@ The vocab should already be properly initiated and the network should be
 set before running this.
 */
 func RunFiringPatternTraining(vocab *Vocabulary, chSynchVocab chan *Vocabulary, chSendBackVocab chan *Vocabulary, tag string) {
-	tots := len(vocab.Samples)
-	log.Println(tag, "Running samples", tots)
+	tots := float64(len(vocab.Samples))
+	errorred := 0.0
 
 	for sampleIndex := 0; sampleIndex < len(vocab.Samples); sampleIndex++ {
 		s := vocab.Samples[sampleIndex]
@@ -265,16 +265,18 @@ func RunFiringPatternTraining(vocab *Vocabulary, chSynchVocab chan *Vocabulary, 
 		// because the old pattern wasn't close enough.
 		// TODO: is this a good rule?
 		if closestOutput == nil {
-			log.Println(tag, "sample:", s.inputs, "=", s.output, "; actual=nil")
+			log.Println("sample:", s.inputs, "=", s.output, "; actual=nil", tag)
+			errorred++
 			// first timer, or not enough data, or not enough fired.
 			newPattern = sampleFirePattern
 		} else if closestOutput.Value == s.output {
 			// predicted correctly
-			log.Println(tag, "sample:", s.inputs, "=", s.output, "; correct")
+			log.Println("sample:", s.inputs, "=", s.output, "; correct", tag)
 			newPattern = mergeFiringPatterns(originalFP, sampleFirePattern)
 		} else {
-			log.Println(tag, "sample:", s.inputs, "=", s.output,
-				"; wrong=", closestOutput.Value)
+			log.Println("sample:", s.inputs, "=", s.output,
+				"; wrong=", closestOutput.Value, tag)
+			errorred++
 			// first timer, or poor prediction:
 			// expected pattern gets overwritten
 			expandInputs(vocab, cellsToFireForInputValues)
@@ -292,10 +294,11 @@ func RunFiringPatternTraining(vocab *Vocabulary, chSynchVocab chan *Vocabulary, 
 				chSynchVocab <- vocab
 				vocab = <-chSendBackVocab
 			}
-			log.Println(tag, "progress", sampleIndex, "/", tots)
+			log.Println("progress", sampleIndex, "/", tots, tag)
 		}
 	}
 
+	log.Println("Error=", errorred / tots, tag)
 	chSynchVocab <- vocab
 	vocab = <-chSendBackVocab
 }

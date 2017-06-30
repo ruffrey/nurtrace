@@ -63,7 +63,7 @@ const SynapseLearnRate int16 = 2
 /*
 CellFireVoltageThreshold represents the millivolts where an action potential will result.
 */
-const CellFireVoltageThreshold int = 100
+const CellFireVoltageThreshold int = 1000
 
 /*
 CellRestingVoltage is what a neuron gets reset to after it has fired.
