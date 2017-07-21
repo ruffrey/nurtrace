@@ -20,6 +20,25 @@ func Train(networkInputFile, networkSaveFile, vocabSaveFile, testDataFile, doPro
 	var network *potential.Network
 	var vocab *potential.Vocabulary
 
+	// load files before the time intense task of deep-seeding the network
+
+	log.Println("Reading training data file", testDataFile)
+	testDataBytes, err := ioutil.ReadFile(testDataFile)
+	if err != nil {
+		log.Println("Unable to read training data file", testDataFile, err)
+		return err
+	}
+
+	// Load vocab
+	vocab, err = potential.LoadVocabFromFile(vocabSaveFile)
+	if err != nil {
+		log.Println(err)
+		vocab = potential.NewVocabulary(network)
+		log.Println("Created vocab", vocabSaveFile)
+	} else {
+		log.Println("Loaded vocab from disk", vocabSaveFile)
+	}
+
 	// Load network
 	network, err = potential.LoadNetworkFromFile(networkSaveFile)
 	if err != nil {
@@ -36,23 +55,7 @@ func Train(networkInputFile, networkSaveFile, vocabSaveFile, testDataFile, doPro
 		network.PrintTotals()
 	}
 
-	// Load vocab
-	vocab, err = potential.LoadVocabFromFile(vocabSaveFile)
-	if err != nil {
-		log.Println(err)
-		vocab = potential.NewVocabulary(network)
-		log.Println("Created vocab", vocabSaveFile)
-	} else {
-		log.Println("Loaded vocab from disk", vocabSaveFile)
-	}
 	vocab.Net = network
-
-	log.Println("Reading training data file", testDataFile)
-	testDataBytes, err := ioutil.ReadFile(testDataFile)
-	if err != nil {
-		log.Println("Unable to read training data file", testDataFile, err)
-		return err
-	}
 	err = vocab.AddTrainingData(testDataBytes)
 	if err != nil {
 		log.Println("Failed adding training data", testDataFile, err)
