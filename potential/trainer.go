@@ -95,7 +95,7 @@ will change, so they should be merged along with the network merge.
 */
 func Train(masterVocab *Vocabulary, isRemoteWorkerWithTag string) {
 	// TODO: deduping is turned off because of #40
-	shouldDedupe := false
+	shouldDedupe := true
 	// shouldDedupe := isRemoteWorkerWithTag == ""
 	if shouldDedupe {
 		isRemoteWorkerWithTag = "<local>"
@@ -231,15 +231,14 @@ func Train(masterVocab *Vocabulary, isRemoteWorkerWithTag string) {
 			// cells that do not yet exist on the new network
 			mergeAllInputs(masterVocab.Inputs, vocab.Inputs)
 
-			if shouldDedupe {
-				dupes := findDupeSynapses(masterVocab.Net)
-				for _, dupeGroup := range dupes {
-					dedupeSynapses(dupeGroup, masterVocab.Net)
-				}
-			}
-
 			merges++
 			if merges%(masterVocab.Threads+1) == 0 {
+				if shouldDedupe {
+					dupes := findDupeSynapses(masterVocab.Net)
+					for _, dupeGroup := range dupes {
+						dedupeSynapses(dupeGroup, masterVocab.Net)
+					}
+				}
 				masterVocab.Net.PrintTotals()
 			}
 			masterVocab.CheckAndReduceSimilarity()

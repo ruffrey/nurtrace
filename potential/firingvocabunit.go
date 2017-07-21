@@ -99,7 +99,9 @@ func randCellFromFP(cellMap FiringPattern) (randCellID CellID) {
 }
 
 /*
-expandInputs expands an input firing pattern by a set number of synapses.
+expandInputs expands an input firing pattern by a set number of synapses,
+but not by increasing the number of input cells - just adding cells that
+connect directly to input cells.
 */
 func expandInputs(vocab *Vocabulary, fp FiringPattern) {
 	for i := 0; i < laws.InputCellDifferentiationCount; i++ {

@@ -12,6 +12,7 @@ import (
 	"sync"
 
 	"fmt"
+
 	"github.com/ruffrey/nurtrace/laws"
 )
 
@@ -165,13 +166,16 @@ resting state.
 */
 func (network *Network) ResetForTraining() {
 	for _, cell := range network.Cells {
-		if cell == nil {
+		if cell == nil { // pruned
 			continue
 		}
 		cell.postRefractoryReset()
 		cell.WasFired = false
 	}
 	for _, synapse := range network.Synapses {
+		if synapse == nil { // pruned
+			continue
+		}
 		synapse.fireNextRound = false
 	}
 
@@ -222,12 +226,12 @@ func (network *Network) PrintTotals() {
 /*
 ToJSON gives a json representation of the neural network.
 */
-func (network *Network) ToJSON() ([]byte, error) {
-	bytes, err := json.Marshal(network)
+func (network *Network) ToJSON() (buf []byte, err error) {
+	buf, err = json.Marshal(network)
 	if err != nil {
 		return []byte{}, err
 	}
-	return bytes, nil
+	return buf, nil
 }
 
 /*
@@ -262,11 +266,11 @@ func (network *Network) SaveToFile(filepath string) (err error) {
 SaveToFileReadable outputs the network to a file as gzipped JSON
 */
 func (network *Network) SaveToFileReadable(filepath string) (err error) {
-	bytes, err := json.MarshalIndent(network, "", "  ")
+	buf, err := json.MarshalIndent(network, "", "  ")
 	if err != nil {
 		return err
 	}
-	err = ioutil.WriteFile(filepath, bytes, os.ModePerm)
+	err = ioutil.WriteFile(filepath, buf, os.ModePerm)
 	return err
 }
 

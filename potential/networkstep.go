@@ -47,7 +47,7 @@ func (network *Network) Step() (hasMore bool) {
 
 	// tally up all the synapse voltage results they will have on the cells
 	for _, syn := range network.Synapses {
-		if !syn.fireNextRound {
+		if syn == nil || !syn.fireNextRound {
 			continue
 		}
 

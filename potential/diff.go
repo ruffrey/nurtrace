@@ -71,10 +71,9 @@ func DiffNetworks(originalNetwork, newerNetwork *Network) (diff Diff) {
 	for id, newerNetworkSynapse := range newerNetwork.Synapses {
 		alreadyExisted := originalNetwork.SynExists(SynapseID(id))
 		if !alreadyExisted {
-			// we may want it derefenced so it is an instance, not a pointer. that will ensure
-			// later we can need to update the synapse to be pointing to the originalNetwork
-			// dendrite and axon cells. it will still be pointing to the old ones.
-			diff.addedSynapses = append(diff.addedSynapses, newerNetworkSynapse)
+			if newerNetworkSynapse != nil { // was pruned
+				diff.addedSynapses = append(diff.addedSynapses, newerNetworkSynapse)
+			}
 			continue
 		}
 		originalSynapse := originalNetwork.GetSyn(SynapseID(id))
@@ -154,16 +153,17 @@ func ApplyDiff(diff Diff, originalNetwork *Network) (reIDedCells map[CellID]Cell
 		// after the next prune. We can end up with cells where a synapse
 		// here or there is missing after the prune. Presumably because
 		// there was always a "correct" but invalid ID reference.
-		copySynapseToNetwork(synapse, originalNetwork)
+		nextSynapseID := copySynapseToNetwork(synapse, originalNetwork)
+		notSameID := nextSynapseID != synapse.ID
 		// old axon connection removed from cell if cell is new
-		if _, isNewCell := diff.addedCells[synapse.FromNeuronAxon]; isNewCell {
+		if _, isNewCell := diff.addedCells[synapse.FromNeuronAxon]; isNewCell && notSameID{
 			// log.Println("  removing old synapse reference from new cell (axon)", synapse.FromNeuronAxon)
 
 			delete(originalNetwork.Cells[synapse.FromNeuronAxon].AxonSynapses, synapse.ID)
 		}
 
 		// old dendrite connection removed from cell if cell is new
-		if _, isNewCell := diff.addedCells[synapse.ToNeuronDendrite]; isNewCell {
+		if _, isNewCell := diff.addedCells[synapse.ToNeuronDendrite]; isNewCell && !notSameID {
 			// log.Println("  removing old synapse reference from new cell (dendrite)", synapse.ToNeuronDendrite)
 
 			delete(originalNetwork.Cells[synapse.ToNeuronDendrite].DendriteSynapses, synapse.ID)
@@ -203,7 +203,13 @@ func CloneNetwork(originalNetwork *Network) *Network {
 	originalNetwork.synMux.Lock()
 	for _, synapse := range originalNetwork.Synapses {
 		originalNetwork.synMux.Unlock()
-		copySynapseToNetwork(synapse, newNetwork)
+		if synapse == nil { // pruned
+			// important to preserve synapse order as the indexes are also
+			// ids
+			newNetwork.Synapses = append(newNetwork.Synapses, nil)
+		} else {
+			copySynapseToNetwork(synapse, newNetwork)
+		}
 		originalNetwork.synMux.Lock()
 	}
 	originalNetwork.synMux.Unlock()
@@ -241,8 +247,8 @@ func copyCellToNetwork(origCell *Cell, newNetwork *Network) CellID {
 }
 
 /*
-copySynapseToNetwork copies the properies of once synapse to a new one, and updates the network pointer
-on the new synapse to a different given network.
+copySynapseToNetwork copies the properies of one synapse to a new one, and
+updates the network pointer on the new synapse to a different given network.
 
 Returns its synapse ID because it had to change.
 */

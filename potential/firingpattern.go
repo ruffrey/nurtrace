@@ -211,8 +211,8 @@ of inputs and their underlying cells.
 For example, given the inputs `[]{"a", "b", "c"}` it will return the
 input cells to be fired for these three input values.
 */
-func GetInputPatternForInputs(vocab *Vocabulary, inputs []InputValue) FiringPattern {
-	cellsToFireForInputValues := make(FiringPattern)
+func GetInputPatternForInputs(vocab *Vocabulary, inputs []InputValue) (cellsToFireForInputValues FiringPattern) {
+	cellsToFireForInputValues = make(FiringPattern)
 	for _, inputChar := range inputs {
 		cellsForInputChar := vocab.Inputs[inputChar]
 
