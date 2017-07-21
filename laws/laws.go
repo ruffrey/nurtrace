@@ -93,20 +93,20 @@ FiringIterationsPerSample is how many times to fire an input cell.
 Firing once may not cause much firing in the network. So firing
 10 or 100+ times in a row will excite many pathways.
 */
-const FiringIterationsPerSample int = 4
+const FiringIterationsPerSample int = 6
 
 /*
 PatternSimilarityLimit represents the percentage/ratio of
 similarity between two firing patterns before one (or both?) of them
 need to change.
 */
-const PatternSimilarityLimit float64 = 0.7
+const PatternSimilarityLimit float64 = 0.8
 
 /*
-InitialCellCountPerVocabUnit is how many cells will represent a single
+InitialCellCountPerInput is how many cells will represent a single
 VocabUnit, to start off.
 */
-const InitialCellCountPerVocabUnit int = 16
+const InitialCellCountPerInput int = 16
 
 /*
 InputCellDifferentiationCount is the number of cells to add in order to
@@ -118,7 +118,7 @@ const InputCellDifferentiationCount = 1
 NoiseRatio is the percentage of cells to purposely fire as noise
 during training (or sampling?).
 */
-const NoiseRatio float64 = 0.01
+const NoiseRatio float64 = 0.1
 
 /*
 TrainingMergeBackIteration is the point at which we reset a network during training.

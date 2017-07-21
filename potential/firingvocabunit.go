@@ -56,7 +56,7 @@ func NewOutputCollection(value OutputValue) *OutputCollection {
 InitRandomInputs chooses some input cells for the vocab unit.
 */
 func (vu *VocabUnit) InitRandomInputs(vocab *Vocabulary) {
-	for i := 0; i < laws.InitialCellCountPerVocabUnit; i++ {
+	for i := 0; i < laws.InitialCellCountPerInput; i++ {
 		var inputCellID CellID
 		var depthGrowerCellID CellID // attempt to ensure there are deep paths in the net
 		for {
