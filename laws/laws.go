@@ -45,7 +45,7 @@ Examples:
 - 10 synapses per cell would be a ratio of `0.1`.
 - 20 synapses per cell would be a ratio of `.05`.
 */
-const IdealCellSynapseBalance float64 = 0.05
+const IdealCellSynapseBalance float64 = 0.005
 
 var ComputedSynapsesPerCell int = int(math.Ceil(1 / IdealCellSynapseBalance))
 
@@ -118,7 +118,7 @@ const InputCellDifferentiationCount = 1
 NoiseRatio is the percentage of cells to purposely fire as noise
 during training (or sampling?).
 */
-const NoiseRatio float64 = 0.1
+const NoiseRatio float64 = 0.01
 
 /*
 TrainingMergeBackIteration is the point at which we reset a network during training.
