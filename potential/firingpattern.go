@@ -233,13 +233,19 @@ set before running this.
 func RunFiringPatternTraining(vocab *Vocabulary, chSynchVocab chan *Vocabulary, chSendBackVocab chan *Vocabulary, tag string) {
 	tots := float64(len(vocab.Samples))
 	errorred := 0.0
+	var s sample
+	var sampleFirePattern FiringPattern
+	var cellsToFireForInputValues FiringPattern
+	var nothingFired bool
+	var originalFP FiringPattern
+	var closestOutput *OutputCollection
+	var shouldRecalibrate bool
 
 	for sampleIndex := 0; sampleIndex < len(vocab.Samples); sampleIndex++ {
-		s := vocab.Samples[sampleIndex]
-		var sampleFirePattern FiringPattern
+		s = vocab.Samples[sampleIndex]
 
 		// merge the inputs first
-		cellsToFireForInputValues := GetInputPatternForInputs(vocab, s.inputs)
+		cellsToFireForInputValues = GetInputPatternForInputs(vocab, s.inputs)
 
 		vocab.Net.ResetForTraining()
 
@@ -249,7 +255,7 @@ func RunFiringPatternTraining(vocab *Vocabulary, chSynchVocab chan *Vocabulary, 
 		// the output pattern as fired. set the output pattern.
 		for {
 			sampleFirePattern = FireNetworkUntilDone(vocab.Net, cellsToFireForInputValues)
-			nothingFired := len(sampleFirePattern) == 0
+			nothingFired = len(sampleFirePattern) == 0
 			if nothingFired {
 				expandInputs(vocab, cellsToFireForInputValues)
 				continue
@@ -258,9 +264,9 @@ func RunFiringPatternTraining(vocab *Vocabulary, chSynchVocab chan *Vocabulary, 
 			break
 		}
 
-		originalFP := vocab.Outputs[s.output].FirePattern
+		originalFP = vocab.Outputs[s.output].FirePattern
 		var newPattern FiringPattern
-		closestOutput := FindClosestOutputCollection(sampleFirePattern, vocab)
+		closestOutput = FindClosestOutputCollection(sampleFirePattern, vocab)
 		// Did this predict the right thing? If not, we just keep the sampleFirePattern
 		// because the old pattern wasn't close enough.
 		// TODO: is this a good rule?
@@ -288,7 +294,7 @@ func RunFiringPatternTraining(vocab *Vocabulary, chSynchVocab chan *Vocabulary, 
 		vocab.Outputs[s.output].FirePattern = newPattern
 
 		// sample is finished here, but provide an update on progress
-		shouldRecalibrate := sampleIndex%laws.TrainingMergeBackIteration == 0
+		shouldRecalibrate = sampleIndex%laws.TrainingMergeBackIteration == 0
 		if shouldRecalibrate {
 			if sampleIndex != 0 { // not the first time
 				chSynchVocab <- vocab
@@ -298,7 +304,7 @@ func RunFiringPatternTraining(vocab *Vocabulary, chSynchVocab chan *Vocabulary, 
 		}
 	}
 
-	log.Println("Error=", errorred / tots, tag)
+	log.Println("Error=", errorred/tots, tag)
 	chSynchVocab <- vocab
 	vocab = <-chSendBackVocab
 }
