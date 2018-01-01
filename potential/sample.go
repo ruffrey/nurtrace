@@ -19,21 +19,14 @@ func Sample(seedText string, vocab *Vocabulary, maxLength int) (output string) {
 	output = ""
 	vocab.Net.ResetForTraining()
 	// need to combine cells to be fired
-	cellsToFireForInputValues := make(FiringPattern)
 
-	fp := GetInputPatternForInputs(vocab, inputs)
-	cellsToFireForInputValues = mergeFiringPatterns(cellsToFireForInputValues, fp)
+	cellsToFireForInputValues := GetInputPatternForInputs(vocab, inputs)
 	finalPattern := FireNetworkUntilDone(vocab.Net, cellsToFireForInputValues)
 
 	// TODO: find more than one match?
 	closest := FindClosestOutputCollection(finalPattern, vocab)
 	if closest != nil {
 		output += string(closest.Value)
-	}
-
-	// TODO: this is useless code
-	if len(output) >= maxLength {
-		return output
 	}
 
 	return output
